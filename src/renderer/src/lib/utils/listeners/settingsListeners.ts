@@ -1,0 +1,13 @@
+import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
+import { setSettingsState } from '@/lib/utils/settingsSlice'
+import geminiService from '@/lib/GeminiService';
+
+export const settingsListeners = createListenerMiddleware()
+
+settingsListeners.startListening({
+  matcher: isAnyOf(setSettingsState),
+  effect: async (action, listenerApi) => {
+    const apiKey = action.payload?.apiKey;
+    geminiService.updateApiKey(apiKey || null);
+  }
+})

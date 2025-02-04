@@ -1,16 +1,24 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/icon.icns?asset'
+import { registerFileOpsHandlers } from './fileOps'
+import { registerSettingsHandlers } from './settingsManager'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1280,
+    height: 720,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'darwin'
+      ? {
+          icon
+        }
+      : {
+          icon: join(__dirname, '../../resources/icon.png')
+        }),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -35,10 +43,16 @@ function createWindow(): void {
   }
 }
 
+import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  installExtension(REDUX_DEVTOOLS)
+    .then((ext) => console.log(`Added Extension:  ${ext.name}`))
+    .catch((err) => console.log('An error occurred: ', err))
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -51,6 +65,9 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  registerFileOpsHandlers()
+  registerSettingsHandlers()
 
   createWindow()
 
