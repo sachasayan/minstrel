@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { selectAppState } from '@/lib/utils/appStateSlice'
+import { addChatMessage } from '@/lib/utils/chatSlice'
 
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (
@@ -179,14 +180,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem key="Skeleton">
                   <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Skeleton.md'}>
                     <a onClick={() => handleFileSelect("Skeleton.md")}>
-                      <FileText className="mr-2 h-4 w-4" /> Skeleton
+                      <FileText className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Skeleton</span> {projectsState.activeProject?.files?.find((item) => item.title.includes('Skeleton'))?.hasEdits && <Diff className="float-right text-orange-500" />}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem key="Outline">
                   <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Outline.md'}>
                     <a onClick={() => handleFileSelect("Outline.md")}>
-                      <ListOrdered className="mr-2 h-4 w-4" /> Outline
+                      <ListOrdered className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Outline</span> {projectsState.activeProject?.files?.find((item) => item.title.includes('Outline'))?.hasEdits && <Diff className="float-right text-orange-500" />}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -214,7 +215,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 })}
                 <SidebarMenuItem key="addChapter">
                   <SidebarMenuButton asChild isActive={true}>
-                    <a onClick={() => handleFileSelect("Outline.md")}><Plus /> Add Chapter</a>
+                    <a onClick={() => dispatch(addChatMessage({ sender: 'User', text: "Please add a new chapter." }))}><Plus /> Add Chapter</a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
