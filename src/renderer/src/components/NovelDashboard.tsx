@@ -1,4 +1,3 @@
-
 import { useSelector } from 'react-redux'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -42,7 +41,7 @@ function StarRating({ rating }: { rating: number }) {
 export default function NovelDashboard() {
   const projectState = useSelector(selectProjects)
 
-  const novelData = { chapterData, characters };
+  const novelData = { chapterData, characters }
 
   const characterColors = {
     aria: '#669900ff', // avocado
@@ -55,7 +54,6 @@ export default function NovelDashboard() {
     rook: '#ff6600ff' // pumpkin
   }
 
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* <h1 className="text-3xl font-bold mb-6">{novelData.title} - Dashboard</h1> */}
@@ -67,7 +65,9 @@ export default function NovelDashboard() {
             <CardTitle>Novel Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{projectState.activeProject?.summary || ''}</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {projectState.activeProject?.summary || ''}
+            </p>
           </CardContent>
         </Card>
 

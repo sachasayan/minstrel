@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import { useRef, useState, useEffect } from "react"
-import { useFrame } from "@react-three/fiber"
-import { Text } from "@react-three/drei"
-import { type Group, Vector3 } from "three"
+import { useRef, useState, useEffect } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { Text } from '@react-three/drei'
+import { type Group, Vector3 } from 'three'
 
 const LETTER_COUNT = 100
 const RADIUS = 5
@@ -26,10 +26,14 @@ export default function LetterTorrent() {
       position: new Vector3(
         (Math.random() - 0.5) * RADIUS,
         (Math.random() - 0.5) * HEIGHT,
-        (Math.random() - 0.5) * RADIUS,
+        (Math.random() - 0.5) * RADIUS
       ),
-      rotation: new Vector3(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
-      speed: Math.random() * 0.02 + 0.01,
+      rotation: new Vector3(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      ),
+      speed: Math.random() * 0.02 + 0.01
     }))
     setLetters(initialLetters)
   }, [])
@@ -54,9 +58,9 @@ export default function LetterTorrent() {
         return {
           ...letter,
           position: newPosition,
-          rotation: newRotation,
+          rotation: newRotation
         }
-      }),
+      })
     )
 
     if (groupRef.current) {
@@ -82,4 +86,3 @@ export default function LetterTorrent() {
     </group>
   )
 }
-

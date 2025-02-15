@@ -1,20 +1,12 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 
-
-export const getProjectMetadata = async (
-  directory: string
-): Promise<Project> => {
+export const getProjectMetadata = async (directory: string): Promise<Project> => {
   try {
     const metadataContent = await window.electron.ipcRenderer.invoke(
       'read-file',
       `${directory}/metadata.json`
     )
     const metadata = JSON.parse(metadataContent)
-    const outlineContent = await window.electron.ipcRenderer.invoke(
-      'read-file',
-      `${directory}/outline.md`
-    )
-
     return {
       id: `${directory}`,
       title: metadata?.title || '',
@@ -25,18 +17,15 @@ export const getProjectMetadata = async (
       year: metadata?.year || 0,
       totalWordCount: metadata?.totalWordCount || 0,
       criticSuggestions: metadata?.criticSuggestions || [],
-      outline: outlineContent || [],
       files: []
     } as Project
   } catch (e) {
-    console.error("Error reading or parsing metadata.json:", e);
-    throw new Error("Could not load project metadata.");
+    console.error('Error reading or parsing metadata.json:', e)
+    throw new Error('Could not load project metadata.')
   }
 }
 
-
-export const getProjectFragmentMeta = async (directory: string
-): Promise<ProjectFragment> => {
+export const getProjectFragmentMeta = async (directory: string): Promise<ProjectFragment> => {
   try {
     const metadataContent = await window.electron.ipcRenderer.invoke(
       'read-file',
@@ -49,11 +38,11 @@ export const getProjectFragmentMeta = async (directory: string
       title: `${metadata.title}`,
       fullPath: `${directory}`,
       genre: metadata?.genre || 'science-fiction',
-      cover: '',
+      cover: ''
     } as ProjectFragment
   } catch (e) {
-    console.error("Error reading or parsing metadata.json:", e);
-    throw new Error("Could not load project fragment metadata.");
+    console.error('Error reading or parsing metadata.json:', e)
+    throw new Error('Could not load project fragment metadata.')
   }
 }
 
@@ -99,13 +88,10 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
     ...metadata,
     files: chapterList
   } as Project
-
 }
 
-
 export const saveProject = async (project: Project): Promise<boolean> => {
-
-  console.log("Saving project...");
+  console.log('Saving project...')
   if (!project?.fullPath || !project?.files) {
     console.warn('Cannot save project: project details are missing.')
     return false
@@ -119,7 +105,7 @@ export const saveProject = async (project: Project): Promise<boolean> => {
           `${project.fullPath}/${file.title}`,
           file.content
         )
-        console.log("File saved successfully"+file.title);
+        console.log('File saved successfully' + file.title)
       }
     }
     return true

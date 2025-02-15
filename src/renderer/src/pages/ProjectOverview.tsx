@@ -19,33 +19,31 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { selectProjects } from '@/lib/utils/projectsSlice'
 import ChatInterface from '@/components/ChatInterface'
 
-
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
   const projectState = useSelector(selectProjects)
-  const [collapsed, setCollapsed] = useState(true);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(true)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      console.log(chatContainerRef.current);
+      console.log(chatContainerRef.current)
       if (
         chatContainerRef.current &&
         !chatContainerRef.current.contains(event.target as Node) &&
         !collapsed
       ) {
-        console.log('click outside');
-        setCollapsed(true);
+        console.log('click outside')
+        setCollapsed(true)
       }
-    };
+    }
 
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside)
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [collapsed]);
-
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [collapsed])
 
   return (
     <SidebarProvider>
@@ -81,8 +79,7 @@ const ProjectOverview = (): React.ReactNode => {
           ) : appState.activeView == 'project/dashboard' ? (
             <NovelDashboard />
           ) : appState.activeView == 'project/outline' ? (
-
-            < MarkdownViewer
+            <MarkdownViewer
               key={appState.activeView}
               fileName={`Outline`}
               content={projectState.activeProject?.outline || ''}

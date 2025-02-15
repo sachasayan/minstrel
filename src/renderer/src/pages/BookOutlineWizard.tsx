@@ -4,13 +4,7 @@ import type React from 'react'
 import { useState, createContext, useContext, useEffect } from 'react'
 // import Torrent from '@/components/visuals/torrent'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -35,17 +29,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { setActiveView } from '@/lib/utils/appStateSlice'
-import { useDispatch } from 'react-redux';
-import { generateSkeleton } from '@/lib/chatManager'; // Import generateSkeleton
-import { setActiveProject } from '@/lib/utils/projectsSlice';
-
+import { useDispatch } from 'react-redux'
+import { generateSkeleton } from '@/lib/chatManager' // Import generateSkeleton
+import { setActiveProject } from '@/lib/utils/projectsSlice'
 
 // Context for managing wizard state
 interface WizardContextProps {
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
-  formData: { [key: string]: any };
-  setFormData: (data: { [key: string]: any }) => void;
+  currentStep: number
+  setCurrentStep: (step: number) => void
+  formData: { [key: string]: any }
+  setFormData: (data: { [key: string]: any }) => void
 }
 
 const WizardContext = createContext<WizardContextProps>({
@@ -53,7 +46,7 @@ const WizardContext = createContext<WizardContextProps>({
   setCurrentStep: () => { },
   formData: {},
   setFormData: () => { }
-});
+})
 
 // Custom hook for using wizard context
 const useWizard = () => useContext(WizardContext)
@@ -63,26 +56,23 @@ const sanitizeFilename = (filename: string) => {
   return filename.replace(/[^a-z0-9_-]/gi, ' ')
 }
 
-
 const cheatData = {
-  "genre": "science_fiction",
-  "length": 80000,
-  "title": "The Crimson Nebula",
-  "setting": "Alien Planet",
-  "plot": "A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.",
-  "writing_sample": "The red dust swirled around their boots as they trudged across the desolate landscape. The twin suns cast long, eerie shadows, painting the alien world in shades of crimson and ochre."
+  genre: 'science_fiction',
+  length: 80000,
+  title: 'The Crimson Nebula',
+  setting: 'Alien Planet',
+  plot: 'A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.',
+  writing_sample:
+    'The red dust swirled around their boots as they trudged across the desolate landscape. The twin suns cast long, eerie shadows, painting the alien world in shades of crimson and ochre.'
 }
-
-
 
 // Navigation component
 const Navigation = () => {
-
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
   const { currentStep, setCurrentStep, formData, setFormData } = useWizard()
 
   const handleExit = () => {
-    dispatch(setActiveView('intro')); // Exit the wizard
+    dispatch(setActiveView('intro')) // Exit the wizard
     setCurrentStep(0)
   }
 
@@ -99,13 +89,12 @@ const Navigation = () => {
   }
 
   const handleCheat = async () => {
-    setFormData(cheatData);
-    console.log('Cheating...');
+    setFormData(cheatData)
+    console.log('Cheating...')
     if (currentStep < 4) {
       setCurrentStep(4)
     }
   }
-
 
   const isNextDisabled = () => {
     switch (currentStep) {
@@ -120,14 +109,24 @@ const Navigation = () => {
     }
   }
 
-
-
   return (
     <CardFooter className="flex justify-between">
-      {<Button className="mx-1" onClick={handleExit}>Exit</Button>}
-      {<Button className="mx-1" onClick={handleCheat}>Cheat</Button>}
+      {
+        <Button className="mx-1" onClick={handleExit}>
+          Exit
+        </Button>
+      }
+      {
+        <Button className="mx-1" onClick={handleCheat}>
+          Cheat
+        </Button>
+      }
       <div className="flex flex-1"></div>
-      {currentStep > 0 && <Button className="mx-1" onClick={handleBack}>Back</Button>}
+      {currentStep > 0 && (
+        <Button className="mx-1" onClick={handleBack}>
+          Back
+        </Button>
+      )}
       {currentStep < 4 && currentStep > 0 && (
         <Button className="mx-1" onClick={handleNext} disabled={isNextDisabled()}>
           Next
@@ -228,8 +227,15 @@ const PageOne = () => {
         <Label htmlFor="genre">Genre</Label>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
-              {formData.genre ? genres.find((genre) => genre.value === formData.genre)?.label : "Select genre..."}
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between"
+            >
+              {formData.genre
+                ? genres.find((genre) => genre.value === formData.genre)?.label
+                : 'Select genre...'}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -248,7 +254,10 @@ const PageOne = () => {
                       }}
                     >
                       <Check
-                        className={cn("mr-2 h-4 w-4", formData.genre === genre.value ? "opacity-100" : "opacity-0")}
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          formData.genre === genre.value ? 'opacity-100' : 'opacity-0'
+                        )}
                       />
                       {genre.label}
                     </CommandItem>
@@ -348,7 +357,7 @@ const PageThree = () => {
 // Summary Page
 const SummaryPage = () => {
   const { formData } = useWizard()
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   const handleDream = async () => {
     const projectTitle = sanitizeFilename(formData.title || 'Untitled Project')
@@ -361,14 +370,13 @@ const SummaryPage = () => {
         fullPath: `/Users/sacha/Documents/Minstrel/${projectTitle}`,
         files: [],
         genre: formData.genre,
-        summary: '', // Add missing properties
-        year: new Date().getFullYear(), // Add missing properties
-        totalWordCount: 0, // Add missing properties
-        criticSuggestions: [], // Add missing properties
-        outline: '', // Add missing properties
+        summary: '',
+        year: new Date().getFullYear(),
+        totalWordCount: 0,
+        criticSuggestions: []
       })
     )
-    generateSkeleton(formData);
+    generateSkeleton(formData)
   }
 
   return (
@@ -381,13 +389,10 @@ const SummaryPage = () => {
   )
 }
 
-
-
 // Wizard component
 export const BookOutlineWizard = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({});
-
+  const [currentStep, setCurrentStep] = useState(0)
+  const [formData, setFormData] = useState({})
 
   const totalSteps = 4 // Including summary page
 
@@ -395,9 +400,7 @@ export const BookOutlineWizard = () => {
     <div className="w-full h-full flex items-center justify-center ">
       <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData }}>
         <Card className="w-[800px] grid grid-cols-2 gap-4">
-          <div>
-            {/* <Torrent /> */}
-          </div>
+          <div>{/* <Torrent /> */}</div>
           <div>
             <CardHeader>
               <CardTitle>Dreaming... {currentStep}/4🪄</CardTitle>

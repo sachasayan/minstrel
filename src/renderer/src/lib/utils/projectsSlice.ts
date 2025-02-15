@@ -22,33 +22,30 @@ export const projectsSlice = createSlice({
       state.projectHasLiveEdits = action.payload
     },
     setAllFilesAsSaved: (state) => {
-      state.projectHasLiveEdits = false;
+      state.projectHasLiveEdits = false
       state.activeProject?.files?.forEach((chapter) => {
-        chapter.hasEdits = false;
+        chapter.hasEdits = false
       })
     },
-    updateFile: (
-      state,
-      action: PayloadAction<{ fileName: string; fileContent: string }>
-    ) => {
+    updateFile: (state, action: PayloadAction<{ fileName: string; fileContent: string }>) => {
       if (state.activeProject) {
         //Get position of this file in the files list
         const chapterIndex = state.activeProject.files.findIndex(
           (file) => file.title === action.payload.fileName
-        );
+        )
         //If file exists, update it in the store
         if (chapterIndex !== -1) {
-          state.activeProject.files[chapterIndex].content = action.payload.fileContent;
-          state.activeProject.files[chapterIndex].hasEdits = true;
-          state.projectHasLiveEdits = true;
+          state.activeProject.files[chapterIndex].content = action.payload.fileContent
+          state.activeProject.files[chapterIndex].hasEdits = true
+          state.projectHasLiveEdits = true
         } else {
           // If chapter doesn't exist, add it
           state.activeProject.files.push({
             title: action.payload.fileName,
             content: action.payload.fileContent,
             hasEdits: true
-          });
-          state.projectHasLiveEdits = true;
+          })
+          state.projectHasLiveEdits = true
         }
       }
     }

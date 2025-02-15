@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import { Canvas } from "@react-three/fiber"
-import { OrbitControls } from "@react-three/drei"
-import { Suspense } from "react"
-import LetterTorrent from "./letterTorrent"
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import { Suspense } from 'react'
+import LetterTorrent from './letterTorrent'
 
 export default function Torrent() {
   return (
@@ -19,4 +19,3 @@ export default function Torrent() {
     </div>
   )
 }
-

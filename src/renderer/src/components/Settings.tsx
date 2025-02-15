@@ -95,7 +95,6 @@ const Settings = (): JSX.Element => {
         Save
       </Button>
       <Button variant="outline">Close</Button>
-
     </div>
   )
 }

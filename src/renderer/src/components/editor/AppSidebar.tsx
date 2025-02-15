@@ -1,9 +1,6 @@
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  setActiveFile,
-  setActiveView
-} from '@/lib/utils/appStateSlice'
+import { setActiveFile, setActiveView } from '@/lib/utils/appStateSlice'
 import { toast } from 'sonner'
 
 import { saveProject } from '@/lib/projectManager'
@@ -11,8 +8,8 @@ import {
   setAllFilesAsSaved,
   setActiveProject,
   setProjectHasLiveEdits,
-  selectProjects,
-} from "@/lib/utils/projectsSlice";
+  selectProjects
+} from '@/lib/utils/projectsSlice'
 
 import { ChevronRight, Save, X, Diff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -42,7 +39,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import { addChatMessage } from '@/lib/utils/chatSlice'
 
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dispatch = useDispatch()
   const projectsState = useSelector(selectProjects)
@@ -53,10 +49,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   const handleNextStage = () => {
-    console.log("handleNextStage called"); // Add this line
-    dispatch(addChatMessage({ sender: 'User', text: 'Proceed to outline.' }));
-  };
-
+    console.log('handleNextStage called') // Add this line
+    dispatch(addChatMessage({ sender: 'User', text: `Let's build the outline based on our story skeleton.` }))
+  }
 
   const handleSave = async () => {
     if (projectsState.activeProject) {
@@ -91,11 +86,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => {
-                    dispatch(setProjectHasLiveEdits(false))
-                    dispatch(setActiveProject(null))
-                    dispatch(setActiveView('intro'))
-                  }}>
+                  <AlertDialogAction
+                    onClick={() => {
+                      dispatch(setProjectHasLiveEdits(false))
+                      dispatch(setActiveProject(null))
+                      dispatch(setActiveView('intro'))
+                    }}
+                  >
                     Close without Saving
                   </AlertDialogAction>
                   <AlertDialogAction
@@ -112,11 +109,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </AlertDialogContent>
             </AlertDialog>
           ) : (
-            <Button
-              variant="outline"
-              className=""
-              onClick={() => dispatch(setActiveView('intro'))}
-            >
+            <Button variant="outline" className="" onClick={() => dispatch(setActiveView('intro'))}>
               <X className="" /> Close
             </Button>
           )}
@@ -181,7 +174,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </CollapsibleContent>
           </SidebarGroup>
         </Collapsible>
-        <div className="border-t p-2 absolute bottom-16 w-full"> {/* Position at the bottom */}
+        <div className="border-t p-2 absolute bottom-16 w-full">
+          {' '}
+          {/* Position at the bottom */}
           <button
             onClick={handleNextStage}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full z-10" // Add z-index

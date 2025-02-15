@@ -23,16 +23,11 @@ export const appStateSlice = createSlice({
     },
     setActiveFile: (state, action: PayloadAction<string | null>) => {
       state.activeFile = action.payload
-    },
+    }
   }
 })
 
-export const {
-  setAppState,
-  setActiveView,
-  setActiveFile,
-  setProjectList,
-} = appStateSlice.actions
+export const { setAppState, setActiveView, setActiveFile, setProjectList } = appStateSlice.actions
 
 export const selectProjectList = (state: RootState) => state.appState.projectList
 export const selectActiveView = (state: RootState) => state.appState.activeView

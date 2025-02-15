@@ -20,7 +20,6 @@ export interface Project extends ProjectFragment {
   year: number
   totalWordCount: number
   criticSuggestions: CriticSuggestion[]
-  outline: string
 }
 export interface ProjectFragment {
   id: string
@@ -43,17 +42,21 @@ export interface CriticSuggestion {
   rating: number
   comment: string
 }
-interface SceneOutline {
-  description: string;
-}
+// interface SceneOutline {
+//   description: string
+// }
 
-export interface ChapterOutline {
-  title: string;
-  scenes: SceneOutline[];
-}
+// export interface ChapterOutline {
+//   title: string
+//   scenes: SceneOutline[]
+// }
 
-
-export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor'
+export type ActiveView =
+  | 'intro'
+  | 'wizard'
+  | 'project/outline'
+  | 'project/dashboard'
+  | 'project/editor'
 
 export type Genre =
   | 'dystopian-post-apocalyptic-climate-fiction'

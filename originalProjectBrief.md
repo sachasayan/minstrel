@@ -30,20 +30,20 @@ The initial process for writing a novel is as follows:
 
 (1) First the app sends story parameters (genre, title, etc.) to the model, which translates those patterns into a story skeleton consisting of a brief synopsis, characters, chapters, things to remember, etc. (Skeleton.md)
 
-(2) The customer is allowed to edit the Skeleton to their leisure, then sends the Skeleton to the model, which generates an outline (Outline.md),  consisting of full character descriptions, full environment descriptions, detailed per-scene plans for each chapter, and key objects.
+(2) The customer is allowed to edit the Skeleton to their leisure, then sends the Skeleton to the model, which generates an outline (Outline.md), consisting of full character descriptions, full environment descriptions, detailed per-scene plans for each chapter, and key objects.
 
-(3) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter1.md, Chapter2.md, etc.)
+(3) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter-1.md, Chapter-2.md, etc.)
 
 (4) A summary and critique is then produced. (Critique.md)
 
 (5) (Repeats) Any above step can be repeated. For instance, the customer may ask the model to re-write a previous chapter, or make adjustments to the outline, or regenerate the critique.
 
-
 ---
+
 # RULES FOR THE MODEL
 
 - The model must output ONLY within XML tags at the top level of its response.
-- The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton.md, Outline.md, and Chapter01.md
+- The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton.md, Outline.md, and Chapter-1.md
 - The model must always begin with a <think> section, briefly explaining what it understands to be the current intent. This is hidden from the customer, but used for debugging.
 - If the model thinks it is being asked to write to a file, it must first <get_context> for that file if it hasn't been provided.
 - The model can use tools like <write_file> to perform actions via the service.
@@ -84,7 +84,7 @@ For example:
 
 ```
 <write_file>
-	<file_name>Chapter01.md</file_name>
+	<file_name>Chapter-1.md</file_name>
 	<content>The content of a chapter would go here.</content>
 </write_chapter>
 ```
@@ -110,8 +110,9 @@ What follows is a sample flow between customer, service, and model. For brevity,
 (Model receives prompt from service, and provides a response:)
 
 <think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant file tree.</think>
-<get_context>Chapter 3.md</get_context>
-<get_context>Chapter 4.md</get_context>
+<get_context>Chapter-3.md</get_context>
+<get_context>Chapter-4.md</get_context>
+
 <summary>I'm looking at the files.</summary>
 
 (Service processes model response, and then provides a response to the model with the depenencies — Outline, Chapter 2, Chapter 3, and Chapter 4: )
@@ -125,13 +126,14 @@ What follows is a sample flow between customer, service, and model. For brevity,
 
 <think>I'm ready to edit Chapter 3 and Chapter 4</think>
 <write_file>
-	<file_name>Chapter03.md</file_name>
-	<content>Chapter 3 content goes here.</content>
+<file_name>Chapter-3.md</file_name>
+<content>Chapter 3 content goes here.</content>
 </write_file>
 <write_file>
-	<file_name>Chapter04.md</file_name>
-	<content>Chapter 4 content goes here.</content>
+<file_name>Chapter-4.md</file_name>
+<content>Chapter 4 content goes here.</content>
 </write_file>
+
 <summary>I've made the requested changes to Chapter 3 and Chapter 4, and have introduced the Asimov character in Chapter 3.</summary>
 
 ---
@@ -146,7 +148,7 @@ Do not switch into coding mode until I say READY TO CODE
 
 We'll update the development plan as we go along, marking items as COMPLETE. Item requirements may be adjusted as we go, but ask me before modifying the plan itself.
 
-Once you are ready to mark an item  as complete, stop and ask me for a code review. I'll let you know when to continue onto the new task.
+Once you are ready to mark an item as complete, stop and ask me for a code review. I'll let you know when to continue onto the new task.
 
 Don't worry about type errors involving 'any' or 'unknown' types.
 
