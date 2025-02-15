@@ -140,7 +140,7 @@ What follows is a sample flow between customer, service, and model. For brevity,
 
 # RULES FOR ROO
 
-We'll develop a development plan in /chatBotEpic.md
+We'll develop a development plan.
 
 Give each item and sub-item in the development plan a status label of UNFINISHED / COMPLETE
 
