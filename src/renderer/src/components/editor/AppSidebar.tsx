@@ -11,9 +11,8 @@ import {
   selectProjects
 } from '@/lib/utils/projectsSlice'
 
-import { ChevronRight, Plus, Save, X, Diff } from 'lucide-react'
+import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered, Squircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +37,17 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { addChatMessage } from '@/lib/utils/chatSlice'
+
+const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
+  return (
+    <div className="relative inline-block">
+      <Squircle className="w-4 h-4 text-muted-foreground" />
+      <span className="absolute inset-0 flex items-center justify-center leading-none text-[0.5rem] font-bold text-foreground">
+        {chapterNumber}
+      </span>
+    </div>
+  );
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dispatch = useDispatch()
@@ -67,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar variant="sidebar" {...props}>
+    <Sidebar variant="sidebar" collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="grid grid-cols-3 gap-2">
           {projectsState.projectHasLiveEdits ? (
@@ -125,23 +135,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent className="gap-0">
-
-
-
-
-
         <SidebarGroup key="Dashboard">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="Dashboard">
                 <SidebarMenuButton asChild isActive={false}>
-                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>Dashboard</a>
+                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
 
         <SidebarGroup key={"Structure"}>
           <SidebarGroupLabel>Structure</SidebarGroupLabel>
@@ -149,17 +155,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               <SidebarMenuItem key="Parameters">
                 <SidebarMenuButton asChild isActive={false}>
-                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>Parameters</a>
+                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
+                    <Settings className="mr-2 h-4 w-4" /> Parameters
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem key="Skeleton">
                 <SidebarMenuButton asChild isActive={true}>
-                  <a onClick={() => handleFileSelect("Skeleton.md")}>Skeleton</a>
+                  <a onClick={() => handleFileSelect("Skeleton.md")}>
+                    <FileText className="mr-2 h-4 w-4" /> Skeleton
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem key="Outline">
                 <SidebarMenuButton asChild isActive={false}>
-                  <a onClick={() => handleFileSelect("Outline.md")}>Outline</a>
+                  <a onClick={() => handleFileSelect("Outline.md")}>
+                    <ListOrdered className="mr-2 h-4 w-4" /> Outline
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -171,16 +183,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Chapters</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {projectsState.activeProject?.files?.filter((item) => item.title.includes('Chapter')).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={true}>
-                    <a onClick={() => handleFileSelect(item.title)}>
-                      {item.title.replace('.md', '').replace('-', ' ')} {item.hasEdits && <Diff />}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-              ))}
+              {projectsState.activeProject?.files?.filter((item) => item.title.includes('Chapter')).map((item) => {
+                const chapterNumber = item.title.match(/Chapter-(\d+)/)?.[1] || '';
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={true}>
+                      <a onClick={() => handleFileSelect(item.title)} className="flex items-center">
+                        <ChapterIcon chapterNumber={chapterNumber} />
+                        <span className="ml-2">{item.title.replace('.md', '').replace('-', ' ')} {item.hasEdits && <Diff />}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
               <SidebarMenuItem key="addChapter">
                 <SidebarMenuButton asChild isActive={true}>
                   <a onClick={() => handleFileSelect("Outline.md")}><Plus /> Add Chapter</a>
