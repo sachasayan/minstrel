@@ -5,7 +5,7 @@
 Minstrel follows a client-server architecture, with a React/Vite/Electron frontend and a backend service that interacts with the Gemini API. The core components and their interactions are as follows:
 
 *   **Frontend (Renderer Process):**
-    *   **UI Components:**  React components built using ShadCN UI.  Handles user interaction, displays data, and dispatches actions to the Redux store. Key components include `AppSidebar`, `ChatInterface`, `MarkdownViewer`, `ProjectOverview`, and `BookOutlineWizard`.
+    *   **UI Components:**  React components built using ShadCN UI.  Handles user interaction, displays data, and dispatches actions to the Redux store. Key components include `AppSidebar`, `ChatInterface`, `MarkdownViewer`, `ProjectOverview`, `BookOutlineWizard`, and `Chart.tsx`.
     *   **State Management:** Redux Toolkit manages the application state, including chat history (`chatSlice`), project data (`projectsSlice`), and application state (`appStateSlice`).
     *   **Service Logic:**  `chatManager.ts` handles communication with the Gemini API, prompt building, and response processing. `projectManager.ts` handles project loading, saving, and file system operations.
     *   **Prompt Engineering:** `promptBuilder.ts` constructs prompts dynamically based on the current state and context. `prompts.ts` stores the static parts of the prompts.
@@ -21,7 +21,7 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
 *   **Event-Driven Architecture:**  Electron's IPC is used for communication between the main and renderer processes, following an event-driven pattern.
 *   **Redux for State Management:**  Redux Toolkit provides a predictable state container, making it easier to manage the application's state and data flow.
 *   **Service Layer:**  `chatManager.ts` and `GeminiService.ts` act as a service layer, abstracting away the complexities of interacting with the Gemini API and the file system.
-* **Memory Bank Pattern:** (Emerging) The project is transitioning to a memory bank pattern for managing project context and documentation.
+* **Memory Bank Pattern:** Implemented. The project uses a memory bank pattern for managing project context and documentation.
 
 ## Component Relationships
 

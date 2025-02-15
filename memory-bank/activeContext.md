@@ -2,12 +2,13 @@
 
 ## Current Work Focus
 
-The current focus is on refining the core workflow and addressing bugs. Recent efforts have concentrated on:
+The current focus is on UI/UX improvements and investigating Tailwind CSS v4 theming. Recent efforts have concentrated on:
 
 *   Ensuring the "Add Chapter" functionality correctly dispatches a user message to the model.
 *   Improving error handling, particularly around file saving and directory creation.
 *   Making the sidebar collapsible and adding dynamic chapter icons.
 *   Updating project documentation (`projectContext.md` and `chatBotEpic.md`) to reflect the current state of the implementation.
+* Cleaning up CSS and reviewing Tailwind configuration.
 
 ## Recent Changes
 
@@ -27,5 +28,5 @@ The current focus is on refining the core workflow and addressing bugs. Recent e
 *   Improve the UI/UX, including loading states and feedback mechanisms.
 *   Begin implementing a versioning system.
 *   Continue testing and addressing any identified bugs.
-*   Transition to using the memory bank pattern.
-* Further develop and refine the memory bank pattern.
+*   Further develop and refine the memory bank pattern.
+* Investigate Tailwind v4 theming.
