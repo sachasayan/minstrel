@@ -25,9 +25,9 @@ This phase focuses on implementing the core workflow of generating a skeleton, o
 
     - Implement service logic in `chatManager.ts` to send `Skeleton.md` to the model. (COMPLETE)
     - Implement prompt building to include the base prompt, `Skeleton.md` content, and tool definitions. (COMPLETE)
-    - Implement model logic (prompt) to generate `Outline.md` content. (UNFINISHED)
-    - Implement service logic in `chatManager.ts` to receive the response, parse the XML, and store `Outline.md` in `projectSlice.current`. (UNFINISHED)
-    - Implement UI to display `Outline.md` to the customer. (UNFINISHED)
+    - Implement model logic (prompt) to generate `Outline.md` content. (COMPLETE)
+    - Implement service logic in `chatManager.ts` to receive the response, parse the XML, and store `Outline.md` in `projectSlice.current`. (COMPLETE)
+    - Implement UI to display `Outline.md` to the customer. (COMPLETE)
 
 4.  **Chapter Generation:**
 
@@ -86,6 +86,7 @@ This phase includes additional features that could enhance the chatbot's capabil
     - Implement logic for user to send messages/prompts to the model after skeleton generation. (UNFINISHED)
 
 4.  **Additional Tools:**
+
     - Explore the possibility of adding more tools for the model to use. (UNFINISHED)
 
 ## Tool Definitions
@@ -93,8 +94,6 @@ This phase includes additional features that could enhance the chatbot's capabil
 The model will use the following tools:
 
 - `<get_context>`: Requests the content of a specific file.
-  - Parameters:
-    - `<file_name>`: The name of the file to retrieve.
 - `<write_file>`: Writes content to a file.
   - Parameters:
     - `<file_name>`: The name of the file to write to.

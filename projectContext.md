@@ -41,28 +41,24 @@ This document summarizes the development of a chatbot feature for the Minstrel a
         - The model generates the outline and saves it to `Outline.md` using the `<write_file>` tag.
         - The `updateFile` action in `projectsSlice.ts` updates the Redux store.
 
-3.  **Chapter Generation (Future):**
+3.  **Chapter Generation:**
 
     - The workflow will be similar to outline generation, but the context will include both the `Outline.md` and the previous chapter.
 
-4.  **Critique Generation (Future)**
+4.  **Critique Generation**
 
 **Key Decisions and Discoveries:**
 
-- **Context Management:** The `contextManager.ts` file was created to handle the logic for determining relevant context files based on the current stage. The `getDependencyList` function within `promptBuilder.ts` defines the dependencies between files (e.g., Outline depends on Skeleton).
 - **Prompt Building:** The `buildPrompt` function in `promptBuilder.ts` is responsible for constructing the complete prompt, including the base prompt, context, chat history, user message, and tool definitions.
 - **Error Handling:** Basic error handling is implemented in `chatManager.ts`, with a retry mechanism for "resource exhausted" errors.
 - **Markdown Parsing:** The `MDXEditor` component (used within `MarkdownViewer.tsx`) had issues parsing the model's Markdown output, specifically with list items followed by bold text. This was resolved by:
   - Adding the `listsPlugin` to the `MDXEditor`.
   - Removing the `prose` class.
-- **Outline Stage:** The outline stage is triggered by the user clicking "Proceed to Outline", which dispatches `startSendMessage` with a message and the stage set to 'outline'.
 - **File Naming:** The model is instructed to save files with specific names (`Skeleton.md`, `Outline.md`, `Chapter-X.md`, `Critique.md`).
 - **Redux State Updates:** The `chatManager` is responsible for dispatching actions to update the Redux store, including adding/updating files, managing the chat history, and setting the active view and file.
 
 **Remaining Issues/TODOs:**
 
-- **User Messages:** Implement a way for users to send messages and instructions to the model _after_ the initial skeleton generation. Currently, the user can only click "Proceed to Outline".
-- **Outline Generation:** Fully implement the outline generation workflow, including model prompt and UI updates.
 - **Chapter Generation:** Implement the chapter generation workflow.
 - **Critique Generation:** Implement the critique generation workflow.
 - **Error Handling:** Expand error handling to be more robust and user-friendly.
