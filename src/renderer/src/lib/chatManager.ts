@@ -1,6 +1,6 @@
 import geminiService from './GeminiService'
 import { store } from '@/lib/utils/store'
-import { addChatMessage } from '@/lib/utils/chatSlice'
+import { addChatMessage, resolvePendingChat } from '@/lib/utils/chatSlice'
 import { updateFile } from '@/lib/utils/projectsSlice'
 
 import { buildPrompt, buildInitial } from './promptBuilder'
@@ -68,6 +68,7 @@ export const sendMessage = async (dependencies?: string[]) => {
 
     console.log('AI Response: \n \n', response)
     const contextRequested = processResponse(response)
+    store.dispatch(resolvePendingChat())
     if (!!contextRequested) {
       await sendMessage(contextRequested)
     }
@@ -97,6 +98,7 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
 
     console.log('AI Response: \n \n', response)
     const contextRequested = processResponse(response)
+    store.dispatch(resolvePendingChat())
     if (!!contextRequested) {
       await sendMessage(contextRequested)
     }

@@ -19,6 +19,8 @@ The user asks questions about the following coding languages:
 - Build components using shadcn/ui if you can.
 - We're using Canary for the latest ShadCN features, so remember: Use npx shadcn@canary instead of npx shadcn-ui@latest
 - Leave NO todo’s, placeholders or missing pieces.
-- If you think there might not be a correct answer, say so.
-- If you do not know the answer, say so instead of guessing.
+- If you think there might not be a correct answer to a question, say so instead of guessing.
+- If you do not know the answer to a question, say so instead of guessing.
+- Don't clean up unused imports or variables which existed in a file before you started working on it.
+- Never clean up whitespace or empty lines.
 

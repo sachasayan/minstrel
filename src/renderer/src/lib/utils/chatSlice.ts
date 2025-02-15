@@ -40,7 +40,7 @@ const chatSlice = createSlice({
   }
 })
 
-export const { setChatHistory, addChatMessage } = chatSlice.actions
+export const { setChatHistory, addChatMessage, resolvePendingChat } = chatSlice.actions
 
 export const selectChat = (state: RootState) => state.chat
 

@@ -87,21 +87,21 @@ export default function NovelDashboard() {
               }}
               className="h-[300px]"
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={novelData.chapterData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="chapter" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line
-                    type="monotone"
-                    dataKey="wordCount"
-                    stroke="black"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+
+              <LineChart data={novelData.chapterData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="chapter" />
+                <YAxis />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Line
+                  type="monotone"
+                  dataKey="wordCount"
+                  stroke="black"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+
             </ChartContainer>
           </CardContent>
         </Card>
@@ -127,23 +127,23 @@ export default function NovelDashboard() {
             }, {})}
             className="h-[400px]"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={novelData.chapterData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="chapter" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Legend />
-                {novelData.characters.map((character) => (
-                  <Bar
-                    key={character.name}
-                    dataKey={character.name}
-                    stackId="a"
-                    fill={characterColors[character.name.toLowerCase()]}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
+
+            <BarChart data={novelData.chapterData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="chapter" />
+              <YAxis />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend />
+              {novelData.characters.map((character) => (
+                <Bar
+                  key={character.name}
+                  dataKey={character.name}
+                  stackId="a"
+                  fill={characterColors[character.name.toLowerCase()]}
+                />
+              ))}
+            </BarChart>
+
           </ChartContainer>
         </CardContent>
       </Card>
