@@ -98,13 +98,24 @@ export const saveProject = async (project: Project): Promise<boolean> => {
   }
 
   try {
+    // Create the project directory if it doesn't exist
+    const mkdirResult = await window.electron.ipcRenderer.invoke('make-directory', project.fullPath)
+    if (!mkdirResult.success) {
+      console.error('Failed to create project directory:', mkdirResult.error);
+      return false;
+    }
+
     for (const file of project.files) {
       if (file.hasEdits) {
-        await window.electron.ipcRenderer.invoke(
+        const writeResult = await window.electron.ipcRenderer.invoke(
           'write-file',
           `${project.fullPath}/${file.title}`,
           file.content
         )
+        if (!writeResult.success) {
+          console.error('Failed to write file:', writeResult.error);
+          return false;
+        }
         console.log('File saved successfully' + file.title)
       }
     }

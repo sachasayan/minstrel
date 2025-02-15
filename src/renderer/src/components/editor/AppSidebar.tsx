@@ -60,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         toast.success('Project saved successfully!')
         dispatch(setAllFilesAsSaved())
       } else {
-        toast.error('Failed to save project.')
+        toast.error(`Failed to save project: ${saveResult}`)
       }
       dispatch(setProjectHasLiveEdits(false))
     }
