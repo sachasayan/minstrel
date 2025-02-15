@@ -11,7 +11,7 @@ This document summarizes the development of a chatbot feature for the Minstrel a
 - **Communication:** The frontend service communicates with the Gemini API via the `chatManager.ts` module.
 - **Prompt Engineering:** `promptBuilder.ts` constructs prompts based on the current state and context, including the latest user message and the content of relevant files. `prompts.ts` stores the base prompt and helper functions for formatting prompt components.
 - **Context Management:** `promptBuilder.ts` handles determining which files are relevant as context for a given stage, using the `getFileContents` function.
-- **File Handling:** File contents are stored in the Redux store (`projectSlice.current.files`). The model uses XML tags (`<write_file>`, `<get_context>`) to interact with files.
+- **File Handling:** File contents are stored in the Redux store (`projectSlice.current.files`). The model uses XML tags (`<write_file>`, `<get_context>`) to interact with files. `fileOps.ts` handles file system operations.
 - **UI Components:**
   - `ChatInterface.tsx`: The main chat interface.
   - `MarkdownViewer.tsx`: Displays Markdown content using the `MDXEditor` component (with `headingsPlugin` and `listsPlugin`).
@@ -19,6 +19,7 @@ This document summarizes the development of a chatbot feature for the Minstrel a
   - `ProjectOverview.tsx`: The main project view, which includes the `ChatInterface` and `MarkdownViewer`.
   - `NovelDashboard.tsx`: Displays project information (currently not used for displaying file content).
   - `App.tsx`: Handles routing and overall application structure.
+  - `AppSidebar.tsx`: The main sidebar for navigation and project management.
 
 **Workflow:**
 
@@ -50,12 +51,16 @@ This document summarizes the development of a chatbot feature for the Minstrel a
 **Key Decisions and Discoveries:**
 
 - **Prompt Building:** The `buildPrompt` function in `promptBuilder.ts` is responsible for constructing the complete prompt, including the base prompt, context, chat history, user message, and tool definitions.
-- **Error Handling:** Basic error handling is implemented in `chatManager.ts`, with a retry mechanism for "resource exhausted" errors.
+- **Error Handling:** Basic error handling is implemented in `chatManager.ts`, with a retry mechanism for "resource exhausted" errors.  `projectManager.ts` checks the return values of file system operations to ensure errors are caught and reported.
 - **Markdown Parsing:** The `MDXEditor` component (used within `MarkdownViewer.tsx`) had issues parsing the model's Markdown output, specifically with list items followed by bold text. This was resolved by:
   - Adding the `listsPlugin` to the `MDXEditor`.
   - Removing the `prose` class.
 - **File Naming:** The model is instructed to save files with specific names (`Skeleton.md`, `Outline.md`, `Chapter-X.md`, `Critique.md`).
 - **Redux State Updates:** The `chatManager` is responsible for dispatching actions to update the Redux store, including adding/updating files, managing the chat history, and setting the active view and file.
+- **Project Directory Creation:** The `saveProject` function in `projectManager.ts` was modified to create the project directory before attempting to save files, fixing a bug where new projects wouldn't save.
+- **IPC Return Value Handling:** The `saveProject` function was modified to check the return values of the `make-directory` and `write-file` IPC calls, ensuring that errors are properly caught and reported.
+- **Collapsible Sidebar:** The `AppSidebar` was made collapsible using `shadcn-ui` components.
+- **Dynamic Chapter Icons:** A custom `ChapterIcon` component was created to display chapter numbers within a `Squircle` icon in the `AppSidebar`.
 
 **Remaining Issues/TODOs:**
 

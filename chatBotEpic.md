@@ -31,7 +31,7 @@ This phase focuses on implementing the core workflow of generating a skeleton, o
 
 4.  **Chapter Generation:**
 
-    - Implement service logic in `chatManager.ts` to send `Outline.md` and the previous chapter (if applicable) to the model. (UNFINISHED)
+    - Implement service logic in `chatManager.ts` to send `Outline.md` and the previous chapter (if applicable) to the model. (Partially COMPLETE - can send messages, but not integrated with chapter flow)
     - Implement prompt building to include the base prompt, `Outline.md` content, previous chapter content, and tool definitions. (Partially COMPLETE - Needs integration with the chapter generation flow)
     - Implement model logic (prompt) to generate `Chapter-X.md` content. (UNFINISHED)
     - Implement service logic in `chatManager.ts` to receive the response, parse the XML, and store `Chapter-X.md` in `projectSlice.current`. (Partially COMPLETE - Parsing and storing logic exists, but needs to be integrated with the chapter generation flow)
@@ -60,7 +60,7 @@ This phase focuses on improving the user experience and handling potential error
 
 3.  **Error Handling:**
 
-    - Implement basic error handling in `chatManager.ts` and `GeminiService.ts`. (Partially COMPLETE - Basic error handling exists, but needs to be expanded)
+    - Implement basic error handling in `chatManager.ts` and `GeminiService.ts`. (Partially COMPLETE - Basic error handling exists, including saving, but needs to be expanded)
 
 4.  **UI/UX Improvements:**
 
@@ -83,7 +83,7 @@ This phase includes additional features that could enhance the chatbot's capabil
 
 3.  **User Messages:**
 
-    - Implement logic for user to send messages/prompts to the model after skeleton generation. (UNFINISHED)
+    - Implement logic for user to send messages/prompts to the model after skeleton generation. (COMPLETE)
 
 4.  **Additional Tools:**
 
