@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { BotMessageSquare, ChevronDown } from 'lucide-react'
 import { selectChat, addChatMessage } from '@/lib/utils/chatSlice'
 import { RootState } from '@/lib/utils/store'
+import { Button } from '@/components/ui/button'
 
 interface ChatInterfaceProps {
-  collapsed: boolean
-  setCollapsed: (collapsed: boolean) => void
+  expanded: boolean
+  setExpanded: (expanded: boolean) => void
 }
 
 const ChatLoadingIndicator = () => {
@@ -20,7 +21,7 @@ const ChatLoadingIndicator = () => {
 }
 
 const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
-  ({ collapsed, setCollapsed }, ref) => {
+  ({ expanded, setExpanded }, ref) => {
     const { chatHistory, pendingChat } = useSelector((state: RootState) => selectChat(state))
     const [message, setMessage] = useState('')
     const dispatch = useDispatch()
@@ -28,10 +29,10 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
     let collapseTimeout: NodeJS.Timeout | null = null
 
     useEffect(() => {
-      if (!collapsed && inputRef.current) {
+      if (expanded && inputRef.current) {
         inputRef.current.focus()
       }
-    }, [collapsed])
+    }, [expanded])
 
     const handleSend = () => {
       if (message.trim() !== '') {
@@ -40,12 +41,18 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
       }
     }
 
-    const toggleCollapsed = () => {
+    const toggleExpanded = () => {
       if (collapseTimeout) {
         clearTimeout(collapseTimeout)
         collapseTimeout = null
       }
-      setCollapsed(!collapsed)
+      setExpanded(!expanded)
+    }
+
+    const handleNextStage = () => {
+      setExpanded(true)
+      console.log('handleNextStage called') // Add this line
+      dispatch(addChatMessage({ sender: 'User', text: `Let's build the outline based on our story skeleton.` }))
     }
 
     const handleFocus = () => {
@@ -58,21 +65,36 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
     const handleBlur = () => {
       if (!collapseTimeout) {
         collapseTimeout = setTimeout(() => {
-          // setCollapsed(true);
+          // setExpanded(true);
         }, 5000)
       }
     }
 
+    const quickActions = ['Proceed to Outline', null, null]
+
+
     return (
       <div
         ref={ref}
-        className={`fixed bottom-4 right-4 z-50 ${collapsed ? 'w-0' : 'w-80'}`}
+        className={`fixed bottom-4 right-4 z-50 ${expanded ? 'w-80' : 'w-0'}`}
         onFocus={handleFocus}
         onBlur={handleBlur}
       >
+        {quickActions[0] && (<div className={`absolute transition-all bottom-0 py-4 pl-1 duration-200 ${expanded ? 'right-0' : 'right-20'} `}>
+          <Button onClick={handleNextStage} className="right-0 transition-all">Proceed to Outline</Button>
+
+          {quickActions[1] && (<div className={`absolute transition-all bottom-0 py-4 pl-1 duration-400  ${expanded ? '-left-0' : '-left-full'}`}>
+            <Button onClick={handleNextStage} className=" transition-all">Proceed to Outline</Button>
+
+            {quickActions[2] && (<div className={`absolute transition-all bottom-0 py-4 pl-1 duration-600  ${expanded ? '-left-0' : '-left-full'}`}>
+              <Button onClick={handleNextStage} className=" transition-all">Proceed to Outline</Button>
+            </div>)}
+          </div>)}
+        </div>)}
+
         <button
-          onClick={toggleCollapsed}
-          className={`z-2 bg-white shadow-lg rounded-lg border flex flex-col right-0 bottom-0 absolute overflow-hidden transition-[opacity, transform] duration-500 ${collapsed ? 'opacity-100 scale-100' : 'opacity-0 scale-0'} `}
+          onClick={toggleExpanded}
+          className={`z-2 bg-white shadow-lg rounded-lg border flex flex-col right-0 bottom-0 absolute overflow-hidden transition-[opacity, transform] duration-500 ${expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'} `}
         >
           <BotMessageSquare
             className={
@@ -81,12 +103,11 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
           />
         </button>
         <div
-          className={`z-1 bg-white shadow-lg rounded-lg border flex flex-col transition-[max-height,max-width, width, height] duration-500 ease-in-out right-0 bottom-0 absolute overflow-hidden ${
-            collapsed ? 'max-h-10 max-w-10 h-10 w-10' : 'max-h-[500px] max-w-[320px] h-96 w-80'
-          }`}
+          className={`z-1 bg-white shadow-lg rounded-lg border flex flex-col transition-[max-height,max-width, width, height] duration-500 ease-in-out right-0 bottom-0 absolute overflow-hidden ${expanded ? 'max-h-[500px] max-w-[320px] h-96 w-80' : 'max-h-10 max-w-10 h-10 w-10'
+            }`}
         >
           <button
-            onClick={toggleCollapsed}
+            onClick={toggleExpanded}
             className={
               'text-gray-500 hover:text-gray-700 transition-transform absolute top-2 right-2 m-4'
             }
@@ -98,9 +119,8 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
             {chatHistory.map((msg, index) => (
               <div
                 key={index}
-                className={`mb-2 p-2 rounded-lg ${
-                  msg.sender === 'User' ? 'bg-black text-white text-right' : 'bg-gray-200 text-left'
-                }`}
+                className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-black text-white text-right' : 'bg-gray-200 text-left'
+                  }`}
               >
                 {msg.text}
               </div>

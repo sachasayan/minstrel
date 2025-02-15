@@ -40,7 +40,7 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
     <div className="h-full flex flex-col p-4 overflow-hidden">
       {fileName ? (
         <>
-          <h2 className="text-2xl font-bold mb-4">{fileName}</h2>
+          {/* <h2 className="text-2xl font-bold mb-4">{fileName}</h2> */}
           <div className="flex-grow overflow-y-auto" style={{ fontFamily: '"Inter", sans-serif' }}>
             <MDXEditor
               markdown={

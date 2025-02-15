@@ -37,6 +37,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { addChatMessage } from '@/lib/utils/chatSlice'
+import { selectAppState } from '@/lib/utils/appStateSlice'
 
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (
@@ -52,16 +53,14 @@ const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dispatch = useDispatch()
   const projectsState = useSelector(selectProjects)
+  const appState = useSelector(selectAppState)
 
   const handleFileSelect = (fileName: string) => {
     dispatch(setActiveFile(fileName))
     dispatch(setActiveView('project/editor'))
   }
 
-  const handleNextStage = () => {
-    console.log('handleNextStage called') // Add this line
-    dispatch(addChatMessage({ sender: 'User', text: `Let's build the outline based on our story skeleton.` }))
-  }
+
 
   const handleSave = async () => {
     if (projectsState.activeProject) {
@@ -139,7 +138,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="Dashboard">
-                <SidebarMenuButton asChild isActive={false}>
+                <SidebarMenuButton asChild isActive={appState.activeView === 'project/dashboard'}>
                   <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
                     <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                   </a>
@@ -161,14 +160,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem key="Skeleton">
-                <SidebarMenuButton asChild isActive={true}>
+                <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Skeleton.md'}>
                   <a onClick={() => handleFileSelect("Skeleton.md")}>
                     <FileText className="mr-2 h-4 w-4" /> Skeleton
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem key="Outline">
-                <SidebarMenuButton asChild isActive={false}>
+                <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Outline.md'}>
                   <a onClick={() => handleFileSelect("Outline.md")}>
                     <ListOrdered className="mr-2 h-4 w-4" /> Outline
                   </a>
@@ -187,10 +186,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 const chapterNumber = item.title.match(/Chapter-(\d+)/)?.[1] || '';
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={true}>
+                    <SidebarMenuButton asChild isActive={false}>
                       <a onClick={() => handleFileSelect(item.title)} className="flex items-center">
                         <ChapterIcon chapterNumber={chapterNumber} />
-                        <span className="ml-2">{item.title.replace('.md', '').replace('-', ' ')} {item.hasEdits && <Diff />}</span>
+                        <span className="flex-grow ml-2">{item.title.replace('.md', '').replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -208,16 +207,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 
 
-        <div className="border-t p-2 absolute bottom-16 w-full">
-          {' '}
-          {/* Position at the bottom */}
-          <button
-            onClick={handleNextStage}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full z-10" // Add z-index
-          >
-            Proceed to Outline
-          </button>
-        </div>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

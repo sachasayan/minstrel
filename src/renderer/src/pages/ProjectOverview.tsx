@@ -22,7 +22,7 @@ import ChatInterface from '@/components/ChatInterface'
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
   const projectState = useSelector(selectProjects)
-  const [collapsed, setCollapsed] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -31,10 +31,10 @@ const ProjectOverview = (): React.ReactNode => {
       if (
         chatContainerRef.current &&
         !chatContainerRef.current.contains(event.target as Node) &&
-        !collapsed
+        expanded
       ) {
         console.log('click outside')
-        setCollapsed(true)
+        setExpanded(false)
       }
     }
 
@@ -43,7 +43,7 @@ const ProjectOverview = (): React.ReactNode => {
     return () => {
       document.removeEventListener('click', handleClickOutside)
     }
-  }, [collapsed])
+  }, [expanded])
 
   return (
     <SidebarProvider>
@@ -88,7 +88,7 @@ const ProjectOverview = (): React.ReactNode => {
         </div>
 
         {/* Chat Interface */}
-        <ChatInterface ref={chatContainerRef} collapsed={collapsed} setCollapsed={setCollapsed} />
+        <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />
       </SidebarInset>
     </SidebarProvider>
   )
