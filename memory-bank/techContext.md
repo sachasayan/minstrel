@@ -23,15 +23,7 @@
     * **TypeScript:**  Superset of JavaScript that adds static typing.
     * **XMLParser:** Used for parsing XML responses from the Gemini API.
 
-## Development Setup
 
-The project is set up as an Electron application. The frontend is built with React, Vite, and TailwindCSS. The backend uses Node.js and interacts with the frontend through Electron's IPC.
-
-## Technical Constraints
-
-*   **Gemini API Limitations:** The project is dependent on the capabilities and limitations of the Gemini API.
-*   **Electron Cross-Platform Compatibility:**  The application needs to be tested and maintained for cross-platform compatibility (primarily macOS, but potentially Windows and Linux).
-* **Asynchronous Operations:** Dealing with asynchronous operations (API calls, file system access) requires careful handling to avoid race conditions and ensure data consistency.
 
 ## Dependencies
 
