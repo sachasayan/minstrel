@@ -18,7 +18,7 @@ const parser = new XMLParser({
   ignoreAttributes: true,
   trimValues: true,
   isArray: (name, jpath) => {
-    return ( ['root.get_context.file_name'].includes(jpath)) ? true : false
+    return ( ['root.get_context'].includes(jpath)) ? true : false
   }
 })
 
@@ -36,9 +36,9 @@ const processResponse = (responseString: string) => {
     console.log(response.think)
   }
 
-  if (!!response.get_context?.file_name) {
+  if (!!response?.get_context) {
     store.dispatch(addChatMessage({ sender: 'Gemini', text: "Looking at files..." }));
-    return response.get_context.file_name
+    return response.get_context
   }
 
   if (!!response.write_file) {

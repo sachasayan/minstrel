@@ -36,17 +36,24 @@ Requesting context will be described later in the prompt. If you request conext,
 **Available Tools:**
 
 \`\`\`xml
-<tools>
-  <get_context>
-    <file_name></file_name>
-  </get_context>
-  <write_file>
-    <file_name></file_name>
-    <content></content>
-  </write_file>
-</tools>
+<get_context></get_context>
+<write_file>
+  <file_name></file_name>
+  <content></content>
+</write_file>
 \`\`\`
 
+
+Example response to the user:
+
+\`\`\`xml
+<think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant file tree.</think>
+<get_context>Outline.md</get_context>
+<get_context>Chapter-2.md</get_context>
+<get_context>Chapter-3.md</get_context>
+<get_context>Chapter-4.md</get_context>
+<summary>I'm looking at the files.</summary>
+\`\`\`
 
 END MINSTREL SYSTEM PROMPT
 BEGIN CURRENT TASK PROMPT

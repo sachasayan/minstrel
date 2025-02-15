@@ -9,8 +9,8 @@ This document summarizes the development of a chatbot feature for the Minstrel a
 - **Frontend:** React, Vite, TailwindCSS, Electron. Uses ShadCN UI components.
 - **State Management:** Redux Toolkit (slices: `chatSlice`, `projectsSlice`, `appStateSlice`).
 - **Communication:** The frontend service communicates with the Gemini API via the `chatManager.ts` module.
-- **Prompt Engineering:** `promptBuilder.ts` constructs prompts based on the current state and context. `prompts.ts` stores the base prompt and helper functions for formatting prompt components.
-- **Context Management:** `contextManager.ts` determines which files are relevant as context for a given stage (e.g., Skeleton for Outline, Outline and previous Chapter for Chapter).
+- **Prompt Engineering:** `promptBuilder.ts` constructs prompts based on the current state and context, including the latest user message and the content of relevant files. `prompts.ts` stores the base prompt and helper functions for formatting prompt components.
+- **Context Management:** `promptBuilder.ts` handles determining which files are relevant as context for a given stage, using the `getFileContents` function.
 - **File Handling:** File contents are stored in the Redux store (`projectSlice.current.files`). The model uses XML tags (`<write_file>`, `<get_context>`) to interact with files.
 - **UI Components:**
   - `ChatInterface.tsx`: The main chat interface.
@@ -34,11 +34,12 @@ This document summarizes the development of a chatbot feature for the Minstrel a
 
 2.  **Outline Generation:**
 
-    - The user clicks the "Proceed to Outline" button in the `ChatInterface`.
-    - This triggers the `sendMessage` function in `chatManager.ts` with the stage set to 'outline'.
-    - The `Skeleton.md` content is included in the prompt.
-    - The model generates the outline and saves it to `Outline.md` using the `<write_file>` tag.
-    - The `updateFile` action updates the Redux store.
+    - The user clicks the "Proceed to Outline" button in the `AppSidebar`.
+        - This dispatches an `addChatMessage` action with the message "Proceed to outline.".
+        - The listener in `chatListeners.ts` intercepts this action and calls `sendMessage()`.
+        - `sendMessage` calls `buildPrompt()`, which includes the latest user message and, if requested by the model, the content of `Skeleton.md`.
+        - The model generates the outline and saves it to `Outline.md` using the `<write_file>` tag.
+        - The `updateFile` action in `projectsSlice.ts` updates the Redux store.
 
 3.  **Chapter Generation (Future):**
 

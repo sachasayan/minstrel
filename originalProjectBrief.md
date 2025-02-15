@@ -24,9 +24,9 @@ Note: We may need two sides to the service — an encoder side which receives i
 
 # TASK
 
-We need to design and implement a feature which will allow the customer to write a novel with help from an AI model. All steps involving customer interaction are handled through the chat interface, which sends messages to the model with the service as an intermediary. The model then sends a message back with actions, to be processed by the service.
+We need to design and implement a feature which will allow the customer to write a novel with help from an AI model. All tasks involving customer interaction are handled through the chat interface, which sends messages to the model with the service as an intermediary. The model then sends a message back with actions, to be processed by the service.
 
-The initial process for writing a novel is as follows:
+The normal process for writing a novel is as follows:
 
 (1) First the app sends story parameters (genre, title, etc.) to the model, which translates those patterns into a story skeleton consisting of a brief synopsis, characters, chapters, things to remember, etc. (Skeleton.md)
 
@@ -36,7 +36,7 @@ The initial process for writing a novel is as follows:
 
 (4) A summary and critique is then produced. (Critique.md)
 
-(5) (Repeats) Any above step can be repeated. For instance, the customer may ask the model to re-write a previous chapter, or make adjustments to the outline, or regenerate the critique.
+Any above step can be repeated. For instance, the customer may ask the model to re-write a previous chapter, or make adjustments to the outline, or regenerate the critique.
 
 ---
 
@@ -104,22 +104,22 @@ What follows is a sample flow between customer, service, and model. For brevity,
 (Service sends API request to model:)
 
 {BASE_PROMPT}
-{CHAT_HISTORY}
+{AVAILABLE_FILES}
 {MESSAGE_FROM_USER}
 
 (Model receives prompt from service, and provides a response:)
 
 <think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant file tree.</think>
+<get_context>Outline.md</get_context>
+<get_context>Chapter-2.md</get_context>
 <get_context>Chapter-3.md</get_context>
 <get_context>Chapter-4.md</get_context>
-
 <summary>I'm looking at the files.</summary>
 
-(Service processes model response, and then provides a response to the model with the depenencies — Outline, Chapter 2, Chapter 3, and Chapter 4: )
+(Service processes model response, and then provides a response to the model with the context — Outline, Chapter 2, Chapter 3, and Chapter 4: )
 
 {BASE_PROMPT}
 {FILE_CONTEXT}
-{CHAT_HISTORY}
 {MESSAGE_FROM_USER}
 
 (Model now has context, and provides a response:)
