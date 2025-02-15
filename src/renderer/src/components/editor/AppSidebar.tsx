@@ -11,7 +11,7 @@ import {
   selectProjects
 } from '@/lib/utils/projectsSlice'
 
-import { ChevronRight, Save, X, Diff } from 'lucide-react'
+import { ChevronRight, Plus, Save, X, Diff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
@@ -125,55 +125,74 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent className="gap-0">
-        {/* Create an overview area for the project */}
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem key="Dashboard">
-              <SidebarMenuButton asChild isActive={false}>
-                <a onClick={() => dispatch(setActiveView('project/dashboard'))}>Dashboard</a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem key="Outline">
-              <SidebarMenuButton asChild isActive={false}>
-                <a onClick={() => dispatch(setActiveView('project/outline'))}>Outline</a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
 
-        {/* We create a collapsible SidebarGroup for Chapters */}
 
-        <Collapsible key={'chapters'} title={'Chapters'} defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel
-              asChild
-              className="group/label text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              <CollapsibleTrigger>
-                Chapters
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {projectsState.activeProject?.files?.map((item) => {
-                    const fileNameWithoutExtension = item.title.split('.').slice(0, -1).join('.')
-                    return (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild isActive={true}>
-                          <a onClick={() => handleFileSelect(item.title)}>
-                            {fileNameWithoutExtension} {item.hasEdits && <Diff />}
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+
+
+
+        <SidebarGroup key="Dashboard">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="Dashboard">
+                <SidebarMenuButton asChild isActive={false}>
+                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>Dashboard</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+
+        <SidebarGroup key={"Structure"}>
+          <SidebarGroupLabel>Structure</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="Parameters">
+                <SidebarMenuButton asChild isActive={false}>
+                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>Parameters</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="Skeleton">
+                <SidebarMenuButton asChild isActive={true}>
+                  <a onClick={() => handleFileSelect("Skeleton.md")}>Skeleton</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="Outline">
+                <SidebarMenuButton asChild isActive={false}>
+                  <a onClick={() => handleFileSelect("Outline.md")}>Outline</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+
+        <SidebarGroup key="Chapters">
+          <SidebarGroupLabel>Chapters</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {projectsState.activeProject?.files?.filter((item) => item.title.includes('Chapter')).map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={true}>
+                    <a onClick={() => handleFileSelect(item.title)}>
+                      {item.title.replace('.md', '').replace('-', ' ')} {item.hasEdits && <Diff />}
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+              ))}
+              <SidebarMenuItem key="addChapter">
+                <SidebarMenuButton asChild isActive={true}>
+                  <a onClick={() => handleFileSelect("Outline.md")}><Plus /> Add Chapter</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+
+
+
         <div className="border-t p-2 absolute bottom-16 w-full">
           {' '}
           {/* Position at the bottom */}
