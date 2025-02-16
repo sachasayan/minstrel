@@ -46,18 +46,13 @@ flowchart TD
    - Why this project exists
    - Problems it solves
    - How it should work
-   - User experience goals
 
 3. `memory-bank/activeContext.md`
    - Current work focus
-   - Recent changes
-   - Next steps
-   - Active decisions and considerations
 
 4. `memory-bank/systemPatterns.md`
    - System architecture
    - Key technical decisions
-   - Design patterns in use
    - Component relationships
 
 5. `memory-bank/techContext.md`
@@ -67,18 +62,7 @@ flowchart TD
    - Dependencies
 
 6. `memory-bank/progress.md`
-   - What works
-   - What's left to build
-   - Current status
-   - Known issues
-
-### Additional Context
-Create additional files/folders within memory-bank/ when they help organize:
-- Complex feature documentation
-- Integration specifications
-- API documentation
-- Testing strategies
-- Deployment procedures
+   - Phased development plan, updated as work progresses
 
 ## Core Workflows
 
@@ -164,6 +148,6 @@ flowchart TD
 - Evolution of project decisions
 - Tool usage patterns
 
-The format is flexible - focus on capturing valuable insights that help me work more effectively with you and the project. Think of .clinerules as a living document that grows smarter as we work together.
+The format is flexible - focus on capturing valuable insights that help me work more effectively with you and the project. Think of .clinerules as a living document that grows smarter as we work together. However, do not modify the format of .clinerules without consulting the user first.
 
 REMEMBER: After every memory reset, I begin completely fresh. The Memory Bank is my only link to previous work. It must be maintained with precision and clarity, as my effectiveness depends entirely on its accuracy.

@@ -13,16 +13,6 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
     *   **`fileOps.ts`:**  Handles file system operations (reading directories, reading files, writing files, creating directories) through Electron's IPC. This ensures proper path resolution and sandboxing.
     *   **`GeminiService.ts`:** (In the renderer process, but conceptually part of the backend) Abstraction layer for interacting with the Gemini API.
 
-## Key Design Patterns
-
-*   **Model-View-Controller (MVC) / Model-View-ViewModel (MVVM):** The frontend loosely follows an MVC/MVVM pattern.  React components act as the View, the Redux store acts as the Model, and the service logic (e.g., `chatManager.ts`, `projectManager.ts`) acts as the Controller/ViewModel.
-*   **Component-Based UI:** The frontend is built using reusable React components, promoting modularity and maintainability.
-*   **Asynchronous Communication:**  Communication between the frontend and backend (and with the Gemini API) is asynchronous, using Promises and `async/await`.
-*   **Event-Driven Architecture:**  Electron's IPC is used for communication between the main and renderer processes, following an event-driven pattern.
-*   **Redux for State Management:**  Redux Toolkit provides a predictable state container, making it easier to manage the application's state and data flow.
-*   **Service Layer:**  `chatManager.ts` and `GeminiService.ts` act as a service layer, abstracting away the complexities of interacting with the Gemini API and the file system.
-* **Memory Bank Pattern:** Implemented. The project uses a memory bank pattern for managing project context and documentation.
-
 ## Component Relationships
 
 *   `AppSidebar` interacts with `projectManager` to save projects and with `chatSlice` and `appStateSlice` to manage UI state.

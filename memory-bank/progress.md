@@ -1,37 +1,52 @@
-# Minstrel Progress
+## Development Plan
 
-## What Works
+### Phase 1: Core Functionality
 
-*   **Skeleton Generation:** The user can input story parameters and generate a story skeleton.
-*   **Outline Generation:** The user can trigger the generation of a story outline based on the skeleton.
-*   **Chat Interface:** The user can interact with the AI model through a collapsible chat interface.
-*   **File Management:**
-    *   File contents are stored in the Redux store.
-    *   Files can be saved to the file system.
-    *   Project directories are created automatically when saving new projects.
-    *   Errors during file system operations are caught and reported.
-*   **State Management:** Redux Toolkit manages the application state effectively.
-*   **Prompt Building:** Prompts are constructed dynamically, including context and user messages.
-*   **Basic Error Handling:** Error handling is in place for API calls and file system operations.
-* **Sidebar:** The sidebar provides navigation and project management features, including a collapsible design and dynamic chapter icons.
-* **User Messages:** The user can send messages to the model after skeleton generation.
-* **Chat History Management:** The chat history is managed, storing the last 20 messages.
-* **Context Management:** The service determines and provides relevant context to the model.
+- [ ] **Skeleton Generation** (COMPLETE)
+    - [x] Implement UI for story parameter input
+    - [x] Implement service logic to send parameters to the model
+    - [x] Implement model logic to generate a story skeleton
+    - [x] Display the skeleton in the UI
+- [ ] **Outline Generation** (COMPLETE)
+    - [x] Implement UI to trigger outline generation
+    - [x] Implement service logic to send the skeleton to the model
+    - [x] Implement model logic to generate a story outline
+    - [x] Display the outline in the UI
+- [ ] **Chapter Generation** (UNFINISHED)
+    - [ ] Implement UI to trigger chapter generation
+    - [ ] Implement service logic to send the outline and previous chapter to the model
+    - [ ] Implement model logic to generate a chapter
+    - [ ] Display the chapter in the UI
+- [ ] **Critique Generation** (UNFINISHED)
+    - [ ] Implement UI to trigger critique generation
+    - [ ] Implement service logic to send all chapters to the model
+    - [ ] Implement model logic to generate a critique
+    - [ ] Display the critique in the UI
 
-## What's Left to Build
+### Phase 2: UI/UX Improvements
 
-*   **Chapter Generation:**  Full implementation of the chapter generation workflow, including model logic and UI integration.
-*   **Critique Generation:** Implementation of the critique generation workflow.
-*   **Expanded Error Handling:** More robust and user-friendly error handling throughout the application.
-*   **UI/UX Improvements:**  Further refinement of the user interface and user experience, including loading states, feedback mechanisms, and overall polish.
-*   **Versioning:** Implementation of a versioning system for project files.
-*   **Testing:** Comprehensive testing of all features and workflows.
-*   **Regeneration/Rewriting:** Implement service and model logic to allow regenerating/rewriting specific parts of the novel.
-*   **User Editing:** Allow the user to directly edit the generated files within the app.
-*  **Additional Tools:** Explore the possibility of adding more tools for the model to use.
+- [ ] **Loading States** (UNFINISHED)
+    - [ ] Implement loading indicators for all API calls
+- [ ] **Feedback Mechanisms** (UNFINISHED)
+    - [ ] Implement user-friendly error messages
+    - [ ] Implement success messages
+- [ ] **Overall Polish** (UNFINISHED)
+    - [ ] Review and improve the UI/UX throughout the application
 
-## Known Issues
+### Phase 3: Advanced Features
 
-*   Minor UI/UX issues may exist.
-*   Chapter and critique generation are not yet implemented.
-*   Error handling could be more comprehensive.
+- [ ] **Versioning** (UNFINISHED)
+    - [ ] Implement a versioning system for project files
+- [ ] **Regeneration/Rewriting** (UNFINISHED)
+    - [ ] Implement service and model logic to allow regenerating/rewriting specific parts of the novel
+- [ ] **User Editing** (UNFINISHED)
+    - [ ] Allow the user to directly edit the generated files within the app
+- [ ] **Additional Tools** (UNFINISHED)
+    - [ ] Explore the possibility of adding more tools for the model to use
+
+### Phase 4: Error Handling and Testing
+
+- [ ] **Expanded Error Handling** (UNFINISHED)
+    - [ ] Implement more robust error handling throughout the application
+- [ ] **Testing** (UNFINISHED)
+    - [ ] Implement comprehensive testing of all features and workflows
