@@ -6,7 +6,7 @@ import { Text } from '@react-three/drei'
 import { type Group, Vector3 } from 'three'
 
 const LETTER_COUNT = 100
-const RADIUS = 5
+const RADIUS = 10
 const HEIGHT = 10
 
 interface LetterState {

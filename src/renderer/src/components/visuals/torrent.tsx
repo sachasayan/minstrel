@@ -7,14 +7,14 @@ import LetterTorrent from './letterTorrent'
 
 export default function Torrent() {
   return (
-    <div className="w-full h-screen bg-white">
+    <div className="w-full h-[400px] bg-white">
       <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>
         <Suspense fallback={null}>
           <LetterTorrent />
-          <OrbitControls enablePan={false} />
+          {/* <OrbitControls enablePan={false} /> */}
         </Suspense>
-        {/* <ambientLight intensity={0.5} /> */}
-        {/* <pointLight position={[10, 10, 10]} /> */}
+        {/* <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} /> */}
       </Canvas>
     </div>
   )
