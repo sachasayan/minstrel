@@ -11,7 +11,8 @@ import {
   selectProjects
 } from '@/lib/utils/projectsSlice'
 
-import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered, Squircle } from 'lucide-react'
+import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered } from 'lucide-react';
+import { Square } from 'lucide-react';
 import { Button } from '@/components/ui/button'
 import {
   useSidebar,
@@ -43,7 +44,7 @@ import { addChatMessage } from '@/lib/utils/chatSlice'
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (
     <div className="relative inline-block">
-      <Squircle className="w-4 h-4 text-muted-foreground" />
+      <Square className="w-4 h-4 text-muted-foreground" />
       <span className="absolute inset-0 flex items-center justify-center leading-none text-[0.5rem] font-bold text-foreground">
         {chapterNumber}
       </span>
