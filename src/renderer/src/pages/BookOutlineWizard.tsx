@@ -367,7 +367,7 @@ const SummaryPage = () => {
       setActiveProject({
         id: projectId,
         title: projectTitle,
-        fullPath: `/Users/sacha/Documents/Minstrel/${projectTitle}`,
+        fullPath: `~/Documents/Minstrel/${projectTitle}`,
         files: [],
         genre: formData.genre,
         summary: '',
