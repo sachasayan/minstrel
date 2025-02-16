@@ -7,18 +7,6 @@ The current focus is on UI/UX improvements and investigating Tailwind CSS v4 the
 *   Ensuring the "Add Chapter" functionality correctly dispatches a user message to the model.
 *   Improving error handling, particularly around file saving and directory creation.
 *   Making the sidebar collapsible and adding dynamic chapter icons.
-*   Updating project documentation (`projectContext.md`) to reflect the current state of the implementation.
-* Cleaning up CSS and reviewing Tailwind configuration.
-
-## Recent Changes
-
-*   Fixed a bug where new projects were not saving due to missing directory creation logic.
-*   Implemented error handling to catch and report failures in file system operations (directory creation and file writing).
-*   Added a `ChapterIcon` component to `AppSidebar.tsx` to display chapter numbers dynamically.
-*   Modified the "Add Chapter" button to dispatch an `addChatMessage` action.
-*   Made the sidebar collapsible.
-*   Added icons to the sidebar navigation buttons.
-*   Updated `chatManager.ts` to correctly reset the `pendingChat` state after successful API calls, preventing the UI from getting stuck in a loading state.
 
 ## Development Plan
 
