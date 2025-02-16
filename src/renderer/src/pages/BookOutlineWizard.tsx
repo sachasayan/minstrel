@@ -146,7 +146,7 @@ const StartPage = () => {
       <p className="text-center">
         Would you like to start from an existing file or create a new story?
       </p>
-      <div className="space-x-4  flex flex-row justify-center">
+      <div className="flex flex-row justify-center">
         <Button disabled>Start from existing file (Coming soon)</Button>
         <Button onClick={() => setCurrentStep(1)}>Create a new story</Button>
       </div>

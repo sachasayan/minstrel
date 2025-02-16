@@ -26,11 +26,14 @@
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
   --ring: hsl(240 10% 3.9%);
-  --chart-1: hsl(12 76% 61%);
-  --chart-2: hsl(173 58% 39%);
-  --chart-3: hsl(197 37% 24%);
-  --chart-4: hsl(43 74% 66%);
-  --chart-5: hsl(27 87% 67%);
+  --chart-1: #374869;
+  --chart-2: #595081;
+  --chart-3: #86548e;
+  --chart-4: #b5548c;
+  --chart-5: #df577d;
+  --chart-6: #fb6662;
+  --chart-7: #ff823f;
+  --chart-8: #ffa600;
   --radius: 0.6rem;
   --sidebar-background: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
@@ -79,17 +82,6 @@
   --sidebar: hsl(240 5.9% 10%);
 }
 
-/* :root {
-  --sidebar-background: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-  --sidebar: hsl(240 5.9% 10%);
-} */
 
 @theme inline {
   --color-background: var(--background);
@@ -131,31 +123,8 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-
-    to {
-      height: 0;
-    }
-  }
 }
 
-
-.fadein-out-transitions {
-  @apply data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95;
-}
 
 @layer base {
   * {
@@ -166,30 +135,7 @@
     @apply bg-background text-foreground;
   }
 
-  :root {
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
 
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border outline-ring/50;
   }
@@ -197,47 +143,48 @@
   body {
     @apply bg-background text-foreground;
   }
-}
 
-:not(input):not(textarea),
-:not(input):not(textarea)::after,
-:not(input):not(textarea)::before {
-  -webkit-user-select: none;
-  user-select: none;
-  cursor: default;
-}
 
-input,
-button,
-textarea,
-:focus {
-  outline: none;
-}
+  :not(input):not(textarea),
+  :not(input):not(textarea)::after,
+  :not(input):not(textarea)::before {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+  }
 
-.prose h1 {
-  @apply text-4xl font-bold my-4;
-}
+  input,
+  button,
+  textarea,
+  :focus {
+    outline: none;
+  }
 
-.prose h2 {
-  @apply text-3xl font-semibold my-3;
-}
+  .prose h1 {
+    @apply text-4xl font-bold my-4;
+  }
 
-.prose h3 {
-  @apply text-2xl font-medium my-2;
-}
+  .prose h2 {
+    @apply text-3xl font-semibold my-3;
+  }
 
-.prose h4 {
-  @apply text-xl font-semibold my-2;
-}
+  .prose h3 {
+    @apply text-2xl font-medium my-2;
+  }
 
-.prose h5 {
-  @apply text-lg font-medium my-1;
-}
+  .prose h4 {
+    @apply text-xl font-semibold my-2;
+  }
 
-.prose h6 {
-  @apply text-base font-semibold my-1;
-}
+  .prose h5 {
+    @apply text-lg font-medium my-1;
+  }
 
-.prose p {
-  @apply leading-relaxed my-2;
+  .prose h6 {
+    @apply text-base font-semibold my-1;
+  }
+
+  .prose p {
+    @apply leading-relaxed my-2;
+  }
 }

@@ -135,7 +135,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type your message..."
-              className="flex-1 border rounded-md px-4 p-2 mr-2 outline-none"
+              className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden"
               disabled={pendingChat}
             />
             <button

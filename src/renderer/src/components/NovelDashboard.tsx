@@ -44,14 +44,14 @@ export default function NovelDashboard() {
   const novelData = { chapterData, characters }
 
   const characterColors = {
-    aria: '#669900ff', // avocado
-    thorne: '#99cc33ff', // yellow-green
-    elara: '#ccee66ff', // mindaro
-    cassius: '#006699ff', // lapis-lazuli
-    lyra: '#3399ccff', // celestial-blue
-    zephyr: '#990066ff', // murrey
-    sage: '#cc3399ff', // red-violet
-    rook: '#ff6600ff' // pumpkin
+    aria: 'var(--chart-1)',
+    thorne: 'var(--chart-2)',
+    elara: 'var(--chart-3)',
+    cassius: 'var(--chart-4)',
+    lyra: 'var(--chart-5)',
+    zephyr: 'var(--chart-6)',
+    sage: 'var(--chart-7)',
+    rook: 'var(--chart-8)'
   }
 
   return (
@@ -81,8 +81,7 @@ export default function NovelDashboard() {
               style={{ aspectRatio: 'auto' }}
               config={{
                 wordCount: {
-                  label: 'Word Count',
-                  color: 'black'
+                  label: 'Word Count'
                 }
               }}
               className="h-[300px]"
@@ -120,8 +119,7 @@ export default function NovelDashboard() {
             style={{ aspectRatio: 'auto' }}
             config={novelData.characters.reduce((acc, char, index) => {
               acc[char.name] = {
-                label: char.name,
-                color: 'black'
+                label: char.name
               }
               return acc
             }, {})}
