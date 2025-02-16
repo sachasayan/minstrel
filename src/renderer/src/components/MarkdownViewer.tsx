@@ -1,10 +1,13 @@
 import { MDXEditor, headingsPlugin, listsPlugin } from '@mdxeditor/editor'
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 import {
   UndoRedo,
   BoldItalicUnderlineToggles,
   toolbarPlugin,
   CreateLink,
-  BlockTypeSelect
+  BlockTypeSelect,
+  ListsToggle
 } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
 import type { JSX } from 'react'
@@ -37,40 +40,40 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
   }
 
   return (
-    <div className="h-full flex flex-col p-4 overflow-hidden">
+    <ScrollArea className="max-h-full rounded-md">
       {fileName ? (
         <>
-          {/* <h2 className="text-2xl font-bold mb-4">{fileName}</h2> */}
-          <div className="flex-grow overflow-y-auto" style={{ fontFamily: '"Inter", sans-serif' }}>
-            <MDXEditor
-              markdown={
-                projectState.activeProject?.files.find((file) => file.title == fileName)?.content ||
-                ''
-              }
-              onChange={handleContentChange}
-              onError={handleError}
-              plugins={[
-                headingsPlugin(),
-                listsPlugin(), // Add listsPlugin
-                toolbarPlugin({
-                  toolbarClassName: 'mdx-toolbar',
-                  toolbarContents: () => (
-                    <>
-                      <UndoRedo />
-                      <BoldItalicUnderlineToggles />
-                      <CreateLink />
-                      <BlockTypeSelect />
-                    </>
-                  )
-                })
-              ]}
-              contentEditableClassName="prose"
-            />
-          </div>
+
+          <MDXEditor
+            markdown={
+              projectState.activeProject?.files.find((file) => file.title == fileName)?.content ||
+              ''
+            }
+            onChange={handleContentChange}
+            onError={handleError}
+            plugins={[
+              headingsPlugin(),
+              listsPlugin(), // Add listsPlugin
+              toolbarPlugin({
+                toolbarClassName: 'mdx-toolbar',
+                toolbarContents: () => (
+                  <>
+                    <UndoRedo />
+                    <BoldItalicUnderlineToggles />
+                    <CreateLink />
+                    <BlockTypeSelect />
+                    <ListsToggle />
+                  </>
+                )
+              })
+            ]}
+            contentEditableClassName="prose"
+          />
+
         </>
       ) : (
         <p className="text-center text-gray-500 mt-8">Select a file to view its content</p>
       )}
-    </div>
+    </ScrollArea>
   )
 }

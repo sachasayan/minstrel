@@ -190,4 +190,12 @@
   .prose p {
     @apply leading-relaxed my-2;
   }
+
+  .prose ul {
+    @apply list-disc pl-6 my-2;
+  }
+
+  .prose ol {
+    @apply list-decimal pl-6 my-2;
+  }
 }

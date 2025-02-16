@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from './store'
-import { resolve } from 'path'
 
 interface ChatMessage {
   sender: 'User' | 'Gemini'
@@ -13,7 +12,7 @@ interface ChatState {
 }
 
 const initialState: ChatState = {
-  chatHistory: [],
+  chatHistory: [{sender: 'Gemini', text: 'Hello there! Ask me anything about your story. I can help you build an outline, write a chapter, and more.'}],
   pendingChat: false
 }
 

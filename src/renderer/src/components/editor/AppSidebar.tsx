@@ -57,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const projectsState = useSelector(selectProjects)
   const appState = useSelector(selectAppState)
   const [alertDialogOpen, setAlertDialogOpen] = React.useState(false);
-  const { open: sideBarOpen, setOpen: setSideBarOpen } = useSidebar()
+  const { open: sideBarOpen } = useSidebar()
 
 
 
@@ -192,40 +192,79 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {!projectsState.activeProject?.files?.find((item) => item.title.includes('Outline')) && (
+                  <SidebarMenuItem key="Create Outline">
+                    <SidebarMenuButton asChild>
+                      <Button
+                        onClick={() =>
+                          dispatch(
+                            addChatMessage({
+                              sender: 'User',
+                              text: 'Please create an outline.',
+                            })
+                          )
+                        }
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Create Outline
+                      </Button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
 
+          {projectsState.activeProject?.files?.find((item) => item.title.includes('Outline')) && (
+            <SidebarGroup key="Chapters">
+              <SidebarGroupLabel>Chapters</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {projectsState.activeProject?.files
+                    ?.filter((item) => item.title.includes('Chapter'))
+                    .map((item) => {
+                      const chapterNumber = item.title.match(/Chapter-(\d+)/)?.[1] || '';
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild isActive={false}>
+                            <a
+                              onClick={() => handleFileSelect(item.title)}
+                              className="flex items-center"
+                            >
+                              <ChapterIcon chapterNumber={chapterNumber} />
+                              <span className="flex-grow ml-2">
+                                {item.title.replace('.md', '').replace('-', ' ')}
+                              </span>{' '}
+                              {item.hasEdits && <Diff className="float-right text-orange-500" />}
+                            </a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  <SidebarMenuItem key="addChapter">
+                    <SidebarMenuButton asChild>
+                      <Button
+                        className={`w-full flex items-center justify-center  rounded p-1`}
+                        onClick={() =>
+                          dispatch(
+                            addChatMessage({
+                              sender: 'User',
+                              text: 'Please add a new chapter.',
+                            })
+                          )
+                        }
+                        variant="outline"
 
-          <SidebarGroup key="Chapters">
-            <SidebarGroupLabel>Chapters</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {projectsState.activeProject?.files?.filter((item) => item.title.includes('Chapter')).map((item) => {
-                  const chapterNumber = item.title.match(/Chapter-(\d+)/)?.[1] || '';
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={false}>
-                        <a onClick={() => handleFileSelect(item.title)} className="flex items-center">
-                          <ChapterIcon chapterNumber={chapterNumber} />
-                          <span className="flex-grow ml-2">{item.title.replace('.md', '').replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-                <SidebarMenuItem key="addChapter">
-                  <SidebarMenuButton asChild isActive={true}>
-                    <a onClick={() => dispatch(addChatMessage({ sender: 'User', text: "Please add a new chapter." }))}><Plus /> Add Chapter</a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-
-
-
+                      >
+                        <Plus className="mr-2" /> Add Chapter
+                      </Button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
         </SidebarContent>
         <SidebarRail />
       </Sidebar>

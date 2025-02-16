@@ -107,7 +107,6 @@ export const saveProject = async (project: Project): Promise<boolean> => {
 
     for (const file of project.files) {
       if (file.hasEdits) {
-        file.hasEdits = false;
         const writeResult = await window.electron.ipcRenderer.invoke(
           'write-file',
           `${project.fullPath}/${file.title}`,

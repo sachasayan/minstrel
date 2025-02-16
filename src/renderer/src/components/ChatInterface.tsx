@@ -28,6 +28,13 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
     const inputRef = useRef<HTMLInputElement>(null)
     let collapseTimeout: NodeJS.Timeout | null = null
 
+
+    useEffect(() => {
+      if (pendingChat) {
+        setExpanded(true);
+      }
+    }, [pendingChat])
+
     useEffect(() => {
       if (expanded && inputRef.current) {
         inputRef.current.focus()
