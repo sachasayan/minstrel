@@ -47,17 +47,16 @@ export const buildInitial = (parameters: object): string => {
 export const buildPrompt = (requestedFiles?: string[] | null): string => {
   let prompt = prompts.getBasePrompt()
 
-  // If no requestedFiles are provided, the prompt will be offered a menu of available files, and the user prompt.
-  if (!requestedFiles) {
-    prompt += prompts.getAvailableFiles(getAvailableFiles());
-  }
+  // Add the user message to the prompt
+  prompt += prompts.getUserPrompt(getLatestUserMesage());
+  // Let the prompt know what files are available
+  prompt += prompts.getAvailableFiles(getAvailableFiles());
+
   if (requestedFiles) {
     // Get the context items for the given dependencies
     prompt += prompts.getContext(getFileContents(requestedFiles))
   }
 
-  // Add the user message to the prompt
-  prompt += prompts.getUserPrompt(getLatestUserMesage());
 
   return prompt;
 };

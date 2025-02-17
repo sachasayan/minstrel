@@ -7,6 +7,6 @@ export const chatListeners = createListenerMiddleware()
 chatListeners.startListening({
   actionCreator: addChatMessage,
   effect: async (action) => {
-    if (action.payload.sender === "User") {sendMessage()};
+    if (action.payload.sender === "User") {sendMessage(undefined, 0)};
   },
 });

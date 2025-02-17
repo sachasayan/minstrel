@@ -25,6 +25,7 @@ import { Star } from 'lucide-react';
 import { selectActiveProject } from '@/lib/utils/projectsSlice';
 
 function extractCharactersFromOutline(outlineContent: string): { name: string }[] {
+  console.log(outlineContent)
   const characters: { name: string }[] = [];
   const lines = outlineContent.split('\n');
   let inCharacterSection = false;
@@ -40,14 +41,14 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
       if (line.startsWith('#') && !line.startsWith('###')) {
         break;
       }
-
+      console.log(line)
       const match = line.match(/^\s*-\s*(.+)$/); // Match lines starting with - and capture the character name
       if (match) {
         characters.push({ name: match[1].trim() });
       }
     }
   }
-
+  console.log(characters)
   return characters;
 }
 

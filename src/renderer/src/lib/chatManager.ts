@@ -2,10 +2,10 @@ import geminiService from './GeminiService'
 import { store } from '@/lib/utils/store'
 import { addChatMessage, resolvePendingChat } from '@/lib/utils/chatSlice'
 import { updateFile } from '@/lib/utils/projectsSlice'
-
 import { buildPrompt, buildInitial } from './promptBuilder'
 import { setActiveView, setActiveFile } from './utils/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
+import { toast } from 'sonner';
 
 export const initializeGeminiService = () => {
   const apiKey = store.getState().settings.apiKey
@@ -37,8 +37,9 @@ const processResponse = (responseString: string) => {
   }
 
   if (!!response?.get_context) {
-    const files = response.get_context.map((item) => `[${item.file}] `).join(' ')
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files...${files}` }));
+    //const files = response.get_context.map((item) => `[${item.file}] `).join(' ')
+    console.log(response.get_context)
+    store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files...` }));
     return response.get_context
   }
 
@@ -61,7 +62,13 @@ const processResponse = (responseString: string) => {
   return
 }
 
-export const sendMessage = async (dependencies?: string[]) => {
+export const sendMessage = async (dependencies?: string[], recursionDepth: number = 0) => {
+  if (recursionDepth > 3) {
+    const errorMessage = "Error: Recursion depth exceeded in sendMessage.";
+    toast.error(errorMessage)
+    throw new Error(errorMessage);
+  }
+
   const prompt = buildPrompt(dependencies || null)
   try {
     console.log('User prompt: \n \n', prompt)
@@ -71,7 +78,7 @@ export const sendMessage = async (dependencies?: string[]) => {
     const contextRequested = processResponse(response)
     store.dispatch(resolvePendingChat())
     if (!!contextRequested) {
-      await sendMessage(contextRequested)
+      await sendMessage(contextRequested, recursionDepth + 1)
     }
   } catch (error) {
     console.error('Failed to send chat message:', error)
@@ -85,7 +92,7 @@ export const sendMessage = async (dependencies?: string[]) => {
     if (errorMessage.includes('resource exhausted')) {
       console.log('Resource exhausted, debouncing...')
       await sleep(DEBOUNCE_TIME)
-      await sendMessage()
+      await sendMessage(undefined, recursionDepth + 1)
     }
   } finally {
     console.log("sendMessage() finished");
@@ -101,7 +108,7 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     const contextRequested = processResponse(response)
     store.dispatch(resolvePendingChat())
     if (!!contextRequested) {
-      await sendMessage(contextRequested)
+      await sendMessage(contextRequested, 0)
     }
   } catch (error) {
     console.error('Failed to send chat message:', error)
@@ -115,7 +122,7 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     if (errorMessage.includes('resource exhausted')) {
       console.log('Resource exhausted, debouncing...')
       await sleep(DEBOUNCE_TIME)
-      await sendMessage()
+      await sendMessage(undefined, 0)
     }
   } finally {
     console.log("generateSkeleton() finished");

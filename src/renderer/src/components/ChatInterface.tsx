@@ -58,7 +58,6 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
 
     const handleNextStage = () => {
       setExpanded(true)
-      console.log('handleNextStage called') // Add this line
       dispatch(addChatMessage({ sender: 'User', text: `Let's build the outline based on our story skeleton.` }))
     }
 
