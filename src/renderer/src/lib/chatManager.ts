@@ -37,7 +37,8 @@ const processResponse = (responseString: string) => {
   }
 
   if (!!response?.get_context) {
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: "Looking at files..." }));
+    const files = response.get_context.map((item) => `[${item.file}] `).join(' ')
+    store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files...${files}` }));
     return response.get_context
   }
 
@@ -63,7 +64,7 @@ const processResponse = (responseString: string) => {
 export const sendMessage = async (dependencies?: string[]) => {
   const prompt = buildPrompt(dependencies || null)
   try {
-
+    console.log('User prompt: \n \n', prompt)
     const response = await geminiService.generateContent(prompt)
 
     console.log('AI Response: \n \n', response)
