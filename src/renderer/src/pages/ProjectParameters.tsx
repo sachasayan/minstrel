@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { getProjectMetadata, saveProject } from '@/lib/projectManager'
-import { Project, Genre } from '@/types'
+import { Genre } from '@/types'
 import {
   Select,
   SelectContent,
@@ -11,55 +10,40 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectActiveProject, updateParameters } from '@/lib/utils/projectsSlice'
+import type { RootState } from '@/lib/utils/store'
+import { toast } from 'sonner'
 
-interface ProjectParametersProps {
-  projectId?: string
-}
+const ProjectParameters = () => {
+  const activeProject = useSelector((state: RootState) => selectActiveProject(state))
+  const dispatch = useDispatch()
 
-const ProjectParameters = ({ projectId }: ProjectParametersProps) => {
-  const [project, setProject] = useState<Project | null>(null)
-  const [title, setTitle] = useState('')
-  const [genre, setGenre] = useState<Genre>('science-fiction')
-  const [summary, setSummary] = useState('');
-  const [year, setYear] = useState(0);
-  const [totalWordCount, setTotalWordCount] = useState(0);
+  const [title, setTitle] = useState(activeProject?.title || '')
+  const [genre, setGenre] = useState<Genre>(activeProject?.genre || 'science-fiction')
+  const [summary, setSummary] = useState(activeProject?.summary || '');
+  const [year, setYear] = useState(activeProject?.year || 0);
+  const [totalWordCount, setTotalWordCount] = useState(activeProject?.totalWordCount || 0);
 
-  useEffect(() => {
-    const loadProject = async () => {
-      if (projectId) {
-        const projectData = await getProjectMetadata(projectId);
-        setProject(projectData);
-        setTitle(projectData.title);
-        setGenre(projectData.genre);
-        setSummary(projectData.summary);
-        setYear(projectData.year);
-        setTotalWordCount(projectData.totalWordCount);
-      }
-    };
-
-    loadProject();
-  }, [projectId]);
 
   const handleSave = async () => {
-    if (project) {
-      const updatedProject: Project = {
-        ...project,
+    if (activeProject) {
+      dispatch(updateParameters({
         title,
         genre,
         summary,
         year,
-        totalWordCount,
-      };
-      await saveProject(updatedProject);
+        totalWordCount
+      }))
       // Provide some user feedback that the save was successful.
-      alert("Project parameters saved successfully!");
+      toast.success("Project parameters saved successfully!");
     }
   };
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Project Parameters</h1>
-      {project ? (
+      {activeProject ? (
         <>
           <div className="mb-4">
             <Label htmlFor="title">Title</Label>
@@ -147,7 +131,7 @@ const ProjectParameters = ({ projectId }: ProjectParametersProps) => {
               onChange={(e) => setTotalWordCount(parseInt(e.target.value, 10))}
             />
           </div>
-          <Button onClick={handleSave} disabled>Save</Button>
+          <Button onClick={handleSave} >Save</Button>
         </>
       ) : (
         <p>Loading project parameters...</p>

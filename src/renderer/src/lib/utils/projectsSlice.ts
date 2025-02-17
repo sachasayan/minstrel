@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ProjectState, ProjectFragment, Project } from '@/types'
+import { ProjectState, ProjectFragment, Project, Genre } from '@/types'
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
 
@@ -48,7 +48,16 @@ export const projectsSlice = createSlice({
           state.projectHasLiveEdits = true
         }
       }
-    }
+    },
+    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number }>) => {
+      if (state.activeProject) {
+        state.activeProject.title = action.payload.title;
+        state.activeProject.genre = action.payload.genre;
+        state.activeProject.summary = action.payload.summary;
+        state.activeProject.year = action.payload.year;
+        state.activeProject.totalWordCount = action.payload.totalWordCount;
+      }
+    },
   }
 })
 
@@ -57,7 +66,8 @@ export const {
   setActiveProjectFromFragment,
   setProjectHasLiveEdits,
   setAllFilesAsSaved,
-  updateFile
+  updateFile,
+  updateParameters
 } = projectsSlice.actions
 
 export const selectProjects = (state: RootState) => state.projects
