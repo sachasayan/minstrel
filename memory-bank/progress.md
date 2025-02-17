@@ -50,3 +50,11 @@
     - [ ] Implement more robust error handling throughout the application
 - [ ] **Testing** (UNFINISHED)
     - [ ] Implement comprehensive testing of all features and workflows
+
+### Phase 5: Dashboard Work
+
+- [ ] **Dashboard Implementation** (UNFINISHED)
+    - [x] Display novel summary.
+    - [x] Display word count per chapter.
+    - [x] Display character mentions per chapter.
+    - [ ] Implement dynamic colors for charts.

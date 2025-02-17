@@ -1,13 +1,13 @@
-import { useSelector } from 'react-redux'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSelector } from 'react-redux';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from '@/components/ui/table'
+  TableRow,
+} from '@/components/ui/table';
 import {
   LineChart,
   Line,
@@ -17,12 +17,39 @@ import {
   YAxis,
   CartesianGrid,
   Legend,
-  ResponsiveContainer
-} from 'recharts'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { Star } from 'lucide-react'
-import { chapterData, characters } from './mockData'
-import { selectProjects } from '@/lib/utils/projectsSlice'
+  ResponsiveContainer,
+} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Star } from 'lucide-react';
+// import { chapterData, characters } from './mockData'; // Removed mock data
+import { selectActiveProject } from '@/lib/utils/projectsSlice';
+
+function extractCharactersFromOutline(outlineContent: string): { name: string }[] {
+  const characters: { name: string }[] = [];
+  const lines = outlineContent.split('\n');
+  let inCharacterSection = false;
+
+  for (const line of lines) {
+    if (line.startsWith('## Characters')) {
+      inCharacterSection = true;
+      continue;
+    }
+
+    if (inCharacterSection) {
+      // Stop parsing when we reach another heading of the same or higher level
+      if (line.startsWith('#') && !line.startsWith('###')) {
+        break;
+      }
+
+      const match = line.match(/^\s*-\s*(.+)$/); // Match lines starting with - and capture the character name
+      if (match) {
+        characters.push({ name: match[1].trim() });
+      }
+    }
+  }
+
+  return characters;
+}
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -30,29 +57,29 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+            }`}
         />
       ))}
       <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
     </div>
-  )
+  );
 }
 
 export default function NovelDashboard() {
-  const projectState = useSelector(selectProjects)
+  const activeProject = useSelector(selectActiveProject);
 
-  const novelData = { chapterData, characters }
-
-  const characterColors = {
-    aria: 'var(--chart-1)',
-    thorne: 'var(--chart-2)',
-    elara: 'var(--chart-3)',
-    cassius: 'var(--chart-4)',
-    lyra: 'var(--chart-5)',
-    zephyr: 'var(--chart-6)',
-    sage: 'var(--chart-7)',
-    rook: 'var(--chart-8)'
-  }
+  // const novelData = { chapterData, characters };  // Replaced with dynamic data
+  const colors = [
+    'var(--chart-1)',
+    'var(--chart-2)',
+    'var(--chart-3)',
+    'var(--chart-4)',
+    'var(--chart-5)',
+    'var(--chart-6)',
+    'var(--chart-7)',
+    'var(--chart-8)',
+  ];
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -66,7 +93,7 @@ export default function NovelDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              {projectState.activeProject?.summary || ''}
+              {activeProject?.summary || ''}
             </p>
           </CardContent>
         </Card>
@@ -77,31 +104,44 @@ export default function NovelDashboard() {
             <CardTitle>Word Count per Chapter</CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              style={{ aspectRatio: 'auto' }}
-              config={{
-                wordCount: {
-                  label: 'Word Count'
-                }
-              }}
-              className="h-[300px]"
-            >
-
-              <LineChart data={novelData.chapterData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="chapter" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line
-                  type="monotone"
-                  dataKey="wordCount"
-                  stroke="black"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-
-            </ChartContainer>
+            {activeProject ? (
+              <ChartContainer
+                style={{ aspectRatio: 'auto' }}
+                config={{
+                  wordCount: {
+                    label: 'Word Count',
+                  },
+                }}
+                className="h-[300px]"
+              >
+                <BarChart
+                  data={activeProject.files
+                    .filter((file) => file.title.startsWith('Chapter'))
+                    .map((file, index) => ({
+                      index: index,
+                      chapter: file.title,
+                      wordCount: file.content.split(/\s+/).length,
+                    }))}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="chapter"
+                    tickFormatter={(tick: string) => {
+                      const match = tick.match(/(\d+)/);
+                      return match ? match[1] : tick;
+                    }}
+                  />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="wordCount"
+                    fill={(entry, index) => colors[index % colors.length]}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <p>No active project data available.</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -115,34 +155,64 @@ export default function NovelDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            style={{ aspectRatio: 'auto' }}
-            config={novelData.characters.reduce((acc, char, index) => {
-              acc[char.name] = {
-                label: char.name
-              }
-              return acc
-            }, {})}
-            className="h-[400px]"
-          >
-
-            <BarChart data={novelData.chapterData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="chapter" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Legend />
-              {novelData.characters.map((character) => (
-                <Bar
-                  key={character.name}
-                  dataKey={character.name}
-                  stackId="a"
-                  fill={characterColors[character.name.toLowerCase()]}
+          {activeProject ? (
+            <ChartContainer
+              style={{ aspectRatio: 'auto' }}
+              config={extractCharactersFromOutline(
+                activeProject.files.find((file) => file.title === 'Outline.md')?.content || ''
+              ).reduce((acc, char) => {
+                acc[char.name] = {
+                  label: char.name,
+                };
+                return acc;
+              }, {})}
+              className="h-[400px]"
+            >
+              <BarChart
+                data={activeProject.files
+                  .filter((file) => file.title.startsWith('Chapter-'))
+                  .map((file) => {
+                    const chapterData: { [key: string]: number | string } = {
+                      chapter: file.title,
+                      wordCount: file.content.split(/\s+/).length,
+                    };
+                    const characters = extractCharactersFromOutline(
+                      activeProject.files.find((f) => f.title === 'Outline.md')?.content || ''
+                    );
+                    characters.forEach((char, index) => {
+                      const regex = new RegExp(`\\b${char.name}\\b`, 'gi');
+                      chapterData[char.name] = (file.content.match(regex) || []).length;
+                      chapterData[`${char.name}_color`] = colors[index % colors.length]; // Store color
+                    });
+                    return chapterData;
+                  })}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="chapter"
+                  tickFormatter={(tick: string) => {
+                    const match = tick.match(/(\d+)/);
+                    return match ? match[1] : tick;
+                  }}
                 />
-              ))}
-            </BarChart>
-
-          </ChartContainer>
+                <YAxis />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Legend />
+                {extractCharactersFromOutline(
+                  activeProject.files.find((file) => file.title === 'Outline.md')?.content || ''
+                ).map((character, index) => (
+                  <Bar
+                    key={character.name}
+                    dataKey={character.name}
+                    stackId="a"
+                    fill={colors[index % colors.length]}
+                  />
+                ))}
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <p>No active project data available.</p>
+          )}
         </CardContent>
       </Card>
 
@@ -172,5 +242,5 @@ export default function NovelDashboard() {
         </CardContent>
       </Card> */}
     </div>
-  )
+  );
 }
