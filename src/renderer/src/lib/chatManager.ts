@@ -37,10 +37,14 @@ const processResponse = (responseString: string) => {
   }
 
   if (!!response?.get_context) {
-    //const files = response.get_context.map((item) => `[${item.file}] `).join(' ')
-    console.log(response.get_context)
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files...` }));
-    return response.get_context
+    const files = response.get_context
+      .map((item) => `[${item}]`)
+      .join(" ");
+    console.log(response.get_context);
+    store.dispatch(
+      addChatMessage({ sender: "Gemini", text: `Looking at files... ${files}` })
+    );
+    return response.get_context;
   }
 
   if (!!response.write_file) {

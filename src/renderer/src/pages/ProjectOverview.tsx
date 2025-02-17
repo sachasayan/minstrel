@@ -27,7 +27,7 @@ const ProjectOverview = (): React.ReactNode => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      console.log(chatContainerRef.current)
+
       if (
         chatContainerRef.current &&
         !chatContainerRef.current.contains(event.target as Node) &&

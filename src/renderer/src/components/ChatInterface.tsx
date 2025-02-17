@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, forwardRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { BotMessageSquare, ChevronDown } from 'lucide-react'
-import { selectChat, addChatMessage } from '@/lib/utils/chatSlice'
+import { useState, useRef, useEffect, forwardRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { BotMessageSquare, ChevronDown } from 'lucide-react';
+import { selectChat, addChatMessage } from '@/lib/utils/chatSlice';
 import { RootState } from '@/lib/utils/store'
 import { Button } from '@/components/ui/button'
 
@@ -22,31 +22,42 @@ const ChatLoadingIndicator = () => {
 
 const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
   ({ expanded, setExpanded }, ref) => {
-    const { chatHistory, pendingChat } = useSelector((state: RootState) => selectChat(state))
-    const [message, setMessage] = useState('')
-    const dispatch = useDispatch()
-    const inputRef = useRef<HTMLInputElement>(null)
-    let collapseTimeout: NodeJS.Timeout | null = null
+    const { chatHistory, pendingChat } = useSelector((state: RootState) => selectChat(state));
+    const [message, setMessage] = useState('');
+    const dispatch = useDispatch();
+    const inputRef = useRef<HTMLInputElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null); // Ref for the chat container
+    let collapseTimeout: NodeJS.Timeout | null = null;
+    const lastMessageRef = useRef<HTMLDivElement>(null);
 
+    const scrollToBottom = () => {
+      if (lastMessageRef.current) {
+        lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
 
     useEffect(() => {
       if (pendingChat) {
         setExpanded(true);
       }
-    }, [pendingChat])
+    }, [pendingChat]);
 
     useEffect(() => {
       if (expanded && inputRef.current) {
-        inputRef.current.focus()
+        inputRef.current.focus();
       }
-    }, [expanded])
+    }, [expanded]);
+
+    useEffect(() => {
+      scrollToBottom();
+    }, [chatHistory]);
 
     const handleSend = () => {
       if (message.trim() !== '') {
-        dispatch(addChatMessage({ sender: 'User', text: message }))
-        setMessage('')
+        dispatch(addChatMessage({ sender: 'User', text: message }));
+        setMessage('');
       }
-    }
+    };
 
     const toggleExpanded = () => {
       if (collapseTimeout) {
@@ -115,18 +126,21 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
           <button
             onClick={toggleExpanded}
             className={
-              'text-gray-500 hover:text-gray-700 transition-transform absolute top-2 right-2 m-4'
+              'text-gray-500 hover:text-gray-700 transition-transform absolute top-2 right-2 m-4 rounded-lg bg-white border-2'
             }
           >
             <ChevronDown />
           </button>
 
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
             {chatHistory.map((msg, index) => (
               <div
                 key={index}
-                className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-black text-white text-right' : 'bg-gray-200 text-left'
+                className={`mb-2 p-2 rounded-lg ${msg.sender === 'User'
+                    ? 'bg-gray-200 text-left ml-8'
+                    : 'bg-black text-white text-right mr-8'
                   }`}
+                ref={index === chatHistory.length - 1 ? lastMessageRef : null}
               >
                 {msg.text}
               </div>
