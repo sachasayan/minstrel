@@ -105,6 +105,27 @@ export const saveProject = async (project: Project): Promise<boolean> => {
       return false;
     }
 
+    const metadata = {
+      "title": project.title,
+      "genre": project.genre,
+      "summary": project.summary,
+      "author": "Sacha",
+      "year": project.year,
+      "totalWordCount": project.totalWordCount,
+      "criticSuggestions": []
+    }
+
+    // Write the metadata file
+    const writeMetadataResult = await window.electron.ipcRenderer.invoke(
+      'write-file',
+      `${project.fullPath}/metadata.json`,
+      JSON.stringify(metadata, null, 2)
+    )
+    if (!writeMetadataResult.success) {
+      console.error('Failed to write metadata file:', writeMetadataResult.error);
+      return false;
+    }
+
     for (const file of project.files) {
       if (file.hasEdits) {
         const writeResult = await window.electron.ipcRenderer.invoke(

@@ -33,7 +33,7 @@ export default function LetterTorrent() {
         Math.random() * Math.PI,
         Math.random() * Math.PI
       ),
-      speed: Math.random() * 0.02 + 0.01
+      speed: Math.random() * 0.02 + 0.001
     }))
     setLetters(initialLetters)
   }, [])
@@ -45,9 +45,9 @@ export default function LetterTorrent() {
       prevLetters.map((letter) => {
         const newPosition = letter.position.clone()
         newPosition.applyAxisAngle(new Vector3(0, 1, 0), letter.speed)
-        newPosition.y += letter.speed * 0.5
+        // newPosition.y += letter.speed * 0.5
         if (newPosition.y > HEIGHT / 2) {
-          newPosition.y = -HEIGHT / 2
+          // newPosition.y = -HEIGHT / 2
         }
 
         const newRotation = letter.rotation.clone()
