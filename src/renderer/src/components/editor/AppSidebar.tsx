@@ -11,8 +11,17 @@ import {
   selectProjects
 } from '@/lib/utils/projectsSlice'
 
-import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered } from 'lucide-react';
-import { Square } from 'lucide-react';
+import {
+  Plus,
+  Save,
+  X,
+  Diff,
+  LayoutDashboard,
+  Settings,
+  FileText,
+  ListOrdered
+} from 'lucide-react'
+import { Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   useSidebar,
@@ -172,8 +181,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem key="Parameters">
-                  <SidebarMenuButton asChild isActive={false}>
-                    <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
+                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/parameters'}>
+                    <a onClick={() => dispatch(setActiveView('project/parameters'))}>
                       <Settings className="mr-2 h-4 w-4" /> Parameters
                     </a>
                   </SidebarMenuButton>

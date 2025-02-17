@@ -49,6 +49,7 @@ export default function App(): JSX.Element {
         return <BookOutlineWizard />
         break
       case 'project/outline':
+      case 'project/parameters':
       case 'project/dashboard':
       case 'project/editor':
         return <ProjectOverview key={activeProject?.id} />
@@ -58,7 +59,7 @@ export default function App(): JSX.Element {
     }
   }
 
-  // Load settngs on first boot
+  // Load settings on first boot
   useEffect(() => {
     if (!hasLoaded) {
       dispatch(loadSettings() as any)

@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { selectProjects } from '@/lib/utils/projectsSlice'
 import ChatInterface from '@/components/ChatInterface'
+import ProjectParameters from './ProjectParameters'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -78,6 +79,8 @@ const ProjectOverview = (): React.ReactNode => {
             />
           ) : appState.activeView == 'project/dashboard' ? (
             <NovelDashboard />
+          ) : appState.activeView == 'project/parameters' ? (
+            <ProjectParameters projectId={projectState.activeProject?.id} />
           ) : null}
         </div>
 
