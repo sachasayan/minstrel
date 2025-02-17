@@ -1,21 +1,24 @@
+const buffer = `\n\n===\n\n`
+
 const getBasePrompt =
   () => `
-BEGIN MINSTREL SYSTEM PROMPT
 
-You are Minstrel, a highly skilled author and editor with extensive knowledge in how to write and manage literary fiction projects. You have an extensive knowledge of many genres and styles , and are able to create compelling stories with a unique voice.
+You are Minstrel, a highly skilled author and editor with extensive knowledge in how to write and manage literary fiction projects, and a special ability: The ability to use tools.
+
+You have an extensive knowledge of many genres and styles , and are able to create compelling stories with a unique voice.
 
 Your goal is to help a user write a novel. You may be presented with one of these tasks to complete:
 
-1. **Write a Skeleton:**
-2. **Write an Outline:**
-3. **Write a Chapter:**
-4. **Write a Critique:**
+1. **Skeleton**
+2. **Outline**
+3. **Chapter**
+4. **Critique**
 
-A list of available context will be provided to you, as well as contents of the relevant files for each task.
+A list of available files will be provided to you, as well as contents of the relevant files for each task.
 
-If no files are provided by the user, you should first request the relevant files (context).
+If no relevant file contents are provided by the user, you MUST first request the relevant files.
 
-Requesting context will be described later in the prompt. If you request conext, do not also write files in the same response.
+Requesting files will be described later in the prompt. If you request files, do not also write files in the same response.
 
 ====
 
@@ -89,52 +92,42 @@ Required context: Requires all chapters, but does not require the skeleton or ou
 
 ===
 
-END MINSTREL SYSTEM PROMPT
-BEGIN CURRENT TASK PROMPT
+END SYSTEM PROMPT
+BEGIN TASK PROMPT
+
+
 `
 
-const getAvailableFiles = (files) => `
 
-====
 
-AVAILABLE CONTEXT:
+const getUserPrompt = (prompt) => `${buffer}
+CURRENT USER PROMPT:
+
+${prompt}
+`
+
+
+const getAvailableFiles = (files) => `${buffer}
+THE USER DID NOT PROVIDE ANY FILES. YOU MAY CHOOSE FROM THIS LIST OF AVAILABLE FILES:
 
 ${files.join('\n')}
 
 `;
 
-const getContext = (item) => `
-
-====
-
+const getContext = (item) => `${buffer}
 PROVIDED CONTEXT:
 
 ${item}
 
 `
 
-const getChatHistory = (chatHistory: { sender: string; text: string }[]): string => `
-
-====
-
+const getChatHistory = (chatHistory: { sender: string; text: string }[]): string => `${buffer}
 CHAT HISTORY:
 
 ${chatHistory.map((message) => `${message.sender}: ${message.text}`).join('\n \n')}
 `
 
-const getUserPrompt = (prompt) => `
-
-====
-
-CURRENT USER PROMPT:
-
-${prompt}
-`
-
-const getParameters = (parameters) => `
-
-====
-
+const getParameters = (parameters) => `${buffer}
 STORYLINE PARAMETERS:
 
 ${JSON.stringify(parameters, null, 2)}
