@@ -19,7 +19,7 @@ export interface Project extends ProjectFragment {
   summary: string
   year: number
   totalWordCount: number
-  criticSuggestions: CriticSuggestion[]
+  expertSuggestions: ExpertSuggestion[]
 }
 export interface ProjectFragment {
   id: string
@@ -36,8 +36,8 @@ export interface ProjectFile {
   hasEdits: boolean
 }
 
-export interface CriticSuggestion {
-  critic: string
+export interface ExpertSuggestion {
+  expert: string
   publication?: string
   rating: number
   comment: string

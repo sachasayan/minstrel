@@ -217,20 +217,20 @@ export default function NovelDashboard() {
         </CardContent>
       </Card>
 
-      {/* Critic Suggestions */}
+      {/* Expert Suggestions */}
       {/* <Card>
         <CardHeader>
-          <CardTitle>Critic Suggestions</CardTitle>
+          <CardTitle>Expert Suggestions</CardTitle>
           <CardDescription>
-            Feedback and improvement suggestions from literary critics
+            Feedback and improvement suggestions from literary experts
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {criticSuggestions.map((suggestion, index) => (
+            {expertSuggestions.map((suggestion, index) => (
               <Card key={index}>
                 <CardHeader>
-                  <CardTitle>{suggestion.critic}</CardTitle>
+                  <CardTitle>{suggestion.expert</CardTitle>
                   <CardDescription>{suggestion.publication}</CardDescription>
                 </CardHeader>
                 <CardContent>

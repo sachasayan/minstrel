@@ -462,7 +462,7 @@ const SummaryPage = () => {
         summary: '',
         year: new Date().getFullYear(),
         totalWordCount: 0,
-        criticSuggestions: []
+        expertSuggestions: []
       })
     )
     generateSkeleton(formData)

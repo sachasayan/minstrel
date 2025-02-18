@@ -16,7 +16,7 @@ export const getProjectMetadata = async (directory: string): Promise<Project> =>
       summary: metadata?.summary || '',
       year: metadata?.year || 0,
       totalWordCount: metadata?.totalWordCount || 0,
-      criticSuggestions: metadata?.criticSuggestions || [],
+      expertSuggestions: metadata?.expertSuggestions || [],
       files: []
     } as Project
   } catch (e) {
@@ -112,7 +112,7 @@ export const saveProject = async (project: Project): Promise<boolean> => {
       "author": "Sacha",
       "year": project.year,
       "totalWordCount": project.totalWordCount,
-      "criticSuggestions": []
+      "expertSuggestions": []
     }
 
     // Write the metadata file
