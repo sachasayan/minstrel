@@ -112,7 +112,7 @@ export const saveProject = async (project: Project): Promise<boolean> => {
       "author": "Sacha",
       "year": project.year,
       "totalWordCount": project.totalWordCount,
-      "expertSuggestions": []
+      "expertSuggestions": project.expertSuggestions
     }
 
     // Write the metadata file

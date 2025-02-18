@@ -14,6 +14,6 @@ He ran his fingers along the spines of the books, a wistful smile gracing his li
 
 But his sanctuary was not without its dangers. The Authority was always watching, always searching for those who dared to defy their control. Elias knew that his library was a ticking time bomb, waiting to be discovered. But he couldn't bring himself to abandon it. The books were too important, the knowledge they contained too precious to be lost.
 
-He pulled a worn copy of "Moby Dick" from the shelf and settled into his favorite armchair. As he began to read, he was transported to another world, a world of adventure and freedom. For a few precious hours, he could forget the oppressive reality of the city outside and lose himself in the whispers of the past. But even in his sanctuary, he couldn't shake the feeling that his time was running out. The Authority's grip was tightening, and he knew it was only a matter of time before they came for him and his books.
+He pulled a worn copy of "Moby Dick" from the shelf and settled into his favorite armchair. As he began to read, he was transported to another world, a world of adventure and freedom. For a few precious hours, he could forget the oppressive reality of the city outside and lose himself in the whispers of the past. But even in his sanctuary, he couldn't shake the feeling that his time was running out. The Authority's grip was tightening, and he knew it was only a matter of time before they came for him and his books.&#x20;
 
 The drones buzzed outside, their surveillance continuing.
