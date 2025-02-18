@@ -1,11 +1,13 @@
 import { useSelector } from 'react-redux'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
+import { Project } from '@/types'
 // import { chapterData, characters } from './mockData'; // Removed mock data
 import { selectActiveProject } from '@/lib/utils/projectsSlice'
+
+const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 
 function extractCharactersFromOutline(outlineContent: string): { name: string }[] {
   console.log(outlineContent)
@@ -25,7 +27,7 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
         break
       }
       console.log(line)
-      const match = line.match(/^\s*-\s*(.+)$/) // Match lines starting with - and capture the character name
+      const match = line.match(/\*\*([A-z -]+).*\*\*/i) // Capture the character name, should be in bold
       if (match) {
         characters.push({ name: match[1].trim() })
       }
@@ -33,6 +35,26 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
   }
   console.log(characters)
   return characters
+}
+
+
+function getCharacterFrequencyData(activeProject: Project): any[] {
+  const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title === 'Outline.md')?.content || '')
+  return activeProject.files
+    .filter((file) => file.title.startsWith('Chapter-'))
+    .map((file) => {
+      const chapterData: { [key: string]: number | string } = {
+        chapter: file.title,
+        wordCount: file.content.split(/\s+/).length
+      }
+
+      characters.forEach((char, index) => {
+        const escapedName = char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        chapterData[char.name] = (file.content.match(`\\b${escapedName}\\b`) || []).length
+        chapterData[`${char.name}_color`] = colors[index % colors.length] // Store color
+      })
+      return chapterData
+    })
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -50,7 +72,7 @@ export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
 
   // const novelData = { chapterData, characters };  // Replaced with dynamic data
-  const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
+
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -109,7 +131,7 @@ export default function NovelDashboard() {
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="wordCount" fill={(entry, index) => colors[index % colors.length]} />
+                  <Bar dataKey="wordCount" fill="black" />
                 </BarChart>
               </ChartContainer>
             ) : (
@@ -137,21 +159,7 @@ export default function NovelDashboard() {
                 className="h-[400px]"
               >
                 <BarChart
-                  data={activeProject.files
-                    .filter((file) => file.title.startsWith('Chapter-'))
-                    .map((file) => {
-                      const chapterData: { [key: string]: number | string } = {
-                        chapter: file.title,
-                        wordCount: file.content.split(/\s+/).length
-                      }
-                      const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title === 'Outline.md')?.content || '')
-                      characters.forEach((char, index) => {
-                        const regex = new RegExp(`\\b${char.name}\\b`, 'gi')
-                        chapterData[char.name] = (file.content.match(regex) || []).length
-                        chapterData[`${char.name}_color`] = colors[index % colors.length] // Store color
-                      })
-                      return chapterData
-                    })}
+                  data={getCharacterFrequencyData(activeProject)}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis

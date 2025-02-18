@@ -6,18 +6,18 @@ A bounty hunter, "The Stranger," arrives in the corrupt town of Redemption, seek
 
 ## Characters
 
-- **The Stranger:** A mysterious bounty hunter.
-- **Sheriff Barlow:** The corrupt sheriff of Redemption.
-- **Sarah:** A saloon owner.
-- **Coyote Jack:** The outlaw.
+* **The Stranger:** A mysterious bounty hunter.
+* **Sheriff Barlow:** The corrupt sheriff of Redemption.
+* **Sarah:** A saloon owner.
+* **Coyote Jack:** The outlaw.
 
 ## Chapter Outlines
 
-- **Chapters 1-3:** The Stranger's arrival and initial conflicts.
-- **Chapters 4-7:** Alliances and confrontations.
-- **Chapters 8-10:** Showdown and resolution.
+* **Chapters 1-3:** The Stranger's arrival and initial conflicts.
+* **Chapters 4-7:** Alliances and confrontations.
+* **Chapters 8-10:** Showdown and resolution.
 
 ## Notes
 
-- Classic Western tropes.
-- Themes of justice, revenge, and redemption.
+* Classic Western tropes.
+* Themes of justice, revenge, and redemption.
