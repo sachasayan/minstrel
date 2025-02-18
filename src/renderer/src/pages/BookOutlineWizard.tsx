@@ -7,24 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '@/components/ui/command'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { BotMessageSquare, Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -45,9 +32,9 @@ interface WizardContextProps {
 const WizardContext = createContext<WizardContextProps>({
   totalSteps: 4,
   currentStep: 0,
-  setCurrentStep: () => { },
+  setCurrentStep: () => {},
   formData: {},
-  setFormData: () => { }
+  setFormData: () => {}
 })
 
 // Custom hook for using wizard context
@@ -92,24 +79,21 @@ const novelLengths = [
 
 const genreSettings = {
   'science-fiction': ['Space', 'Alien Planet', 'Mars Colony', 'Dystopian Future', 'Other'],
-  'fantasy': ['Middle Earth', 'Wizard World', 'Medieval Kingdom', 'Other'],
-  'mystery': ['Crime Scene', 'Detective Noir', 'Small Town Secrets', 'Locked Room', 'Other'],
-  'thriller': ['Espionage', 'Psychological', 'Crime Thriller', 'Political', 'Other'],
-  'horror': ['Haunted House', 'Supernatural', 'Psychological Horror', 'Monster Horror', 'Other'],
-  'romance': ['Historical Romance', 'Contemporary', 'Fantasy Romance', 'Enemies to Lovers', 'Other'],
+  fantasy: ['Middle Earth', 'Wizard World', 'Medieval Kingdom', 'Other'],
+  mystery: ['Crime Scene', 'Detective Noir', 'Small Town Secrets', 'Locked Room', 'Other'],
+  thriller: ['Espionage', 'Psychological', 'Crime Thriller', 'Political', 'Other'],
+  horror: ['Haunted House', 'Supernatural', 'Psychological Horror', 'Monster Horror', 'Other'],
+  romance: ['Historical Romance', 'Contemporary', 'Fantasy Romance', 'Enemies to Lovers', 'Other'],
   'historical-fiction': ['Ancient Civilization', 'Medieval Europe', 'Victorian Era', 'World War Era', 'Other'],
   'literary-fiction': ['Character-Driven', 'Experimental', 'Social Commentary', 'Psychological', 'Other'],
-  'dystopian': ['Post-Apocalyptic', 'Totalitarian Regime', 'Cyberpunk', 'Environmental Collapse', 'Other'],
-  'adventure': ['Jungle Expedition', 'Treasure Hunt', 'Lost Civilization', 'Pirate Adventure', 'Other']
+  dystopian: ['Post-Apocalyptic', 'Totalitarian Regime', 'Cyberpunk', 'Environmental Collapse', 'Other'],
+  adventure: ['Jungle Expedition', 'Treasure Hunt', 'Lost Civilization', 'Pirate Adventure', 'Other']
 }
-
 
 // Navigation component
 const Navigation = () => {
   const dispatch = useDispatch()
   const { currentStep, setCurrentStep, formData } = useWizard()
-
-
 
   const handleExit = () => {
     dispatch(setActiveView('intro')) // Exit the wizard
@@ -127,8 +111,6 @@ const Navigation = () => {
       setCurrentStep(currentStep - 1)
     }
   }
-
-
 
   const isNextDisabled = () => {
     switch (currentStep) {
@@ -195,12 +177,12 @@ const Intro = () => {
           <p className="text-center text-sm">
             {`I'm Pip, I'll be your guide.`}
           </p> */}
-          <p className="text-center text-sm text-gray-500">
-            {`It's nice to meet you! Do you have an idea for a story, or should I come up with something? `}
-          </p>
+          <p className="text-center text-sm text-gray-500">{`It's nice to meet you! Do you have an idea for a story, or should I come up with something? `}</p>
           <div className="flex flex-row w-full justify-between">
             {/* <Button disabled>Start from existing file (Coming soon)</Button> */}
-            <Button className="mx-1" onClick={handleCheat}>Help me!</Button>
+            <Button className="mx-1" onClick={handleCheat}>
+              Help me!
+            </Button>
             <Button onClick={() => setCurrentStep(1)}>{`I've got a story idea already.`} </Button>
           </div>
         </div>
@@ -231,34 +213,20 @@ const StoryLength = () => {
         </div>
       </CardHeader>
       <CardContent>
-
-        <div className='space-y-4'>
-
+        <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-500">{`Okay, let me walk you through the steps. First let's get an idea of where we should go with this. Don't worry, we can change everything later.`}</p>
           </div>
           <div>
-
             <Label>How long of a story are we writing?</Label>
-            <Slider
-              defaultValue={[50000]}
-              max={120000}
-              step={1}
-              onValueChange={(value) => setFormData({ ...formData, length: value[0] })}
-              className="mt-2"
-            />
+            <Slider defaultValue={[50000]} max={120000} step={1} onValueChange={(value) => setFormData({ ...formData, length: value[0] })} className="mt-2" />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               {novelLengths.map((length) => (
                 <span key={length.value}>{length.value}</span>
               ))}
             </div>
-            <p className="text-sm text-gray-500 mt-2">
-              {novelLengths.find((length) => length.value >= (formData.length || 0))?.label}
-            </p>
-
+            <p className="text-sm text-gray-500 mt-2">{novelLengths.find((length) => length.value >= (formData.length || 0))?.label}</p>
           </div>
-
-
         </div>
       </CardContent>
       <Navigation />
@@ -272,15 +240,11 @@ const SettingAndTitle = () => {
 
   const [open, setOpen] = useState(false)
 
-
-
   const settings = genreSettings[formData.genre as keyof typeof genreSettings] || ['Other']
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
-
 
   return (
     <>
@@ -290,20 +254,13 @@ const SettingAndTitle = () => {
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
       </CardHeader>
-      <CardContent className='space-y-4'>
+      <CardContent className="space-y-4">
         <div>
           <Label htmlFor="genre">Genre</Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-full justify-between"
-              >
-                {formData.genre
-                  ? genres.find((genre) => genre.value === formData.genre)?.label
-                  : 'Select genre...'}
+              <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
+                {formData.genre ? genres.find((genre) => genre.value === formData.genre)?.label : 'Select genre...'}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -321,12 +278,7 @@ const SettingAndTitle = () => {
                           setOpen(false)
                         }}
                       >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            formData.genre === genre.value ? 'opacity-100' : 'opacity-0'
-                          )}
-                        />
+                        <Check className={cn('mr-2 h-4 w-4', formData.genre === genre.value ? 'opacity-100' : 'opacity-0')} />
                         {genre.label}
                       </CommandItem>
                     ))}
@@ -339,10 +291,7 @@ const SettingAndTitle = () => {
 
         <div>
           <Label htmlFor="setting">Initial Setting</Label>
-          <Select
-            value={formData.setting || ''}
-            onValueChange={(value) => setFormData({ ...formData, setting: value })}
-          >
+          <Select value={formData.setting || ''} onValueChange={(value) => setFormData({ ...formData, setting: value })}>
             <SelectTrigger>
               <SelectValue placeholder="Select a setting" />
             </SelectTrigger>
@@ -354,25 +303,12 @@ const SettingAndTitle = () => {
               ))}
             </SelectContent>
           </Select>
-
         </div>
-        <div className='space-y-4'>
-
+        <div className="space-y-4">
           <Label htmlFor="title">What should we call your story for now?</Label>
-          <Input
-            id="title"
-            name="title"
-            value={formData.title || ''}
-            onChange={handleInputChange}
-            placeholder="Enter your book title"
-          />
-          <p className="text-sm text-gray-500">
-            {formData.title?.length > 0
-              ? `We'll use "${sanitizeFilename(formData.title || '')}" as the name for your folder.`
-              : ' '}
-          </p>
+          <Input id="title" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Enter your book title" />
+          <p className="text-sm text-gray-500">{formData.title?.length > 0 ? `We'll use "${sanitizeFilename(formData.title || '')}" as the name for your folder.` : ' '}</p>
         </div>
-
       </CardContent>
       <Navigation />
     </>
@@ -384,7 +320,6 @@ const PlotAndWritingStyle = () => {
   const { currentStep, formData, setFormData, totalSteps } = useWizard()
   const [characterCount, setCharacterCount] = useState(0)
 
-
   useEffect(() => {
     setCharacterCount(formData.plot?.length || 0)
   }, [formData.plot])
@@ -393,8 +328,6 @@ const PlotAndWritingStyle = () => {
     setFormData({ ...formData, plot: e.target.value })
     setCharacterCount(e.target.value.length)
   }
-
-
 
   return (
     <>
@@ -405,7 +338,6 @@ const PlotAndWritingStyle = () => {
         </div>
       </CardHeader>
       <CardContent>
-
         <div class="space-y-4">
           <div>
             <Label htmlFor="plot">Basic Plot</Label>
@@ -421,9 +353,7 @@ const PlotAndWritingStyle = () => {
 
             <div className="text-sm text-gray-500 flex justify-between gap-4 items-top">
               <span>i.e &quot;A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.&quot;</span>
-              <span className={characterCount >= 200 ? 'text-black' : 'text-gray-500'}>
-                {characterCount}/200
-              </span>
+              <span className={characterCount >= 200 ? 'text-black' : 'text-gray-500'}>{characterCount}/200</span>
             </div>
           </div>
           <div>
@@ -479,33 +409,26 @@ const SummaryPage = () => {
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="flex flex-col items-center justify-center p-8">
-
           <div className="text-center">
-            <h2 className="text-2xl font-bold">
-              Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story.
-            </h2>
-            <p className="text-sm text-gray-500">
-              This'll take a few seconds. Just hang tight.
-            </p>
+            <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story.</h2>
+            <p className="text-sm text-gray-500">This'll take a few seconds. Just hang tight.</p>
           </div>
           <div className="flex flex-row items-center justify-center p-16">
-            {!requestPending &&
-              <Button onClick={handleDream}>I'm ready!</Button>
-            } {!!requestPending && <Button disabled>Creating your story...
-
-              <div className="flex items-center justify-center p-2">
-                <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
-                <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>
-                <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-150"></div>
-              </div>
-            </Button>}
-
+            {!requestPending && <Button onClick={handleDream}>I'm ready!</Button>}{' '}
+            {!!requestPending && (
+              <Button disabled>
+                Creating your story...
+                <div className="flex items-center justify-center p-2">
+                  <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
+                  <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>
+                  <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-150"></div>
+                </div>
+              </Button>
+            )}
           </div>
-        </div >
-
-      </CardContent >
+        </div>
+      </CardContent>
       <Navigation />
-
     </div>
   )
 }
@@ -520,8 +443,10 @@ export const BookOutlineWizard = () => {
     <div className="w-full h-full flex items-center justify-center ">
       <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps }}>
         <Card className="w-[800px] grid grid-cols-5 gap-4">
-          <div className="col-span-2"><Torrent /></div>
-          <div className='col-span-3'>
+          <div className="col-span-2">
+            <Torrent />
+          </div>
+          <div className="col-span-3">
             {currentStep === 0 && <Intro />}
             {currentStep === 1 && <StoryLength />}
             {currentStep === 2 && <SettingAndTitle />}
@@ -530,6 +455,6 @@ export const BookOutlineWizard = () => {
           </div>
         </Card>
       </WizardContext.Provider>
-    </div >
+    </div>
   )
 }

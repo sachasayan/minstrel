@@ -4,15 +4,7 @@ import Versions from '@/components/Versions'
 import { Button } from '@/components/ui/button'
 import { ProjectFragment } from '@/types'
 import ProjectLibrary from '@/components/ProjectLibrary'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useDispatch, useSelector } from 'react-redux'
 import { setProjectList, selectProjectList, setActiveView } from '@/lib/utils/appStateSlice'
 import { setActiveProjectFromFragment } from '@/lib/utils/projectsSlice'
@@ -52,18 +44,10 @@ const Intro = (): JSX.Element => {
   return (
     <div className="flex flex-col items-center justify-center p-8 h-full">
       <h1 className="text-2xl font-bold mb-4">Welcome to Minstrel</h1>
-      <p className="text-gray-500 mb-2">
-        Start a new project or set your project directory to begin.
-      </p>
-      <ProjectLibrary
-        workingRootDirectory={settingsState?.workingRootDirectory || ''}
-        projects={projectList}
-        onProjectChange={handleProjectSelect}
-      />
+      <p className="text-gray-500 mb-2">Start a new project or set your project directory to begin.</p>
+      <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
 
-      <p className="text-gray-500 m-8">
-        Current project path: {settingsState?.workingRootDirectory || ''}
-      </p>
+      <p className="text-gray-500 m-8">Current project path: {settingsState?.workingRootDirectory || ''}</p>
       <div className="m-4">
         <Dialog>
           <DialogTrigger asChild>

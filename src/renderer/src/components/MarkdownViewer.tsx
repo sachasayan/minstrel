@@ -1,14 +1,7 @@
 import { MDXEditor, headingsPlugin, listsPlugin } from '@mdxeditor/editor'
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-import {
-  UndoRedo,
-  BoldItalicUnderlineToggles,
-  toolbarPlugin,
-  CreateLink,
-  BlockTypeSelect,
-  ListsToggle
-} from '@mdxeditor/editor'
+import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, CreateLink, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
 import type { JSX } from 'react'
 
@@ -43,12 +36,8 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
     <ScrollArea className="max-h-full rounded-md">
       {fileName ? (
         <>
-
           <MDXEditor
-            markdown={
-              projectState.activeProject?.files.find((file) => file.title == fileName)?.content ||
-              ''
-            }
+            markdown={projectState.activeProject?.files.find((file) => file.title == fileName)?.content || ''}
             onChange={handleContentChange}
             onError={handleError}
             plugins={[
@@ -69,7 +58,6 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
             ]}
             contentEditableClassName="prose"
           />
-
         </>
       ) : (
         <p className="text-center text-gray-500 mt-8">Select a file to view its content</p>

@@ -12,7 +12,7 @@ interface ChatState {
 }
 
 const initialState: ChatState = {
-  chatHistory: [{sender: 'Gemini', text: 'Hello there! Ask me anything about your story. I can help you build an outline, write a chapter, and more.'}],
+  chatHistory: [{ sender: 'Gemini', text: 'Hello there! Ask me anything about your story. I can help you build an outline, write a chapter, and more.' }],
   pendingChat: false
 }
 
@@ -24,12 +24,12 @@ const chatSlice = createSlice({
       state.chatHistory = action.payload
     },
     resolvePendingChat: (state) => {
-      state.pendingChat = false;
+      state.pendingChat = false
     },
     addChatMessage: (state, action: PayloadAction<ChatMessage>) => {
       //Chat messages are added to the end of the array
       if (action.payload.sender === 'User') {
-        state.pendingChat = true;
+        state.pendingChat = true
       }
       state.chatHistory.push(action.payload)
       if (state.chatHistory.length > 20) {

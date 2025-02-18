@@ -23,16 +23,8 @@ export default function LetterTorrent() {
   useEffect(() => {
     const initialLetters = Array.from({ length: LETTER_COUNT }, () => ({
       char: String.fromCharCode(65 + Math.floor(Math.random() * 26)),
-      position: new Vector3(
-        (Math.random() - 0.5) * RADIUS,
-        (Math.random() - 0.5) * HEIGHT,
-        (Math.random() - 0.5) * RADIUS
-      ),
-      rotation: new Vector3(
-        Math.random() * Math.PI,
-        Math.random() * Math.PI,
-        Math.random() * Math.PI
-      ),
+      position: new Vector3((Math.random() - 0.5) * RADIUS, (Math.random() - 0.5) * HEIGHT, (Math.random() - 0.5) * RADIUS),
+      rotation: new Vector3(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
       speed: Math.random() * 0.02 + 0.001
     }))
     setLetters(initialLetters)

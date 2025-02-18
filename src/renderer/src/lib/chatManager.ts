@@ -5,7 +5,7 @@ import { updateFile } from '@/lib/utils/projectsSlice'
 import { buildPrompt, buildInitial } from './promptBuilder'
 import { setActiveView, setActiveFile } from './utils/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
-import { toast } from 'sonner';
+import { toast } from 'sonner'
 
 export const initializeGeminiService = () => {
   const apiKey = store.getState().settings.apiKey
@@ -18,7 +18,7 @@ const parser = new XMLParser({
   ignoreAttributes: true,
   trimValues: true,
   isArray: (name, jpath) => {
-    return ( ['root.read_file'].includes(jpath)) ? true : false
+    return ['root.read_file'].includes(jpath) ? true : false
   }
 })
 
@@ -37,14 +37,10 @@ const processResponse = (responseString: string) => {
   }
 
   if (!!response?.read_file) {
-    const files = response.read_file
-      .map((item) => `[${item}]`)
-      .join(" ");
-    console.log(response.read_file);
-    store.dispatch(
-      addChatMessage({ sender: "Gemini", text: `Looking at files... ${files}` })
-    );
-    return response.read_file;
+    const files = response.read_file.map((item) => `[${item}]`).join(' ')
+    console.log(response.read_file)
+    store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files... ${files}` }))
+    return response.read_file
   }
 
   if (!!response.write_file) {
@@ -68,18 +64,16 @@ const processResponse = (responseString: string) => {
 
 export const sendMessage = async (dependencies?: string[], recursionDepth: number = 0) => {
   if (recursionDepth > 3) {
-    const errorMessage = "Error: Recursion depth exceeded in sendMessage.";
+    const errorMessage = 'Error: Recursion depth exceeded in sendMessage.'
     toast.error(errorMessage)
-    throw new Error(errorMessage);
+    throw new Error(errorMessage)
   }
 
   const prompt = buildPrompt(dependencies || null)
   try {
-
-
-  console.groupCollapsed('User Prompt')
-  console.log(prompt)
-  console.groupEnd()
+    console.groupCollapsed('User Prompt')
+    console.log(prompt)
+    console.groupEnd()
 
     const response = await geminiService.generateContent(prompt)
 
@@ -107,7 +101,7 @@ export const sendMessage = async (dependencies?: string[], recursionDepth: numbe
       await sendMessage(undefined, recursionDepth + 1)
     }
   } finally {
-    console.log("sendMessage() finished");
+    console.log('sendMessage() finished')
   }
 }
 
@@ -137,6 +131,6 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
       await sendMessage(undefined, 0)
     }
   } finally {
-    console.log("generateSkeleton() finished");
+    console.log('generateSkeleton() finished')
   }
 }

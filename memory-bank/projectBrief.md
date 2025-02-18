@@ -114,6 +114,7 @@ What follows is a sample flow between customer, service, and model. For brevity,
 <read_file>Chapter-2.md</read_file>
 <read_file>Chapter-3.md</read_file>
 <read_file>Chapter-4.md</read_file>
+
 <summary>I'm looking at the files.</summary>
 
 (Service processes model response, and then provides a response to the model with the context — Outline, Chapter 2, Chapter 3, and Chapter 4: )

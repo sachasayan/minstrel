@@ -51,13 +51,7 @@ export interface ExpertSuggestion {
 //   scenes: SceneOutline[]
 // }
 
-export type ActiveView =
-  | 'intro'
-  | 'wizard'
-  | 'project/outline'
-  | 'project/dashboard'
-  | 'project/editor'
-  | 'project/parameters'
+export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
 
 export type Genre =
   | 'dystopian-post-apocalyptic-climate-fiction'

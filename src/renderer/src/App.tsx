@@ -34,8 +34,7 @@ export default function App(): JSX.Element {
       setSettingsState({
         api: appSettings?.api || defaultSettings.api,
         apiKey: appSettings?.apiKey || defaultSettings.apiKey,
-        workingRootDirectory:
-          appSettings?.workingRootDirectory || defaultSettings.workingRootDirectory
+        workingRootDirectory: appSettings?.workingRootDirectory || defaultSettings.workingRootDirectory
       })
     )
   }
@@ -81,10 +80,7 @@ export default function App(): JSX.Element {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p>
-                Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to
-                Google AI Studio and sign into your Google Account. Find the blue button labelled
-              </p>
+              <p>Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to Google AI Studio and sign into your Google Account. Find the blue button labelled</p>
               <p>
                 {' '}
                 <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none data-[state=open]:bg-secondary/50 h-9 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] hover:bg-[#87a9ff]/80 w-fit">
@@ -96,10 +92,7 @@ export default function App(): JSX.Element {
             </div>
             <Settings />
           </div>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
-            onClick={() => setShowOnboarding(false)}
-          >
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4" onClick={() => setShowOnboarding(false)}>
             Got it!
           </button>
         </DialogContent>

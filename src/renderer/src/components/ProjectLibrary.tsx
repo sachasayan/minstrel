@@ -14,10 +14,7 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project, onClick }: ProjectCardProps): JSX.Element => {
   return (
-    <div
-      className="relative  rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none"
-      onClick={onClick}
-    >
+    <div className="relative  rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none" onClick={onClick}>
       <div className="relative" style={{ paddingTop: '175%' }}>
         {project === 'add' ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -28,9 +25,7 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps): JSX.Element => {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: !project?.cover
-                ? `url("/covers/${project?.genre}.png")`
-                : `url("/book-cover.png")`
+              backgroundImage: !project?.cover ? `url("/covers/${project?.genre}.png")` : `url("/book-cover.png")`
             }}
           >
             <div className="p-4 absolute bottom-0 left-0 right-0 bg-white">
@@ -53,11 +48,7 @@ const ProjectLibrary = ({ projects, onProjectChange }: ProjectLibraryProps): JSX
       <div className="container mx-auto ">
         <div className="flex flex-wrap flex-row justify-center gap-6 ">
           {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onClick={() => handleProjectSelect(project.id)}
-            />
+            <ProjectCard key={project.id} project={project} onClick={() => handleProjectSelect(project.id)} />
           ))}
           <ProjectCard key="add" project="add" onClick={() => handleProjectSelect('add')} />
         </div>

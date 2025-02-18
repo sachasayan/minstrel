@@ -108,21 +108,18 @@ END SYSTEM PROMPT
 BEGIN TASK PROMPT
 `
 
-
-
 const getUserPrompt = (prompt) => `${buffer}
 CURRENT USER PROMPT:
 
 ${prompt}
 `
 
-
 const getAvailableFiles = (files) => `${buffer}
 LIST OF AVAILABLE FILES:
 
-${files.join('\n') || "[THE USER DID NOT PROVIDE ANY FILES.]"}
+${files.join('\n') || '[THE USER DID NOT PROVIDE ANY FILES.]'}
 
-`;
+`
 
 const getFileContents = (item) => `${buffer}
 PROVIDED FILE CONTENTS:

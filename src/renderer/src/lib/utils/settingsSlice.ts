@@ -27,8 +27,7 @@ export const settingsSlice = createSlice({
   }
 })
 
-export const { setApi, setApiKey, setWorkingRootDirectory, setSettingsState } =
-  settingsSlice.actions
+export const { setApi, setApiKey, setWorkingRootDirectory, setSettingsState } = settingsSlice.actions
 
 export const selectSettingsState = (state: RootState) => state.settings
 

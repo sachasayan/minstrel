@@ -6,14 +6,7 @@ import { selectAppState } from '@/lib/utils/appStateSlice'
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import MarkdownViewer from '@/components/MarkdownViewer'
 import NovelDashboard from '@/components/NovelDashboard'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { selectProjects } from '@/lib/utils/projectsSlice'
@@ -28,12 +21,7 @@ const ProjectOverview = (): React.ReactNode => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-
-      if (
-        chatContainerRef.current &&
-        !chatContainerRef.current.contains(event.target as Node) &&
-        expanded
-      ) {
+      if (chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node) && expanded) {
         console.log('click outside')
         setExpanded(false)
       }
@@ -71,11 +59,7 @@ const ProjectOverview = (): React.ReactNode => {
             <MarkdownViewer
               key={appState.activeFile}
               fileName={appState.activeFile}
-              content={
-                projectState.activeProject?.files.find(
-                  (chapter) => chapter.title == appState.activeFile
-                )?.content || ''
-              }
+              content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''}
             />
           ) : appState.activeView == 'project/dashboard' ? (
             <NovelDashboard />

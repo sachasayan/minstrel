@@ -15,13 +15,7 @@ export const store = configureStore({
     projects: projectsReducer,
     chat: chatReducer
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().prepend(
-      appStateListeners.middleware,
-      projectListeners.middleware,
-      settingsListeners.middleware,
-      chatListeners.middleware
-    )
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(appStateListeners.middleware, projectListeners.middleware, settingsListeners.middleware, chatListeners.middleware)
 })
 
 export type RootState = ReturnType<typeof store.getState>

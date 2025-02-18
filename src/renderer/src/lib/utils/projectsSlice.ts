@@ -30,9 +30,7 @@ export const projectsSlice = createSlice({
     updateFile: (state, action: PayloadAction<{ fileName: string; fileContent: string }>) => {
       if (state.activeProject) {
         //Get position of this file in the files list
-        const chapterIndex = state.activeProject.files.findIndex(
-          (file) => file.title === action.payload.fileName
-        )
+        const chapterIndex = state.activeProject.files.findIndex((file) => file.title === action.payload.fileName)
         //If file exists, update it in the store
         if (chapterIndex !== -1) {
           state.activeProject.files[chapterIndex].content = action.payload.fileContent
@@ -51,24 +49,17 @@ export const projectsSlice = createSlice({
     },
     updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number }>) => {
       if (state.activeProject) {
-        state.activeProject.title = action.payload.title;
-        state.activeProject.genre = action.payload.genre;
-        state.activeProject.summary = action.payload.summary;
-        state.activeProject.year = action.payload.year;
-        state.activeProject.totalWordCount = action.payload.totalWordCount;
+        state.activeProject.title = action.payload.title
+        state.activeProject.genre = action.payload.genre
+        state.activeProject.summary = action.payload.summary
+        state.activeProject.year = action.payload.year
+        state.activeProject.totalWordCount = action.payload.totalWordCount
       }
-    },
+    }
   }
 })
 
-export const {
-  setActiveProject,
-  setActiveProjectFromFragment,
-  setProjectHasLiveEdits,
-  setAllFilesAsSaved,
-  updateFile,
-  updateParameters
-} = projectsSlice.actions
+export const { setActiveProject, setActiveProjectFromFragment, setProjectHasLiveEdits, setAllFilesAsSaved, updateFile, updateParameters } = projectsSlice.actions
 
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject

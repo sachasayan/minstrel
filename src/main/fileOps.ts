@@ -47,15 +47,15 @@ export const handleWriteFile = async (event, filePath, content) => {
 }
 
 export const handleMakeDirectory = async (event, dirPath) => {
-  const resolvedPath = dirPath.replace('~', homedir); // Resolve "~"
-  console.log('Making directory at:', resolvedPath);
-    try {
-      await fs.mkdir(resolvedPath, { recursive: true });
-      return { success: true };
-    } catch (error: unknown) {
-      console.error('Failed to create directory:', error);
-      return { success: false, error: String(error) };
-    }
+  const resolvedPath = dirPath.replace('~', homedir) // Resolve "~"
+  console.log('Making directory at:', resolvedPath)
+  try {
+    await fs.mkdir(resolvedPath, { recursive: true })
+    return { success: true }
+  } catch (error: unknown) {
+    console.error('Failed to create directory:', error)
+    return { success: false, error: String(error) }
+  }
 }
 
 export const registerFileOpsHandlers = () => {

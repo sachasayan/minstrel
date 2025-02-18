@@ -3,13 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Genre } from '@/types'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectActiveProject, updateParameters } from '@/lib/utils/projectsSlice'
 import type { RootState } from '@/lib/utils/store'
@@ -21,24 +15,25 @@ const ProjectParameters = () => {
 
   const [title, setTitle] = useState(activeProject?.title || '')
   const [genre, setGenre] = useState<Genre>(activeProject?.genre || 'science-fiction')
-  const [summary, setSummary] = useState(activeProject?.summary || '');
-  const [year, setYear] = useState(activeProject?.year || 0);
-  const [totalWordCount, setTotalWordCount] = useState(activeProject?.totalWordCount || 0);
-
+  const [summary, setSummary] = useState(activeProject?.summary || '')
+  const [year, setYear] = useState(activeProject?.year || 0)
+  const [totalWordCount, setTotalWordCount] = useState(activeProject?.totalWordCount || 0)
 
   const handleSave = async () => {
     if (activeProject) {
-      dispatch(updateParameters({
-        title,
-        genre,
-        summary,
-        year,
-        totalWordCount
-      }))
+      dispatch(
+        updateParameters({
+          title,
+          genre,
+          summary,
+          year,
+          totalWordCount
+        })
+      )
       // Provide some user feedback that the save was successful.
-      toast.success("Project parameters saved successfully!");
+      toast.success('Project parameters saved successfully!')
     }
-  };
+  }
 
   return (
     <div className="p-4">
@@ -47,11 +42,7 @@ const ProjectParameters = () => {
         <>
           <div className="mb-4">
             <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="mb-4">
             <Label htmlFor="genre">Genre</Label>
@@ -106,38 +97,23 @@ const ProjectParameters = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="summary">Summary</Label>
-            <textarea
-              id="summary"
-              className="w-full border rounded p-2"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-            />
+            <textarea id="summary" className="w-full border rounded p-2" value={summary} onChange={(e) => setSummary(e.target.value)} />
           </div>
           <div className="mb-4">
             <Label htmlFor="year">Year</Label>
-            <Input
-              id="year"
-              type="number"
-              value={year}
-              onChange={(e) => setYear(parseInt(e.target.value, 10))}
-            />
+            <Input id="year" type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value, 10))} />
           </div>
           <div className="mb-4">
             <Label htmlFor="totalWordCount">Total Word Count</Label>
-            <Input
-              id="totalWordCount"
-              type="number"
-              value={totalWordCount}
-              onChange={(e) => setTotalWordCount(parseInt(e.target.value, 10))}
-            />
+            <Input id="totalWordCount" type="number" value={totalWordCount} onChange={(e) => setTotalWordCount(parseInt(e.target.value, 10))} />
           </div>
-          <Button onClick={handleSave} >Save</Button>
+          <Button onClick={handleSave}>Save</Button>
         </>
       ) : (
         <p>Loading project parameters...</p>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ProjectParameters;
+export default ProjectParameters

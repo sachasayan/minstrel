@@ -7,14 +7,10 @@ import { Button } from './ui/button'
 const Settings = (): JSX.Element => {
   const apiStoreValue = useSelector((state: RootState) => state.settings?.api ?? '')
   const apiKeyStoreValue = useSelector((state: RootState) => state.settings?.apiKey ?? '')
-  const workingRootDirectoryStoreValue = useSelector(
-    (state: RootState) => state.settings?.workingRootDirectory ?? ''
-  )
+  const workingRootDirectoryStoreValue = useSelector((state: RootState) => state.settings?.workingRootDirectory ?? '')
   const [apiValue, setApiValue] = useState<string>(apiStoreValue || '')
   const [apiKeyValue, setApiKeyValue] = useState<string>(apiKeyStoreValue || '')
-  const [workingRootDirectoryValue, setWorkingRootDirectoryValue] = useState<string>(
-    workingRootDirectoryStoreValue || ''
-  )
+  const [workingRootDirectoryValue, setWorkingRootDirectoryValue] = useState<string>(workingRootDirectoryStoreValue || '')
   const dispatch = useDispatch<AppDispatch>()
 
   const loadSettings = async () => {
@@ -65,10 +61,7 @@ const Settings = (): JSX.Element => {
         />
       </div>
       <div>
-        <label
-          htmlFor="workingRootDirectory"
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
+        <label htmlFor="workingRootDirectory" className="block text-gray-700 text-sm font-bold mb-2">
           Project Path
         </label>
         <input

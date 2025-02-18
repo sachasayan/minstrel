@@ -4,7 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
 /* Define base values. */
 :root {
   --background: hsl(0 0% 100%);
@@ -46,8 +45,6 @@
   --sidebar: hsl(0 0% 98%);
 }
 
-
-
 .dark {
   --background: hsl(240 10% 3.9%);
   --foreground: hsl(0 0% 98%);
@@ -83,7 +80,6 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --sidebar: hsl(240 5.9% 10%);
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -124,12 +120,9 @@
   --color-sidebar: var(--sidebar-background);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-
 }
 
-
 @layer base {
-
   * {
     @apply border-border;
   }
@@ -138,7 +131,6 @@
     @apply bg-background text-foreground;
   }
 
-
   * {
     @apply border-border outline-ring/50;
   }
@@ -146,7 +138,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
 
   :not(input):not(textarea),
   :not(input):not(textarea)::after,
