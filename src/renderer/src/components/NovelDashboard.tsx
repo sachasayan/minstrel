@@ -218,7 +218,7 @@ export default function NovelDashboard() {
       </Card>
 
       {/* Expert Suggestions */}
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Expert Suggestions</CardTitle>
           <CardDescription>
@@ -227,10 +227,10 @@ export default function NovelDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {expertSuggestions.map((suggestion, index) => (
+            {activeProject?.expertSuggestions.map((suggestion, index) => (
               <Card key={index}>
                 <CardHeader>
-                  <CardTitle>{suggestion.expert</CardTitle>
+                  <CardTitle>{suggestion.expert}</CardTitle>
                   <CardDescription>{suggestion.publication}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -241,7 +241,7 @@ export default function NovelDashboard() {
             ))}
           </div>
         </CardContent>
-      </Card> */}
+      </Card>
     </div>
   );
 }
