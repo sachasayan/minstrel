@@ -12,15 +12,15 @@
     - [x] Implement service logic to send the skeleton to the model
     - [x] Implement model logic to generate a story outline
     - [x] Display the outline in the UI
-- [ ] **Chapter Generation** (UNFINISHED)
+- [x] **Chapter Generation** (Partially Complete)
+    - [x] Implement service logic to send the outline and previous chapter to the model
+    - [x] Implement model logic to generate a chapter
     - [ ] Implement UI to trigger chapter generation
-    - [ ] Implement service logic to send the outline and previous chapter to the model
-    - [ ] Implement model logic to generate a chapter
     - [ ] Display the chapter in the UI
 - [ ] **Critique Generation** (UNFINISHED)
+    - [x] Implement service logic to send all chapters to the model
+    - [x] Implement model logic to generate a critique
     - [ ] Implement UI to trigger critique generation
-    - [ ] Implement service logic to send all chapters to the model
-    - [ ] Implement model logic to generate a critique
     - [ ] Display the critique in the UI
 
 ### Phase 2: UI/UX Improvements

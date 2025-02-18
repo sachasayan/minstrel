@@ -13,52 +13,15 @@ This document outlines additional improvements to the prompt in `src/renderer/sr
 
 1.  **Tool Descriptions:**
 
-    *   **`write_file`:** Add that it overwrites existing files.
-    *   **`get_context`:** Emphasize that it returns the *entire* file content.
-
-    Updated tool definitions:
-
-    ```
-    AVAILABLE TOOLS:
-
-    \`\`\`xml
-    <write_file>
-      <file_name>{file_name}</file_name>
-      <content>{file_content}</content>
-    </write_file>
-    \`\`\`
-    Description: Writes the provided content to the specified file. **Overwrites the file if it already exists.**
-
-    \`\`\`xml
-    <get_context>{file_name}</get_context>
-    \`\`\`
-    Description: Requests the **full** content of the specified file as context. This tool can be used multiple times in a single response to request multiple files.
-    ```
+    *   The tool descriptions for `write_file` and `get_context` are already detailed in `src/renderer/src/lib/prompts.ts`.
 
 2.  **Error Handling:**
 
-    Add a section on error handling:
-
-    ```
-    ERROR HANDLING:
-
-    If an error occurs (e.g., a requested file doesn't exist, or a write operation fails), report the error in the `<summary>` section. Do not attempt to proceed with the task if a critical error occurs.
-    ```
+    *   Error handling instructions are already included in `src/renderer/src/lib/prompts.ts`.
 
 3.  **Limitations:**
 
-    Add a section on limitations (placeholders for now, need to confirm actual limitations):
+    *   A limitations section exists in `src/renderer/src/lib/prompts.ts`, specifying a 20,000 character limit for `write_file` and restricting file types to Markdown (.md).
 
-    ```
-    LIMITATIONS:
-
-    *   Maximum file size for `write_file`: [TODO: Determine limit]
-    *   Maximum file size for `get_context`: [TODO: Determine limit]
-    *  File types: Only Markdown (.md) files are supported.
-    ```
-4. **Chat History:**
-    * Add to CONTEXT section: "The chat history between the user and Minstrel is also available as context."
-
-## Next Steps
-
-1.  Implement these changes in `src/renderer/src/lib/prompts.ts`.
+4.  **Chat History:**
+    *   Chat history is already included as part of the context in `src/renderer/src/lib/prompts.ts`.

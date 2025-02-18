@@ -1,0 +1,28 @@
+{
+    "title": "Science Station 2",
+    "genre": "science-fiction",
+    "summary": "A series of short stories set on a space station on the edge of explored space, facing unknown cosmic threats.",
+    "author": "Sacha",
+    "year": 2020,
+    "totalWordCount": 80000,
+    "criticSuggestions": [
+        {
+            "critic": "Alice Johnson",
+            "publication": "Literary Insights",
+            "rating": 4.5,
+            "comment": "A captivating tale that weaves magic and words beautifully. The character development of Aria is particularly strong, but the pacing in the middle chapters could be tightened."
+        },
+        {
+            "critic": "Michael Chen",
+            "publication": "Fantasy Frontier",
+            "rating": 4.0,
+            "comment": "The world-building is exceptional, creating a unique magic system around the power of words. However, some secondary characters feel underdeveloped and could benefit from more depth."
+        },
+        {
+            "critic": "Sophia Rodriguez",
+            "publication": "The Quill Review",
+            "rating": 4.8,
+            "comment": "A masterful blend of fantasy and linguistic artistry. The plot twists are unexpected and delightful. Consider expanding on the historical context of the word-weaver conflict for even richer lore."
+        }
+    ]
+}
