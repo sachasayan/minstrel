@@ -123,22 +123,14 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(
           className={`z-1 bg-white shadow-lg rounded-lg border flex flex-col transition-[max-height,max-width, width, height] duration-500 ease-in-out right-0 bottom-0 absolute overflow-hidden ${expanded ? 'max-h-[500px] max-w-[320px] h-96 w-80' : 'max-h-10 max-w-10 h-10 w-10'
             }`}
         >
-          <button
-            onClick={toggleExpanded}
-            className={
-              'text-gray-500 hover:text-gray-700 transition-transform absolute top-2 right-2 m-4 rounded-lg bg-white border-2'
-            }
-          >
-            <ChevronDown />
-          </button>
 
           <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
             {chatHistory.map((msg, index) => (
               <div
                 key={index}
                 className={`mb-2 p-2 rounded-lg ${msg.sender === 'User'
-                    ? 'bg-gray-200 text-left ml-8'
-                    : 'bg-black text-white text-right mr-8'
+                  ? 'bg-gray-200 text-left ml-8'
+                  : 'bg-black text-white text-right mr-8'
                   }`}
                 ref={index === chatHistory.length - 1 ? lastMessageRef : null}
               >
