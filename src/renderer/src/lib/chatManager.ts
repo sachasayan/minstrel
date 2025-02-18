@@ -75,9 +75,17 @@ export const sendMessage = async (dependencies?: string[], recursionDepth: numbe
 
   const prompt = buildPrompt(dependencies || null)
   try {
-    console.log('User prompt: \n \n', prompt)
+
+
+  console.groupCollapsed('User Prompt')
+  console.log(prompt)
+  console.groupEnd()
+
     const response = await geminiService.generateContent(prompt)
 
+    console.groupCollapsed('AI Response')
+    console.log(response)
+    console.groupEnd()
     console.log('AI Response: \n \n', response)
     const contextRequested = processResponse(response)
     store.dispatch(resolvePendingChat())

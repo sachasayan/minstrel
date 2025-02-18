@@ -8,7 +8,7 @@
     *   **TailwindCSS:** Utility-first CSS framework.
     *   **Electron:** Framework for building cross-platform desktop applications with web technologies.
     *   **ShadCN UI:** UI component library.
-    *   **Lucide React:** Icon library.
+    *   **Lucide React:** Icon library
     *   **Recharts:** Charting library.
     *   **MDXEditor:** Markdown editor component.
 *   **State Management:**
@@ -31,4 +31,8 @@ The project's dependencies are managed using `npm`. Key dependencies are listed 
 
 ## Testing
 
-Mock projects for testing are located in the `mock-projects` folder.
+Mock projects for testing are located in the `mock-projects` folder. The available mock projects are:
+
+*   Romance Island
+*   Science Station 2
+*   Western 3

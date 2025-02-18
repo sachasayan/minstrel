@@ -15,7 +15,7 @@ In the rugged frontier town of Redemption, a hardened bounty hunter, known only 
 
 Redemption, a dusty and lawless frontier town in the American West.
 
-## Chapter Outlines ( अंदाजित )
+## Chapter Outlines
 
 *   **Chapter 1:** The Stranger arrives in Redemption.
 *   **Chapter 2:** The Stranger learns about Sheriff Barlow's corruption.

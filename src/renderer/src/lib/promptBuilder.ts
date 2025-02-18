@@ -39,8 +39,6 @@ export const buildInitial = (parameters: object): string => {
   let prompt = prompts.getBasePrompt()
 
   prompt += prompts.getParameters(parameters)
-  console.log(prompt)
-
   return prompt
 }
 
@@ -56,7 +54,5 @@ export const buildPrompt = (requestedFiles?: string[] | null): string => {
     // Get the context items for the given dependencies
     prompt += prompts.getContext(getFileContents(requestedFiles))
   }
-
-
   return prompt;
 };
