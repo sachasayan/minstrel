@@ -87,6 +87,16 @@ export default function NovelDashboard() {
       {/* <h1 className="text-3xl font-bold mb-6">{novelData.title} - Dashboard</h1> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className='md:col-span-2 '>
+          <CardHeader>
+            <CardTitle>Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            Looks like you're on a streak!
+          </CardContent>
+        </Card>
+
+
         {/* Novel Summary */}
         <Card>
           <CardHeader>
@@ -145,103 +155,104 @@ export default function NovelDashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Character Mentions per Chapter */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Character Mentions per Chapter</CardTitle>
-          <CardDescription>
-            Stacked bar graph showing mentions of each character per chapter
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {activeProject ? (
-            <ChartContainer
-              style={{ aspectRatio: 'auto' }}
-              config={extractCharactersFromOutline(
-                activeProject.files.find((file) => file.title === 'Outline.md')?.content || ''
-              ).reduce((acc, char) => {
-                acc[char.name] = {
-                  label: char.name,
-                };
-                return acc;
-              }, {})}
-              className="h-[400px]"
-            >
-              <BarChart
-                data={activeProject.files
-                  .filter((file) => file.title.startsWith('Chapter-'))
-                  .map((file) => {
-                    const chapterData: { [key: string]: number | string } = {
-                      chapter: file.title,
-                      wordCount: file.content.split(/\s+/).length,
-                    };
-                    const characters = extractCharactersFromOutline(
-                      activeProject.files.find((f) => f.title === 'Outline.md')?.content || ''
-                    );
-                    characters.forEach((char, index) => {
-                      const regex = new RegExp(`\\b${char.name}\\b`, 'gi');
-                      chapterData[char.name] = (file.content.match(regex) || []).length;
-                      chapterData[`${char.name}_color`] = colors[index % colors.length]; // Store color
-                    });
-                    return chapterData;
-                  })}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="chapter"
-                  tickFormatter={(tick: string) => {
-                    const match = tick.match(/(\d+)/);
-                    return match ? match[1] : tick;
-                  }}
-                />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Legend />
-                {extractCharactersFromOutline(
+
+        {/* Character Mentions per Chapter */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Character Mentions per Chapter</CardTitle>
+            <CardDescription>
+              Stacked bar graph showing mentions of each character per chapter
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activeProject ? (
+              <ChartContainer
+                style={{ aspectRatio: 'auto' }}
+                config={extractCharactersFromOutline(
                   activeProject.files.find((file) => file.title === 'Outline.md')?.content || ''
-                ).map((character, index) => (
-                  <Bar
-                    key={character.name}
-                    dataKey={character.name}
-                    stackId="a"
-                    fill={colors[index % colors.length]}
+                ).reduce((acc, char) => {
+                  acc[char.name] = {
+                    label: char.name,
+                  };
+                  return acc;
+                }, {})}
+                className="h-[400px]"
+              >
+                <BarChart
+                  data={activeProject.files
+                    .filter((file) => file.title.startsWith('Chapter-'))
+                    .map((file) => {
+                      const chapterData: { [key: string]: number | string } = {
+                        chapter: file.title,
+                        wordCount: file.content.split(/\s+/).length,
+                      };
+                      const characters = extractCharactersFromOutline(
+                        activeProject.files.find((f) => f.title === 'Outline.md')?.content || ''
+                      );
+                      characters.forEach((char, index) => {
+                        const regex = new RegExp(`\\b${char.name}\\b`, 'gi');
+                        chapterData[char.name] = (file.content.match(regex) || []).length;
+                        chapterData[`${char.name}_color`] = colors[index % colors.length]; // Store color
+                      });
+                      return chapterData;
+                    })}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="chapter"
+                    tickFormatter={(tick: string) => {
+                      const match = tick.match(/(\d+)/);
+                      return match ? match[1] : tick;
+                    }}
                   />
-                ))}
-              </BarChart>
-            </ChartContainer>
-          ) : (
-            <p>No active project data available.</p>
-          )}
-        </CardContent>
-      </Card>
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend />
+                  {extractCharactersFromOutline(
+                    activeProject.files.find((file) => file.title === 'Outline.md')?.content || ''
+                  ).map((character, index) => (
+                    <Bar
+                      key={character.name}
+                      dataKey={character.name}
+                      stackId="a"
+                      fill={colors[index % colors.length]}
+                    />
+                  ))}
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <p>No active project data available.</p>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Expert Suggestions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Expert Suggestions</CardTitle>
-          <CardDescription>
-            Feedback and improvement suggestions from literary experts
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {activeProject?.expertSuggestions.map((suggestion, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle>{suggestion.expert}</CardTitle>
-                  <CardDescription>{suggestion.publication}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <StarRating rating={suggestion.rating} />
-                  <p className="mt-2 text-sm text-muted-foreground">{suggestion.comment}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        {/* Expert Suggestions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Expert Suggestions</CardTitle>
+            <CardDescription>
+              Feedback and improvement suggestions from literary experts
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {activeProject?.expertSuggestions.map((suggestion, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle>{suggestion.expert}</CardTitle>
+                    <CardDescription>{suggestion.publication}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <StarRating rating={suggestion.rating} />
+                    <p className="mt-2 text-sm text-muted-foreground">{suggestion.comment}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
