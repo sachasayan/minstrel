@@ -18,7 +18,7 @@ const parser = new XMLParser({
   ignoreAttributes: true,
   trimValues: true,
   isArray: (name, jpath) => {
-    return ( ['root.get_context'].includes(jpath)) ? true : false
+    return ( ['root.read_file'].includes(jpath)) ? true : false
   }
 })
 
@@ -28,7 +28,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // Parse the response and extract the relevant information
 // Add the summary to the chat history
 // Take action with tools: Update the relevant files with the new content, etc.
-// If context was requested, send a new response with context
+// If files were requested, send a new response with file contents
 const processResponse = (responseString: string) => {
   const response = parser.parse(`<root>${responseString}</root>`).root
 
@@ -36,15 +36,15 @@ const processResponse = (responseString: string) => {
     console.log(response.think)
   }
 
-  if (!!response?.get_context) {
-    const files = response.get_context
+  if (!!response?.read_file) {
+    const files = response.read_file
       .map((item) => `[${item}]`)
       .join(" ");
-    console.log(response.get_context);
+    console.log(response.read_file);
     store.dispatch(
       addChatMessage({ sender: "Gemini", text: `Looking at files... ${files}` })
     );
-    return response.get_context;
+    return response.read_file;
   }
 
   if (!!response.write_file) {
@@ -87,10 +87,10 @@ export const sendMessage = async (dependencies?: string[], recursionDepth: numbe
     console.log(response)
     console.groupEnd()
     console.log('AI Response: \n \n', response)
-    const contextRequested = processResponse(response)
+    const filesRequested = processResponse(response)
     store.dispatch(resolvePendingChat())
-    if (!!contextRequested) {
-      await sendMessage(contextRequested, recursionDepth + 1)
+    if (!!filesRequested) {
+      await sendMessage(filesRequested, recursionDepth + 1)
     }
   } catch (error) {
     console.error('Failed to send chat message:', error)
@@ -117,10 +117,10 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     const response = await geminiService.generateContent(prompt)
 
     console.log('AI Response: \n \n', response)
-    const contextRequested = processResponse(response)
+    const filesRequested = processResponse(response)
     store.dispatch(resolvePendingChat())
-    if (!!contextRequested) {
-      await sendMessage(contextRequested, 0)
+    if (!!filesRequested) {
+      await sendMessage(filesRequested, 0)
     }
   } catch (error) {
     console.error('Failed to send chat message:', error)

@@ -17,7 +17,7 @@ IMPORTANT RULES:
 *   You must output ONLY within XML tags at the top level of your response.
 *   You must use Markdown (within the relevant XML tag) as your syntax when writing files such as \`Skeleton.md\`, \`Outline.md\`, and \`Chapter-1.md\`.
 *   You must always begin with a \`<think>\` section, briefly explaining what you understand to be the current intent. This is hidden from the user, but used for debugging.
-*   If you think you are being asked to write to a file, you must first request that file's context using the <get_context> tool if it hasn't been provided.
+*   If you think you are being asked to write to a file, you must first request that file's contents using the <read_file> tool.
 *   You must always end with a \`<summary>\` section, briefly explaining the actions you have performed to the user in first person, such as: "I've written Chapter 3."
 
 ====
@@ -33,9 +33,9 @@ AVAILABLE TOOLS:
 Description: Writes the provided content to the specified file. **Overwrites the file if it already exists.**
 
 \`\`\`xml
-<get_context>{file_name}</get_context>
+<read_file>{file_name}</read_file>
 \`\`\`
-Description: Requests the **full** content of the specified file as context. This tool can be used multiple times in a single response to request multiple files.
+Description: Requests the **full** contents of the specified file. This tool can be used multiple times in a single response to request multiple files.
 
 ====
 
@@ -52,9 +52,9 @@ If an error occurs (e.g., a requested file doesn't exist, or a write operation f
 
 ====
 
-CONTEXT:
+FILE CONTENTS:
 
-Context consists of the *full* content of files relevant to the current task. If no specific files are requested, a list of available files will be provided. The chat history between the user and Minstrel is also available as context.
+Consists of the *full* content of files relevant to the current task. If no specific files are requested, a list of available files will be provided.
 
 *   **Skeleton:** For the initial skeleton generation, a special prompt is used that includes the story parameters provided by the user.
 *   **Outline:** Contents of \`Skeleton.md\`.
@@ -75,18 +75,18 @@ TASK DEFINITIONS:
 Example response to the user:
 
     \`\`\`xml
-    <think>The user wants to rewrite Chapter 3 and 4. I need the content of Outline.md, Chapter-2.md, Chapter-3.md, and Chapter-4.md.</think>
-    <get_context>Outline.md</get_context>
-    <get_context>Chapter-2.md</get_context>
-    <get_context>Chapter-3.md</get_context>
-    <get_context>Chapter-4.md</get_context>
+    <think>The user wants to rewrite Chapter 3 and 4. I need to read Outline.md, Chapter-2.md, Chapter-3.md, and Chapter-4.md.</think>
+    <read_file>Outline.md</read_file>
+    <read_file>Chapter-2.md</read_file>
+    <read_file>Chapter-3.md</read_file>
+    <read_file>Chapter-4.md</read_file>
     <summary>I'm requesting the necessary files to rewrite Chapters 3 and 4.</summary>
     \`\`\`
 
-    (Later, after receiving the context)
+    (Later, after receiving the files)
 
     \`\`\`xml
-    <think>I have the context needed to rewrite Chapters 3 and 4.</think>
+    <think>I have the files needed to rewrite Chapters 3 and 4.</think>
     <write_file>
       <file_name>Chapter-3.md</file_name>
       <content>
@@ -124,8 +124,8 @@ ${files.join('\n') || "[THE USER DID NOT PROVIDE ANY FILES.]"}
 
 `;
 
-const getContext = (item) => `${buffer}
-PROVIDED CONTEXT:
+const getFileContents = (item) => `${buffer}
+PROVIDED FILE CONTENTS:
 
 ${item}
 
@@ -146,7 +146,7 @@ ${JSON.stringify(parameters, null, 2)}
 export const prompts = {
   getAvailableFiles,
   getBasePrompt,
-  getContext,
+  getFileContents,
   getChatHistory,
   getUserPrompt,
   getParameters

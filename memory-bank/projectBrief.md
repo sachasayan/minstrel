@@ -45,7 +45,7 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 - The model must output ONLY within XML tags at the top level of its response.
 - The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton.md, Outline.md, and Chapter-1.md
 - The model must always begin with a <think> section, briefly explaining what it understands to be the current intent. This is hidden from the customer, but used for debugging.
-- If the model thinks it is being asked to write to a file, it must first <get_context> for that file if it hasn't been provided.
+- If the model thinks it is being asked to write to a file, it must first <read_file> for that file if it hasn't been provided.
 - The model can use tools like <write_file> to perform actions via the service.
 - The model must always end with a <summary> section, briefly explaining the actions it has performed to the customer in first person, such as: "I've written Chapter 3."
 
@@ -110,16 +110,16 @@ What follows is a sample flow between customer, service, and model. For brevity,
 (Model receives prompt from service, and provides a response:)
 
 <think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant file tree.</think>
-<get_context>Outline.md</get_context>
-<get_context>Chapter-2.md</get_context>
-<get_context>Chapter-3.md</get_context>
-<get_context>Chapter-4.md</get_context>
+<read_file>Outline.md</read_file>
+<read_file>Chapter-2.md</read_file>
+<read_file>Chapter-3.md</read_file>
+<read_file>Chapter-4.md</read_file>
 <summary>I'm looking at the files.</summary>
 
 (Service processes model response, and then provides a response to the model with the context — Outline, Chapter 2, Chapter 3, and Chapter 4: )
 
 {BASE_PROMPT}
-{FILE_CONTEXT}
+{FILE_CONTENTS}
 {MESSAGE_FROM_USER}
 
 (Model now has context, and provides a response:)

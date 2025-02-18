@@ -10,22 +10,20 @@ export const getAvailableFiles = (): string[] => {
 
 // Gets contents of all the given files as a string
 export const getFileContents = (dependencies: string[]): string => {
-  // Get each file as a context item
+  // Get each file as a ontent item
   const activeProject = store.getState().projects.activeProject
-  const context: string =
+  const files: string =
     activeProject?.files
       .filter((f) => dependencies.includes(f.title))
       .map(
         (file) => `
-    ---
-    file: ${file.title}
-    content:
-    ${file.content}
-    `
-      )
-      .join('\n') || ''
+<file title="${file.title}">
+${file.content}
+</file>
 
-  return context
+`).join('\n') || ''
+
+  return files
 }
 
 export const getLatestUserMesage = (): string => {
@@ -51,8 +49,8 @@ export const buildPrompt = (requestedFiles?: string[] | null): string => {
   prompt += prompts.getAvailableFiles(getAvailableFiles());
 
   if (requestedFiles) {
-    // Get the context items for the given dependencies
-    prompt += prompts.getContext(getFileContents(requestedFiles))
+    // Get the contents for the given dependencies
+    prompt += prompts.getFileContents(getFileContents(requestedFiles))
   }
   return prompt;
 };
