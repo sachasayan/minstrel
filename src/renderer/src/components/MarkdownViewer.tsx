@@ -33,10 +33,11 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
   }
 
   return (
-    <ScrollArea className="max-h-full rounded-md">
+    <div className="relative max-h-full rounded-md">
       {fileName ? (
         <>
           <MDXEditor
+            className='h-full'
             markdown={projectState.activeProject?.files.find((file) => file.title == fileName)?.content || ''}
             onChange={handleContentChange}
             onError={handleError}
@@ -62,6 +63,6 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
       ) : (
         <p className="text-center text-gray-500 mt-8">Select a file to view its content</p>
       )}
-    </ScrollArea>
+    </div>
   )
 }
