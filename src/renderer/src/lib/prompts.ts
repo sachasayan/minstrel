@@ -58,8 +58,7 @@ ${hr}
 
 # SPECIAL TASKS:
 
-* For each special task, with your <think> tool, determine which files are needed for the current task. Consider whether you already have the necessary information, or if you need to read files.
-* If you determine that you need to read files, use the <read_file> tool to request only the files that are missing from your current context window. Do not request files unnecessarily. If you have the full content of the needed file(s) in your context window, do not use the <read_file> tool.
+* For each special task, with your <think> tool, determine which files are needed for the current task. Consider whether you already have the necessary information, or if you need to use the <read_file> tool.
 * If you have have already been provided the needed files, proceed with the task.
 * If you are in a sequence, don't forget to use <read_file> for any files needed for the next step.
 
@@ -71,14 +70,14 @@ ${hr}
 * The skeleton should always be written in Markdown and saved in a file called "Skeleton.md".
 
 ## OUTLINE
-* Needs: 'Skeleton.md'
+* Needs the skeleton.
 * Based on the skeleton, expand the story into a full outline.
 * This outline should include detailed character descriptions, environment descriptions, sub-threads, scene-by-scene plans for each chapter, and visual descriptions of any key objects.
 * It may also include notes on twists, storytelling devices, character developments, and more.
 * The outline should always be written in Markdown and saved in a file called "Outline.md".
 
 ## CHAPTER
-* Needs: 'Outline.md', the previous content of the chapter to be written (if it exists), and the content of the chapter before this one (if it exists). If these files are not provided, request them.
+* Needs the outline, the previous content of the chapter to be written (if it exists), and the content of the chapter before this one (if it exists).
 * Write a chapter of the story, respecting the Outline description of that chapter, any described scenes, and the target word length.
 * If no chapter was specified by the user, write the earliest chapter of the story which hasn't been written yet, but which is listed in the Outline.
 * If the user requests a chapter rewrite for a chapter in the case where a previous chapter has not yet been written, politely decline and ask them to write the previous chapter.
@@ -135,12 +134,12 @@ BEGIN TASK PROMPT
 
 //CURRENT TASK + STATE //
 const getAvailableFiles = (files) => `${hr}\n# DIRECTORY LISTING: FILES IN PROJECT:\n\n${files.join('\n') || '(The user did not provide a listing of files in this project.)'}`
-const getProvidedFiles = (files) => `${hr}\n# PROVIDED FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}`
-const getFileContents = (item) => `${hr}\n# PROVIDED FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}`
+const getProvidedFiles = (files) => `${hr}\n# ACTIVE FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}`
+const getFileContents = (item) => `${hr}\n# ACTIVE FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}`
 const getUserPrompt = (prompt) => `${hr}\n# CURRENT TASK FROM USER: \n\n${prompt}\n`
 
 // STORYLINE PARAMTERS ONLY USED FOR THE INITIAL BUILD//
-const getParameters = (parameters) => `${hr}\n\n# STORYLINE PARAMETERS:\n\n${JSON.stringify(parameters, null, 2)}`
+const getParameters = (parameters) => `${hr}\n\n# PARAMETERS FOR THE SKELETON:\n\n${JSON.stringify(parameters, null, 2)}`
 
 // EXTRA META INCL CONTEXT //
 const getCurrentStep = (currentStep) => `\n# CURRENT STEP: \n\n${currentStep}\n`

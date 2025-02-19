@@ -35,9 +35,6 @@ ${file.content}
 
 
 
-
-
-
 `
       )
       .join('\n') || ''
