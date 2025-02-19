@@ -51,6 +51,12 @@ export interface ExpertSuggestion {
 //   scenes: SceneOutline[]
 // }
 
+export interface RequestContext {
+  currentStep: number
+  sequenceInfo?: string
+  requestedFiles?: string[]
+}
+
 export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
 
 export type Genre =

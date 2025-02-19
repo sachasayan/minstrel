@@ -6,6 +6,8 @@ import { buildPrompt, buildInitial } from './promptBuilder'
 import { setActiveView, setActiveFile } from './utils/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
+import { RequestContext } from '@/types'
+import { current } from '@reduxjs/toolkit'
 
 export const initializeGeminiService = () => {
   const apiKey = store.getState().settings.apiKey
@@ -31,16 +33,19 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // If files were requested, send a new response with file contents
 const processResponse = (responseString: string) => {
   const response = parser.parse(`<root>${responseString}</root>`).root
+  const context : RequestContext = {
+    currentStep: 0,
+  }
 
   if (!!response.think) {
     console.log(response.think)
   }
 
   if (!!response?.read_file) {
-    const files = response.read_file.map((item) => `[${item}]`).join(' ')
+    const files = response.read_file.map((item) => `${item}`).join(' ')
     console.log(response.read_file)
     store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files... ${files}` }))
-    return response.read_file
+    context.requestedFiles = response.read_file
   }
 
   if (!!response.write_file) {
@@ -55,21 +60,31 @@ const processResponse = (responseString: string) => {
     }
   }
 
+
+  // Check for the presence of the sequence tag
+  if (!!response.sequence) {
+    context.sequenceInfo = response.sequence.sequence
+  }
+
   if (!!response.summary) {
     store.dispatch(addChatMessage({ sender: 'Gemini', text: response.summary }))
   }
 
-  return
+  return context
 }
+// Make sure we are setting recursionDepth in sendMessage
+export const sendMessage = async (context: RequestContext) => {
 
-export const sendMessage = async (dependencies?: string[], recursionDepth: number = 0) => {
-  if (recursionDepth > 3) {
+  if (context.currentStep > 3) {
     const errorMessage = 'Error: Recursion depth exceeded in sendMessage.'
     toast.error(errorMessage)
     throw new Error(errorMessage)
   }
 
-  const prompt = buildPrompt(dependencies || null)
+  const prompt = buildPrompt({
+    ...context,
+    currentStep: context.currentStep || 0
+  })
   try {
     console.groupCollapsed('User Prompt')
     console.log(prompt)
@@ -81,10 +96,13 @@ export const sendMessage = async (dependencies?: string[], recursionDepth: numbe
     console.log(response)
     console.groupEnd()
     console.log('AI Response: \n \n', response)
-    const filesRequested = processResponse(response)
+    const newContext = processResponse(response)
     store.dispatch(resolvePendingChat())
-    if (!!filesRequested) {
-      await sendMessage(filesRequested, recursionDepth + 1)
+    if (!!newContext.requestedFiles || !!newContext.sequenceInfo) {
+      await sendMessage({
+        ...context,
+        currentStep: context.currentStep + 1
+      })
     }
   } catch (error) {
     console.error('Failed to send chat message:', error)
@@ -98,7 +116,10 @@ export const sendMessage = async (dependencies?: string[], recursionDepth: numbe
     if (errorMessage.includes('resource exhausted')) {
       console.log('Resource exhausted, debouncing...')
       await sleep(DEBOUNCE_TIME)
-      await sendMessage(undefined, recursionDepth + 1)
+      await sendMessage({
+        ...context,
+        currentStep: context.currentStep + 1
+      })
     }
   } finally {
     console.log('sendMessage() finished')
@@ -111,11 +132,10 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     const response = await geminiService.generateContent(prompt)
 
     console.log('AI Response: \n \n', response)
-    const filesRequested = processResponse(response)
+    const  context = processResponse(response)
     store.dispatch(resolvePendingChat())
-    if (!!filesRequested) {
-      await sendMessage(filesRequested, 0)
-    }
+
+
   } catch (error) {
     console.error('Failed to send chat message:', error)
     const errorMessage = `Error: Failed to send message. ${error}`
@@ -128,7 +148,7 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     if (errorMessage.includes('resource exhausted')) {
       console.log('Resource exhausted, debouncing...')
       await sleep(DEBOUNCE_TIME)
-      await sendMessage(undefined, 0)
+      await sendMessage({currentStep: 0} )
     }
   } finally {
     console.log('generateSkeleton() finished')

@@ -1,5 +1,6 @@
 import { prompts } from './prompts'
 import { store } from '@/lib/utils/store'
+import { RequestContext } from '@/types'
 
 // Gets all available files
 export const getAvailableFiles = (): string[] => {
@@ -36,21 +37,30 @@ export const getLatestUserMesage = (): string => {
 export const buildInitial = (parameters: object): string => {
   let prompt = prompts.getBasePrompt()
 
+  prompt += "\n\n# GENERATE THE SKELETON \n\n"
+
   prompt += prompts.getParameters(parameters)
   return prompt
 }
 
-export const buildPrompt = (requestedFiles?: string[] | null): string => {
+export const buildPrompt = (context: RequestContext): string => {
   let prompt = prompts.getBasePrompt()
 
+
+  prompt += prompts.getAvailableFiles(getAvailableFiles())
   // Add the user message to the prompt
   prompt += prompts.getUserPrompt(getLatestUserMesage())
   // Let the prompt know what files are available
-  prompt += prompts.getAvailableFiles(getAvailableFiles())
 
-  if (requestedFiles) {
+  context.sequenceInfo ? prompt += prompts.getCurrentSequence(context.sequenceInfo) : null
+  context.currentStep ? prompt += prompts.getCurrentStep(context.currentStep) : null
+
+  if (context.requestedFiles) {
     // Get the contents for the given dependencies
-    prompt += prompts.getFileContents(getFileContents(requestedFiles))
+    prompt += prompts.getFileContents(getFileContents(context.requestedFiles))
   }
+
+  prompt += prompts.getTools()
+
   return prompt
 }

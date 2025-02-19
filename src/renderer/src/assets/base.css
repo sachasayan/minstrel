@@ -44,7 +44,6 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --sidebar: hsl(0 0% 98%);
 
-
   --neutral-50: hsl(60, 14%, 98%);
   --neutral-100: hsl(50, 7%, 96%);
   --neutral-200: hsl(60, 5%, 90%);
@@ -190,7 +189,8 @@
 }
 
 @layer base {
-  :root {}
+  :root {
+  }
 
   * {
     @apply border-border;

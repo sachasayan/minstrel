@@ -37,7 +37,6 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
   return characters
 }
 
-
 function getCharacterFrequencyData(activeProject: Project): any[] {
   const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title === 'Outline.md')?.content || '')
   return activeProject.files
@@ -49,7 +48,7 @@ function getCharacterFrequencyData(activeProject: Project): any[] {
       }
 
       characters.forEach((char, index) => {
-        const escapedName = char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedName = char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         chapterData[char.name] = (file.content.match(`\\b${escapedName}\\b`) || []).length
         chapterData[`${char.name}_color`] = colors[index % colors.length] // Store color
       })
@@ -72,7 +71,6 @@ export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
 
   // const novelData = { chapterData, characters };  // Replaced with dynamic data
-
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -158,9 +156,7 @@ export default function NovelDashboard() {
                 }, {})}
                 className="h-[400px]"
               >
-                <BarChart
-                  data={getCharacterFrequencyData(activeProject)}
-                >
+                <BarChart data={getCharacterFrequencyData(activeProject)}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="chapter"
