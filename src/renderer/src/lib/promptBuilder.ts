@@ -7,6 +7,17 @@ export const getAvailableFiles = (): string[] => {
   return store.getState().projects.activeProject?.files.map((f) => f.title) || []
 }
 
+export const getProvidedFiles = (dependencies): string[] => {
+  const activeProject = store.getState().projects.activeProject
+  const files: string[] =
+    activeProject?.files
+      ?.filter((f) => dependencies?.includes(f.title))
+      ?.map((file) => `${file.title}\n`) || []
+
+  return files;
+}
+
+
 // Gets contents of all the given files as a string
 export const getFileContents = (dependencies: string[]): string => {
   // Get each file as a ontent item
@@ -48,6 +59,7 @@ export const buildPrompt = (context: RequestContext): string => {
 
 
   prompt += prompts.getAvailableFiles(getAvailableFiles())
+  prompt += prompts.getProvidedFiles(getProvidedFiles(context.requestedFiles))
   // Add the user message to the prompt
   prompt += prompts.getUserPrompt(getLatestUserMesage())
   // Let the prompt know what files are available
