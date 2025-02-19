@@ -10,7 +10,6 @@ import { selectActiveProject } from '@/lib/utils/projectsSlice'
 const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 
 function extractCharactersFromOutline(outlineContent: string): { name: string }[] {
-  console.log(outlineContent)
   const characters: { name: string }[] = []
   const lines = outlineContent.split('\n')
   let inCharacterSection = false
@@ -26,14 +25,12 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
       if (line.startsWith('#') && !line.startsWith('###')) {
         break
       }
-      console.log(line)
       const match = line.match(/\*\*([A-z -]+).*\*\*/i) // Capture the character name, should be in bold
       if (match) {
         characters.push({ name: match[1].trim() })
       }
     }
   }
-  console.log(characters)
   return characters
 }
 

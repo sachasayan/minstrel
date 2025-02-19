@@ -7,7 +7,6 @@ import { setActiveView, setActiveFile } from './utils/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
-import { current } from '@reduxjs/toolkit'
 
 export const initializeGeminiService = () => {
   const apiKey = store.getState().settings.apiKey
@@ -75,7 +74,7 @@ const processResponse = (responseString: string) => {
 // Make sure we are setting recursionDepth in sendMessage
 export const sendMessage = async (context: RequestContext) => {
 
-  if (context.currentStep > 3) {
+  if (context.currentStep > 10) {
     const errorMessage = 'Error: Recursion depth exceeded in sendMessage.'
     toast.error(errorMessage)
     throw new Error(errorMessage)
@@ -107,12 +106,7 @@ export const sendMessage = async (context: RequestContext) => {
   } catch (error) {
     console.error('Failed to send chat message:', error)
     const errorMessage = `Error: Failed to send message. ${error}`
-    store.dispatch(
-      addChatMessage({
-        sender: 'Gemini',
-        text: errorMessage
-      })
-    )
+
     if (errorMessage.includes('resource exhausted')) {
       console.log('Resource exhausted, debouncing...')
       await sleep(DEBOUNCE_TIME)
@@ -120,6 +114,13 @@ export const sendMessage = async (context: RequestContext) => {
         ...context,
         currentStep: context.currentStep + 1
       })
+    } else {
+      store.dispatch(
+        addChatMessage({
+          sender: 'Gemini',
+          text: `Hmm. Something went wrong, sorry. You might need to try again.`
+        })
+      )
     }
   } finally {
     console.log('sendMessage() finished')
@@ -132,24 +133,10 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     const response = await geminiService.generateContent(prompt)
 
     console.log('AI Response: \n \n', response)
-    const  context = processResponse(response)
+    const context = processResponse(response)
     store.dispatch(resolvePendingChat())
-
-
   } catch (error) {
     console.error('Failed to send chat message:', error)
-    const errorMessage = `Error: Failed to send message. ${error}`
-    store.dispatch(
-      addChatMessage({
-        sender: 'Gemini',
-        text: errorMessage
-      })
-    )
-    if (errorMessage.includes('resource exhausted')) {
-      console.log('Resource exhausted, debouncing...')
-      await sleep(DEBOUNCE_TIME)
-      await sendMessage({currentStep: 0} )
-    }
   } finally {
     console.log('generateSkeleton() finished')
   }
