@@ -31,7 +31,14 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // Take action with tools: Update the relevant files with the new content, etc.
 // If files were requested, send a new response with file contents
 const processResponse = (responseString: string) => {
-  const response = parser.parse(`<root>${responseString}</root>`).root
+  let response;
+  try {
+    response = parser.parse(`<root>${responseString}</root>`).root
+  } catch (parsingError) {
+    console.error('XML Parsing Error:', parsingError);
+    store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing AI response. Please check the response format.' }));
+    return { currentStep: 0 }; // Or handle error context as needed
+  }
   const context : RequestContext = {
     currentStep: 0,
   }
