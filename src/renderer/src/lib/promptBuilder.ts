@@ -27,9 +27,16 @@ export const getFileContents = (dependencies: string[]): string => {
       .filter((f) => dependencies.includes(f.title))
       .map(
         (file) => `
-<file title="${file.title}">
+---
+
+${file.title}:
+
 ${file.content}
-</file>
+
+
+
+
+
 
 `
       )

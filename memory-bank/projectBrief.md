@@ -34,7 +34,7 @@ The normal process for writing a novel is as follows:
 
 (3) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter-1.md, Chapter-2.md, etc.)
 
-(4) A summary and critique is then produced. (Critique.md)
+(4) A message and critique is then produced. (Critique.md)
 
 Any above step can be repeated. For instance, the customer may ask the model to re-write a previous chapter, or make adjustments to the outline, or regenerate the critique.
 
@@ -47,7 +47,7 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 - The model must always begin with a <think> section, briefly explaining what it understands to be the current intent. This is hidden from the customer, but used for debugging.
 - If the model thinks it is being asked to write to a file, it must first <read_file> for that file if it hasn't been provided.
 - The model can use tools like <write_file> to perform actions via the service.
-- The model must always end with a <summary> section, briefly explaining the actions it has performed to the customer in first person, such as: "I've written Chapter 3."
+- The model must always end with a <message> section, briefly explaining the actions it has performed to the customer in first person, such as: "I've written Chapter 3."
 
 ---
 
@@ -59,7 +59,7 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 - The service can process XML tags from the model using regex.
 - The service keeps a running history of the last twenty messages in the Chat slice of the Redux store, which contains a chatHistory array. (The reducer can be responsible for trimming history when it is full.)
 - The service should always provide the full chat history between the customer and model when the customer sends a message.
-- The service only stores excerpted content from <summary> tags in the chat log from the model.
+- The service only stores excerpted content from <message> tags in the chat log from the model.
 
 ---
 
@@ -115,7 +115,7 @@ What follows is a sample flow between customer, service, and model. For brevity,
 <read_file>Chapter-3.md</read_file>
 <read_file>Chapter-4.md</read_file>
 
-<summary>I'm looking at the files.</summary>
+<message>I'm looking at the files.</message>
 
 (Service processes model response, and then provides a response to the model with the context — Outline, Chapter 2, Chapter 3, and Chapter 4: )
 
@@ -135,7 +135,7 @@ What follows is a sample flow between customer, service, and model. For brevity,
 <content>Chapter 4 content goes here.</content>
 </write_file>
 
-<summary>I've made the requested changes to Chapter 3 and Chapter 4, and have introduced the Asimov character in Chapter 3.</summary>
+<message>I've made the requested changes to Chapter 3 and Chapter 4, and have introduced the Asimov character in Chapter 3.</message>
 
 ---
 

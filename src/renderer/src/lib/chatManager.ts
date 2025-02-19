@@ -27,7 +27,7 @@ const DEBOUNCE_TIME = 5000 // 5 seconds
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Parse the response and extract the relevant information
-// Add the summary to the chat history
+// Add the message to the chat history
 // Take action with tools: Update the relevant files with the new content, etc.
 // If files were requested, send a new response with file contents
 const processResponse = (responseString: string) => {
@@ -72,8 +72,8 @@ const processResponse = (responseString: string) => {
     context.sequenceInfo = response.sequence.sequence
   }
 
-  if (!!response.summary) {
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: response.summary }))
+  if (!!response.message) {
+    store.dispatch(addChatMessage({ sender: 'Gemini', text: response.message }))
   }
 
   return context

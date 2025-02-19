@@ -19,7 +19,7 @@ The user should feel like they are collaborating with a knowledgeable and helpfu
 1.  **Intuitive Interface:** The chat interface should be clean, easy to use, and provide clear feedback on the AI's actions.
 2.  **Guided Workflow:** The system should guide the user through the stages of novel writing (skeleton, outline, chapters, critique) in a logical and understandable way.
 3.  **Customization:** The user should be able to customize the story parameters and edit the AI-generated content at each stage.
-4.  **Transparency:** The AI should explain its reasoning (through the `<think>` tag, though this is hidden from the user) and clearly communicate its actions (through the `<summary>` tag).
+4.  **Transparency:** The AI should explain its reasoning (through the `<think>` tag, though this is hidden from the user) and clearly communicate its actions (through the `<message>` tag).
 5.  **Responsiveness:** The system should respond promptly to user input and provide timely feedback.
 6.  **Iteration:** The user should be able to easily iterate on any part of the novel, requesting rewrites or adjustments as needed.
 
