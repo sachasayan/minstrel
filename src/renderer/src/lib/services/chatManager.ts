@@ -5,8 +5,12 @@ import { updateFile } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
-import { toast } from 'sonner'
-import { RequestContext } from '@/types'
+import { toast } from 'sonner';
+import { RequestContext } from '@/types';
+
+const isValidAgentType = (agent: string): agent is 'routingAgent' | 'criticAgent' | 'outlineAgent' | 'writerAgent' => {
+  return ['routingAgent', 'criticAgent', 'outlineAgent', 'writerAgent'].includes(agent);
+}
 
 export const initializeGeminiService = () => {
   const apiKey = store.getState().settings.apiKey
@@ -44,17 +48,16 @@ const processResponse = (responseString: string): RequestContext | null => {
     agent : 'routingAgent',
   }
 
-  if (!!response?.think) {
-    console.log(response.think)
-  }
+    console.log(response?.think || "No thoughts, only vibes." );
 
-  if (!!response?.context) {
-    context.carriedContext = response.context
-  }
 
   if (!!response?.route_to) {
     console.log('Switching agents to ' + response.route_to)
-    context.agent = response.route_to
+    if (isValidAgentType(response.route_to)) {
+      context.agent = response.route_to
+    } else {
+      throw new Error(`Invalid agent type received from AI: ${response.route_to}.`)
+    }
   }
 
   if (!!response?.read_file) {
@@ -74,7 +77,6 @@ const processResponse = (responseString: string): RequestContext | null => {
       store.dispatch(setActiveFile(fileName))
     }
   }
-
 
   // Check for the presence of the sequence tag
   if (!!response?.sequence) {

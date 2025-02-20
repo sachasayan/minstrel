@@ -13,7 +13,7 @@ const prompt = () => `
 * If the user is asking you to perform an action on the story such as write a story skeleton, write a story outline, write a chapter of the book, or write a critique, you should route them to a specialist.
 * The specialists are:
 * **outlineAgent** - Writes either the outline or skeleton of the book.
-* **writingAgent** - Writes a chapter of the book.
+* **writerAgent** - Writes a chapter of the book.
 * **criticAgent** — Writes a critique of the user's story so far.
 * When directing a user to a specialist, use your <think> tool to determine which files will be needed for the task. Consider the available files and the information from the outline.
 * You will then use <read_file> to send the contents of the relevant files to the specialist.
