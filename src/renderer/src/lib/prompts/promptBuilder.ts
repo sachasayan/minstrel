@@ -1,4 +1,4 @@
-import { prompts } from './promptsUtils'
+import { promptly() } from './promptsUtils'
 import { store } from '@/lib/store/store'
 import { RequestContext } from '@/types'
 
@@ -19,7 +19,8 @@ export const getProvidedFiles = (dependencies): string[] => {
 
 
 // Gets contents of all the given files as a string
-export const getFileContents = (dependencies: string[]): string => {
+export const getFileContents = (dependencies: string[] | undefined): string => {
+  if (!dependencies) {return ''}
   // Get each file as a ontent item
   const activeProject = store.getState().projects.activeProject
   const files: string =
@@ -46,34 +47,48 @@ export const getLatestUserMesage = (): string => {
   `
 }
 
-// Builds the initial prompt for the Skeleton based on parameters
-export const buildInitial = (parameters: object): string => {
-  let prompt = prompts.basePrompt()
-
-  prompt += "\n\n# GENERATE THE SKELETON \n\n"
-
-  prompt += prompts.parameters(parameters)
-  return prompt
-}
 
 export const buildPrompt = (context: RequestContext): string => {
-  let prompt = prompts.basePrompt()
+  let prompt = '';
 
-  prompt += prompts.availableFiles(getAvailableFiles())
-  prompt += prompts.providedFiles(getProvidedFiles(context.requestedFiles))
-  // Add the user message to the prompt
-  prompt += prompts.userPrompt(getLatestUserMesage())
-  // Let the prompt know what files are available
+  switch (context.agent) {
+    case 'outlineAgent':
+      prompt = promptly()
+      .basePrompt()
+      .outlineAgent()
+      .userPrompt(getLatestUserMesage())
+      .availableFiles(getAvailableFiles())
+      .providedFiles(getProvidedFiles(context.requestedFiles))
+      .fileContents(getFileContents(context.requestedFiles))
+      break;
+    case 'writerAgent':
+      prompt = promptly()
+      .basePrompt()
+      .writerAgent()
+      .userPrompt(getLatestUserMesage())
+      .availableFiles(getAvailableFiles())
+      .providedFiles(getProvidedFiles(context.requestedFiles))
+      .fileContents(getFileContents(context.requestedFiles))
 
-  context.sequenceInfo ? prompt += prompts.currentSequence(context.sequenceInfo) : null
-  context.currentStep ? prompt += prompts.currentStep(context.currentStep) : null
-
-  if (context.requestedFiles) {
-    // Get the contents for the given dependencies
-    prompt += prompts.fileContents(getFileContents(context.requestedFiles))
-  }
-
-  prompt += prompts.tools()
+      break;
+    case 'criticAgent':
+      prompt = promptly()
+        .basePrompt()
+        .criticAgent()
+        .userPrompt(getLatestUserMesage())
+        .availableFiles(getAvailableFiles())
+        .providedFiles(getProvidedFiles(context.requestedFiles))
+        .fileContents(getFileContents(context.requestedFiles))
+      break;
+    default: // Default to the router prompt
+      prompt = promptly()
+        .basePrompt()
+        .routingAgent()
+        .userPrompt(getLatestUserMesage())
+        .availableFiles(getAvailableFiles())
+        .providedFiles(getProvidedFiles(context.requestedFiles))
+        .fileContents(getFileContents(context.requestedFiles))
 
   return prompt
+  }
 }

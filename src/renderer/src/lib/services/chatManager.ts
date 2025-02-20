@@ -2,7 +2,7 @@ import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat } from '@/lib/store/chatSlice'
 import { updateFile } from '@/lib/store/projectsSlice'
-import { buildPrompt, buildInitial } from '@/lib/prompts/promptBuilder'
+import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
@@ -30,21 +30,30 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // Add the message to the chat history
 // Take action with tools: Update the relevant files with the new content, etc.
 // If files were requested, send a new response with file contents
-const processResponse = (responseString: string) => {
+const processResponse = (responseString: string): RequestContext => {
   let response;
   try {
     response = parser.parse(`<root>${responseString}</root>`).root
   } catch (parsingError) {
     console.error('XML Parsing Error:', parsingError);
     store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing AI response. Please check the response format.' }));
-    return { currentStep: 0 }; // Or handle error context as needed
+    throw new Error('Error parsing AI response. Please check the response format.');
   }
   const context : RequestContext = {
     currentStep: 0,
+    agent : 'routingAgent',
   }
 
-  if (!!response.think) {
+  if (!!response?.think) {
     console.log(response.think)
+  }
+
+  if (!!response?.context) {
+    context.carriedContext = response.context
+  }
+
+  if (!!response?.route_to) {
+    context.agent = response.route_to
   }
 
   if (!!response?.read_file) {
@@ -54,7 +63,7 @@ const processResponse = (responseString: string) => {
     context.requestedFiles = response.read_file
   }
 
-  if (!!response.write_file) {
+  if (!!response?.write_file) {
     const fileName = response.write_file.file_name
     const content = response.write_file.content
     if (fileName && content) {
@@ -68,20 +77,21 @@ const processResponse = (responseString: string) => {
 
 
   // Check for the presence of the sequence tag
-  if (!!response.sequence) {
+  if (!!response?.sequence) {
     context.sequenceInfo = response.sequence.sequence
   }
 
-  if (!!response.message) {
+  if (!!response?.message) {
     store.dispatch(addChatMessage({ sender: 'Gemini', text: response.message }))
   }
 
   return context
 }
-// Make sure we are setting recursionDepth in sendMessage
+
+
 export const sendMessage = async (context: RequestContext) => {
 
-  if (context.currentStep > 10) {
+  if (context.currentStep > 5) {
     const errorMessage = 'Error: Recursion depth exceeded in sendMessage.'
     toast.error(errorMessage)
     throw new Error(errorMessage)
@@ -135,13 +145,20 @@ export const sendMessage = async (context: RequestContext) => {
 }
 
 export const generateSkeleton = async (parameters: { [key: string]: any }): Promise<void> => {
-  const prompt = buildInitial(parameters)
+  const prompt = buildPrompt({
+    agent: 'writerAgent',
+    currentStep: 0,
+    carriedContext: JSON.stringify(parameters, null, 2),
+    requestedFiles: undefined,
+    sequenceInfo: undefined,
+  })
   try {
     const response = await geminiService.generateContent(prompt)
 
     console.log('AI Response: \n \n', response)
     const context = processResponse(response)
     store.dispatch(resolvePendingChat())
+    await sendMessage(context);
   } catch (error) {
     console.error('Failed to send chat message:', error)
   } finally {

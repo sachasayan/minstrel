@@ -27,6 +27,14 @@
 
 The project's dependencies are managed using `npm`. Key dependencies are listed above in the "Technologies Used" section. The full list of dependencies can be found in `package.json`.
 
+## Do not read files named
+
+* criticAgent.ts
+* outlineAgent.ts
+* promptsUtils.ts
+* routingAgent.ts
+* writerAgent.ts
+
 ## Testing
 
 Mock projects for testing are located in the `mock-projects` folder. The available mock projects are:

@@ -53,9 +53,12 @@ export interface ExpertSuggestion {
 
 export interface RequestContext {
   currentStep: number
+  agent: 'criticAgent' | 'outlineAgent' | 'routingAgent' | 'writerAgent'
+  carriedContext?: string
   sequenceInfo?: string
   requestedFiles?: string[]
 }
+
 
 export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
 
