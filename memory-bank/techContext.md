@@ -27,6 +27,13 @@
 
 The project's dependencies are managed using `npm`. Key dependencies are listed above in the "Technologies Used" section. The full list of dependencies can be found in `package.json`.
 
+- **Multi-Agent Architecture:** The project now uses a multi-agent architecture with a routing agent delegating tasks to specialized agents (criticAgent, outlineAgent, writerAgent).
+    - **Routing Agent:**  Responsible for initial request handling and agent delegation. Defined in `promptBuilder.ts` and used by default in `chatManager.ts`.
+    - **Specialized Agents:** `criticAgent`, `outlineAgent`, `writerAgent` are designed for specific tasks. Prompts for these agents are defined in `prompts.ts` (to be reviewed and refined).
+    - **Agent Switching:** `chatManager.ts` processes the `<route_to>` tag in the model's response to switch agents dynamically.
+    - **Context Handling:**  `promptBuilder.ts` constructs prompts with relevant context for each agent, including user messages, available files, and file contents.
+
+
 ## Do not read files named
 
 * criticAgent.ts
