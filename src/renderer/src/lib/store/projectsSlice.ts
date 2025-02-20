@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ProjectState, ProjectFragment, Project, Genre } from '@/types'
 import { RootState } from './store'
-import { projectFromFragment } from '@/lib/typeUtils'
+import { projectFromFragment } from '@/typeUtils'
 
 const initialState: ProjectState = {
   projectHasLiveEdits: false,
