@@ -1,3 +1,9 @@
+
+
+
+![screenshot](resources/screenshot.png)
+
+
 # Minstrel
 
 Minstrel is an application designed to facilitate collaborative novel writing between a user and an AI model. It aims to address common challenges faced by writers, such as writer's block, structuring long narratives, and maintaining consistency.
@@ -36,7 +42,7 @@ Forking the project? Using an AI-enabled LLM? This project is set up with a Clin
 - `progress.md`: Outlines the phased development plan and progress.
 - `activeContext.md`: Tracks the current work focus and development status.
 
-## Requirements
+## System Requirements
 
 - Minstrel is built with Node.js and requires Node.js 18 or higher to run.
 - Minstrel is currently only tested and supported on MacOS with Apple Silicon.
@@ -50,7 +56,7 @@ To run Minstrel locally:
 2.  Install dependencies using `npm install`.
 4.  Run the application using `npm run dev`.
 3.  Obtain an API key for the Gemini API and set it in the application settings.
-4.  Optional: Set your project directory.
+4.  Optional: Set your project directory. If you'd like to use mocks, they've been provided in the mock-projects folder.
 
 ## License
 
@@ -63,4 +69,4 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-It's yours, y'all. Do what you want with it. Just don't sue me.
+Portions of Minstrel may end up commercial, but it's intended that the base source code will always remain free/gratis. It's yours, y'all. Do what you want with it. Just don't sue me.
