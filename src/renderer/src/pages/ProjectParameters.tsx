@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Genre } from '@/types'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectActiveProject, updateParameters } from '@/lib/utils/projectsSlice'
-import type { RootState } from '@/lib/utils/store'
+import { selectActiveProject, updateParameters } from '@/lib/store/projectsSlice'
+import type { RootState } from '@/lib/store/store'
 import { toast } from 'sonner'
 
 const ProjectParameters = () => {

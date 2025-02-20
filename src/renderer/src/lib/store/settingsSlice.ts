@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AppSettings } from '@/types'
-import { RootState } from '@/lib/utils/store'
+import { RootState } from '@/lib/store/store'
 
 const initialState: AppSettings = {
   api: '',

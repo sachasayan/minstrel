@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setActiveFile, setActiveView } from '@/lib/utils/appStateSlice'
+import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
 import { toast } from 'sonner'
 
 import { saveProject } from '@/lib/services/projectManager'
-import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects } from '@/lib/utils/projectsSlice'
+import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects } from '@/lib/store/projectsSlice'
 
 import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered } from 'lucide-react'
 import { Square } from 'lucide-react'
@@ -33,8 +33,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
-import { selectAppState } from '@/lib/utils/appStateSlice'
-import { addChatMessage } from '@/lib/utils/chatSlice'
+import { selectAppState } from '@/lib/store/appStateSlice'
+import { addChatMessage } from '@/lib/store/chatSlice'
 
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setSettingsState } from '@/lib/utils/settingsSlice'
-import { RootState, AppDispatch } from '@/lib/utils/store'
+import { setSettingsState } from '@/lib/store/settingsSlice'
+import { RootState, AppDispatch } from '@/lib/store/store'
 import { Button } from './ui/button'
 
 const Settings = (): JSX.Element => {

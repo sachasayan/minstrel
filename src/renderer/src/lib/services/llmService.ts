@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { store } from '@/lib/utils/store'
+import { store } from '@/lib/store/store'
 
 const geminiService = {
   apiKey: null as string | null,

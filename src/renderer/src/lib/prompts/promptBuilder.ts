@@ -1,5 +1,5 @@
 import { prompts } from './promptsUtils'
-import { store } from '@/lib/utils/store'
+import { store } from '@/lib/store/store'
 import { RequestContext } from '@/types'
 
 // Gets all available files

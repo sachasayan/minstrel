@@ -5,7 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Star } from 'lucide-react'
 import { Project } from '@/types'
 // import { chapterData, characters } from './mockData'; // Removed mock data
-import { selectActiveProject } from '@/lib/utils/projectsSlice'
+import { selectActiveProject } from '@/lib/store/projectsSlice'
 
 const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 

@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, forwardRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { BotMessageSquare } from 'lucide-react'
-import { selectChat, addChatMessage } from '@/lib/utils/chatSlice'
-import { RootState } from '@/lib/utils/store'
+import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
+import { RootState } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
-import { selectActiveProject } from '@/lib/utils/projectsSlice'
+import { selectActiveProject } from '@/lib/store/projectsSlice'
 
 interface ChatInterfaceProps {
   expanded: boolean

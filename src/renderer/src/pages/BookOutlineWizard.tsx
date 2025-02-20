@@ -15,10 +15,10 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { BotMessageSquare, Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { setActiveView } from '@/lib/utils/appStateSlice'
+import { setActiveView } from '@/lib/store/appStateSlice'
 import { useDispatch } from 'react-redux'
 import { generateSkeleton } from '@/lib/services/chatManager' // Import generateSkeleton
-import { setActiveProject } from '@/lib/utils/projectsSlice'
+import { setActiveProject } from '@/lib/store/projectsSlice'
 
 // Context for managing wizard state
 interface WizardContextProps {

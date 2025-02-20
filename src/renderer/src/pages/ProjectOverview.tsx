@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 
-import { selectAppState } from '@/lib/utils/appStateSlice'
+import { selectAppState } from '@/lib/store/appStateSlice'
 
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import MarkdownViewer from '@/components/MarkdownViewer'
@@ -9,7 +9,7 @@ import NovelDashboard from '@/components/NovelDashboard'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import { selectProjects } from '@/lib/utils/projectsSlice'
+import { selectProjects } from '@/lib/store/projectsSlice'
 import ChatInterface from '@/components/ChatInterface'
 import ProjectParameters from './ProjectParameters'
 

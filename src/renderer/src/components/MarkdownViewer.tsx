@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import type { JSX } from 'react'
 
 import '@mdxeditor/editor/style.css'
-import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/utils/projectsSlice'
+import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
 
 interface MarkdownViewerProps {
   fileName: string | null // Allow null

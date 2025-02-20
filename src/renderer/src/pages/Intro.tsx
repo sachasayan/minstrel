@@ -6,9 +6,9 @@ import { ProjectFragment } from '@/types'
 import ProjectLibrary from '@/components/ProjectLibrary'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useDispatch, useSelector } from 'react-redux'
-import { setProjectList, selectProjectList, setActiveView } from '@/lib/utils/appStateSlice'
-import { setActiveProjectFromFragment } from '@/lib/utils/projectsSlice'
-import { selectSettingsState } from '@/lib/utils/settingsSlice'
+import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice'
+import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
+import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/projectManager'
 
 const Intro = (): JSX.Element => {

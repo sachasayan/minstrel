@@ -1,6 +1,6 @@
 import './assets/base.css'
 import { Provider } from 'react-redux'
-import { store } from './lib/utils/store'
+import { store } from './lib/store/store'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
