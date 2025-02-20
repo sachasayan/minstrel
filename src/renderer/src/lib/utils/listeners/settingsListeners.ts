@@ -1,6 +1,6 @@
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import { setSettingsState } from '@/lib/utils/settingsSlice'
-import geminiService from '@/lib/GeminiService'
+import geminiService from '@/lib/services/llmService'
 
 export const settingsListeners = createListenerMiddleware()
 

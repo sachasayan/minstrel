@@ -17,7 +17,7 @@ import { BotMessageSquare, Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { setActiveView } from '@/lib/utils/appStateSlice'
 import { useDispatch } from 'react-redux'
-import { generateSkeleton } from '@/lib/chatManager' // Import generateSkeleton
+import { generateSkeleton } from '@/lib/services/chatManager' // Import generateSkeleton
 import { setActiveProject } from '@/lib/utils/projectsSlice'
 
 // Context for managing wizard state
@@ -32,9 +32,9 @@ interface WizardContextProps {
 const WizardContext = createContext<WizardContextProps>({
   totalSteps: 4,
   currentStep: 0,
-  setCurrentStep: () => {},
+  setCurrentStep: () => { },
   formData: {},
-  setFormData: () => {}
+  setFormData: () => { }
 })
 
 // Custom hook for using wizard context

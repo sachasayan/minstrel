@@ -11,7 +11,7 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
   - **Prompt Engineering:** `promptBuilder.ts` constructs prompts dynamically based on the current state and context. `prompts.ts` stores the static parts of the prompts.
 - **Backend (Main Process):**
   - **`fileOps.ts`:** Handles file system operations (reading directories, reading files, writing files, creating directories) through Electron's IPC. This ensures proper path resolution and sandboxing.
-  - **`GeminiService.ts`:** (In the renderer process, but conceptually part of the backend) Abstraction layer for interacting with the Gemini API.
+  - **`llmService.ts`:** (In the renderer process, but conceptually part of the backend) Abstraction layer for interacting with the Gemini API.
 
 ## Component Relationships
 
@@ -20,5 +20,5 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
 - `MarkdownViewer` displays Markdown content from the `projectSlice`.
 - `BookOutlineWizard` collects initial project parameters and triggers the skeleton generation process.
 - `ProjectOverview` combines `ChatInterface` and `MarkdownViewer` to provide the main project view.
-- `chatManager` interacts with `GeminiService` to communicate with the Gemini API, `promptBuilder` to construct prompts, and `projectsSlice` to update project data.
+- `chatManager` interacts with `llmService` to communicate with the Gemini API, `promptBuilder` to construct prompts, and `projectsSlice` to update project data.
 - `projectManager` uses Electron's IPC to interact with `fileOps.ts` in the main process for file system operations.

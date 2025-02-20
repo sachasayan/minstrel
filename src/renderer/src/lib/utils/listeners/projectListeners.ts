@@ -1,6 +1,6 @@
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import { setActiveProject, setActiveProjectFromFragment } from '../projectsSlice'
-import { fetchProjectDetails } from '@/lib/projectManager'
+import { fetchProjectDetails } from '@/lib/services/projectManager'
 
 export const projectListeners = createListenerMiddleware()
 

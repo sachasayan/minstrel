@@ -1,4 +1,4 @@
-import { prompts } from './prompts'
+import { prompts } from './promptsUtils'
 import { store } from '@/lib/utils/store'
 import { RequestContext } from '@/types'
 
