@@ -5,11 +5,11 @@ import { updateFile } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
-import { toast } from 'sonner';
-import { RequestContext } from '@/types';
+import { toast } from 'sonner'
+import { RequestContext } from '@/types'
 
 const isValidAgentType = (agent: string): agent is 'routingAgent' | 'criticAgent' | 'outlineAgent' | 'writerAgent' => {
-  return ['routingAgent', 'criticAgent', 'outlineAgent', 'writerAgent'].includes(agent);
+  return ['routingAgent', 'criticAgent', 'outlineAgent', 'writerAgent'].includes(agent)
 }
 
 export const initializeGeminiService = () => {
@@ -35,21 +35,20 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // Take action with tools: Update the relevant files with the new content, etc.
 // If files were requested, send a new response with file contents
 const processResponse = (responseString: string): RequestContext | null => {
-  let response;
+  let response
   try {
     response = parser.parse(`<root>${responseString}</root>`).root
   } catch (parsingError) {
-    console.error('XML Parsing Error:', parsingError);
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing AI response. Please check the response format.' }));
-    return null;
+    console.error('XML Parsing Error:', parsingError)
+    store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing AI response. Please check the response format.' }))
+    return null
   }
-  const context : RequestContext = {
+  const context: RequestContext = {
     currentStep: 0,
-    agent : 'routingAgent',
+    agent: 'routingAgent'
   }
 
-    console.log(response?.think || "No thoughts, only vibes." );
-
+  console.log(response?.think || 'No thoughts, only vibes.')
 
   if (!!response?.route_to) {
     console.log('Switching agents to ' + response.route_to)
@@ -90,9 +89,7 @@ const processResponse = (responseString: string): RequestContext | null => {
   return context
 }
 
-
 export const sendMessage = async (context: RequestContext) => {
-
   if (context.currentStep > 5) {
     const errorMessage = 'Error: Recursion depth exceeded in sendMessage.'
     toast.error(errorMessage)
@@ -118,7 +115,7 @@ export const sendMessage = async (context: RequestContext) => {
     const newContext = processResponse(response)
     store.dispatch(resolvePendingChat())
     if (newContext === null) {
-      return; // Stop recursion if processResponse failed
+      return // Stop recursion if processResponse failed
     }
     if (newContext.agent !== 'routingAgent') {
       await sendMessage({
@@ -156,7 +153,7 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     currentStep: 0,
     carriedContext: JSON.stringify(parameters, null, 2),
     requestedFiles: undefined,
-    sequenceInfo: undefined,
+    sequenceInfo: undefined
   })
   try {
     const response = await geminiService.generateContent(prompt)
@@ -165,10 +162,10 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     const context = processResponse(response)
     store.dispatch(resolvePendingChat())
     if (context === null) {
-      console.error('processResponse returned null in generateSkeleton, not calling sendMessage');
-      return;
+      console.error('processResponse returned null in generateSkeleton, not calling sendMessage')
+      return
     }
-    await sendMessage(context);
+    await sendMessage(context)
   } catch (error) {
     console.error('Failed to send chat message:', error)
   } finally {

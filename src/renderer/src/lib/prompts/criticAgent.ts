@@ -65,11 +65,10 @@ BEGIN USER PROMPT
 * The user may also provide you with the contents of any files needed for the current task.
 `
 
-
 //EXPORT
 export const criticAgent = {
   criticAgent(this) {
-    this.value += prompt();
-    return this;
-  },
+    this.value += prompt()
+    return this
+  }
 }

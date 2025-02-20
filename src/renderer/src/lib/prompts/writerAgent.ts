@@ -48,10 +48,9 @@ BEGIN USER PROMPT
 
 `
 
-
 export const writerAgent = {
   writerAgent(this) {
-    this.value += prompt();
-    return this;
-  },
+    this.value += prompt()
+    return this
+  }
 }

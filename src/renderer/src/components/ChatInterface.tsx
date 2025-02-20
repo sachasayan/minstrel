@@ -134,14 +134,16 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
 
       <button
         onClick={toggleExpanded}
-        className={`z-2 bg-white shadow-lg rounded-lg border flex flex-col right-0 bottom-0 absolute overflow-hidden transition-[opacity, transform] duration-500 ${expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
-          } `}
+        className={`z-2 bg-white shadow-lg rounded-lg border flex flex-col right-0 bottom-0 absolute overflow-hidden transition-[opacity, transform] duration-500 ${
+          expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+        } `}
       >
         <BotMessageSquare className={'text-gray-500 hover:text-gray-700 hover:rotate-15 transition-transform size-8 m-4'} />
       </button>
       <div
-        className={`z-1 bg-white shadow-lg rounded-lg border flex flex-col transition-[max-height,max-width, width, height] duration-500 ease-in-out right-0 bottom-0 absolute overflow-hidden ${expanded ? 'max-h-[500px] max-w-[320px] h-96 w-80' : 'max-h-10 max-w-10 h-10 w-10'
-          }`}
+        className={`z-1 bg-white shadow-lg rounded-lg border flex flex-col transition-[max-height,max-width, width, height] duration-500 ease-in-out right-0 bottom-0 absolute overflow-hidden ${
+          expanded ? 'max-h-[500px] max-w-[320px] h-96 w-80' : 'max-h-10 max-w-10 h-10 w-10'
+        }`}
       >
         <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
           {chatHistory.map((msg, index) => (

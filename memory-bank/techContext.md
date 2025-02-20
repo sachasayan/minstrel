@@ -63,14 +63,13 @@ The project now uses a multi-agent architecture with a routing agent delegating 
     - **Agent Switching:** `chatManager.ts` processes the `<route_to>` tag in the model's response to switch agents dynamically.
     - **Context Handling:**  `promptBuilder.ts` constructs prompts with relevant context for each agent, including user messages, available files, and file contents.
 
-
 ### Do not read files named
 
-* criticAgent.ts
-* outlineAgent.ts
-* promptsUtils.ts
-* routingAgent.ts
-* writerAgent.ts
+- criticAgent.ts
+- outlineAgent.ts
+- promptsUtils.ts
+- routingAgent.ts
+- writerAgent.ts
 
 ### Testing
 

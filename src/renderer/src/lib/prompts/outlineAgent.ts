@@ -54,12 +54,11 @@ BEGIN USER PROMPT
 
 `
 
-
 //EXPORT
 
 export const outlineAgent = {
   outlineAgent(this) {
-    this.value += prompt();
-    return this;
-  },
+    this.value += prompt()
+    return this
+  }
 }

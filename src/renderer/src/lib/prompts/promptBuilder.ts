@@ -9,18 +9,16 @@ export const getAvailableFiles = (): string[] => {
 
 export const getProvidedFiles = (dependencies): string[] => {
   const activeProject = store.getState().projects.activeProject
-  const files: string[] =
-    activeProject?.files
-      ?.filter((f) => dependencies?.includes(f.title))
-      ?.map((file) => `${file.title}\n`) || []
+  const files: string[] = activeProject?.files?.filter((f) => dependencies?.includes(f.title))?.map((file) => `${file.title}\n`) || []
 
-  return files;
+  return files
 }
-
 
 // Gets contents of all the given files as a string
 export const getFileContents = (dependencies: string[] | undefined): string => {
-  if (!dependencies) {return ''}
+  if (!dependencies) {
+    return ''
+  }
   // Get each file as a ontent item
   const activeProject = store.getState().projects.activeProject
   const files: string =
@@ -47,49 +45,47 @@ export const getLatestUserMessage = (): string => {
   `
 }
 
-
 export const buildPrompt = (context: RequestContext): string => {
-  let prompt = '';
+  let prompt = ''
 
   switch (context.agent) {
     case 'outlineAgent':
       prompt = promptly()
-      .outlineAgent()
-      .userPrompt(getLatestUserMessage())
-      .availableFiles(getAvailableFiles())
-      .providedFiles(getProvidedFiles(context.requestedFiles))
-      .fileContents(getFileContents(context.requestedFiles))
-      .finish();
-      break;
+        .outlineAgent()
+        .userPrompt(getLatestUserMessage())
+        .availableFiles(getAvailableFiles())
+        .providedFiles(getProvidedFiles(context.requestedFiles))
+        .fileContents(getFileContents(context.requestedFiles))
+        .finish()
+      break
     case 'writerAgent':
       prompt = promptly()
-      .writerAgent()
-      .userPrompt(getLatestUserMessage())
-      .availableFiles(getAvailableFiles())
-      .providedFiles(getProvidedFiles(context.requestedFiles))
-      .fileContents(getFileContents(context.requestedFiles))
-      .finish();
+        .writerAgent()
+        .userPrompt(getLatestUserMessage())
+        .availableFiles(getAvailableFiles())
+        .providedFiles(getProvidedFiles(context.requestedFiles))
+        .fileContents(getFileContents(context.requestedFiles))
+        .finish()
 
-      break;
+      break
     case 'criticAgent':
       prompt = promptly()
-      .criticAgent()
-      .userPrompt(getLatestUserMessage())
+        .criticAgent()
+        .userPrompt(getLatestUserMessage())
         .availableFiles(getAvailableFiles())
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
-        .finish();
-      break;
+        .finish()
+      break
     default: // Default to the router prompt
       prompt = promptly()
-
-      .routingAgent()
-      .userPrompt(getLatestUserMessage())
+        .routingAgent()
+        .userPrompt(getLatestUserMessage())
         .availableFiles(getAvailableFiles())
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
-        .finish();
+        .finish()
       return prompt
   }
-  return prompt;
+  return prompt
 }

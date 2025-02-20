@@ -9,7 +9,7 @@ chatListeners.startListening({
   actionCreator: addChatMessage,
   effect: async (action) => {
     if (action.payload.sender === 'User') {
-      const blankContext : RequestContext = {
+      const blankContext: RequestContext = {
         currentStep: 0,
         agent: 'routingAgent'
       }

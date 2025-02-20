@@ -11,7 +11,9 @@
 ## Features
 
 - 🤖 **Guided world-building:** Build your story from ideation to outlines and chapters, with AI assistance at each stage.
+
 * 💬 **Familiar chat interface:** All interactions take place through a familiar chat window. Ask Minstrel questions, give it instructions, strategize on next steps. It's your writing buddy.
+
 - 🤹 **Multi-agent architecture:** Specialized agents (Project Managers, Writers, Critics, Storyline Specialists) work behind the scenes to get the best output. It's like having a whole team.
 - ✍️ **Iterative process:** Revisit and refine any part of the story, including skeletons and outlines. Restructure entire chapters, or just add and remove details.
 - 🔑 **Use your own key:** Minstrel is free to use, just provide your own API key. Currently, Minstrel uses the free (rate-limited) Gemini Flash 2.0 API.
@@ -22,8 +24,7 @@
 <img  src="./resources/process.png">
 </div>
 
-Minstrel follows a structured process to guide users through the writing experience, but *does not take control*. It is intended to allow writers to give as much input as they like, and let the AI model do the rest. Writing style, changes you make to the story, additions, and writing style are all up to you. If you like, **the entire story can be written by you**, the AI is just there to help.
-
+Minstrel follows a structured process to guide users through the writing experience, but _does not take control_. It is intended to allow writers to give as much input as they like, and let the AI model do the rest. Writing style, changes you make to the story, additions, and writing style are all up to you. If you like, **the entire story can be written by you**, the AI is just there to help.
 
 #### The following is a step-by-step guide to writing a novel with Minstrel:
 
@@ -35,7 +36,7 @@ Minstrel follows a structured process to guide users through the writing experie
 <img  margin="20" width="200" src="./resources/chat.png">
 </div>
 
-- From the Skeleton, ask Minstrel to generate a story **Outline**.  The Outline is a more detailed version of the Skeleton, with specific details about the characters, their relationships, and the events that will happen in the story. Environments are described visually, and chapters are broken down into scenes. Again, you may change the Outline as you like - the editing process is totally yours. Minstrel can also help you change the Outline and provide feedback. Try prompts like "Where could we add some foreshadowing for the climax?" or "In the Outline, let's have the main characters meet in Chapter 4 instead of Chapter 5."
+- From the Skeleton, ask Minstrel to generate a story **Outline**. The Outline is a more detailed version of the Skeleton, with specific details about the characters, their relationships, and the events that will happen in the story. Environments are described visually, and chapters are broken down into scenes. Again, you may change the Outline as you like - the editing process is totally yours. Minstrel can also help you change the Outline and provide feedback. Try prompts like "Where could we add some foreshadowing for the climax?" or "In the Outline, let's have the main characters meet in Chapter 4 instead of Chapter 5."
 - Minstrel can then generate **Chapters** based on the outline, or you can write them yourself. Each time you write a chapter, the full outline and previous chapter are passed to the AI to maintain consistency. Writing style, character appearances, and environments are all respected. Edits can be done by hand, or you can give Minstrel directions like "In Chapter 4, let's start Arthur outisde of his house rather than in the living room." or "Have the ship commander check for survivors before pursuing the aliens."
 - Updates made to chapters can then be syndicated back to the Outline. Try "Update the outline to reflect the new changes in Chapter 8" — soon this will happen automatically, but for the first version of Minstrel, you should actively instruct the AI to do it.
 
@@ -48,12 +49,12 @@ All story files (Skeleton, Outline, Chapters) are written in Markdown and saved 
 - **Import/Export:** Export your story files to Word, PDF, or other formats.
 - **Diff-based editing:** See the changes Minstrel is making to your story files and review them before applying.
 
-
 ## Technologies Used
 
 Minstrel is built on Electron, React, Vite, Typescript, TailwindCSS, ShadCN UI, Lucide React, Recharts, ThreeJS, and MDXEditor. It is a bleeding-edge project using React V19, Tailwind V4, and ShadCN so it's technically not production-ready yet. As of February 2025, most of these packages are still in flux and adjusting to the React 19 transition, so expect some rough edges.
 
 Other technologies used include:
+
 - **State Management:** Redux
 - **AI Model:** Gemini API
 - **Language:** TypeScript
@@ -68,15 +69,14 @@ Other technologies used include:
 ## Getting Started
 
 To run Minstrel locally:
+
 1.  Clone the repository.
 2.  Install dependencies using `npm install`.
-4.  Run the application using `npm run dev`.
-3.  Obtain an API key for the Gemini API and set it in the application settings.
-4.  Optional: Set your project directory. If you'd like to use mocks, they've been provided in the mock-projects folder.
-
+3.  Run the application using `npm run dev`.
+4.  Obtain an API key for the Gemini API and set it in the application settings.
+5.  Optional: Set your project directory. If you'd like to use mocks, they've been provided in the mock-projects folder.
 
 # Development
-
 
 ## Contributions
 

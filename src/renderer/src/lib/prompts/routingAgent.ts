@@ -80,14 +80,12 @@ BEGIN USER PROMPT
 
 `
 
-
 export const routingAgent = {
   routingAgent(this) {
-    this.value += prompt();
-    return this;
-  },
+    this.value += prompt()
+    return this
+  }
 }
-
 
 // # SEQUENCES:
 // * If the user You can use the "<sequence>" tool to plan and execute a series of steps.

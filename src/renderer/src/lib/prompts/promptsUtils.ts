@@ -5,13 +5,34 @@ import { criticAgent } from './criticAgent'
 import { tools } from './tools'
 
 export const promptUtils = {
-  availableFiles (files) { this.value +=  `---\n\n# DIRECTORY LISTING: FILES IN PROJECT:\n\n${files.join('\n') || '(The user did not provide a listing of files in this project.)'}\n\n`; return this },
-  providedFiles (files) { this.value +=  `---\n\n# ACTIVE FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}\n\n`; return this },
-  fileContents (item) { this.value +=  `---\n\n# ACTIVE FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}\n\n`; return this },
-  userPrompt (prompt) { this.value +=  `---\n\n# CURRENT TASK FROM USER: \n\n${prompt}\n\n`; return this },
-  parameters (parameters) { this.value +=  `---\n\n# PARAMETERS FOR THE SKELETON:\n\n${parameters}\n\n`; return this },
-  currentStep (currentStep) { this.value +=  `---\n\n# CURRENT STEP: \n\n${currentStep}\n\n`; return this },
-  currentSequence (currentSequence) { this.value +=  `\n\n# A SEQUENCE IS ACTIVE: \n\n${currentSequence}\n\n`; return this },
+  availableFiles(files) {
+    this.value += `---\n\n# DIRECTORY LISTING: FILES IN PROJECT:\n\n${files.join('\n') || '(The user did not provide a listing of files in this project.)'}\n\n`
+    return this
+  },
+  providedFiles(files) {
+    this.value += `---\n\n# ACTIVE FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}\n\n`
+    return this
+  },
+  fileContents(item) {
+    this.value += `---\n\n# ACTIVE FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}\n\n`
+    return this
+  },
+  userPrompt(prompt) {
+    this.value += `---\n\n# CURRENT TASK FROM USER: \n\n${prompt}\n\n`
+    return this
+  },
+  parameters(parameters) {
+    this.value += `---\n\n# PARAMETERS FOR THE SKELETON:\n\n${parameters}\n\n`
+    return this
+  },
+  currentStep(currentStep) {
+    this.value += `---\n\n# CURRENT STEP: \n\n${currentStep}\n\n`
+    return this
+  },
+  currentSequence(currentSequence) {
+    this.value += `\n\n# A SEQUENCE IS ACTIVE: \n\n${currentSequence}\n\n`
+    return this
+  }
 }
 
 const basePrompt = `
@@ -54,12 +75,11 @@ export function promptly() {
     ...promptUtils,
     ...tools,
     beginUserPrompt() {
-      this.value += `\n\n---\n\nEND SYSTEM PROMPT\nBEGIN USER PROMPT`;
-      return this;
+      this.value += `\n\n---\n\nEND SYSTEM PROMPT\nBEGIN USER PROMPT`
+      return this
     },
     finish() {
-      return this.value;
+      return this.value
     }
-  });
+  })
 }
-

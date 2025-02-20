@@ -37,7 +37,7 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
       {fileName ? (
         <>
           <MDXEditor
-            className='h-full'
+            className="h-full"
             markdown={projectState.activeProject?.files.find((file) => file.title == fileName)?.content || ''}
             onChange={handleContentChange}
             onError={handleError}

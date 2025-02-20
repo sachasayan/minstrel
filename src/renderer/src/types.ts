@@ -59,7 +59,6 @@ export interface RequestContext {
   requestedFiles?: string[]
 }
 
-
 export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
 
 export type Genre =
