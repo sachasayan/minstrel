@@ -1,4 +1,4 @@
-import { promptly() } from './promptsUtils'
+import { promptly } from './promptsUtils'
 import { store } from '@/lib/store/store'
 import { RequestContext } from '@/types'
 
@@ -41,7 +41,7 @@ ${file.content}
   return files
 }
 
-export const getLatestUserMesage = (): string => {
+export const getLatestUserMessage = (): string => {
   return `
   ${store.getState().chat.chatHistory.findLast((message) => message.sender === 'User')?.text}
   `
@@ -54,41 +54,42 @@ export const buildPrompt = (context: RequestContext): string => {
   switch (context.agent) {
     case 'outlineAgent':
       prompt = promptly()
-      .basePrompt()
       .outlineAgent()
-      .userPrompt(getLatestUserMesage())
+      .userPrompt(getLatestUserMessage())
       .availableFiles(getAvailableFiles())
       .providedFiles(getProvidedFiles(context.requestedFiles))
       .fileContents(getFileContents(context.requestedFiles))
+      .finish();
       break;
     case 'writerAgent':
       prompt = promptly()
-      .basePrompt()
       .writerAgent()
-      .userPrompt(getLatestUserMesage())
+      .userPrompt(getLatestUserMessage())
       .availableFiles(getAvailableFiles())
       .providedFiles(getProvidedFiles(context.requestedFiles))
       .fileContents(getFileContents(context.requestedFiles))
+      .finish();
 
       break;
     case 'criticAgent':
       prompt = promptly()
-        .basePrompt()
-        .criticAgent()
-        .userPrompt(getLatestUserMesage())
+      .criticAgent()
+      .userPrompt(getLatestUserMessage())
         .availableFiles(getAvailableFiles())
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
+        .finish();
       break;
     default: // Default to the router prompt
       prompt = promptly()
-        .basePrompt()
-        .routingAgent()
-        .userPrompt(getLatestUserMesage())
+
+      .routingAgent()
+      .userPrompt(getLatestUserMessage())
         .availableFiles(getAvailableFiles())
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
-
-  return prompt
+        .finish();
+      return prompt
   }
+  return prompt;
 }

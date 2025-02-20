@@ -1,6 +1,6 @@
 
 //TOOL USE RULES//
-const tools = (tools) => `
+const toolPrompt = (tools) => `
 
 ---
 
@@ -75,7 +75,7 @@ const tools = (tools) => `
 
 export const tools = {
   addTools(tools) {
-    this.value += tools();
+    this.value += toolPrompt(true);
     return this;
   },
 }

@@ -68,7 +68,7 @@ BEGIN USER PROMPT
 
 //EXPORT
 export const criticAgent = {
-  criticAgentPrompt(this) {
+  criticAgent(this) {
     this.value += prompt();
     return this;
   },

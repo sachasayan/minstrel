@@ -30,14 +30,14 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // Add the message to the chat history
 // Take action with tools: Update the relevant files with the new content, etc.
 // If files were requested, send a new response with file contents
-const processResponse = (responseString: string): RequestContext => {
+const processResponse = (responseString: string): RequestContext | null => {
   let response;
   try {
     response = parser.parse(`<root>${responseString}</root>`).root
   } catch (parsingError) {
     console.error('XML Parsing Error:', parsingError);
     store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing AI response. Please check the response format.' }));
-    throw new Error('Error parsing AI response. Please check the response format.');
+    return null;
   }
   const context : RequestContext = {
     currentStep: 0,
@@ -53,12 +53,12 @@ const processResponse = (responseString: string): RequestContext => {
   }
 
   if (!!response?.route_to) {
+    console.log('Switching agents to ' + response.route_to)
     context.agent = response.route_to
   }
 
   if (!!response?.read_file) {
     const files = response.read_file.map((item) => `${item}`).join(' ')
-    console.log(response.read_file)
     store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files... ${files}` }))
     context.requestedFiles = response.read_file
   }
@@ -101,6 +101,7 @@ export const sendMessage = async (context: RequestContext) => {
     ...context,
     currentStep: context.currentStep || 0
   })
+  console.log(prompt)
   try {
     console.groupCollapsed('User Prompt')
     console.log(prompt)
@@ -114,10 +115,13 @@ export const sendMessage = async (context: RequestContext) => {
     console.log('AI Response: \n \n', response)
     const newContext = processResponse(response)
     store.dispatch(resolvePendingChat())
-    if (!!newContext.requestedFiles || !!newContext.sequenceInfo) {
+    if (newContext === null) {
+      return; // Stop recursion if processResponse failed
+    }
+    if (newContext.agent !== 'routingAgent') {
       await sendMessage({
-        ...context,
-        currentStep: context.currentStep + 1
+        ...newContext,
+        currentStep: context.currentStep + 1 // Keeping currentStep from the original context
       })
     }
   } catch (error) {
@@ -146,7 +150,7 @@ export const sendMessage = async (context: RequestContext) => {
 
 export const generateSkeleton = async (parameters: { [key: string]: any }): Promise<void> => {
   const prompt = buildPrompt({
-    agent: 'writerAgent',
+    agent: 'routingAgent',
     currentStep: 0,
     carriedContext: JSON.stringify(parameters, null, 2),
     requestedFiles: undefined,
@@ -158,6 +162,10 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     console.log('AI Response: \n \n', response)
     const context = processResponse(response)
     store.dispatch(resolvePendingChat())
+    if (context === null) {
+      console.error('processResponse returned null in generateSkeleton, not calling sendMessage');
+      return;
+    }
     await sendMessage(context);
   } catch (error) {
     console.error('Failed to send chat message:', error)

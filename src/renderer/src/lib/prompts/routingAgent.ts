@@ -82,7 +82,7 @@ BEGIN USER PROMPT
 
 
 export const routingAgent = {
-  routingAgentPrompt(this) {
+  routingAgent(this) {
     this.value += prompt();
     return this;
   },

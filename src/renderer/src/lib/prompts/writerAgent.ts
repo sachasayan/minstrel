@@ -50,7 +50,7 @@ BEGIN USER PROMPT
 
 
 export const writerAgent = {
-  writerAgentPrompt(this) {
+  writerAgent(this) {
     this.value += prompt();
     return this;
   },
