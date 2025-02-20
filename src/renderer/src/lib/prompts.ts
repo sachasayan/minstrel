@@ -2,7 +2,7 @@ const hr = `\n\n---\n\n`
 
 //
 
-const getBasePrompt = () => `
+const basePrompt = () => `
 BEGIN SYSTEM PROMPT
 
 # INTRODUCTION:
@@ -133,23 +133,23 @@ BEGIN TASK PROMPT
 
 
 //CURRENT TASK + STATE //
-const getAvailableFiles = (files) => `${hr}\n# DIRECTORY LISTING: FILES IN PROJECT:\n\n${files.join('\n') || '(The user did not provide a listing of files in this project.)'}`
-const getProvidedFiles = (files) => `${hr}\n# ACTIVE FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}`
-const getFileContents = (item) => `${hr}\n# ACTIVE FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}`
-const getUserPrompt = (prompt) => `${hr}\n# CURRENT TASK FROM USER: \n\n${prompt}\n`
+const availableFiles = (files) => `${hr}\n# DIRECTORY LISTING: FILES IN PROJECT:\n\n${files.join('\n') || '(The user did not provide a listing of files in this project.)'}`
+const providedFiles = (files) => `${hr}\n# ACTIVE FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}`
+const fileContents = (item) => `${hr}\n# ACTIVE FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}`
+const userPrompt = (prompt) => `${hr}\n# CURRENT TASK FROM USER: \n\n${prompt}\n`
 
 // STORYLINE PARAMTERS ONLY USED FOR THE INITIAL BUILD//
-const getParameters = (parameters) => `${hr}\n\n# PARAMETERS FOR THE SKELETON:\n\n${JSON.stringify(parameters, null, 2)}`
+const parameters = (parameters) => `${hr}\n\n# PARAMETERS FOR THE SKELETON:\n\n${JSON.stringify(parameters, null, 2)}`
 
 // EXTRA META INCL CONTEXT //
-const getCurrentStep = (currentStep) => `\n# CURRENT STEP: \n\n${currentStep}\n`
-const getCurrentSequence = (currentSequence) => `\n# A SEQUENCE IS ACTIVE: \n\n${currentSequence}\n`
+const currentStep = (currentStep) => `\n# CURRENT STEP: \n\n${currentStep}\n`
+const currentSequence = (currentSequence) => `\n# A SEQUENCE IS ACTIVE: \n\n${currentSequence}\n`
 
-// const getChatHistory = (chatHistory: { sender: string; text: string }[]): string => `${hr}\nCHAT HISTORY:\n\n${chatHistory.map((message) => `${message.sender}: ${message.text}`).join('\n \n')}`
+// const chatHistory = (chatHistory: { sender: string; text: string }[]): string => `${hr}\nCHAT HISTORY:\n\n${chatHistory.map((message) => `${message.sender}: ${message.text}`).join('\n \n')}`
 
 
 //TOOL USE RULES//
-const getTools = () => `
+const tools = () => `
 ${hr}
 # CURRENTLY AVAILABLE TOOLS:
 * <think>
@@ -221,13 +221,13 @@ ${hr}
 //EXPORT
 
 export const prompts = {
-  getParameters,
-  getBasePrompt,
-  getAvailableFiles,
-  getProvidedFiles,
-  getUserPrompt,
-  getCurrentSequence,
-  getCurrentStep,
-  getFileContents,
-  getTools
+  parameters,
+  basePrompt,
+  availableFiles,
+  providedFiles,
+  userPrompt,
+  currentSequence,
+  currentStep,
+  fileContents,
+  tools
 }

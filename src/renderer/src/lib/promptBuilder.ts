@@ -27,14 +27,12 @@ export const getFileContents = (dependencies: string[]): string => {
       .filter((f) => dependencies.includes(f.title))
       .map(
         (file) => `
+
 ---
 
 ${file.title}:
 
 ${file.content}
-
-
-
 `
       )
       .join('\n') || ''
@@ -50,33 +48,32 @@ export const getLatestUserMesage = (): string => {
 
 // Builds the initial prompt for the Skeleton based on parameters
 export const buildInitial = (parameters: object): string => {
-  let prompt = prompts.getBasePrompt()
+  let prompt = prompts.basePrompt()
 
   prompt += "\n\n# GENERATE THE SKELETON \n\n"
 
-  prompt += prompts.getParameters(parameters)
+  prompt += prompts.parameters(parameters)
   return prompt
 }
 
 export const buildPrompt = (context: RequestContext): string => {
-  let prompt = prompts.getBasePrompt()
+  let prompt = prompts.basePrompt()
 
-
-  prompt += prompts.getAvailableFiles(getAvailableFiles())
-  prompt += prompts.getProvidedFiles(getProvidedFiles(context.requestedFiles))
+  prompt += prompts.availableFiles(getAvailableFiles())
+  prompt += prompts.providedFiles(getProvidedFiles(context.requestedFiles))
   // Add the user message to the prompt
-  prompt += prompts.getUserPrompt(getLatestUserMesage())
+  prompt += prompts.userPrompt(getLatestUserMesage())
   // Let the prompt know what files are available
 
-  context.sequenceInfo ? prompt += prompts.getCurrentSequence(context.sequenceInfo) : null
-  context.currentStep ? prompt += prompts.getCurrentStep(context.currentStep) : null
+  context.sequenceInfo ? prompt += prompts.currentSequence(context.sequenceInfo) : null
+  context.currentStep ? prompt += prompts.currentStep(context.currentStep) : null
 
   if (context.requestedFiles) {
     // Get the contents for the given dependencies
-    prompt += prompts.getFileContents(getFileContents(context.requestedFiles))
+    prompt += prompts.fileContents(getFileContents(context.requestedFiles))
   }
 
-  prompt += prompts.getTools()
+  prompt += prompts.tools()
 
   return prompt
 }
