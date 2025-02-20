@@ -10,13 +10,11 @@
 
 ## Features
 
-- **AI-Assisted Novel Writing:** Minstrel guides users through a structured novel-writing process, from initial story skeleton to detailed outlines and chapter generation, with AI assistance at each stage.
-* **Familiar chat interface:** All interactions with Minstrel happen through a familiar chat window. Ask it questions, give it instructions, strategize on next steps. It's your writing buddy.
-- **Multi-Agent Workflow:** Utilizes a multi-agent architecture with specialized agents (Project Managers, Writers, Critics, Storyline Specialists) jumping in trans efficient task delegation and processing.
-- **Iterative Process:** Supports iterative writing, allowing users to revisit and refine any part of their novel, including skeletons, outlines, and chapters.
-- **Contextual Awareness:** Provides the AI model with relevant context at each stage, ensuring consistency and coherence in the generated content.
-- **User Customization:** Enables users to customize story parameters and edit AI-generated content to align with their creative vision.
-- **Use your own key:** Minstrel is free to use, just provide your own API key. Currently, Minstrel uses the free (rate-limited) Gemini Flash 2.0 API.
+- 🤖 **Guided world-building:** Build your story from ideation to outlines and chapters, with AI assistance at each stage.
+* 💬 **Familiar chat interface:** All interactions take place through a familiar chat window. Ask Minstrel questions, give it instructions, strategize on next steps. It's your writing buddy.
+- 🤹 **Multi-agent architecture:** Specialized agents (Project Managers, Writers, Critics, Storyline Specialists) work behind the scenes to get the best output. It's like having a whole team.
+- ✍️ **Iterative process:** Revisit and refine any part of the story, including skeletons and outlines. Restructure entire chapters, or just add and remove details.
+- 🔑 **Use your own key:** Minstrel is free to use, just provide your own API key. Currently, Minstrel uses the free (rate-limited) Gemini Flash 2.0 API.
 
 # Writing a Novel with Minstrel
 
@@ -31,7 +29,7 @@ Minstrel follows a structured process to guide users through the writing experie
 
 - Open Minstrel and select the "Add Project" option.
 - Minstrel will ask you some basic questions about your project, such as the name, genre, and storyline details you have in mind.
-- From those parameters, Minstrel will automatically generate a broad-strokes **Skeleton** for your story. A skeleton is a basic suggested structure with characters, chapters, and environments described in abstract. Change the Skeleton as much as you like — add or remove details, characters, names, chapters, or storyline events. 
+- From those parameters, Minstrel will automatically generate a broad-strokes **Skeleton** for your story. A skeleton is a basic suggested structure with characters, chapters, and environments described in abstract. Change the Skeleton as much as you like — add or remove details, characters, names, chapters, or storyline events.
 
 <div style="padding: 20px; padding-left:50px; float:right">
 <img  margin="20" width="200" src="./resources/chat.png">
@@ -43,12 +41,12 @@ Minstrel follows a structured process to guide users through the writing experie
 
 All story files (Skeleton, Outline, Chapters) are written in Markdown and saved as plain text, so you aren't locked into a proprietary file format. Edit them the same you would any other text file, from any other program. Go nuts!
 
-#### Other Features coming soon: 
+#### Other Features coming soon:
 
 - **Project Analytics:** Track chapter-by-chapter word counts, daily streaks, and other project metrics. Stay on top of your writing progress.
 - **Automatic outline updates:** Minstrel will automatically update your outline as you write chapters, flagging you to revisit or update sections as needed.
-- **Import/Export:** Export your story files to Word, PDF, or other formats. 
-- **Diff-based editing:** See the changes Minstrel is making to your story files and review them before applying. 
+- **Import/Export:** Export your story files to Word, PDF, or other formats.
+- **Diff-based editing:** See the changes Minstrel is making to your story files and review them before applying.
 
 
 ## Technologies Used
