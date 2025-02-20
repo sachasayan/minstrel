@@ -24,11 +24,9 @@ The Memory Bank consists of required core files and optional context files, all 
 ```mermaid
 flowchart TD
     PB[projectbrief.md] --> PC[productContext.md]
-    PB --> SP[systemPatterns.md]
     PB --> TC[techContext.md]
 
     PC --> AC[activeContext.md]
-    SP --> AC
     TC --> AC
 
     AC --> P[progress.md]
@@ -50,16 +48,13 @@ flowchart TD
 3. `memory-bank/activeContext.md`
    - Current work focus
 
-4. `memory-bank/systemPatterns.md`
+4. `memory-bank/techContext.md`
+   - Technologies used
    - System architecture
+   - Dependencies
    - Key technical decisions
    - Component relationships
-
-5. `memory-bank/techContext.md`
-   - Technologies used
    - Development setup
-   - Technical constraints
-   - Dependencies
 
 6. `memory-bank/progress.md`
    - Phased development plan, updated as work progresses
