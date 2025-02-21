@@ -19,7 +19,7 @@ const Intro = (): JSX.Element => {
 
   const handleProjectSelect = (projectId: string) => {
     if (projectId == 'add') {
-      setShowBookOutlineWizard(true);
+      setShowBookOutlineWizard(true)
       //dispatch(setActiveView('wizard'))
       return
     }

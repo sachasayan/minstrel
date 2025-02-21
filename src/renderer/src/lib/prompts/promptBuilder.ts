@@ -60,19 +60,15 @@ export const buildPrompt = (context: RequestContext): string => {
       break
     case 'outlineAgent':
       if (context.currentStep >= 0) {
-      prompt = promptly()
-        .outlineAgent()
-        .userPrompt(getLatestUserMessage())
-        .availableFiles(getAvailableFiles())
-        .providedFiles(getProvidedFiles(context.requestedFiles))
-        .fileContents(getFileContents(context.requestedFiles))
-        .finish()
-      } else {
         prompt = promptly()
-        .outlineAgent()
-        .userPrompt(getLatestUserMessage())
-        .parameters(context.carriedContext)
-        .finish()
+          .outlineAgent()
+          .userPrompt(getLatestUserMessage())
+          .availableFiles(getAvailableFiles())
+          .providedFiles(getProvidedFiles(context.requestedFiles))
+          .fileContents(getFileContents(context.requestedFiles))
+          .finish()
+      } else {
+        prompt = promptly().outlineAgent().userPrompt(getLatestUserMessage()).parameters(context.carriedContext).finish()
       }
 
       break
@@ -95,10 +91,8 @@ export const buildPrompt = (context: RequestContext): string => {
         .fileContents(getFileContents(context.requestedFiles))
         .finish()
       break
-      default: // Default throws an error
-        throw new Error(`Invalid agent type received from AI: ${context.agent}.`)
-
-
+    default: // Default throws an error
+      throw new Error(`Invalid agent type received from AI: ${context.agent}.`)
   }
   return prompt
 }

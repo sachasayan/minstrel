@@ -32,9 +32,9 @@ interface WizardContextProps {
 const WizardContext = createContext<WizardContextProps>({
   totalSteps: 4,
   currentStep: 0,
-  setCurrentStep: () => { },
+  setCurrentStep: () => {},
   formData: {},
-  setFormData: () => { }
+  setFormData: () => {}
 })
 
 // Custom hook for using wizard context
@@ -122,7 +122,6 @@ const Navigation = () => {
 
   return (
     <DialogFooter className="flex justify-between">
-
       <div className="flex flex-1"></div>
       {currentStep > 0 && (
         <Button className="mx-1" onClick={handleBack}>
@@ -413,7 +412,12 @@ export const BookOutlineWizard = ({ open, onOpenChange }: { open: boolean; onOpe
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps }}>
-        <DialogContent className="sm:max-w-[800px]" onInteractOutside={(e) => { e.preventDefault(); }}>
+        <DialogContent
+          className="sm:max-w-[800px]"
+          onInteractOutside={(e) => {
+            e.preventDefault()
+          }}
+        >
           <div className="grid grid-cols-5 gap-4">
             <div className="col-span-2">
               <Torrent />

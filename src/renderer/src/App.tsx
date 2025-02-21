@@ -72,8 +72,6 @@ export default function App(): JSX.Element {
         <Toaster position="bottom-center" richColors />
       </div>
 
-
-
       <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
         <DialogContent className="min-w-[800px]">
           <DialogHeader>
