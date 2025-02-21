@@ -9,11 +9,13 @@ interface ChatMessage {
 interface ChatState {
   chatHistory: ChatMessage[]
   pendingChat: boolean
+  actionSuggestions: string[] // Add actionSuggestions to state
 }
 
 const initialState: ChatState = {
   chatHistory: [{ sender: 'Gemini', text: 'Hello there! Ask me anything about your story. I can help you build an outline, write a chapter, and more.' }],
-  pendingChat: false
+  pendingChat: false,
+  actionSuggestions: [] // Initialize actionSuggestions as empty array
 }
 
 const chatSlice = createSlice({
@@ -29,17 +31,21 @@ const chatSlice = createSlice({
     addChatMessage: (state, action: PayloadAction<ChatMessage>) => {
       //Chat messages are added to the end of the array
       if (action.payload.sender === 'User') {
+        state.actionSuggestions = []
         state.pendingChat = true
       }
       state.chatHistory.push(action.payload)
       if (state.chatHistory.length > 20) {
         state.chatHistory = state.chatHistory.slice(-20)
       }
+    },
+    setActionSuggestions: (state, action: PayloadAction<string[]>) => {
+      state.actionSuggestions = action.payload
     }
   }
 })
 
-export const { setChatHistory, addChatMessage, resolvePendingChat } = chatSlice.actions
+export const { setChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions } = chatSlice.actions
 
 export const selectChat = (state: RootState) => state.chat
 

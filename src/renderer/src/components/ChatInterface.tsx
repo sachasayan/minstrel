@@ -88,50 +88,17 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
     }
   }
 
-  const quickActions: (string | null)[] = [null, null, null]
-  if (chatHistory.length === 0) {
-    if (!project) {
-      quickActions[0] = 'Create the Skeleton'
-    } else if (!project.files.find((file) => file.title === 'Skeleton.md')) {
-      quickActions[0] = 'Create the Skeleton'
-    } else if (!project.files.find((file) => file.title === 'Outline.md')) {
-      quickActions[0] = 'Create the Outline'
-    } else {
-      const chapterRegex = /Chapter-(\d+)\.md/
-      const chapters = project.files.map((file) => chapterRegex.exec(file.title)).filter((match) => match !== null) as RegExpExecArray[]
-
-      const chapterNumbers = chapters.map((match) => parseInt(match[1], 10))
-      const nextChapter = chapterNumbers.length > 0 ? Math.max(...chapterNumbers) + 1 : 1
-      quickActions[0] = `Write Chapter ${nextChapter}`
-    }
-  }
+  const actionSuggestions = useSelector((state: RootState) => selectChat(state).actionSuggestions)
 
   return (
     <div ref={ref} className={`fixed bottom-4 right-4 z-50 ${expanded ? 'w-80' : 'w-0'}`} onFocus={handleFocus} onBlur={handleBlur}>
-      {quickActions[0] && (
-        <div className={`absolute transition-all bottom-0 py-4 pl-1 duration-200 ${expanded ? 'right-0' : 'right-20'} `}>
-          <Button onClick={() => handleNextStage(quickActions[0] || '')} className="right-0 transition-all">
-            {quickActions[0]}
+      <div className={`duration-200 w-0 h-0 flex flex-col-reverse items-end absolute right-[100%] bottom-[0px] transition-all  bg-black `}>
+        {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+          <Button onClick={() => handleNextStage(suggestion)} key={index} className={` ${expanded ? 'opacity-100' : 'opacity-0'} transition-all py-4 mx-4 my-4  duration-500`}>
+            {suggestion}
           </Button>
-
-          {quickActions[1] && (
-            <div className={`absolute transition-all bottom-0 py-4 pl-1 duration-400  ${expanded ? '-left-0' : '-left-full'}`}>
-              <Button onClick={() => handleNextStage(quickActions[1] || '')} className=" transition-all">
-                {quickActions[1]}
-              </Button>
-
-              {quickActions[2] && (
-                <div className={`absolute transition-all bottom-0 py-4 pl-1 duration-600  ${expanded ? '-left-0' : '-left-full'}`}>
-                  <Button onClick={() => handleNextStage(quickActions[2] || '')} className=" transition-all">
-                    {quickActions[2]}
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
+        ))}
+      </div>
       <button
         onClick={toggleExpanded}
         className={`z-2 bg-white shadow-lg rounded-lg border flex flex-col right-0 bottom-0 absolute overflow-hidden transition-[opacity, transform] duration-500 ${

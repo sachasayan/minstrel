@@ -1,6 +1,6 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
-import { addChatMessage, resolvePendingChat } from '@/lib/store/chatSlice'
+import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
 import { updateFile } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
@@ -84,6 +84,13 @@ const processResponse = (responseString: string): RequestContext | null => {
 
   if (!!response?.message) {
     store.dispatch(addChatMessage({ sender: 'Gemini', text: response.message }))
+  }
+
+  if (!!response?.action_suggestion) {
+    const suggestions = response.action_suggestion.map((item) => `${item}`).slice(0, 3)
+    store.dispatch(setActionSuggestions(suggestions))
+  } else {
+    store.dispatch(setActionSuggestions([])) // Clear suggestions if not present
   }
 
   return context
