@@ -7,7 +7,7 @@ interface AppSettings {
   workingRootDirectory?: string | null
 }
 
-export const loadAppSettings = async (event): Promise<AppSettings> => {
+export const loadAppSettings = async (_event): Promise<AppSettings> => {
   const appSettings: any = (await settings.get('settings')) || {}
 
   // Expand tilde in workingRootDirectory
@@ -18,7 +18,7 @@ export const loadAppSettings = async (event): Promise<AppSettings> => {
   return appSettings as AppSettings
 }
 
-export const saveAppSettings = async (event, config: AppSettings) => {
+export const saveAppSettings = async (_event, config: AppSettings) => {
   await settings.set('settings', {
     api: config.api as any,
     apiKey: config.apiKey as any,

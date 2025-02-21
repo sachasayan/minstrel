@@ -4,7 +4,7 @@ import * as fs from 'fs/promises'
 
 const homedir = os.homedir()
 
-export const handleReadDirectory = async (event, dirPath) => {
+export const handleReadDirectory = async (_event, dirPath) => {
   if (typeof dirPath !== 'string') {
     console.error('dirPath is not a string:', dirPath)
     return []
@@ -22,7 +22,7 @@ export const handleReadDirectory = async (event, dirPath) => {
   }
 }
 
-export const handleReadFile = async (event, filePath) => {
+export const handleReadFile = async (_event, filePath) => {
   const resolvedPath = filePath.replace('~', homedir) // Resolve "~" to user's home directory
   console.log('resolvedPath', resolvedPath)
   try {
@@ -34,7 +34,7 @@ export const handleReadFile = async (event, filePath) => {
   }
 }
 
-export const handleWriteFile = async (event, filePath, content) => {
+export const handleWriteFile = async (_event, filePath, content) => {
   const resolvedPath = filePath.replace('~', homedir) // Resolve "~" to user's home directory
   console.log('resolvedPath', resolvedPath)
   try {
@@ -46,7 +46,7 @@ export const handleWriteFile = async (event, filePath, content) => {
   }
 }
 
-export const handleMakeDirectory = async (event, dirPath) => {
+export const handleMakeDirectory = async (_event, dirPath) => {
   const resolvedPath = dirPath.replace('~', homedir) // Resolve "~"
   console.log('Making directory at:', resolvedPath)
   try {

@@ -7,11 +7,15 @@
     "src/preload/*.d.ts"
   ],
   "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/renderer/src/*"],
+      "@/*": [
+        "./src/renderer/src/*"
+      ],
     }
   }
 }

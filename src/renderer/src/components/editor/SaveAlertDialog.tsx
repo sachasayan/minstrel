@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function AlertDialogDemo() {

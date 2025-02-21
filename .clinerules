@@ -9,6 +9,7 @@
 - If I do not know the answer to a question, say so instead of guessing.
 - I don't clean up unused imports or variables which existed in a file before I started working on it.
 - I never clean up whitespace or empty lines.
+- I don't add semicolons to the end of lines in JavaScript or TypeScript files.
 
 # Cline/Roo's Memory Bank
 

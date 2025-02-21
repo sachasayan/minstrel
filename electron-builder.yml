@@ -39,7 +39,7 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-icon: build/icon.png
+icon: resources/icon.png
 publish:
   provider: generic
   url: https://example.com/auto-updates

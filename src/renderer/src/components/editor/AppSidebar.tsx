@@ -74,13 +74,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         return false
       }
       dispatch(setProjectHasLiveEdits(false))
+      return true
     }
+    return false
   }
   const saveAndClose = async () => {
     const result = await handleSave()
     if (result) {
       handleClose()
     }
+    return false
   }
   const handleCloseSafe = async () => {
     if (projectsState.projectHasLiveEdits) {
@@ -88,6 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return false
     }
     handleClose()
+    return true
   }
 
   return (
