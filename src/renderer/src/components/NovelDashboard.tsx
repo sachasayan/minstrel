@@ -46,7 +46,7 @@ function getCharacterFrequencyData(activeProject: Project): any[] {
 
       characters.forEach((char, index) => {
         const escapedName = char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        chapterData[char.name] = (file.content.match(`\\b${escapedName}\\b`) || []).length
+        chapterData[char.name] = (file.content.match(new RegExp(`\\b${escapedName}\\b`, 'g')) || []).length
         chapterData[`${char.name}_color`] = colors[index % colors.length] // Store color
       })
       return chapterData
@@ -139,7 +139,7 @@ export default function NovelDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Character Mentions per Chapter</CardTitle>
-            <CardDescription>Stacked bar graph showing mentions of each character per chapter</CardDescription>
+            <CardDescription>Line graph showing mentions of each character per chapter</CardDescription>
           </CardHeader>
           <CardContent>
             {activeProject ? (
@@ -153,12 +153,12 @@ export default function NovelDashboard() {
                 }, {})}
                 className="h-[400px]"
               >
-                <BarChart data={getCharacterFrequencyData(activeProject)}>
+                <LineChart data={getCharacterFrequencyData(activeProject)}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="chapter"
                     tickFormatter={(tick: string) => {
-                      const match = tick.match(/(\d+)/)
+                      const match = tick.match(/(\\d+)/)
                       return match ? match[1] : tick
                     }}
                   />
@@ -166,9 +166,9 @@ export default function NovelDashboard() {
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
                   {extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline.md')?.content || '').map((character, index) => (
-                    <Bar key={character.name} dataKey={character.name} stackId="a" fill={colors[index % colors.length]} />
+                    <Line key={character.name} type="monotone" dataKey={character.name} stroke={colors[index % colors.length]} strokeWidth={2} />
                   ))}
-                </BarChart>
+                </LineChart>
               </ChartContainer>
             ) : (
               <p>No active project data available.</p>
