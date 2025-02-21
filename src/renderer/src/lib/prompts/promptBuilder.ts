@@ -49,7 +49,17 @@ export const buildPrompt = (context: RequestContext): string => {
   let prompt = ''
 
   switch (context.agent) {
+    case 'routingAgent': // Default to the router prompt
+      prompt = promptly()
+        .routingAgent()
+        .userPrompt(getLatestUserMessage())
+        .availableFiles(getAvailableFiles())
+        .providedFiles(getProvidedFiles(context.requestedFiles))
+        .fileContents(getFileContents(context.requestedFiles))
+        .finish()
+      break
     case 'outlineAgent':
+      if (context.currentStep >= 0) {
       prompt = promptly()
         .outlineAgent()
         .userPrompt(getLatestUserMessage())
@@ -57,6 +67,14 @@ export const buildPrompt = (context: RequestContext): string => {
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
         .finish()
+      } else {
+        prompt = promptly()
+        .outlineAgent()
+        .userPrompt(getLatestUserMessage())
+        .parameters(context.carriedContext)
+        .finish()
+      }
+
       break
     case 'writerAgent':
       prompt = promptly()
@@ -77,15 +95,10 @@ export const buildPrompt = (context: RequestContext): string => {
         .fileContents(getFileContents(context.requestedFiles))
         .finish()
       break
-    default: // Default to the router prompt
-      prompt = promptly()
-        .routingAgent()
-        .userPrompt(getLatestUserMessage())
-        .availableFiles(getAvailableFiles())
-        .providedFiles(getProvidedFiles(context.requestedFiles))
-        .fileContents(getFileContents(context.requestedFiles))
-        .finish()
-      return prompt
+      default: // Default throws an error
+        throw new Error(`Invalid agent type received from AI: ${context.agent}.`)
+
+
   }
   return prompt
 }

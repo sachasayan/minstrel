@@ -15,8 +15,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { setActiveView } from '@/lib/store/appStateSlice'
-import { useDispatch } from 'react-redux'
+import { selectSettingsState } from '@/lib/store/settingsSlice'
+import { useDispatch, useSelector } from 'react-redux'
 import { generateSkeleton } from '@/lib/services/chatManager' // Import generateSkeleton
 import { setActiveProject } from '@/lib/store/projectsSlice'
 
@@ -349,6 +349,7 @@ const SummaryPage = () => {
   const { currentStep, formData, totalSteps } = useWizard()
   const dispatch = useDispatch()
   const [requestPending, setRequestPending] = useState(false)
+  const settingsState = useSelector(selectSettingsState)
 
   const handleDream = async () => {
     const projectTitle = sanitizeFilename(formData.title || 'Untitled Project')
@@ -358,7 +359,7 @@ const SummaryPage = () => {
       setActiveProject({
         id: projectId,
         title: projectTitle,
-        fullPath: `~/Documents/Minstrel/${projectTitle}`,
+        fullPath: `${settingsState?.workingRootDirectory}/${projectTitle}`,
         files: [],
         genre: formData.genre,
         summary: '',

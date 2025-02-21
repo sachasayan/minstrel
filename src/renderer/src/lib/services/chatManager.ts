@@ -149,8 +149,8 @@ export const sendMessage = async (context: RequestContext) => {
 
 export const generateSkeleton = async (parameters: { [key: string]: any }): Promise<void> => {
   const prompt = buildPrompt({
-    agent: 'routingAgent',
-    currentStep: 0,
+    agent: 'outlineAgent',
+    currentStep: -1, // Special trigger for the outline agent to generate the skeleton
     carriedContext: JSON.stringify(parameters, null, 2),
     requestedFiles: undefined,
     sequenceInfo: undefined
