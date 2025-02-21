@@ -55,11 +55,17 @@ export const projectsSlice = createSlice({
         state.activeProject.year = action.payload.year
         state.activeProject.totalWordCount = action.payload.totalWordCount
       }
+    },
+    updateReviews: (state, action: PayloadAction<any>) => {
+      if (state.activeProject) {
+        state.activeProject.expertSuggestions = action.payload
+        state.projectHasLiveEdits = true
+      }
     }
   }
 })
 
-export const { setActiveProject, setActiveProjectFromFragment, setProjectHasLiveEdits, setAllFilesAsSaved, updateFile, updateParameters } = projectsSlice.actions
+export const { setActiveProject, setActiveProjectFromFragment, setProjectHasLiveEdits, setAllFilesAsSaved, updateFile, updateParameters, updateReviews } = projectsSlice.actions
 
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject

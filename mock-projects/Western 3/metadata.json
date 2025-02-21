@@ -7,22 +7,22 @@
   "totalWordCount": 80000,
   "expertSuggestions": [
     {
-      "expert": "Alice Johnson",
-      "publication": "Literary Insights",
-      "rating": 4.5,
-      "comment": "A captivating tale that weaves magic and words beautifully. The character development of Aria is particularly strong, but the pacing in the middle chapters could be tightened."
+      "name": "Dr. Evelyn Hayes",
+      "expertise": "Western Genre Historian",
+      "critique": "The setting and tropes are classic, yet the initial chapters lack historical depth. Redemption feels generic. More authentic details about daily life, social tensions, and economic realities could enrich the narrative.",
+      "rating": 3
     },
     {
-      "expert": "Michael Chen",
-      "publication": "Fantasy Frontier",
-      "rating": 4,
-      "comment": "The world-building is exceptional, creating a unique magic system around the power of words. However, some secondary characters feel underdeveloped and could benefit from more depth."
+      "name": "Arthur Sterling",
+      "expertise": "Character Development Specialist",
+      "critique": "The Stranger's initial mystery is intriguing, but the backstory is lacking. Sheriff Barlow needs more complexity, and Sarah isn't present in the chapters. Deeper exploration of motivations is needed.",
+      "rating": 2
     },
     {
-      "expert": "Sophia Rodriguez",
-      "publication": "The Quill Review",
-      "rating": 4.8,
-      "comment": "A masterful blend of fantasy and linguistic artistry. The plot twists are unexpected and delightful. Consider expanding on the historical context of the word-weaver conflict for even richer lore."
+      "name": "Jane Cardinal",
+      "expertise": "Plot Structure Consultant",
+      "critique": "The plot progresses linearly, but slowly. The narrative jumps from introduction to conflict setup with little rising action. The confrontation with Coyote Jack needs to happen sooner.",
+      "rating": 3
     }
   ]
 }

@@ -37,10 +37,10 @@ export interface ProjectFile {
 }
 
 export interface ExpertSuggestion {
-  expert: string
-  publication?: string
+  name: string
+  expertise?: string
   rating: number
-  comment: string
+  critique: string
 }
 // interface SceneOutline {
 //   description: string

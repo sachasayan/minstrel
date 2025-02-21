@@ -5,5 +5,24 @@
   "author": "Sacha",
   "year": 2020,
   "totalWordCount": 80000,
-  "expertSuggestions": []
+  "expertSuggestions": [
+    {
+      "name": "Dr. Evelyn Reed",
+      "expertise": "Literary Critic (Dystopian Fiction)",
+      "critique": "The story shows promise, but relies heavily on familiar dystopian tropes.  Anya's discovery of the library feels rushed, and Elias needs more depth. The writing lacks originality.",
+      "rating": 3
+    },
+    {
+      "name": "Professor Alistair Davies",
+      "expertise": "Historian (Authoritarian Regimes)",
+      "critique": "The Authority's control lacks nuance.  The story needs to explore the regime's propaganda and manipulation techniques in more detail. Motivation of the Authority's members also warrants further study.",
+      "rating": 2
+    },
+    {
+      "name": "Ms. Sarah Chen",
+      "expertise": "Security Expert (Surveillance Technologies)",
+      "critique": "The surveillance state is vaguely described. More detail on how the Authority uses technology to track and control citizens would heighten the tension and realism. It's too easily avoided.",
+      "rating": 3
+    }
+  ]
 }

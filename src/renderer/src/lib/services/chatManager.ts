@@ -1,7 +1,7 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile } from '@/lib/store/projectsSlice'
+import { updateFile, updateReviews } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
@@ -80,6 +80,17 @@ const processResponse = (responseString: string): RequestContext | null => {
   // Check for the presence of the sequence tag
   if (!!response?.sequence) {
     context.sequenceInfo = response.sequence.sequence
+  }
+
+  if (!!response?.critique) {
+    try {
+      const critiqueContent = JSON.parse(response.critique)
+      store.dispatch(updateReviews(critiqueContent))
+      console.log('Critique content dispatched to store:', critiqueContent)
+    } catch (error) {
+      console.error('Error parsing critique JSON:', error)
+      store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing critique from AI response.' }))
+    }
   }
 
   if (!!response?.message) {

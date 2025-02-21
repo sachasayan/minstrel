@@ -187,12 +187,12 @@ export default function NovelDashboard() {
               {activeProject?.expertSuggestions.map((suggestion, index) => (
                 <Card key={index}>
                   <CardHeader>
-                    <CardTitle>{suggestion.expert}</CardTitle>
-                    <CardDescription>{suggestion.publication}</CardDescription>
+                    <CardTitle>{suggestion.name}</CardTitle>
+                    <CardDescription>{suggestion.expertise}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <StarRating rating={suggestion.rating} />
-                    <p className="mt-2 text-sm text-muted-foreground">{suggestion.comment}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{suggestion.critique}</p>
                   </CardContent>
                 </Card>
               ))}
