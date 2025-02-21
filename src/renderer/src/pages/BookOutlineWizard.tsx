@@ -4,7 +4,7 @@ import type React from 'react'
 import { useState, createContext, useContext, useEffect } from 'react'
 import Torrent from '@/components/visuals/torrent'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { BotMessageSquare, Check, ChevronsUpDown } from 'lucide-react'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { setActiveView } from '@/lib/store/appStateSlice'
 import { useDispatch } from 'react-redux'
@@ -92,13 +92,8 @@ const genreSettings = {
 
 // Navigation component
 const Navigation = () => {
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   const { currentStep, setCurrentStep, formData } = useWizard()
-
-  const handleExit = () => {
-    dispatch(setActiveView('intro')) // Exit the wizard
-    setCurrentStep(0)
-  }
 
   const handleNext = () => {
     if (currentStep < 4) {
@@ -126,12 +121,7 @@ const Navigation = () => {
   }
 
   return (
-    <CardFooter className="flex justify-between">
-      {
-        <Button className="mx-1" onClick={handleExit}>
-          Exit
-        </Button>
-      }
+    <DialogFooter className="flex justify-between">
 
       <div className="flex flex-1"></div>
       {currentStep > 0 && (
@@ -144,7 +134,7 @@ const Navigation = () => {
           Next
         </Button>
       )}
-    </CardFooter>
+    </DialogFooter>
   )
 }
 
@@ -160,35 +150,20 @@ const Intro = () => {
   }
 
   return (
-    <>
-      <div className="h-full flex flex-col">
-        <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
-          <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
-          {/* <button
-
-            className={` bg-white shadow-lg rounded-lg border flex flex-col  overflow-hidden transition-[opacity, transform] duration-500 opacity-100 scale-100 `}
-          >
-            <BotMessageSquare
-              className={
-                'text-gray-500 hover:text-gray-700 hover:rotate-15 transition-transform size-8 m-4'
-              }
-            />
-          </button>
-          <p className="text-center text-sm">
-            {`I'm Pip, I'll be your guide.`}
-          </p> */}
-          <p className="text-center text-sm text-gray-500">{`It's nice to meet you! Do you have an idea for a story, or should I come up with something? `}</p>
-          <div className="flex flex-row w-full justify-between">
-            {/* <Button disabled>Start from existing file (Coming soon)</Button> */}
-            <Button className="mx-1" onClick={handleCheat}>
-              Help me!
-            </Button>
-            <Button onClick={() => setCurrentStep(1)}>{`I've got a story idea already.`} </Button>
-          </div>
+    <div className="h-full flex flex-col">
+      <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
+        <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
+        <p className="text-center text-sm text-gray-500">{`It's nice to meet you! Do you have an idea for a story, or should I come up with something? `}</p>
+        <div className="flex flex-row w-full gap-4 justify-between">
+          {/* <Button disabled>Start from existing file (Coming soon)</Button> */}
+          <Button className="mx-1" onClick={handleCheat}>
+            Help me!
+          </Button>
+          <Button onClick={() => setCurrentStep(1)}>{`I've got a story idea already.`} </Button>
         </div>
-        <Navigation />
       </div>
-    </>
+      <Navigation />
+    </div>
   )
 }
 
@@ -205,32 +180,30 @@ const StoryLength = () => {
   }, [])
 
   return (
-    <>
-      <CardHeader>
-        <div className="flex flex-row w-full justify-between gap-4 align-center">
-          <CardTitle className="leading-2 ">{currentStep}/4 </CardTitle>
+    <div className="flex flex-col h-full">
+      <DialogHeader>
+        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
+          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm text-gray-500">{`Okay, let me walk you through the steps. First let's get an idea of where we should go with this. Don't worry, we can change everything later.`}</p>
-          </div>
-          <div>
-            <Label>How long of a story are we writing?</Label>
-            <Slider defaultValue={[50000]} max={120000} step={1} onValueChange={(value) => setFormData({ ...formData, length: value[0] })} className="mt-2" />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              {novelLengths.map((length) => (
-                <span key={length.value}>{length.value}</span>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500 mt-2">{novelLengths.find((length) => length.value >= (formData.length || 0))?.label}</p>
-          </div>
+      </DialogHeader>
+      <div className="flex-grow flex flex-col justify-center gap-4">
+        <div>
+          <p className="text-sm text-gray-500">{`Okay, let me walk you through the steps. First let's get an idea of where we should go with this. Don't worry, we can change everything later.`}</p>
         </div>
-      </CardContent>
+        <div>
+          <Label>How long of a story are we writing?</Label>
+          <Slider defaultValue={[50000]} max={120000} step={1} onValueChange={(value) => setFormData({ ...formData, length: value[0] })} className="mt-2" />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            {novelLengths.map((length) => (
+              <span key={length.value}>{length.value}</span>
+            ))}
+          </div>
+          <p className="text-sm text-gray-500 mt-2">{novelLengths.find((length) => length.value >= (formData.length || 0))?.label}</p>
+        </div>
+      </div>
       <Navigation />
-    </>
+    </div>
   )
 }
 
@@ -247,14 +220,14 @@ const SettingAndTitle = () => {
   }
 
   return (
-    <>
-      <CardHeader>
-        <div className="flex flex-row w-full justify-between gap-4 align-center">
-          <CardTitle className="leading-2 ">{currentStep}/4 </CardTitle>
+    <div className="flex flex-col h-full">
+      <DialogHeader>
+        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
+          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </DialogHeader>
+      <div className="flex-grow flex flex-col justify-center gap-4">
         <div>
           <Label htmlFor="genre">Genre</Label>
           <Popover open={open} onOpenChange={setOpen}>
@@ -309,9 +282,9 @@ const SettingAndTitle = () => {
           <Input id="title" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Enter your book title" />
           <p className="text-sm text-gray-500">{formData.title?.length > 0 ? `We'll use "${sanitizeFilename(formData.title || '')}" as the name for your folder.` : ' '}</p>
         </div>
-      </CardContent>
+      </div>
       <Navigation />
-    </>
+    </div>
   )
 }
 
@@ -330,45 +303,44 @@ const PlotAndWritingStyle = () => {
   }
 
   return (
-    <>
-      <CardHeader>
-        <div className="flex flex-row w-full justify-between gap-4 align-center">
-          <CardTitle className="leading-2 ">{currentStep}/4 </CardTitle>
+    <div className="flex flex-col h-full">
+      <DialogHeader>
+        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
+          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4">
-          <div>
-            <Label htmlFor="plot">Basic Plot</Label>
+      </DialogHeader>
+      <div className="flex-grow flex flex-col items-center justify-center gap-4">
+        <div>
+          <Label htmlFor="plot">Basic Plot</Label>
 
-            <p className="text-sm text-gray-500"></p>
-            <Textarea
-              id="plot"
-              placeholder="Describe main characters, environments, what the story is about, and what the climax might be. Minimum 200 characters required."
-              value={formData.plot || ''}
-              onChange={handlePlotChange}
-              className="mb-2"
-            />
+          <p className="text-sm text-gray-500"></p>
+          <Textarea
+            id="plot"
+            placeholder="Describe main characters, environments, what the story is about, and what the climax might be. Minimum 200 characters required."
+            value={formData.plot || ''}
+            onChange={handlePlotChange}
+            className="mb-2"
+          />
 
-            <div className="text-sm text-gray-500 flex justify-between gap-4 items-top">
-              <span>i.e &quot;A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.&quot;</span>
-              <span className={characterCount >= 200 ? 'text-black' : 'text-gray-500'}>{characterCount}/200</span>
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="writing_sample">Writing Sample</Label>
-            <Textarea
-              id="writing_sample"
-              placeholder="Provide a writing sample. The tool will mirror your writing style."
-              value={formData.writing_sample || ''}
-              onChange={(e) => setFormData({ ...formData, writing_sample: e.target.value })}
-            />
+          <div className="text-sm text-gray-500 flex justify-between gap-4 items-top">
+            <span>i.e &quot;A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.&quot;</span>
+            <span className={characterCount >= 200 ? 'text-black' : 'text-gray-500'}>{characterCount}/200</span>
           </div>
         </div>
-      </CardContent>
+        <div>
+          <Label htmlFor="writing_sample">Writing Sample</Label>
+          <Textarea
+            id="writing_sample"
+            placeholder="Provide a writing sample. The tool will mirror your writing style."
+            value={formData.writing_sample || ''}
+            onChange={(e) => setFormData({ ...formData, writing_sample: e.target.value })}
+          />
+        </div>
+      </div>
+
       <Navigation />
-    </>
+    </div>
   )
 }
 
@@ -400,61 +372,61 @@ const SummaryPage = () => {
   }
 
   return (
-    <div className="flex flex-col">
-      <CardHeader>
-        <div className="flex flex-row w-full justify-between gap-4 align-center">
-          <CardTitle className="leading-2 ">{currentStep}/4 </CardTitle>
+    <div className="flex flex-col h-full">
+      <DialogHeader>
+        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
+          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <div className="flex flex-col items-center justify-center p-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story.</h2>
-            <p className="text-sm text-gray-500">This'll take a few seconds. Just hang tight.</p>
-          </div>
-          <div className="flex flex-row items-center justify-center p-16">
-            {!requestPending && <Button onClick={handleDream}>I'm ready!</Button>}{' '}
-            {!!requestPending && (
-              <Button disabled>
-                Creating your story...
-                <div className="flex items-center justify-center p-2">
-                  <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
-                  <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>
-                  <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-150"></div>
-                </div>
-              </Button>
-            )}
-          </div>
+      </DialogHeader>
+      <div className="flex-grow flex flex-col items-center justify-center p-8 gap-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story.</h2>
+          <p className="text-sm text-gray-500">{`This'll take a few seconds. Just hang tight.`}</p>
         </div>
-      </CardContent>
+        <div className="flex flex-row items-center justify-center">
+          {!requestPending && <Button onClick={handleDream}>I'm ready!</Button>}{' '}
+          {!!requestPending && (
+            <Button disabled>
+              Creating your story...
+              <div className="flex items-center justify-center p-2">
+                <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
+                <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>
+                <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-150"></div>
+              </div>
+            </Button>
+          )}
+        </div>
+      </div>
       <Navigation />
     </div>
   )
 }
 
 // Wizard component
-export const BookOutlineWizard = () => {
+export const BookOutlineWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState({})
   const totalSteps = 4 // Includes summary page, but not the start page
 
   return (
-    <div className="w-full h-full flex items-center justify-center ">
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps }}>
-        <Card className="w-[800px] grid grid-cols-5 gap-4">
-          <div className="col-span-2">
-            <Torrent />
+        <DialogContent className="sm:max-w-[800px]" onInteractOutside={(e) => { e.preventDefault(); }}>
+          <div className="grid grid-cols-5 gap-4">
+            <div className="col-span-2">
+              <Torrent />
+            </div>
+            <div className="col-span-3 flex flex-col">
+              {currentStep === 0 && <Intro />}
+              {currentStep === 1 && <StoryLength />}
+              {currentStep === 2 && <SettingAndTitle />}
+              {currentStep === 3 && <PlotAndWritingStyle />}
+              {currentStep === 4 && <SummaryPage />}
+            </div>
           </div>
-          <div className="col-span-3">
-            {currentStep === 0 && <Intro />}
-            {currentStep === 1 && <StoryLength />}
-            {currentStep === 2 && <SettingAndTitle />}
-            {currentStep === 3 && <PlotAndWritingStyle />}
-            {currentStep === 4 && <SummaryPage />}
-          </div>
-        </Card>
+        </DialogContent>
       </WizardContext.Provider>
-    </div>
+    </Dialog>
   )
 }

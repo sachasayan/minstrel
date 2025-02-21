@@ -10,7 +10,6 @@ import Settings from '@/components/Settings'
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
-import { BookOutlineWizard } from '@/pages/BookOutlineWizard'
 import { Key } from 'lucide-react'
 
 import type { JSX } from 'react' // Import JSX namespace
@@ -45,7 +44,7 @@ export default function App(): JSX.Element {
         return <Intro />
         break
       case 'wizard':
-        return <BookOutlineWizard />
+        return
         break
       case 'project/outline':
       case 'project/parameters':
@@ -72,6 +71,8 @@ export default function App(): JSX.Element {
         {router(activeView)}
         <Toaster position="bottom-center" richColors />
       </div>
+
+
 
       <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
         <DialogContent className="min-w-[800px]">

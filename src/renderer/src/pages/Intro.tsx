@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Settings from '@/components/Settings'
 import Versions from '@/components/Versions'
 import { Button } from '@/components/ui/button'
-import { ProjectFragment } from '@/types'
 import ProjectLibrary from '@/components/ProjectLibrary'
+import { BookOutlineWizard } from '@/pages/BookOutlineWizard'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useDispatch, useSelector } from 'react-redux'
 import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice'
@@ -13,12 +13,14 @@ import { fetchProjects } from '@/lib/services/projectManager'
 
 const Intro = (): JSX.Element => {
   const dispatch = useDispatch()
+  const [showBookOutlineWizard, setShowBookOutlineWizard] = useState(false)
   const projectList = useSelector(selectProjectList)
   const settingsState = useSelector(selectSettingsState)
 
   const handleProjectSelect = (projectId: string) => {
     if (projectId == 'add') {
-      dispatch(setActiveView('wizard'))
+      setShowBookOutlineWizard(true);
+      //dispatch(setActiveView('wizard'))
       return
     }
 
@@ -48,6 +50,7 @@ const Intro = (): JSX.Element => {
       <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
 
       <p className="text-gray-500 m-8">Current project path: {settingsState?.workingRootDirectory || ''}</p>
+
       <div className="m-4">
         <Dialog>
           <DialogTrigger asChild>
@@ -59,6 +62,8 @@ const Intro = (): JSX.Element => {
           </DialogContent>
         </Dialog>
       </div>
+
+      <BookOutlineWizard open={showBookOutlineWizard} onOpenChange={setShowBookOutlineWizard} />
     </div>
   )
 }
