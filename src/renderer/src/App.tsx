@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectActiveView } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
@@ -12,9 +12,7 @@ import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
 import { Key } from 'lucide-react'
 
-import type { JSX } from 'react' // Import JSX namespace
-
-export default function App(): JSX.Element {
+export default function App(): ReactNode {
   const dispatch = useDispatch()
   // const settings = useSelector(selectSettingsState)
   const activeProject = useSelector(selectActiveProject)

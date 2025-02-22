@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 import { RootState, AppDispatch } from '@/lib/store/store'
 import { Button } from './ui/button'
 
-const Settings = (): JSX.Element => {
+const Settings = (): ReactNode => {
   const apiStoreValue = useSelector((state: RootState) => state.settings?.api ?? '')
   const apiKeyStoreValue = useSelector((state: RootState) => state.settings?.apiKey ?? '')
   const workingRootDirectoryStoreValue = useSelector((state: RootState) => state.settings?.workingRootDirectory ?? '')

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { selectActiveProject, updateParameters } from '@/lib/store/projectsSlice
 import type { RootState } from '@/lib/store/store'
 import { toast } from 'sonner'
 
-const ProjectParameters = () => {
+const ProjectParameters = (): ReactNode => {
   const activeProject = useSelector((state: RootState) => selectActiveProject(state))
   const dispatch = useDispatch()
 

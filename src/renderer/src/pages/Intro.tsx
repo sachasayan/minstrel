@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode } from 'react'
 import Settings from '@/components/Settings'
 import Versions from '@/components/Versions'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,7 @@ import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/projectManager'
 
-const Intro = (): JSX.Element => {
+const Intro = (): ReactNode => {
   const dispatch = useDispatch()
   const [showBookOutlineWizard, setShowBookOutlineWizard] = useState(false)
   const projectList = useSelector(selectProjectList)

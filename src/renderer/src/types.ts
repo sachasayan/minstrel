@@ -51,6 +51,12 @@ export interface ExpertSuggestion {
 //   scenes: SceneOutline[]
 // }
 
+export interface AppListenerApi {
+  dispatch: () => any
+  getState: () => any
+  getOriginalState: () => any
+}
+
 export interface RequestContext {
   currentStep: number
   agent: 'criticAgent' | 'outlineAgent' | 'routingAgent' | 'writerAgent'

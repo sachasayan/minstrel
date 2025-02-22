@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { ProjectFragment } from '@/types'
 import { BookPlusIcon } from 'lucide-react'
 
@@ -12,7 +13,7 @@ interface ProjectCardProps {
   onClick: () => void
 }
 
-const ProjectCard = ({ project, onClick }: ProjectCardProps): JSX.Element => {
+const ProjectCard = ({ project, onClick }: ProjectCardProps): ReactNode => {
   return (
     <div className="relative  rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none" onClick={onClick}>
       <div className="relative" style={{ paddingTop: '175%' }}>
@@ -39,7 +40,7 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps): JSX.Element => {
   )
 }
 
-const ProjectLibrary = ({ projects, onProjectChange }: ProjectLibraryProps): JSX.Element => {
+const ProjectLibrary = ({ projects, onProjectChange }: ProjectLibraryProps) => {
   const handleProjectSelect = (projectId: string) => {
     onProjectChange(projectId)
   }

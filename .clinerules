@@ -10,6 +10,7 @@
 - I don't clean up unused imports or variables which existed in a file before I started working on it.
 - I never clean up whitespace or empty lines.
 - I don't add semicolons to the end of lines in JavaScript or TypeScript files.
+- I always use ReactNode as the TypeScript type for React components.
 
 # Cline/Roo's Memory Bank
 

@@ -64,7 +64,7 @@ const ProjectOverview = (): React.ReactNode => {
           ) : appState.activeView == 'project/dashboard' ? (
             <NovelDashboard />
           ) : appState.activeView == 'project/parameters' ? (
-            <ProjectParameters projectId={projectState.activeProject?.id} />
+            <ProjectParameters />
           ) : null}
         </div>
 
