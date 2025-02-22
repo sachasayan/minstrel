@@ -67,22 +67,13 @@ function StarRating({ rating }: { rating: number }) {
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
 
-  // const novelData = { chapterData, characters };  // Replaced with dynamic data
-
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      {/* <h1 className="text-3xl font-bold mb-6">{novelData.title} - Dashboard</h1> */}
+    <div className="container mx-auto p-24 space-y-6">
+      <h1 className="text-3xl font-bold mb-6 text-highlight-700">Your Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="md:col-span-2 ">
-          <CardHeader>
-            <CardTitle>Progress</CardTitle>
-          </CardHeader>
-          <CardContent>Looks like you're on a streak!</CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
         {/* Novel Summary */}
-        <Card>
+        <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Novel Summary</CardTitle>
           </CardHeader>
@@ -92,7 +83,7 @@ export default function NovelDashboard() {
         </Card>
 
         {/* Per-Chapter Word Count Graph */}
-        <Card>
+        <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Word Count per Chapter</CardTitle>
           </CardHeader>
@@ -126,7 +117,7 @@ export default function NovelDashboard() {
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="wordCount" fill="black" />
+                  <Bar dataKey="wordCount" fill="var(--color-highlight-900)" />
                 </BarChart>
               </ChartContainer>
             ) : (
@@ -135,8 +126,32 @@ export default function NovelDashboard() {
           </CardContent>
         </Card>
 
+        {/* Expert Suggestions */}
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Expert Suggestions</CardTitle>
+            <CardDescription>Feedback and improvement suggestions from literary experts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {activeProject?.expertSuggestions.map((suggestion, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle>{suggestion.name}</CardTitle>
+                    <CardDescription>{suggestion.expertise}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <StarRating rating={suggestion.rating} />
+                    <p className="mt-2 text-sm text-muted-foreground">{suggestion.critique}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Character Mentions per Chapter */}
-        <Card>
+        <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Character Mentions per Chapter</CardTitle>
             <CardDescription>Line graph showing mentions of each character per chapter</CardDescription>
@@ -176,28 +191,12 @@ export default function NovelDashboard() {
           </CardContent>
         </Card>
 
-        {/* Expert Suggestions */}
-        <Card>
+        {/* Progress */}
+        <Card className="md:col-span-7 ">
           <CardHeader>
-            <CardTitle>Expert Suggestions</CardTitle>
-            <CardDescription>Feedback and improvement suggestions from literary experts</CardDescription>
+            <CardTitle>Progress</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {activeProject?.expertSuggestions.map((suggestion, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle>{suggestion.name}</CardTitle>
-                    <CardDescription>{suggestion.expertise}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <StarRating rating={suggestion.rating} />
-                    <p className="mt-2 text-sm text-muted-foreground">{suggestion.critique}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
+          <CardContent>Looks like you're on a streak!</CardContent>
         </Card>
       </div>
     </div>

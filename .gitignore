@@ -3,3 +3,8 @@ dist
 out
 .DS_Store
 *.log*
+.aider.tags.cache.v3/cache.db
+.aider.tags.cache.v3/cache.db-shm
+.aider.tags.cache.v3/cache.db-wal
+.aider.chat.history.md
+.aider.input.history
