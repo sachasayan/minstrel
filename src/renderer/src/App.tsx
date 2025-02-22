@@ -5,7 +5,8 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 import { defaultSettings } from '@/lib/services/settingsManager'
 import { Toaster } from '@/components/ui/sonner'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Settings from '@/components/Settings'
 
 import ProjectOverview from '@/pages/ProjectOverview'
@@ -19,7 +20,7 @@ export default function App(): ReactNode {
   const activeView = useSelector(selectActiveView)
 
   const [hasLoaded, setHasLoaded] = useState(false)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(true)
 
   const loadSettings = () => async (dispatch) => {
     console.log('Loading settings')
@@ -71,16 +72,15 @@ export default function App(): ReactNode {
       </div>
 
       <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-        <DialogContent className="min-w-[800px]">
+        <DialogContent className="min-w-[800px] px-16 py-8">
           <DialogHeader>
-            <DialogTitle>Looks like you&apos;re new here!</DialogTitle>
+            <DialogTitle className="text-center">Looks like you&apos;re new here!</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p>Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to Google AI Studio and sign into your Google Account. Find the blue button labelled</p>
+            <div className="flex flex-col justify-center gap-4">
+              <p>Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to Google AI Studio and sign into your Google Account. Find the blue button labelled...</p>
               <p>
-                {' '}
-                <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none data-[state=open]:bg-secondary/50 h-9 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] hover:bg-[#87a9ff]/80 w-fit">
+                <button className="shadow-md ring-1 ring-black-500 mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit">
                   <Key className="mr-2 h-4 w-4" />
                   Get API Key
                 </button>
@@ -89,11 +89,13 @@ export default function App(): ReactNode {
             </div>
             <Settings />
           </div>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4" onClick={() => setShowOnboarding(false)}>
-            Got it!
-          </button>
+          <DialogFooter>
+            <Button className="px-4 py-2 rounded-md mt-4" onClick={() => setShowOnboarding(false)}>
+              Save
+            </Button>
+          </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog >
     </>
   )
 }

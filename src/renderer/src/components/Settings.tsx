@@ -49,7 +49,7 @@ const Settings = (): ReactNode => {
   return (
     <div>
       <div className="mb-4">
-        <label htmlFor="api" className="block text-gray-700 text-sm font-bold mb-2">
+        <label htmlFor="api" className="block text-gray-700 text-sm font-bold">
           API
         </label>
         <input
@@ -60,8 +60,8 @@ const Settings = (): ReactNode => {
           onChange={(e) => setApiValue(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="workingRootDirectory" className="block text-gray-700 text-sm font-bold mb-2">
+      <div className="mb-4">
+        <label htmlFor="workingRootDirectory" className="block text-gray-700 text-sm font-bold ">
           Project Path
         </label>
         <input
@@ -72,8 +72,8 @@ const Settings = (): ReactNode => {
           onChange={(e) => setWorkingRootDirectoryValue(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="apiKey" className="block text-gray-700 text-sm font-bold mb-2">
+      <div className="mb-4">
+        <label htmlFor="apiKey" className="block text-gray-700 text-sm font-bold">
           API Key
         </label>
         <input
@@ -84,10 +84,10 @@ const Settings = (): ReactNode => {
           onChange={(e) => setApiKeyValue(e.target.value)}
         />
       </div>
-      <Button variant="outline" onClick={handleSaveSettings}>
+      <Button onClick={handleSaveSettings} className="mr-4">
         Save
       </Button>
-      <Button variant="outline">Close</Button>
+      <Button >Close</Button>
     </div>
   )
 }

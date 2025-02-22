@@ -61,7 +61,6 @@ const processResponse = (responseString: string): RequestContext | null => {
 
   if (!!response?.read_file) {
     const files = response.read_file.map((item) => `${item}`).join(' ')
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: `Looking at files... ${files}` }))
     context.requestedFiles = response.read_file
   }
 
