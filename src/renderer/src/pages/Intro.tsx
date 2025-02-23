@@ -49,8 +49,6 @@ const Intro = (): JSX.Element => {
       <p className="text-gray-500 mb-2">Start a new project or set your project directory to begin.</p>
       <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
 
-
-
       <div className="mt-12">
         <Dialog>
           <DialogTrigger asChild>
@@ -64,7 +62,13 @@ const Intro = (): JSX.Element => {
       </div>
       <p className="text-gray-300 m-4 text-xs">Current project path: {settingsState?.workingRootDirectory || ''}</p>
 
-      <p className="outline outline-gray-700 rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">Minstrel is totally free for personal use. Like it? <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">Buy me a coffee.</a> ☕ ❤️</p>
+      <p className="outline outline-gray-700 rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
+        Minstrel is totally free for personal use. Like it?{' '}
+        <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">
+          Buy me a coffee.
+        </a>{' '}
+        ☕ ❤️
+      </p>
 
       <BookOutlineWizard open={showBookOutlineWizard} onOpenChange={setShowBookOutlineWizard} />
     </div>

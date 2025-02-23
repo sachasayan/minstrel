@@ -41,7 +41,7 @@ const ProjectParameters = (): ReactNode => {
     <div className="p-4 mx-auto max-w-[1000px]">
       <h1 className="text-2xl font-bold mb-4">Project Parameters</h1>
       {activeProject ? (
-        <div className='grid grid-cols-2 gap-4'>
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="mb-4">
               <Label htmlFor="title">Title</Label>

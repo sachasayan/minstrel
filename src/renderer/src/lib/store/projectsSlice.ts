@@ -47,7 +47,7 @@ export const projectsSlice = createSlice({
         }
       }
     },
-    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number, writingSample: string }>) => {
+    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number; writingSample: string }>) => {
       if (state.activeProject) {
         state.activeProject.title = action.payload.title
         state.activeProject.genre = action.payload.genre

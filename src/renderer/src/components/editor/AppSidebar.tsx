@@ -20,7 +20,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail
+  SidebarRail,
+  SidebarTrigger
 } from '@/components/ui/sidebar'
 import {
   AlertDialog,
@@ -114,6 +115,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Sidebar variant="sidebar" collapsible="icon" {...props}>
         <SidebarHeader>
           <div className={`flex justify-between ${sideBarOpen ? `flex-row` : `flex-col`}`}>
+            <Button asChild variant="ghost" className="flex-grow transition-all">
+              <SidebarTrigger className="w-8 h-full" />
+            </Button>
             <Button variant="ghost" className="flex-grow transition-all" onClick={handleCloseSafe}>
               <X className="" /> {sideBarOpen ? 'Close' : ''}
             </Button>

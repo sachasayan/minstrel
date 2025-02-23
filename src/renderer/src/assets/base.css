@@ -212,12 +212,11 @@
   --color-highlight-900: var(--highlight-900);
 }
 
-
 @layer base {
-  :root {}
+  :root {
+  }
 
   .mdx-theme {
-
     .mdxeditor-toolbar {
       @apply shadow-2xl;
       overflow: visible;
@@ -265,11 +264,7 @@
       --baseText: var(--highlight-600);
       --baseTextContrast: var(--highlight-900);
     }
-
   }
-
-
-
 
   * {
     @apply border-border;

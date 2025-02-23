@@ -38,12 +38,6 @@ const ProjectOverview = (): React.ReactNode => {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className="h-full max-h-full">
-        <SidebarTrigger className="-ml-1" />
-        <header className="flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4 z-50">
-          <Separator orientation="vertical" className="mr-2 h-4" />
-
-        </header>
-
         <div className="h-full max-h-screen p-4">
           {appState.activeView == 'project/editor' ? (
             <MarkdownViewer
