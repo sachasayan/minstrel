@@ -6,6 +6,49 @@
 
 /* Define base values. */
 :root {
+  --neutral-50: hsl(60, 14%, 98%);
+  --neutral-100: hsl(50, 7%, 96%);
+  --neutral-200: hsl(60, 5%, 90%);
+  --neutral-300: hsl(60, 5%, 83%);
+  --neutral-400: hsl(0, 0%, 64%);
+  --neutral-500: hsl(0, 0%, 45%);
+  --neutral-600: hsl(0, 0%, 33%);
+  --neutral-700: hsl(0, 0%, 25%);
+  --neutral-800: hsl(0, 0%, 15%);
+  --neutral-900: hsl(0, 0%, 9%);
+
+  --emerald-50: #f5f8f5;
+  --emerald-100: #e8f0e8;
+  --emerald-200: #d1e1d1;
+  --emerald-300: #acc9ac;
+  --emerald-400: #7fa980;
+  --emerald-500: #5d8a5f;
+  --emerald-600: #49704a;
+  --emerald-700: #426343;
+  --emerald-800: #324933;
+  --emerald-900: #2b3c2c;
+  --emerald-950: #141f15;
+
+  --highlight-50: hsl(70, 84%, 94%);
+  --highlight-100: hsl(70, 78%, 91%);
+  --highlight-200: hsl(70, 69%, 87%);
+  --highlight-300: hsl(70, 51%, 82%);
+  --highlight-400: hsl(70, 35%, 77%);
+  --highlight-500: hsl(70, 17%, 69%);
+  --highlight-600: hsl(70, 11%, 57%);
+  --highlight-700: hsl(70, 10%, 42%);
+  --highlight-800: hsl(70, 14%, 32%);
+  --highlight-900: hsl(70, 27%, 22%);
+
+  --chart-1: #374869;
+  --chart-2: #595081;
+  --chart-3: #86548e;
+  --chart-4: #b5548c;
+  --chart-5: #df577d;
+  --chart-6: #fb6662;
+  --chart-7: #ff823f;
+  --chart-8: #ffa600;
+
   --foreground: hsl(240 10% 3.9%);
   --card-foreground: hsl(240 10% 3.9%);
   --popover-foreground: hsl(240 10% 3.9%);
@@ -25,14 +68,7 @@
   --border: hsl(240 5.9% 90%);
   --input: hsl(240 5.9% 90%);
   --ring: hsl(240 10% 3.9%);
-  --chart-1: #374869;
-  --chart-2: #595081;
-  --chart-3: #86548e;
-  --chart-4: #b5548c;
-  --chart-5: #df577d;
-  --chart-6: #fb6662;
-  --chart-7: #ff823f;
-  --chart-8: #ffa600;
+
   --radius: 0.6rem;
   --sidebar-background: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
@@ -44,39 +80,6 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --sidebar: hsl(0 0% 98%);
 
-  --neutral-50: hsl(60, 14%, 98%);
-  --neutral-100: hsl(50, 7%, 96%);
-  --neutral-200: hsl(60, 5%, 90%);
-  --neutral-300: hsl(60, 5%, 83%);
-  --neutral-400: hsl(0, 0%, 64%);
-  --neutral-500: hsl(0, 0%, 45%);
-  --neutral-600: hsl(0, 0%, 33%);
-  --neutral-700: hsl(0, 0%, 25%);
-  --neutral-800: hsl(0, 0%, 15%);
-  --neutral-900: hsl(0, 0%, 9%);
-
-  --brand-50: hsl(48, 100%, 93%);
-  --brand-100: hsl(48, 100%, 90%);
-  --brand-200: hsl(48, 100%, 80%);
-  --brand-300: hsl(48, 100%, 72%);
-  --brand-400: hsl(42, 100%, 68%);
-  --brand-500: hsl(38, 94%, 57%);
-  --brand-600: hsl(35, 69%, 50%);
-  --brand-700: hsl(30, 70%, 39%);
-  --brand-800: hsl(25, 64%, 32%);
-  --brand-900: hsl(20, 63%, 27%);
-
-  --highlight-50: hsl(70, 84%, 94%);
-  --highlight-100: hsl(70, 78%, 91%);
-  --highlight-200: hsl(70, 69%, 87%);
-  --highlight-300: hsl(70, 51%, 82%);
-  --highlight-400: hsl(70, 35%, 77%);
-  --highlight-500: hsl(70, 17%, 69%);
-  --highlight-600: hsl(70, 11%, 57%);
-  --highlight-700: hsl(70, 10%, 42%);
-  --highlight-800: hsl(70, 14%, 32%);
-  --highlight-900: hsl(70, 27%, 22%);
-
   --radius: 10px;
 
   --background: hsl(50, 7%, 96%);
@@ -84,7 +87,7 @@
 
   --card: var(--neutral-100);
   --popover: var(--neutral-50);
-  --primary: var(--brand-500);
+  --primary: var(--emerald-500);
   --secondary: var(--neutral-200);
   --muted: var(--neutral-300);
   --accent: var(--highlight-500);
@@ -102,55 +105,41 @@
   --border: var(--neutral-400);
   /* --highlight-800); */
   --input: var(--neutral-300);
-  --ring: var(--brand-400);
+  --ring: var(--emerald-400);
 
   /* Sidebar Colors */
   --sidebar-background: var(--neutral-200);
   --sidebar-foreground: var(--neutral-900);
-  --sidebar-primary: var(--brand-500);
+  --sidebar-primary: var(--emerald-500);
   --sidebar-primary-foreground: var(--neutral-50);
   --sidebar-accent: var(--highlight-900);
   --sidebar-accent-foreground: var(--neutral-50);
   --sidebar-border: var(--neutral-700);
 }
 
-.dark {
-  --background: hsl(240 10% 3.9%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(240 10% 3.9%);
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(240 10% 3.9%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(0 0% 98%);
-  --primary-foreground: hsl(240 5.9% 10%);
-  --secondary: hsl(240 3.7% 15.9%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(240 3.7% 15.9%);
-  --muted-foreground: hsl(240 5% 64.9%);
-  --accent: hsl(240 3.7% 15.9%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(240 3.7% 15.9%);
-  --input: hsl(240 3.7% 15.9%);
-  --ring: hsl(240 4.9% 83.9%);
-  --chart-1: hsl(220 70% 50%);
-  --chart-2: hsl(160 60% 45%);
-  --chart-3: hsl(30 80% 55%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
-  --sidebar-background: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-  --sidebar: hsl(240 5.9% 10%);
-}
-
 @theme inline {
+  --color-brand-50: var(--emerald-50);
+  --color-brand-100: var(--emerald-100);
+  --color-brand-200: var(--emerald-200);
+  --color-brand-300: var(--emerald-300);
+  --color-brand-400: var(--emerald-400);
+  --color-brand-500: var(--emerald-500);
+  --color-brand-600: var(--emerald-600);
+  --color-brand-700: var(--emerald-700);
+  --color-brand-800: var(--emerald-800);
+  --color-brand-900: var(--emerald-900);
+
+  --color-highlight-50: var(--highlight-50);
+  --color-highlight-100: var(--highlight-100);
+  --color-highlight-200: var(--highlight-200);
+  --color-highlight-300: var(--highlight-300);
+  --color-highlight-400: var(--highlight-400);
+  --color-highlight-500: var(--highlight-500);
+  --color-highlight-600: var(--highlight-600);
+  --color-highlight-700: var(--highlight-700);
+  --color-highlight-800: var(--highlight-800);
+  --color-highlight-900: var(--highlight-900);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -189,27 +178,6 @@
   --color-sidebar: var(--sidebar-background);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  --color-brand-50: var(--brand-50);
-  --color-brand-100: var(--brand-100);
-  --color-brand-200: var(--brand-200);
-  --color-brand-300: var(--brand-300);
-  --color-brand-400: var(--brand-400);
-  --color-brand-500: var(--brand-500);
-  --color-brand-600: var(--brand-600);
-  --color-brand-700: var(--brand-700);
-  --color-brand-800: var(--brand-800);
-  --color-brand-900: var(--brand-900);
-  --color-highlight-50: var(--highlight-50);
-  --color-highlight-100: var(--highlight-100);
-  --color-highlight-200: var(--highlight-200);
-  --color-highlight-300: var(--highlight-300);
-  --color-highlight-400: var(--highlight-400);
-  --color-highlight-500: var(--highlight-500);
-  --color-highlight-600: var(--highlight-600);
-  --color-highlight-700: var(--highlight-700);
-  --color-highlight-800: var(--highlight-800);
-  --color-highlight-900: var(--highlight-900);
 }
 
 @layer base {
@@ -219,50 +187,52 @@
   .mdx-theme {
     .mdxeditor-toolbar {
       @apply shadow-2xl;
-      overflow: visible;
+      overflow: visible !important;
 
       &:before {
         @apply bg-background;
         display: block;
         content: '';
         position: absolute;
-        top: 110%;
+        top: 100%;
         left: 0;
         right: 0;
         height: 50%;
         z-index: -1;
-        --toolbar: hsla(0, 0%, 0%, 1);
-        --toolbar-transparent: hsla(0, 0%, 100%, 0);
+        --toolbar: hsla(0, 0%, 95%, 1);
+        --toolbar-transparent: hsla(0, 0%, 90%, 0);
         background: linear-gradient(var(--toolbar), var(--toolbar-transparent));
       }
 
-      --accentBase: var(--brand-500);
-      --accentBgSubtle: var(--brand-500);
-      --accentBg: var(--brand-500);
-      --accentBgHover: var(--brand-500);
-      --accentBgActive: var(--brand-500);
+      /* Toolbar colors */
 
-      --accentLine: var(--brand-500);
-      --accentBorder: var(--brand-500);
-      --accentBorderHover: var(--brand-500);
-      --accentSolid: var(--brand-500);
-      --accentSolidHover: var(--brand-500);
-      --accentText: var(--brand-500);
-      --accentTextContrast: var(--brand-500);
+      --baseBase: var(--emerald-500);
+      --baseBg: var(--neutral-100);
+      --baseBgSubtle: var(--emerald-500);
+      --baseBgHover: var(--emerald-200);
+      --baseBgActive: var(--emerald-200);
 
-      --baseBase: var(--highlight-200);
-      --baseBgSubtle: var(--highlight-500);
-      --baseBg: var(--highlight-500);
-      --baseBgHover: var(--brand-500);
-      --baseBgActive: var(--highlight-500);
-
-      --baseLine: var(--highlight-500);
-      --baseBorder: var(--highlight-500);
-      --baseBorderHover: var(--highlight-500);
-      --baseSolid: var(--highlight-700);
-      --baseSolidHover: var(--highlight-500);
-      --baseText: var(--highlight-600);
+      --baseLine: var(--emerald-500);
+      --baseBorder: var(--emerald-500);
+      --baseBorderHover: var(--emerald-500);
+      --baseSolid: var(--emerald-700);
+      --baseSolidHover: var(--emerald-500);
+      --baseText: var(--emerald-600);
       --baseTextContrast: var(--highlight-900);
+
+      --accentBase: var(--emerald-500);
+      --accentBgSubtle: var(--emerald-500);
+      --accentBg: var(--emerald-500);
+      --accentBgHover: var(--emerald-500);
+      --accentBgActive: var(--emerald-500);
+
+      --accentLine: var(--emerald-500);
+      --accentBorder: var(--emerald-500);
+      --accentBorderHover: var(--emerald-500);
+      --accentSolid: var(--emerald-500);
+      --accentSolidHover: var(--emerald-500);
+      --accentText: var(--emerald-500);
+      --accentTextContrast: var(--emerald-500);
     }
   }
 
