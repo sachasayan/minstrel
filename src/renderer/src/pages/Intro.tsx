@@ -62,7 +62,7 @@ const Intro = (): JSX.Element => {
       </div>
       <p className="text-gray-300 m-4 text-xs">Current project path: {settingsState?.workingRootDirectory || ''}</p>
 
-      <p className="outline outline-gray-700 rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
+      <p className="outline rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
         Minstrel is totally free for personal use. Like it?{' '}
         <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">
           Buy me a coffee.

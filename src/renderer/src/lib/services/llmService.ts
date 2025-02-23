@@ -30,6 +30,19 @@ const geminiService = {
     return this.model
   },
 
+  async verifyKey(apiKey: string) {
+    const API_VERSION = 'v1.5'
+    const apiUrl = `https://generativelanguage.googleapis.com/${API_VERSION}/models?key=${apiKey}`
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    if (!response.ok) {
+      throw new Error('Invalid API key')
+    }
+    return true
+  },
+
   async generateContent(prompt: string) {
     if (!this.model) {
       throw new Error('Gemini model is not initialized. Please set the API key in settings.')

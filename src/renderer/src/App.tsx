@@ -5,13 +5,10 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 import { defaultSettings } from '@/lib/services/settingsService'
 import { Toaster } from '@/components/ui/sonner'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import Settings from '@/components/Settings'
+import OnboardingDialog from '@/components/OnboardingDialog'
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
-import { Key } from 'lucide-react'
 
 export default function App(): ReactNode {
   const dispatch = useDispatch()
@@ -41,16 +38,13 @@ export default function App(): ReactNode {
     switch (activeView) {
       case 'intro':
         return <Intro />
-        break
       case 'wizard':
-        return
-        break
+        return null // was <Wizard /> - component not defined in file
       case 'project/outline':
       case 'project/parameters':
       case 'project/dashboard':
       case 'project/editor':
         return <ProjectOverview key={activeProject?.id} />
-        break
       default:
         return <Intro />
     }
@@ -71,37 +65,7 @@ export default function App(): ReactNode {
         <Toaster position="bottom-center" richColors />
       </div>
 
-      <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-        <DialogContent className="min-w-[800px] px-16 py-8">
-          <DialogHeader>
-            <DialogTitle className="text-center">Looks like you&apos;re new here!</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col justify-center gap-4">
-              <p>
-                Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to{' '}
-                <a href="https://aistudio.google.com/" rel="noreferrer" className="cursor-pointer underline" target="_blank">
-                  Google AI Studio
-                </a>{' '}
-                and sign into your Google Account. Find the blue button labelled...
-              </p>
-              <p>
-                <button className="shadow-md ring-1 ring-black-500 mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit">
-                  <Key className="mr-2 h-4 w-4" />
-                  Get API Key
-                </button>
-              </p>
-              <p>... and click it. Generate a new API key add it to Minstrel on the right.</p>
-            </div>
-            <Settings />
-          </div>
-          <DialogFooter>
-            <Button className="px-4 py-2 rounded-md mt-4" onClick={() => setShowOnboarding(false)}>
-              Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <OnboardingDialog showOnboarding={showOnboarding} setShowOnboarding={setShowOnboarding} />
     </>
   )
 }

@@ -9,6 +9,7 @@ import { selectActiveProject, updateParameters } from '@/lib/store/projectsSlice
 import type { RootState } from '@/lib/store/store'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
 
 const GenreOptions = () => {
   return (
@@ -112,10 +113,7 @@ const ProjectParameters = (): ReactNode => {
                   <GenreOptions />
                 </Select>
               </div>
-              <div className="mb-4">
-                <Label htmlFor="summary">Summary</Label>
-                <textarea id="summary" className="w-full border rounded p-2" value={summary} onChange={(e) => setSummary(e.target.value)} />
-              </div>
+
               <div className="mb-4">
                 <Label htmlFor="year">Year</Label>
                 <Input id="year" type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value, 10))} />
@@ -123,6 +121,10 @@ const ProjectParameters = (): ReactNode => {
               <div className="mb-4">
                 <Label htmlFor="totalWordCount">Total Word Count</Label>
                 <Input id="totalWordCount" type="number" value={totalWordCount} onChange={(e) => setTotalWordCount(parseInt(e.target.value, 10))} />
+              </div>
+              <div className="mb-4">
+                <Label htmlFor="summary">Summary</Label>
+                <Textarea id="summary" className="w-full border rounded p-2" value={summary} onChange={(e) => setSummary(e.target.value)} />
               </div>
             </CardContent>
           </Card>
@@ -132,7 +134,7 @@ const ProjectParameters = (): ReactNode => {
               <CardTitle>Writing Sample</CardTitle>
             </CardHeader>
             <CardContent>
-              <textarea id="summary" className="w-full border rounded p-2 h-[400px]" value={writingSample} onChange={(e) => setWritingSample(e.target.value)} />
+              <Textarea id="summary" className="w-full border rounded p-2 h-[400px]" value={writingSample} onChange={(e) => setWritingSample(e.target.value)} />
             </CardContent>
           </Card>
         </div>
