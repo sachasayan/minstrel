@@ -181,8 +181,7 @@
 }
 
 @layer base {
-  :root {
-  }
+  :root {}
 
   .mdx-theme {
     .mdxeditor-toolbar {
@@ -268,38 +267,38 @@
   }
 
   .prose h1 {
-    @apply text-4xl font-bold my-4;
+    @apply text-4xl font-bold my-8;
   }
 
   .prose h2 {
-    @apply text-3xl font-semibold my-3;
+    @apply text-3xl font-semibold my-8;
   }
 
   .prose h3 {
-    @apply text-2xl font-medium my-2;
+    @apply text-2xl font-medium my-8;
   }
 
   .prose h4 {
-    @apply text-xl font-semibold my-2;
+    @apply text-xl font-semibold my-8;
   }
 
   .prose h5 {
-    @apply text-lg font-medium my-1;
+    @apply text-lg font-medium my-8;
   }
 
   .prose h6 {
-    @apply text-base font-semibold my-1;
+    @apply text-base font-semibold my-8;
   }
 
   .prose p {
-    @apply leading-relaxed my-2;
+    @apply leading-relaxed my-8;
   }
 
   .prose ul {
-    @apply list-disc pl-6 my-2;
+    @apply list-disc pl-6 my-8;
   }
 
   .prose ol {
-    @apply list-decimal pl-6 my-2;
+    @apply list-decimal pl-6 my-8;
   }
 }
