@@ -113,7 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </AlertDialog>
 
       <Sidebar variant="sidebar" collapsible="icon" {...props}>
-        <SidebarHeader>
+        <SidebarHeader className="pt-8">
           <div className={`flex justify-between ${sideBarOpen ? `flex-row` : `flex-col`}`}>
             <Button asChild variant="ghost" className="flex-grow transition-all">
               <SidebarTrigger className="w-8 h-full" />

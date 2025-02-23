@@ -12,6 +12,8 @@ function createWindow(): void {
     height: 720,
     show: false,
     autoHideMenuBar: true,
+    titleBarStyle: 'hidden', // remove default titlebar
+    ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}), // expose window controls in Windows/Linux
     ...(process.platform === 'darwin'
       ? {
           icon
