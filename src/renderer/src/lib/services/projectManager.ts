@@ -9,6 +9,7 @@ export const getProjectMetadata = async (directory: string): Promise<Project> =>
       title: metadata?.title || '',
       fullPath: `${directory}`,
       genre: metadata?.genre || 'science-fiction',
+      writingSample: metadata?.writingSample || '',
       cover: '',
       summary: metadata?.summary || '',
       year: metadata?.year || 0,
@@ -95,6 +96,7 @@ export const saveProject = async (project: Project): Promise<boolean> => {
       summary: project.summary,
       author: 'Sacha',
       year: project.year,
+      writingSample: project.writingSample,
       totalWordCount: project.totalWordCount,
       expertSuggestions: project.expertSuggestions
     }

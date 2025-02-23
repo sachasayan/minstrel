@@ -38,20 +38,10 @@ const ProjectOverview = (): React.ReactNode => {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className="h-full max-h-full">
+        <SidebarTrigger className="-ml-1" />
         <header className="flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4 z-50">
-          <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">{projectState.activeProject?.title}</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+
         </header>
 
         <div className="h-full max-h-screen p-4">

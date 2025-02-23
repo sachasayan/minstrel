@@ -47,13 +47,15 @@ export const projectsSlice = createSlice({
         }
       }
     },
-    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number }>) => {
+    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number, writingSample: string }>) => {
       if (state.activeProject) {
         state.activeProject.title = action.payload.title
         state.activeProject.genre = action.payload.genre
         state.activeProject.summary = action.payload.summary
         state.activeProject.year = action.payload.year
         state.activeProject.totalWordCount = action.payload.totalWordCount
+        state.activeProject.writingSample = action.payload.writingSample
+        state.projectHasLiveEdits = true
       }
     },
     updateReviews: (state, action: PayloadAction<any>) => {

@@ -32,9 +32,9 @@ interface WizardContextProps {
 const WizardContext = createContext<WizardContextProps>({
   totalSteps: 4,
   currentStep: 0,
-  setCurrentStep: () => {},
+  setCurrentStep: () => { },
   formData: {},
-  setFormData: () => {}
+  setFormData: () => { }
 })
 
 // Custom hook for using wizard context
@@ -362,6 +362,7 @@ const SummaryPage = () => {
         files: [],
         genre: formData.genre,
         summary: '',
+        writingSample: formData.writing_sample,
         year: new Date().getFullYear(),
         totalWordCount: 0,
         expertSuggestions: []

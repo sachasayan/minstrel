@@ -212,8 +212,64 @@
   --color-highlight-900: var(--highlight-900);
 }
 
+
 @layer base {
   :root {}
+
+  .mdx-theme {
+
+    .mdxeditor-toolbar {
+      @apply shadow-2xl;
+      overflow: visible;
+
+      &:before {
+        @apply bg-background;
+        display: block;
+        content: '';
+        position: absolute;
+        top: 110%;
+        left: 0;
+        right: 0;
+        height: 50%;
+        z-index: -1;
+        --toolbar: hsla(0, 0%, 0%, 1);
+        --toolbar-transparent: hsla(0, 0%, 100%, 0);
+        background: linear-gradient(var(--toolbar), var(--toolbar-transparent));
+      }
+
+      --accentBase: var(--brand-500);
+      --accentBgSubtle: var(--brand-500);
+      --accentBg: var(--brand-500);
+      --accentBgHover: var(--brand-500);
+      --accentBgActive: var(--brand-500);
+
+      --accentLine: var(--brand-500);
+      --accentBorder: var(--brand-500);
+      --accentBorderHover: var(--brand-500);
+      --accentSolid: var(--brand-500);
+      --accentSolidHover: var(--brand-500);
+      --accentText: var(--brand-500);
+      --accentTextContrast: var(--brand-500);
+
+      --baseBase: var(--highlight-200);
+      --baseBgSubtle: var(--highlight-500);
+      --baseBg: var(--highlight-500);
+      --baseBgHover: var(--brand-500);
+      --baseBgActive: var(--highlight-500);
+
+      --baseLine: var(--highlight-500);
+      --baseBorder: var(--highlight-500);
+      --baseBorderHover: var(--highlight-500);
+      --baseSolid: var(--highlight-700);
+      --baseSolidHover: var(--highlight-500);
+      --baseText: var(--highlight-600);
+      --baseTextContrast: var(--highlight-900);
+    }
+
+  }
+
+
+
 
   * {
     @apply border-border;

@@ -18,6 +18,7 @@ export interface Project extends ProjectFragment {
   files: ProjectFile[]
   summary: string
   year: number
+  writingSample: string
   totalWordCount: number
   expertSuggestions: ExpertSuggestion[]
 }

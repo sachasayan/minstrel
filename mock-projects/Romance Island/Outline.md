@@ -1,6 +1,6 @@
 # Novel Outline: The Last Librarian
 
-Synopsis&#x20;
+Synopsis &#x20;
 
 In a dystopian future where knowledge is suppressed, and books are outlawed, a solitary librarian named Elias maintains a hidden collection of forbidden literature. When a young woman named Anya, desperate for truth, stumbles upon his secret sanctuary, Elias must decide whether to risk everything to share the power of stories, or protect his haven from the iron fist of the Authority. Their alliance sparks a rebellion, challenging the very foundations of the oppressive regime and igniting a flame of hope in a world shrouded in darkness.
 

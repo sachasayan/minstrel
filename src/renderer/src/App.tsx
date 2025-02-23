@@ -78,7 +78,7 @@ export default function App(): ReactNode {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col justify-center gap-4">
-              <p>Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to Google AI Studio and sign into your Google Account. Find the blue button labelled...</p>
+              <p>Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to <a href="https://aistudio.google.com/" rel="noreferrer" className="cursor-pointer underline" target="_blank">Google AI Studio</a> and sign into your Google Account. Find the blue button labelled...</p>
               <p>
                 <button className="shadow-md ring-1 ring-black-500 mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit">
                   <Key className="mr-2 h-4 w-4" />
@@ -95,7 +95,7 @@ export default function App(): ReactNode {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog >
+      </Dialog>
     </>
   )
 }

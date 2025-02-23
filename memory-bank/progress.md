@@ -20,8 +20,8 @@
 - [ ] **Critique Generation** (UNFINISHED)
   - [x] Implement service logic to send all chapters to the model
   - [x] Implement model logic to generate a critique
-  - [ ] Implement UI to trigger critique generation
-  - [ ] Display the critique in the UI
+  - [x] Implement UI to trigger critique generation
+  - [x] Display the critique in the UI
 
 ### Phase 2: UI/UX Improvements
 

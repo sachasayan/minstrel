@@ -87,7 +87,7 @@ const Settings = (): ReactNode => {
       <Button onClick={handleSaveSettings} className="mr-4">
         Save
       </Button>
-      <Button >Close</Button>
+      <Button>Close</Button>
     </div>
   )
 }
