@@ -37,7 +37,7 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
   }
 
   return (
-    <div className="relative px-2 py-1  md:px-36 md:py-20 max-h-full rounded-md">
+    <div className="relative px-2 py-1 mx-auto max-w-[1000px] md:px-36 md:py-20 max-h-full rounded-md">
       {fileName ? (
         <>
           <MDXEditor

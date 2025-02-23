@@ -181,8 +181,6 @@
 }
 
 @layer base {
-  :root {}
-
   .mdx-theme {
     .mdxeditor-toolbar {
       @apply shadow-2xl;

@@ -126,32 +126,8 @@ export default function NovelDashboard() {
           </CardContent>
         </Card>
 
-        {/* Expert Suggestions */}
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Expert Suggestions</CardTitle>
-            <CardDescription>Feedback and improvement suggestions from literary experts</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {activeProject?.expertSuggestions.map((suggestion, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle>{suggestion.name}</CardTitle>
-                    <CardDescription>{suggestion.expertise}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <StarRating rating={suggestion.rating} />
-                    <p className="mt-2 text-sm text-muted-foreground">{suggestion.critique}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Character Mentions per Chapter */}
-        <Card className="col-span-3">
+        <Card className="col-span-5">
           <CardHeader>
             <CardTitle>Character Mentions per Chapter</CardTitle>
             <CardDescription>Line graph showing mentions of each character per chapter</CardDescription>
@@ -190,6 +166,20 @@ export default function NovelDashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Expert Suggestions */}
+        {activeProject?.expertSuggestions.map((suggestion, index) => (
+          <Card className="col-span-2" key={index}>
+            <CardHeader>
+              <CardTitle>Expert feedback: {suggestion.name}</CardTitle>
+              <CardDescription>{suggestion.expertise}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <StarRating rating={suggestion.rating} />
+              <p className="mt-2 text-sm text-muted-foreground">{suggestion.critique}</p>
+            </CardContent>
+          </Card>
+        ))}
 
         {/* Progress */}
         <Card className="md:col-span-7 ">
