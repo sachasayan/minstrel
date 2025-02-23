@@ -17,7 +17,7 @@ import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
-import { generateSkeleton } from '@/lib/services/chatManager' // Import generateSkeleton
+import { generateSkeleton } from '@/lib/services/chatService' // Import generateSkeleton
 import { setActiveProject } from '@/lib/store/projectsSlice'
 
 // Context for managing wizard state

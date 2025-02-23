@@ -15,13 +15,13 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
 
 ### Component Relationships
 
-- `AppSidebar` interacts with `projectManager` to save projects and with `chatSlice` and `appStateSlice` to manage UI state.
-- `ChatInterface` interacts with `chatSlice` to display and manage chat history and with `chatManager` to send messages.
+- `AppSidebar` interacts with `fileService` to save projects and with `chatSlice` and `appStateSlice` to manage UI state.
+- `ChatInterface` interacts with `chatSlice` to display and manage chat history and with `chatService` to send messages.
 - `MarkdownViewer` displays Markdown content from the `projectSlice`.
 - `BookOutlineWizard` collects initial project parameters and triggers the skeleton generation process.
 - `ProjectOverview` combines `ChatInterface` and `MarkdownViewer` to provide the main project view.
-- `chatManager` interacts with `llmService` to communicate with the Gemini API, `promptBuilder` to construct prompts, and `projectsSlice` to update project data.
-- `projectManager` uses Electron's IPC to interact with `fileOps.ts` in the main process for file system operations.
+- `chatService` interacts with `llmService` to communicate with the Gemini API, `promptBuilder` to construct prompts, and `projectsSlice` to update project data.
+- `fileService` uses Electron's IPC to interact with `fileOps.ts` in the main process for file system operations.
 
 ---
 

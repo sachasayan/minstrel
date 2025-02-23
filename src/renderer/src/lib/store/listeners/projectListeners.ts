@@ -1,6 +1,6 @@
 import { createListenerMiddleware, isAnyOf, ListenerEffect } from '@reduxjs/toolkit'
 import { setActiveProject, setActiveProjectFromFragment } from '../projectsSlice'
-import { fetchProjectDetails } from '@/lib/services/projectManager'
+import { fetchProjectDetails } from '@/lib/services/fileService'
 export const projectListeners = createListenerMiddleware()
 
 // Listen for changes to the active project — if it's a new project, fetch and update the projects state

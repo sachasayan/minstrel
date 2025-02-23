@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice'
 import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
-import { fetchProjects } from '@/lib/services/projectManager'
+import { fetchProjects } from '@/lib/services/fileService'
 
 const Intro = (): JSX.Element => {
   const dispatch = useDispatch()

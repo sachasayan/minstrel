@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
 import { toast } from 'sonner'
 
-import { saveProject } from '@/lib/services/projectManager'
+import { saveProject } from '@/lib/services/fileService'
 import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects } from '@/lib/store/projectsSlice'
 
 import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered } from 'lucide-react'

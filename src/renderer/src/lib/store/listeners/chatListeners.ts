@@ -1,5 +1,5 @@
 import { createListenerMiddleware } from '@reduxjs/toolkit'
-import { sendMessage } from '@/lib/services/chatManager'
+import { sendMessage } from '@/lib/services/chatService'
 import { addChatMessage } from '../chatSlice'
 import { RequestContext } from '@/types'
 
