@@ -60,7 +60,6 @@ const processResponse = (responseString: string): RequestContext | null => {
   }
 
   if (!!response?.read_file) {
-    const files = response.read_file.map((item) => `${item}`).join(' ')
     context.requestedFiles = response.read_file
   }
 
@@ -130,7 +129,7 @@ export const sendMessage = async (context: RequestContext) => {
     console.groupEnd()
     console.log('AI Response: \n \n', response)
     const newContext = processResponse(response)
-    store.dispatch(resolvePendingChat())
+
     if (newContext === null) {
       return // Stop recursion if processResponse failed
     }
@@ -158,8 +157,10 @@ export const sendMessage = async (context: RequestContext) => {
           text: `Hmm. Something went wrong, sorry. You might need to try again.`
         })
       )
+      store.dispatch(resolvePendingChat())
     }
   } finally {
+    store.dispatch(resolvePendingChat())
     console.log('sendMessage() finished')
   }
 }
@@ -177,7 +178,6 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
 
     console.log('AI Response: \n \n', response)
     const context = processResponse(response)
-    store.dispatch(resolvePendingChat())
     if (context === null) {
       console.error('processResponse returned null in generateSkeleton, not calling sendMessage')
       return
@@ -186,6 +186,7 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
   } catch (error) {
     console.error('Failed to send chat message:', error)
   } finally {
+    store.dispatch(resolvePendingChat())
     console.log('generateSkeleton() finished')
   }
 }

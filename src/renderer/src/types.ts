@@ -64,6 +64,7 @@ export interface RequestContext {
   carriedContext?: string
   sequenceInfo?: string
   requestedFiles?: string[]
+  message?: string
 }
 
 export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
