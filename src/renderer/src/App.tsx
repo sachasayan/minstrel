@@ -17,21 +17,23 @@ export default function App(): ReactNode {
   const activeView = useSelector(selectActiveView)
 
   const [hasLoaded, setHasLoaded] = useState(false)
-  const [showOnboarding, setShowOnboarding] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const loadSettings = () => async (dispatch) => {
     console.log('Loading settings')
     const appSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
-    if (!appSettings?.api || !appSettings?.apiKey) {
+    if (!appSettings?.workingRootDirectory || !appSettings?.apiKey) {
+      console.log(appSettings)
       setShowOnboarding(true)
+    } else {
+      dispatch(
+        setSettingsState({
+          api: appSettings?.api || defaultSettings.api,
+          apiKey: appSettings?.apiKey || defaultSettings.apiKey,
+          workingRootDirectory: appSettings?.workingRootDirectory || defaultSettings.workingRootDirectory
+        })
+      )
     }
-    dispatch(
-      setSettingsState({
-        api: appSettings?.api || defaultSettings.api,
-        apiKey: appSettings?.apiKey || defaultSettings.apiKey,
-        workingRootDirectory: appSettings?.workingRootDirectory || defaultSettings.workingRootDirectory
-      })
-    )
   }
 
   const router = (activeView) => {

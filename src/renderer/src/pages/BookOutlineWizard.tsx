@@ -32,9 +32,9 @@ interface WizardContextProps {
 const WizardContext = createContext<WizardContextProps>({
   totalSteps: 4,
   currentStep: 0,
-  setCurrentStep: () => {},
+  setCurrentStep: () => { },
   formData: {},
-  setFormData: () => {}
+  setFormData: () => { }
 })
 
 // Custom hook for using wizard context

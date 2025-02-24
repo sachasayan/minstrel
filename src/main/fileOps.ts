@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { dialog, ipcMain } from 'electron'
 import * as os from 'os'
 import * as fs from 'fs/promises'
 
@@ -46,6 +46,18 @@ export const handleWriteFile = async (_event, filePath, content) => {
   }
 }
 
+export const handleSelectDirectory = async (_event, operation) => {
+  const properties = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory'];
+  const result = await dialog.showOpenDialog({
+      properties: properties
+  });
+  if (result.canceled) {
+      return null;
+  } else {
+      return result.filePaths[0];
+  }
+};
+
 export const handleMakeDirectory = async (_event, dirPath) => {
   const resolvedPath = dirPath.replace('~', homedir) // Resolve "~"
   console.log('Making directory at:', resolvedPath)
@@ -63,4 +75,5 @@ export const registerFileOpsHandlers = () => {
   ipcMain.handle('read-file', handleReadFile)
   ipcMain.handle('write-file', handleWriteFile)
   ipcMain.handle('make-directory', handleMakeDirectory)
+  ipcMain.handle('select-directory', handleSelectDirectory)
 }

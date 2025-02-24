@@ -4,10 +4,12 @@ import Torrent from '@/components/visuals/torrent'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { MoveRight } from 'lucide-react'
+import { Folder, MoveRight, WandSparkles } from 'lucide-react'
 import { ReactNode } from 'react'
 import { Key } from 'lucide-react'
 import geminiService from '@/lib/services/llmService'
+import { setSettingsState } from '@/lib/store/settingsSlice'
+import { useDispatch } from 'react-redux'
 
 interface OnboardingDialogProps {
   showOnboarding: boolean
@@ -21,14 +23,16 @@ interface OnboardingFlowProps {
   setCurrentStep: (step: number) => void
   formData: { [key: string]: any }
   setFormData: (data: { [key: string]: any }) => void
+  editFormData: (newData) => void
 }
 
 const OnboardingFlow = createContext<OnboardingFlowProps>({
   totalSteps: 3,
   currentStep: 0,
-  setCurrentStep: () => {},
+  setCurrentStep: () => { },
   formData: {},
-  setFormData: () => {}
+  setFormData: () => { },
+  editFormData: () => { }
 })
 
 // Custom hook for using wizard context
@@ -36,15 +40,27 @@ const useOnboarding = () => useContext(OnboardingFlow)
 
 // Page 0
 const Intro = () => {
-  const { setCurrentStep, setFormData, currentStep } = useOnboarding()
+  const { setCurrentStep, editFormData, currentStep } = useOnboarding()
+  const [selectedFolder, setSelectedFolder] = useState(null)
+
+  const selectFolder = async () => {
+    const exportPath = await window.electron.ipcRenderer.invoke('select-directory', 'export');
+
+    editFormData({ workingRootDirectory: exportPath })
+    setSelectedFolder(exportPath)
+
+  }
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
         <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
-        <p className="text-center text-sm text-gray-500">{`Welcome to Minstrel. It's nice to meet you! Before we get started, let's set up a couple things. `}</p>
-
-        <Button onClick={() => setCurrentStep(1)}>{`I'm ready!`} </Button>
+        <p className="text-center text-sm text-gray-500">Welcome to Minstrel. It&apos;s nice to meet you! Before we get started, let&apos;s set up a couple things. First of all, where can we put our projects?
+          <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.</p>
+        <div className="flex flex-row items-center justify-center gap-4">
+          <Button onClick={() => { selectFolder(); setCurrentStep(1) }}> <Folder /> {`Choose a Directory`} </Button>
+          <Button onClick={() => { editFormData({ workingRootDirectory: '~/Documents/Minstrel' }); setCurrentStep(1) }}><WandSparkles /> {`Use the default.`} </Button>
+        </div>
       </div>
     </div>
   )
@@ -52,50 +68,54 @@ const Intro = () => {
 
 // Page 1
 const SetUpKey = () => {
-  const { currentStep, setCurrentStep, formData, setFormData, totalSteps } = useOnboarding()
+  const { currentStep, setCurrentStep, formData, editFormData, totalSteps } = useOnboarding()
   const [keyValue, setKeyValue] = useState('')
   const [keyError, setKeyError] = useState(false)
 
   const handleKey = async (keyInput) => {
+    setKeyValue(keyInput)
+    if (keyInput.length < 10) {
+      return
+    }
     try {
-      setKeyValue(keyInput)
+
       console.log('Verifying key...' + keyInput)
       const keyTest = await geminiService.verifyKey(keyInput)
       console.log(keyTest)
       if (!keyTest) {
         console.error('Key verification failed.')
-        return
+        setKeyError(true)
+        return false
       }
+
       console.log('Key verified.')
+      editFormData({ apiKey: keyInput.trim() })
       setCurrentStep(2)
+      return true;
+
     } catch (e) {
       console.error(e)
+      setKeyError(true)
+      return false
     }
   }
 
-  useEffect(() => {
-    setFormData(formData.length || 0)
-  }, [formData.length])
-
-  useEffect(() => {
-    setFormData(formData.length || 50000)
-  }, [])
 
   return (
     <div className="flex flex-col h-full justify-center gap-4 items-center p-16">
       <h2 className="text-2xl font-bold text-center">API Key </h2>
       <p className="text-center text-sm text-gray-500">
-        Before you can use Minstrel, you&apos;ll need to set up your API key. Head over to{' '}
+        Great! We also need to set up your API key. Head over to{' '}
         <a href="https://aistudio.google.com/" rel="noreferrer" className="font-bold cursor-pointer underline" target="_blank">
           Google AI Studio
         </a>{' '}
         and sign into your Google Account. Find the blue button labelled <i>Get API Key</i>, generate a key, and copy it here.
       </p>
       <div className="flex flex-row justify-center align-middle gap-4">
-        <div className="shadow-md  mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit">
+        <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="block shadow-md  mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit">
           <Key className="mr-2 h-4 w-4" />
           Get API Key
-        </div>
+        </a>
         <MoveRight className="h-full  text-gray-500" />
         <Input value={keyValue} onChange={(e) => handleKey(e.target.value)} className="w-10" />
       </div>
@@ -113,14 +133,29 @@ const SetUpKey = () => {
 // Summary Page
 const SummaryPage = () => {
   const { currentStep, formData, totalSteps } = useOnboarding()
+  const dispatch = useDispatch()
+
+  const handleSaveSettings = () => {
+    const apiCall = {
+      api: '',
+      ...formData
+    }
+    dispatch(
+      setSettingsState(apiCall)
+    )
+    console.log(apiCall);
+    window.electron.ipcRenderer.invoke('save-app-settings', apiCall)
+
+    alert('Settings Saved!')
+  }
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow flex flex-col items-center justify-center p-8 gap-4">
         <h2 className="text-2xl text-center font-bold">Great. We&apos;re ready to go.</h2>
-        <p className="text-sm text-gray-500">{`That was painless, right? `}</p>
+        <p className="text-sm text-gray-500">{`That was painless, right? If you need to change things in the future, you can go to the Settings area.`}</p>
 
-        <div className="flex flex-row items-center justify-center">{!requestPending && <Button>I'm ready!</Button>}</div>
+        <div className="flex flex-row items-center justify-center"><Button onClick={handleSaveSettings}>I'm ready!</Button></div>
       </div>
     </div>
   )
@@ -131,10 +166,13 @@ const OnboardingDialog = ({ showOnboarding, setShowOnboarding }: OnboardingDialo
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState({})
   const totalSteps = 4 // Includes summary page, but not the start page
+  const editFormData = (newData) => {
+    setFormData({ ...formData, ...newData })
+  }
 
   return (
     <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-      <OnboardingFlow.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps }}>
+      <OnboardingFlow.Provider value={{ currentStep, setCurrentStep, formData, setFormData, editFormData, totalSteps }}>
         <DialogContent
           className="sm:max-w-[800px]"
           onInteractOutside={(e) => {
