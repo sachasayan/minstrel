@@ -128,7 +128,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
         </SidebarHeader>
         <SidebarContent className="gap-0">
-          <SidebarGroup key="Dashboard" >
+          <SidebarGroup key="Dashboard">
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem key="Dashboard">

@@ -47,16 +47,16 @@ export const handleWriteFile = async (_event, filePath, content) => {
 }
 
 export const handleSelectDirectory = async (_event, operation) => {
-  const properties = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory'];
+  const properties = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory']
   const result = await dialog.showOpenDialog({
-      properties: properties
-  });
+    properties: properties
+  })
   if (result.canceled) {
-      return null;
+    return null
   } else {
-      return result.filePaths[0];
+    return result.filePaths[0]
   }
-};
+}
 
 export const handleMakeDirectory = async (_event, dirPath) => {
   const resolvedPath = dirPath.replace('~', homedir) // Resolve "~"

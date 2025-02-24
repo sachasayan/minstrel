@@ -29,10 +29,10 @@ interface OnboardingFlowProps {
 const OnboardingFlow = createContext<OnboardingFlowProps>({
   totalSteps: 3,
   currentStep: 0,
-  setCurrentStep: () => { },
+  setCurrentStep: () => {},
   formData: {},
-  setFormData: () => { },
-  editFormData: () => { }
+  setFormData: () => {},
+  editFormData: () => {}
 })
 
 // Custom hook for using wizard context
@@ -44,22 +44,38 @@ const Intro = () => {
   const [selectedFolder, setSelectedFolder] = useState(null)
 
   const selectFolder = async () => {
-    const exportPath = await window.electron.ipcRenderer.invoke('select-directory', 'export');
+    const exportPath = await window.electron.ipcRenderer.invoke('select-directory', 'export')
 
     editFormData({ workingRootDirectory: exportPath })
     setSelectedFolder(exportPath)
-
   }
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
         <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
-        <p className="text-center text-sm text-gray-500">Welcome to Minstrel. It&apos;s nice to meet you! Before we get started, let&apos;s set up a couple things. First of all, where can we put our projects?
-          <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.</p>
+        <p className="text-center text-sm text-gray-500">
+          Welcome to Minstrel. It&apos;s nice to meet you! Before we get started, let&apos;s set up a couple things. First of all, where can we put our projects?
+          <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.
+        </p>
         <div className="flex flex-row items-center justify-center gap-4">
-          <Button onClick={() => { selectFolder(); setCurrentStep(1) }}> <Folder /> {`Choose a Directory`} </Button>
-          <Button onClick={() => { editFormData({ workingRootDirectory: '~/Documents/Minstrel' }); setCurrentStep(1) }}><WandSparkles /> {`Use the default.`} </Button>
+          <Button
+            onClick={() => {
+              selectFolder()
+              setCurrentStep(1)
+            }}
+          >
+            {' '}
+            <Folder /> {`Choose a Directory`}{' '}
+          </Button>
+          <Button
+            onClick={() => {
+              editFormData({ workingRootDirectory: '~/Documents/Minstrel' })
+              setCurrentStep(1)
+            }}
+          >
+            <WandSparkles /> {`Use the default.`}{' '}
+          </Button>
         </div>
       </div>
     </div>
@@ -78,7 +94,6 @@ const SetUpKey = () => {
       return
     }
     try {
-
       console.log('Verifying key...' + keyInput)
       const keyTest = await geminiService.verifyKey(keyInput)
       console.log(keyTest)
@@ -91,15 +106,13 @@ const SetUpKey = () => {
       console.log('Key verified.')
       editFormData({ apiKey: keyInput.trim() })
       setCurrentStep(2)
-      return true;
-
+      return true
     } catch (e) {
       console.error(e)
       setKeyError(true)
       return false
     }
   }
-
 
   return (
     <div className="flex flex-col h-full justify-center gap-4 items-center p-16">
@@ -112,7 +125,12 @@ const SetUpKey = () => {
         and sign into your Google Account. Find the blue button labelled <i>Get API Key</i>, generate a key, and copy it here.
       </p>
       <div className="flex flex-row justify-center align-middle gap-4">
-        <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="block shadow-md  mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit">
+        <a
+          href="https://aistudio.google.com/"
+          target="_blank"
+          rel="noreferrer"
+          className="block shadow-md  mx-auto flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-fit"
+        >
           <Key className="mr-2 h-4 w-4" />
           Get API Key
         </a>
@@ -140,10 +158,8 @@ const SummaryPage = () => {
       api: '',
       ...formData
     }
-    dispatch(
-      setSettingsState(apiCall)
-    )
-    console.log(apiCall);
+    dispatch(setSettingsState(apiCall))
+    console.log(apiCall)
     window.electron.ipcRenderer.invoke('save-app-settings', apiCall)
 
     alert('Settings Saved!')
@@ -155,7 +171,9 @@ const SummaryPage = () => {
         <h2 className="text-2xl text-center font-bold">Great. We&apos;re ready to go.</h2>
         <p className="text-sm text-gray-500">{`That was painless, right? If you need to change things in the future, you can go to the Settings area.`}</p>
 
-        <div className="flex flex-row items-center justify-center"><Button onClick={handleSaveSettings}>I'm ready!</Button></div>
+        <div className="flex flex-row items-center justify-center">
+          <Button onClick={handleSaveSettings}>I'm ready!</Button>
+        </div>
       </div>
     </div>
   )

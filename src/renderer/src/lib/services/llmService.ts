@@ -32,15 +32,15 @@ const geminiService = {
 
   async verifyKey(apiKey: string) {
     try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = await genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
-    const response = await model.generateContent('Hey there!')
-    console.log("API Key is valid. Available models:", response);
-  } catch (error) {
-    console.error("Invalid API Key or request failed:", error);
-    return false;
-  }
-  return true;
+      const genAI = new GoogleGenerativeAI(apiKey)
+      const model = await genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+      const response = await model.generateContent('Hey there!')
+      console.log('API Key is valid. Available models:', response)
+    } catch (error) {
+      console.error('Invalid API Key or request failed:', error)
+      return false
+    }
+    return true
   },
 
   async generateContent(prompt: string) {
