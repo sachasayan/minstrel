@@ -1,5 +1,4 @@
-import type React from 'react'
-import { useState, createContext, useContext, useEffect } from 'react'
+import { useState, createContext, useContext } from 'react'
 import Torrent from '@/components/visuals/torrent'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -24,6 +23,7 @@ interface OnboardingFlowProps {
   formData: { [key: string]: any }
   setFormData: (data: { [key: string]: any }) => void
   editFormData: (newData) => void
+  setShowOnboarding: (show: boolean) => void // Added setShowOnboarding to context
 }
 
 const OnboardingFlow = createContext<OnboardingFlowProps>({
@@ -32,7 +32,8 @@ const OnboardingFlow = createContext<OnboardingFlowProps>({
   setCurrentStep: () => {},
   formData: {},
   setFormData: () => {},
-  editFormData: () => {}
+  editFormData: () => {},
+  setShowOnboarding: () => {} // Added setShowOnboarding to default context value
 })
 
 // Custom hook for using wizard context
@@ -40,14 +41,12 @@ const useOnboarding = () => useContext(OnboardingFlow)
 
 // Page 0
 const Intro = () => {
-  const { setCurrentStep, editFormData, currentStep } = useOnboarding()
-  const [selectedFolder, setSelectedFolder] = useState(null)
+  const { setCurrentStep, editFormData } = useOnboarding()
 
   const selectFolder = async () => {
     const exportPath = await window.electron.ipcRenderer.invoke('select-directory', 'export')
 
     editFormData({ workingRootDirectory: exportPath })
-    setSelectedFolder(exportPath)
   }
 
   return (
@@ -84,34 +83,45 @@ const Intro = () => {
 
 // Page 1
 const SetUpKey = () => {
-  const { currentStep, setCurrentStep, formData, editFormData, totalSteps } = useOnboarding()
+  const { setCurrentStep, editFormData, setShowOnboarding } = useOnboarding() // Added setShowOnboarding from context
   const [keyValue, setKeyValue] = useState('')
   const [keyError, setKeyError] = useState(false)
+  const [verifyingKey, setVerifyingKey] = useState(false) // Added loading state
+  let debounceTimeout // Changed to let and moved to component scope
 
   const handleKey = async (keyInput) => {
     setKeyValue(keyInput)
     if (keyInput.length < 10) {
       return
     }
-    try {
-      console.log('Verifying key...' + keyInput)
-      const keyTest = await geminiService.verifyKey(keyInput)
-      console.log(keyTest)
-      if (!keyTest) {
-        console.error('Key verification failed.')
+    clearTimeout(debounceTimeout)
+
+    // Set up new timeout
+    debounceTimeout = setTimeout(async () => {
+      // Removed const timeoutId
+      setVerifyingKey(true)
+      try {
+        console.log('Verifying key...' + keyInput)
+        const keyTest = await geminiService.verifyKey(keyInput)
+        console.log(keyTest)
+        if (!keyTest) {
+          console.error('Key verification failed.')
+          setKeyError(true)
+          return false
+        }
+
+        console.log('Key verified.')
+        editFormData({ apiKey: keyInput.trim() })
+        setCurrentStep(2)
+        return true
+      } catch (e) {
+        console.error(e)
         setKeyError(true)
         return false
+      } finally {
+        setVerifyingKey(false)
       }
-
-      console.log('Key verified.')
-      editFormData({ apiKey: keyInput.trim() })
-      setCurrentStep(2)
-      return true
-    } catch (e) {
-      console.error(e)
-      setKeyError(true)
-      return false
-    }
+    }, 500)
   }
 
   return (
@@ -135,9 +145,10 @@ const SetUpKey = () => {
           Get API Key
         </a>
         <MoveRight className="h-full  text-gray-500" />
-        <Input value={keyValue} onChange={(e) => handleKey(e.target.value)} className="w-10" />
+        <Input value={keyValue} onChange={(e) => handleKey(e.target.value)} className="w-10" disabled={verifyingKey} />
       </div>
-      {keyError && <div className="text-red-700 text-xs">Hmm that didn&apos;t work. Try again.</div>}
+      {keyError && <div className="text-red-700">Hmm that didn&apos;t work. Try again.</div>}
+      {verifyingKey && <div className="text-xs">Verifying key...</div>}
       <p className="text-sm bg-amber-100 outline-1 outline-amber-300 text-amber-900 p-4 rounded-md">
         <span className="font-bold">What is an API key?</span> It's like a password, but for computers. Minstrel needs to talk to Google on your behalf.{' '}
         <a className="underline pointer text-amber-900" href="https://ai.google.dev/gemini-api/docs/api-key" target="blank" rel="noreferrer">
@@ -150,8 +161,8 @@ const SetUpKey = () => {
 
 // Summary Page
 const SummaryPage = () => {
-  const { currentStep, formData, totalSteps } = useOnboarding()
-  const dispatch = useDispatch()
+  const { formData, setShowOnboarding } = useOnboarding() // Added setShowOnboarding from context
+  const dispatch = useDispatch() // moved useDispatch here
 
   const handleSaveSettings = () => {
     const apiCall = {
@@ -162,7 +173,7 @@ const SummaryPage = () => {
     console.log(apiCall)
     window.electron.ipcRenderer.invoke('save-app-settings', apiCall)
 
-    alert('Settings Saved!')
+    setShowOnboarding(false) // Close the dialog after saving
   }
 
   return (
@@ -190,7 +201,9 @@ const OnboardingDialog = ({ showOnboarding, setShowOnboarding }: OnboardingDialo
 
   return (
     <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-      <OnboardingFlow.Provider value={{ currentStep, setCurrentStep, formData, setFormData, editFormData, totalSteps }}>
+      <OnboardingFlow.Provider value={{ currentStep, setCurrentStep, formData, setFormData, editFormData, totalSteps, setShowOnboarding }}>
+        {' '}
+        {/* Added setShowOnboarding to context value */}
         <DialogContent
           className="sm:max-w-[800px]"
           onInteractOutside={(e) => {
