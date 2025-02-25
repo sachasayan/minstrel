@@ -4,9 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
 :root {
-
   /* Define base colors. */
   --neutral-50: hsl(60, 14%, 98%);
   --neutral-100: hsl(50, 7%, 96%);
@@ -41,7 +39,6 @@
   --highlight-700: hsl(70, 10%, 42%);
   --highlight-800: hsl(70, 14%, 32%);
   --highlight-900: hsl(70, 27%, 22%);
-
 
   /* General dimensional characteristics */
   --radius: 0.6rem;

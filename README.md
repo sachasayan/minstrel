@@ -92,15 +92,6 @@ Forking the project? Using an AI-enabled LLM? This project is set up with a Clin
 - `progress.md`: Outlines the phased development plan and progress.
 - `activeContext.md`: Tracks the current work focus and development status.
 
-## License
-
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## Usage
 
 Portions of Minstrel may end up commercial, but it's intended that the base source code will always remain free/gratis. It's yours, y'all. Do what you want with it. Just don't sue me.

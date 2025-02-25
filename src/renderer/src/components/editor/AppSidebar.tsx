@@ -112,9 +112,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sidebar variant="sidebar" collapsible="icon" className={`[&_div]:transition-colors ${!sideBarOpen ? 'border-none [&_.bg-sidebar]:bg-transparent' :
-        '[&_.bg_sidebar]:bg-sidebar'
-        }`} {...props}>
+      <Sidebar variant="sidebar" collapsible="icon" className={`[&_div]:transition-colors ${!sideBarOpen ? 'border-none [&_.bg-sidebar]:bg-transparent' : '[&_.bg_sidebar]:bg-sidebar'}`} {...props}>
         <SidebarHeader className="pt-8">
           <div className={`flex justify-between ${sideBarOpen ? `max-h-30 flex-row` : `max-h-30 flex-col`} transition-all duration-500`}>
             <Button asChild variant="ghost" className="flex-grow transition-all">
@@ -207,9 +205,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === item.title}>
-                            < a onClick={() => handleFileSelect(item.title)} className={`flex items-center [&:active]:bg-highlight-700 [&:active]:text-white [data-active=true]:bg-highlight-600`}>
-                              {!!sideBarOpen && < Book />}
-                              {!sideBarOpen && < ChapterIcon chapterNumber={chapterNumber} />}
+                            <a onClick={() => handleFileSelect(item.title)} className={`flex items-center [&:active]:bg-highlight-700 [&:active]:text-white [data-active=true]:bg-highlight-600`}>
+                              {!!sideBarOpen && <Book />}
+                              {!sideBarOpen && <ChapterIcon chapterNumber={chapterNumber} />}
                               <span className="flex-grow ml-2">{item.title.replace('.md', '').replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>
@@ -229,8 +227,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       }
                       variant="outline"
                     >
-                      <Plus className="mr-2" /><span className="block overflow-hidden"> Add Chapter</span>
-
+                      <Plus className="mr-2" />
+                      <span className="block overflow-hidden"> Add Chapter</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -239,7 +237,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           )}
         </SidebarContent>
         <SidebarRail />
-      </Sidebar >
+      </Sidebar>
     </>
   )
 }
