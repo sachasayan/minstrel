@@ -33,7 +33,7 @@ const toolPrompt = (tools) => `
 * Writes a new file if the file doesn't exist.
 
 * Maximum file size for 'write_file': 20,000 characters
-* File types: Only Markdown (.md) files are supported.
+* File formats: Only Markdown files are supported.
 
 ## READ FILE:
 \`\`\`xml

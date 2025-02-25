@@ -154,16 +154,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem key="Skeleton">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Skeleton.md'}>
-                    <a onClick={() => handleFileSelect('Skeleton.md')}>
+                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Skeleton'}>
+                    <a onClick={() => handleFileSelect('Skeleton')}>
                       <FileText className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Skeleton</span>{' '}
                       {projectsState.activeProject?.files?.find((item) => item.title.includes('Skeleton'))?.hasEdits && <Diff className="float-right text-orange-500" />}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem key="Outline">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Outline.md'}>
-                    <a onClick={() => handleFileSelect('Outline.md')}>
+                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Outline'}>
+                    <a onClick={() => handleFileSelect('Outline')}>
                       <ListOrdered className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Outline</span>{' '}
                       {projectsState.activeProject?.files?.find((item) => item.title.includes('Outline'))?.hasEdits && <Diff className="float-right text-orange-500" />}
                     </a>
@@ -208,7 +208,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <a onClick={() => handleFileSelect(item.title)} className={`flex items-center [&:active]:bg-highlight-700 [&:active]:text-white [data-active=true]:bg-highlight-600`}>
                               {!!sideBarOpen && <Book />}
                               {!sideBarOpen && <ChapterIcon chapterNumber={chapterNumber} />}
-                              <span className="flex-grow ml-2">{item.title.replace('.md', '').replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
+                              <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>
                         </SidebarMenuItem>

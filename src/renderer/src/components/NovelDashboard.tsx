@@ -35,7 +35,7 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
 }
 
 function getCharacterFrequencyData(activeProject: Project): any[] {
-  const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title === 'Outline.md')?.content || '')
+  const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title === 'Outline')?.content || '')
   return activeProject.files
     .filter((file) => file.title.startsWith('Chapter-'))
     .map((file) => {
@@ -136,7 +136,7 @@ export default function NovelDashboard() {
             {activeProject ? (
               <ChartContainer
                 style={{ aspectRatio: 'auto' }}
-                config={extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline.md')?.content || '').reduce((acc, char) => {
+                config={extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline')?.content || '').reduce((acc, char) => {
                   acc[char.name] = {
                     label: char.name
                   }
@@ -156,7 +156,7 @@ export default function NovelDashboard() {
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
-                  {extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline.md')?.content || '').map((character, index) => (
+                  {extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline')?.content || '').map((character, index) => (
                     <Line key={character.name} type="monotone" dataKey={character.name} stroke={colors[index % colors.length]} strokeWidth={2} />
                   ))}
                 </LineChart>

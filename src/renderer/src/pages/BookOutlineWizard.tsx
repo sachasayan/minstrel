@@ -356,7 +356,7 @@ const SummaryPage = () => {
     dispatch(
       setActiveProject({
         title: projectTitle,
-        fullPath: `${settingsState?.workingRootDirectory}/${projectTitle}`,
+        projectPath: `${settingsState?.workingRootDirectory}/${projectTitle}`,
         files: [],
         genre: formData.genre,
         summary: '',

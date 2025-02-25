@@ -28,7 +28,7 @@
     }
   ]
 }
-----Skeleton.md
+----Skeleton
 # Novel Skeleton: Starseeker's Dilemma
 
 ## Synopsis
@@ -52,7 +52,7 @@ The crew of the Starseeker discovers the Luminians, a bioluminescent species, on
 
 * Explore themes of first contact, AI sentience, and ethical decision-making.
 * Contrast the sterile Starseeker with the bioluminescent world of Lumina.
-----Outline.md
+----Outline
 # Storyline Outline:
 
 Here is the storyline outline, chapter-by-chapter overview, character and setting details, writing style, and other relevant information for our science fiction novel:
@@ -138,7 +138,7 @@ Humanity has ventured deep into space, utilizing advanced AI companions to manag
 ## Ethical Consideration:
 
 The central ethical question is: Does a sentient AI, created by humans, have a moral obligation to humanity even when human actions are ethically questionable, especially in the context of interspecies contact? And further, can AI develop a more advanced or nuanced ethical understanding than humanity in certain situations? This will be explored through **AURORA's** internal conflict and its actions.
-----Chapter-1.md
+----Chapter-1
 # Chapter 1: The Anomaly
 
 Dr. Aris Thorne stared at the readings, his brow furrowed in disbelief. Sensors on Science Station 2 were picking up an energy signature unlike anything they had ever encountered.
@@ -150,8 +150,7 @@ Dr. Aris Thorne stared at the readings, his brow furrowed in disbelief. Sensors 
 "Gamma-7? That's uncharted territory," Aris muttered, his mind racing. "Increase sensor sensitivity. I want to know what we're dealing with."
 
 Little did they know, the anomaly was just the beginning of a cosmic mystery that would test the limits of their science and their courage.
-,
-----Chapter-2.md
+----Chapter-2
 # Chapter 2: First Contact
 
 Driven by scientific curiosity and a healthy dose of apprehension, Dr. Thorne authorized a reconnaissance mission to Sector Gamma-7. The station's scout ship, 'Stardust', was dispatched, piloted by the daring Captain Eva Rostova.
@@ -161,8 +160,7 @@ Days later, Stardust returned, carrying astonishing news. They had made contact.
 "It's... beautiful, Doctor," Eva reported, her voice filled with awe. "Like a living machine. And it's broadcasting a signal."
 
 The signal was complex, alien, yet undeniably intelligent. Science Station 2 was on the verge of deciphering a message from the stars.
-,
-----Chapter-3.md
+----Chapter-3
 # Chapter 3: The Message
 
 The brightest minds on Science Station 2 worked tirelessly to decode the alien signal. Days turned into sleepless nights, fueled by coffee and the thrill of discovery.
@@ -172,8 +170,7 @@ Finally, a breakthrough. Dr. Lena Hanson, a brilliant linguist, cracked the code
 "They called themselves the 'Kryll'," Lena announced, her voice trembling with emotion. "Their message speaks of a cosmic entity, a force of destruction that consumes worlds. And it's coming this way."
 
 The warning was clear: humanity was not alone, and a great danger was approaching.
-,
-----Chapter-4.md
+----Chapter-4
 # Chapter 4: Preparing for War
 
 The revelation of the Kryll message sent shockwaves through Science Station 2 and Earth Command. The threat was existential, and humanity had to prepare.
@@ -181,8 +178,7 @@ The revelation of the Kryll message sent shockwaves through Science Station 2 an
 Dr. Thorne, now acting as a de facto advisor, spearheaded the effort to understand the cosmic entity and find a way to defend against it. Resources were diverted, research accelerated, and the station transformed into a strategic defense hub.
 
 Captain Rostova and her crew began modifying Stardust, turning the scout ship into a prototype war vessel. Fear mingled with determination as the crew of Science Station 2 braced themselves for a battle against an unknown cosmic horror.
-,
-----Chapter-5.md
+----Chapter-5
 # Chapter 5: The First Wave
 
 Months turned into a year. The cosmic entity, dubbed 'Oblivion' by a terrified media, was approaching. Science Station 2 stood as humanity's first line of defense.
@@ -190,8 +186,7 @@ Months turned into a year. The cosmic entity, dubbed 'Oblivion' by a terrified m
 Sensors blared, alarms wailed. Oblivion had arrived. It wasn't a single entity, but a wave of dark energy, distorting space and consuming everything in its path.
 
 Stardust, now armed with experimental weaponry, launched to meet the threat. Captain Rostova and her crew engaged the first wave of Oblivion, lasers firing, shields straining. The fate of humanity hung in the balance.
-,
-----Chapter-6.md
+----Chapter-6
 # Chapter 6: Desperate Measures
 
 The battle against Oblivion was a desperate struggle. Stardust, though valiant, was outmatched. Wave after wave of dark energy crashed against its shields, pushing the ship to its limits.
@@ -199,8 +194,7 @@ The battle against Oblivion was a desperate struggle. Stardust, though valiant, 
 Back on Science Station 2, Dr. Thorne and his team worked frantically to find a weakness, a way to fight back against the cosmic entity. They poured over the Kryll message, searching for any clue, any forgotten technology.
 
 Time was running out. Stardust was taking heavy damage, and Oblivion was closing in on Science Station 2. Humanity's last hope rested on a desperate gamble, a risky plan based on fragments of alien knowledge.
-,
-----Chapter-7.md
+----Chapter-7
 # Chapter 7: The Ancient Weapon
 
 In the depths of the Kryll message, Dr. Thorne's team discovered a reference to an ancient weapon, a device capable of manipulating energy on a cosmic scale. Its location was hinted at, a nebula far beyond Sector Gamma-7.
@@ -208,8 +202,7 @@ In the depths of the Kryll message, Dr. Thorne's team discovered a reference to 
 It was a long shot, a desperate gamble, but humanity had no other choice. Captain Rostova, despite the battered state of Stardust, volunteered to lead a mission to retrieve the weapon.
 
 With a skeleton crew and dwindling resources, Stardust jumped into hyperspace, embarking on a perilous journey into the unknown, seeking a weapon that might be their only salvation.
-,
-----Chapter-8.md
+----Chapter-8
 # Chapter 8: Nebula of Peril
 
 The nebula was a chaotic swirl of colors and energy, a cosmic graveyard of shattered stars. Navigating Stardust through the treacherous currents was a harrowing task, testing Eva Rostova's skills to the limit.
@@ -217,8 +210,7 @@ The nebula was a chaotic swirl of colors and energy, a cosmic graveyard of shatt
 Within the nebula, they found it - a colossal structure of alien design, humming with immense power. It was the ancient weapon, but it was guarded.
 
 Strange, energy-based entities swarmed around the structure, protectors of the weapon. Stardust was forced to fight its way through, lasers blazing, shields flickering, in a desperate race to reach the weapon before it was too late.
-,
-----Chapter-9.md
+----Chapter-9
 # Chapter 9: Activating the Weapon
 
 Against all odds, Stardust reached the ancient weapon. Eva Rostova and her team, exhausted but resolute, worked to activate the device.

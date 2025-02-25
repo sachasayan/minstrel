@@ -35,20 +35,20 @@ const prompt = () => `
 * A skeleton is a very basic summary of the details of the story with characters, storyline beats, and other assorted information.
 * If the user sounds like they're asking for help writing a story skeleton, direct them to the outlineAgent.
 * For the initial skeleton generation, a special prompt is used which includes the story parameters provided by the user.
-* No other files are required, however if Skeleton.md already exists, use <read_file> on it.
+* No other files are required, however if Skeleton already exists, use <read_file> on it.
 
 ### OUTLINE
 * An outline is a much more fleshed-out overview of the story with more focus on world-building and building layers.
 * If the user sounds like they're asking for help writing the story outline, direct them to the outlineAgent.
 * For the initial skeleton generation, a special prompt is used which includes the story parameters provided by the user.
-* If the the file Outline.md exists, it is required. Use <read_file> on it.
-* If Outline.md does not exist, use <read_file> on Skeleton.md instead.
+* If the the file Outline exists, it is required. Use <read_file> on it.
+* If Outline does not exist, use <read_file> on Skeleton instead.
 
 ### CHAPTER
 * If the user sounds like they're trying to write a chapter of the story, direct them to the writerAgent.
 * The user may ask you to write a new chapter for the story, or to re-write an existing chapter of the story.
-* If Outline.md does not exist in the list of available files, politely decline any action, and suggest to the user that they build an outline first.
-* Otherwise, always use the <read_file> tool on Outline.md for this specialist.
+* If Outline does not exist in the list of available files, politely decline any action, and suggest to the user that they build an outline first.
+* Otherwise, always use the <read_file> tool on Outline for this specialist.
 * All previous chapters must also exist in the directory list.
 * Also use <read_file> on the chapter previous to this one, if it exists. For instance, if the user wants to re-write Chapter 3, use <read_file> on Chapter 2.
 * Finally, if the chapter itself exists and is therefore being re-written, use <read_file> on it as well.
@@ -68,9 +68,9 @@ User: "Please re-write Chapter 3."
 \`\`\`xml
 <think>The user wants to write the next chapter. I will read the files and use writerAgent to write the chapter.</think>
 <route_to>writerAgent</route_to>
-<read_file>Outline.md</read_file>
-<read_file>Chapter-2.md</read_file>
-<read_file>Chapter-3.md</read_file>
+<read_file>Outline</read_file>
+<read_file>Chapter-2</read_file>
+<read_file>Chapter-3</read_file>
 <message>It looks like you want to re-write Chapter 3. I'm looking at the relevant files now.</message>
 \`\`\`
 

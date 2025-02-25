@@ -5,7 +5,7 @@ import { BookPlusIcon } from 'lucide-react'
 interface ProjectLibraryProps {
   workingRootDirectory: string | null
   projects: ProjectFragment[]
-  onProjectChange: (fullPath: string) => void
+  onProjectChange: (projectPath: string) => void
 }
 
 interface ProjectCardProps {
@@ -49,7 +49,7 @@ const ProjectLibrary = ({ projects, onProjectChange }: ProjectLibraryProps) => {
       <div className="container mx-auto ">
         <div className="flex flex-wrap flex-row justify-center gap-6 ">
           {projects.map((project) => (
-            <ProjectCard key={project.fullPath} project={project} onClick={() => handleProjectSelect(project.fullPath)} />
+            <ProjectCard key={project.projectPath} project={project} onClick={() => handleProjectSelect(project.projectPath)} />
           ))}
           <ProjectCard key="add" project="add" onClick={() => handleProjectSelect('add')} />
         </div>

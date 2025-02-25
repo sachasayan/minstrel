@@ -28,13 +28,13 @@ We need to design and implement a feature which will allow the customer to writ
 
 The normal process for writing a novel is as follows:
 
-(1) First the app sends story parameters (genre, title, etc.) to the model, which translates those patterns into a story skeleton consisting of a brief synopsis, characters, chapters, things to remember, etc. (Skeleton.md)
+(1) First the app sends story parameters (genre, title, etc.) to the model, which translates those patterns into a story skeleton consisting of a brief synopsis, characters, chapters, things to remember, etc. (Skeleton)
 
-(2) The customer is allowed to edit the Skeleton to their leisure, then sends the Skeleton to the model, which generates an outline (Outline.md), consisting of full character descriptions, full environment descriptions, detailed per-scene plans for each chapter, and key objects.
+(2) The customer is allowed to edit the Skeleton to their leisure, then sends the Skeleton to the model, which generates an outline (Outline), consisting of full character descriptions, full environment descriptions, detailed per-scene plans for each chapter, and key objects.
 
-(3) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter-1.md, Chapter-2.md, etc.)
+(3) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter-1, Chapter-2, etc.)
 
-(4) A message and critique is then produced. (Critique.md)
+(4) A message and critique is then produced. (Critique)
 
 Any above step can be repeated. For instance, the customer may ask the model to re-write a previous chapter, or make adjustments to the outline, or regenerate the critique.
 
@@ -43,7 +43,7 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 # RULES FOR THE MODEL
 
 - The model must output ONLY within XML tags at the top level of its response.
-- The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton.md, Outline.md, and Chapter-1.md
+- The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton, Outline, and Chapter-1
 - The model must always begin with a <think> section, briefly explaining what it understands to be the current intent. This is hidden from the customer, but used for debugging.
 - If the model thinks it is being asked to write to a file, it must first <read_file> for that file if it hasn't been provided.
 - The model can use tools like <write_file> to perform actions via the service.
@@ -84,7 +84,7 @@ For example:
 
 ```
 <write_file>
-	<file_name>Chapter-1.md</file_name>
+	<file_name>Chapter-1</file_name>
 	<content>The content of a chapter would go here.</content>
 </write_chapter>
 ```
@@ -110,10 +110,10 @@ What follows is a sample flow between customer, service, and model. For brevity,
 (Model receives prompt from service, and provides a response:)
 
 <think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant file tree.</think>
-<read_file>Outline.md</read_file>
-<read_file>Chapter-2.md</read_file>
-<read_file>Chapter-3.md</read_file>
-<read_file>Chapter-4.md</read_file>
+<read_file>Outline</read_file>
+<read_file>Chapter-2</read_file>
+<read_file>Chapter-3</read_file>
+<read_file>Chapter-4</read_file>
 
 <message>I'm looking at the files.</message>
 
@@ -127,11 +127,11 @@ What follows is a sample flow between customer, service, and model. For brevity,
 
 <think>I'm ready to edit Chapter 3 and Chapter 4</think>
 <write_file>
-<file_name>Chapter-3.md</file_name>
+<file_name>Chapter-3</file_name>
 <content>Chapter 3 content goes here.</content>
 </write_file>
 <write_file>
-<file_name>Chapter-4.md</file_name>
+<file_name>Chapter-4</file_name>
 <content>Chapter 4 content goes here.</content>
 </write_file>
 

@@ -24,7 +24,7 @@ const Intro = (): JSX.Element => {
       return
     }
 
-    const project = projectList.find((p) => p.fullPath === projectPath)
+    const project = projectList.find((p) => p.projectPath === projectPath)
     if (project) {
       dispatch(setActiveProjectFromFragment(project))
       dispatch(setActiveView('project/dashboard'))

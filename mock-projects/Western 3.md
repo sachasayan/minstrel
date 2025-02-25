@@ -28,7 +28,7 @@
     }
   ]
 }
-----Skeleton.md
+----Skeleton
 # Novel Skeleton: Dusty Trails and Iron Wills&#x20;
 
 ## Synopsis
@@ -52,7 +52,7 @@ A bounty hunter, "The Stranger," arrives in the corrupt town of Redemption, seek
 
 * Classic Western tropes.
 * Themes of justice, revenge, and redemption.
-----Outline.md
+----Outline
 # Novel Outline: Dusty Trails and Iron Wills
 
 ## Synopsis
@@ -87,7 +87,7 @@ Redemption, a dusty and lawless frontier town in the American West.
 
 * Classic Western tropes: saloons, gunfights, showdowns, moral ambiguity.
 * Focus on themes of justice, revenge, and redemption.
-----Chapter-1.md
+----Chapter-1
 # Chapter 1: Arrival in Redemption
 
 The sun beat down on the dusty plains as a lone rider approached the town of Redemption. The man, known only as The Stranger, squinted beneath the brim of his worn hat, his face weathered and unreadable. Redemption, a cluster of ramshackle buildings clinging precariously to the arid landscape, looked every bit as lawless as its reputation suggested.
@@ -111,7 +111,7 @@ The Stranger took a slow sip of the whiskey. "Passing through."
 "Heard that before," the bartender replied, wiping down the counter with a rag. "Most folks just pass on through. Redemption ain't got much to offer, 'less you're lookin' for trouble."
 
 The Stranger finished his whiskey and set the glass down. "Maybe I am," he said, his eyes meeting the bartender's. "Looking for trouble.",
-----Chapter-2.md
+----Chapter-2
 # Chapter 2: Whispers of Corruption
 
 The bartender eyed The Stranger, a flicker of unease in his gaze. "Trouble's easy to find in Redemption. It's getting rid of it that's the problem. Especially when it wears a badge."
@@ -152,8 +152,8 @@ The boy's eyes darted around nervously. "He hides in the hills. With his gang."
 
 The Stranger placed another coin in the boy's hand. "Thank you."
 
-The boy scurried away, disappearing down a narrow alleyway. The Stranger watched him go, then turned and walked towards the sheriff's office, a grim determination in his eyes. He had a sheriff to meet.,
-----Chapter-3.md
+The boy scurried away, disappearing down a narrow alleyway. The Stranger watched him go, then turned and walked towards the sheriff's office, a grim determination in his eyes. He had a sheriff to meet.
+----Chapter-3
 # Chapter 3: Ambush at the Creek
 
 The sun beat down on The Stranger as he rode towards the hills, following rumors of Coyote Jack's hideout. The air was dry, the landscape unforgiving. He knew this wouldn't be easy.
@@ -178,8 +178,8 @@ One by one, the gang members fell, until only Coyote Jack remained. He emerged f
 
 "You'll pay for this, stranger!" he roared, leveling his rifle.
 
-The Stranger stood his ground, his eyes fixed on Coyote Jack. The showdown was about to begin.,
-----Chapter-4.md
+The Stranger stood his ground, his eyes fixed on Coyote Jack. The showdown was about to begin.
+----Chapter-4
 # Chapter 4: Sarah Helps The Stranger
 
 The echoes of the gunfight faded as Coyote Jack lay motionless on the dusty ground. The Stranger holstered his revolver, assessing the scene. He was wounded, nothing life-threatening, but he needed to tend to it. As he began to gather his things, he heard footsteps approaching.
@@ -212,8 +212,8 @@ Sarah's expression hardened. "Barlow's a cancer on this town. Someone needs to s
 
 The Stranger looked at her, seeing the fire in her eyes, the determination etched on her face. He nodded slowly. "Alright, Sarah. I appreciate the help."
 
-As the sun began to set, casting long shadows across the landscape, The Stranger and Sarah began to plan their next move. They knew that Sheriff Barlow would be coming for them, and they needed to be ready. The battle for Redemption was far from over.,
-----Chapter-5.md
+As the sun began to set, casting long shadows across the landscape, The Stranger and Sarah began to plan their next move. They knew that Sheriff Barlow would be coming for them, and they needed to be ready. The battle for Redemption was far from over.
+----Chapter-5
 # Chapter 5: The Stranger and Sheriff Barlow have a tense standoff.
 
 The morning sun cast long shadows as The Stranger and Sarah prepared to leave her cabin. They had spent the night strategizing, planning their next move against Sheriff Barlow. The air was thick with tension, the unspoken understanding that their actions could ignite a war.
@@ -248,8 +248,8 @@ Barlow's eyes flickered with uncertainty. He knew that The Stranger was a danger
 
 "Then you've made your choice," Barlow said, his hand dropping to his holster. "Draw, Stranger."
 
-The air crackled with anticipation as The Stranger and Sheriff Barlow faced off. The fate of Redemption hung in the balance, poised on the edge of a gunfight.,
-----Chapter-6.md
+The air crackled with anticipation as The Stranger and Sheriff Barlow faced off. The fate of Redemption hung in the balance, poised on the edge of a gunfight.
+----Chapter-6
 # Chapter 6: A Gunfight Erupts in the Town
 
 The tension that had been building finally snapped. Sheriff Barlow, with a sneer, drew his revolver. The Stranger mirrored him, the movement fluid and deadly. The morning air was shattered by the roar of gunfire.
