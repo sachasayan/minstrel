@@ -1,4 +1,4 @@
-----Metadata
+----Metadata.json
 {
   "title": "Romance Island",
   "genre": "romance",
@@ -28,12 +28,12 @@
     }
   ]
 }
-----Skeleton
-# Skeleton: The Last Librarian
+----Skeleton.md
+# Novel Skeleton: The Last Librarian
 
 ## Synopsis
 
-In a dystopian future where books are outlawed, librarian Elias protects a hidden collection. He joins forces with Anya, a young woman seeking knowledge, to spark a rebellion against the oppressive Authority.
+In a dystopian future where books are outlawed, librarian Elias protects a hidden collection. He joins forces with Anya, a young woman seeking knowledge, to spark a rebellion against the oppressive Authority.&#x20;
 
 ## Characters
 
@@ -58,8 +58,8 @@ In a dystopian future where books are outlawed, librarian Elias protects a hidde
 ## Notes
 
 * Focus on themes of knowledge, freedom, and resistance.
-----Outline
-# Outline: The Last Librarian
+----Outline.md
+# Novel Outline: The Last Librarian
 
 Synopsis &#x20;
 
@@ -154,7 +154,7 @@ A bleak, oppressive city controlled by the Authority. The architecture is imposi
 * Maintain a sense of urgency and suspense throughout the story.
 * Explore the themes of knowledge, freedom, and resistance.
 * Create a believable and immersive dystopian world.
-----2
+----Chapter-1.md
 # Chapter 1: The Whispers of the Past
 
 The city was a cage of steel and concrete, its inhabitants living under the watchful eyes of the Authority. Surveillance drones buzzed like metallic insects, their lenses recording every movement, every interaction. Buildings loomed, gray and imposing, their windows like vacant eyes staring down at the citizens below. Even the sky seemed muted, perpetually overcast with a smog that choked the lungs and dimmed the spirit.
@@ -174,7 +174,8 @@ But his sanctuary was not without its dangers. The Authority was always watching
 He pulled a worn copy of "Moby Dick" from the shelf and settled into his favorite armchair. As he began to read, he was transported to another world, a world of adventure and freedom. For a few precious hours, he could forget the oppressive reality of the city outside and lose himself in the whispers of the past. But even in his sanctuary, he couldn't shake the feeling that his time was running out. The Authority's grip was tightening, and he knew it was only a matter of time before they came for him and his books.&#x20;
 
 The drones buzzed outside, their surveillance continuing.
-----2
+,
+----Chapter-2.md
 # Chapter 2: A Seeker in the Shadows
 
 Anya lived a life of quiet desperation. By day, she toiled in the Authority's data processing center, inputting meaningless numbers into the vast digital machine that controlled every aspect of their lives. By night, she retreated to her cramped apartment, a small cell in a towering hive of identical dwellings. But beneath the surface of her compliant existence, a spark of defiance flickered.
@@ -212,7 +213,8 @@ Elias saw the sincerity in her eyes, the burning desire for knowledge that mirro
 Anya followed him into the heart of the library, her eyes wide with wonder. She ran her fingers along the spines of the books, feeling the weight of history in her hands. She was like a child in a candy store, overwhelmed by the possibilities.
 
 Elias watched her, a wistful smile gracing his lips. He had found a kindred spirit, someone who shared his love of knowledge and his yearning for freedom. But he also knew that he had taken a great risk. By revealing his sanctuary to Anya, he had put both of their lives in danger.
-----3
+,
+----Chapter-3.md
 # Chapter 3: The Forbidden Knowledge
 
 The library was a labyrinth of towering shelves, each laden with books that hummed with untold stories. Anya gazed in awe, her fingers tracing the worn spines, feeling the weight of forbidden knowledge. Elias watched her, a gentle smile on his face.
@@ -238,7 +240,8 @@ He explained his plan to her, a daring scheme to spread the forbidden knowledge 
 As they spoke, a sense of camaraderie grew between them. They were two souls united by a shared passion for knowledge and a burning desire to resist the Authority. They knew that the road ahead would be long and difficult, but they were ready to face it together.
 
 The library, once a solitary sanctuary, had become a beacon of hope, a symbol of defiance against the darkness. And Anya, once a seeker in the shadows, had found her purpose, her voice, her weapon in the fight for freedom.
------4
+,
+----Chapter-4.md
 # Chapter 4: The Enforcer's Doubt
 
 Marcus adjusted his helmet, the cold metal a familiar comfort against the rising unease in his stomach. The Authority uniform, usually a symbol of power and order, now felt like a suffocating weight. He stood beside the transport vehicle, its armored plating gleaming under the harsh city lights, waiting for Director Thorne to emerge.
@@ -305,8 +308,8 @@ He knew that he had crossed a line, that there was no turning back. He had defie
 
 "What do we do now, Marcus?" one of the enforcers asked, his voice barely a whisper.
 
-Marcus took a deep breath and looked at the other enforcers, his eyes filled with determination. "Now," he said, "we fight for freedom."
------5
+Marcus took a deep breath and looked at the other enforcers, his eyes filled with determination. "Now," he said, "we fight for freedom.",
+----Chapter-5.md
 # Chapter 5: The Key to Rebellion
 
 Elias adjusted his spectacles, the dim light of the library casting long shadows across his face. "The Key," he murmured, tracing the worn inscription in an ancient text. "It's said to unlock a chamber beneath the city, a vault of knowledge even more dangerous than what we have here."
@@ -359,8 +362,8 @@ Anya nodded, her eyes filled with determination. "We have to be," she said. "The
 
 Elias took a deep breath and grasped the Key. As his fingers closed around it, a surge of energy coursed through his body. He felt a connection to the past, a sense of purpose, and a glimmer of hope for the future.
 
-They had found the Key. But their journey was far from over. The hidden chamber awaited, and the secrets it held could change everything.
------6
+They had found the Key. But their journey was far from over. The hidden chamber awaited, and the secrets it held could change everything.,
+----Chapter-6.md
 # Chapter 6: Seeds of Discontent
 
 The weight of the Key felt heavy in Elias's pocket, a constant reminder of the responsibility they now carried. Back in the library, the air buzzed with a nervous energy. The discovery of the Key had emboldened them, but also amplified the danger they faced.
@@ -395,8 +398,8 @@ Slowly, painstakingly, they began to build a network of resistance, a web of ind
 
 One evening, Anya returned to the library, her face flushed with excitement. "I heard something," she said. "A rumor. They say the Authority is planning a crackdown. A massive sweep of the lower levels, to root out any signs of dissent."
 
-Elias and Marcus exchanged worried glances. They knew that time was running out. The seeds of discontent had been sown, but they had to act quickly before the Authority could crush the rebellion before it even began.
------7
+Elias and Marcus exchanged worried glances. They knew that time was running out. The seeds of discontent had been sown, but they had to act quickly before the Authority could crush the rebellion before it even began.,
+----Chapter-7.md
 # Chapter 7: The Enforcer's Choice
 
 Marcus stood on the rooftop, the cold wind whipping at his coat. Below him, the city sprawled, a web of lights and shadows. He watched as Authority vehicles patrolled the streets, their searchlights cutting through the darkness. The crackdown Anya had warned them about was already underway.
@@ -427,8 +430,8 @@ They spent the next few hours planning their next move. Marcus shared his knowle
 
 As they planned, Marcus couldn't help but think of his former colleagues, the men and women he had served with for so many years. He knew that many of them were good people, people who had simply been misled by the Authority's propaganda. He hoped that one day, they would see the truth and join the rebellion.
 
-But for now, his focus was on the present. He had made his choice, and he was determined to see it through. He was no longer an enforcer of the Authority. He was now a rebel, a fighter for freedom. He was ready to face whatever challenges lay ahead.
-----8
+But for now, his focus was on the present. He had made his choice, and he was determined to see it through. He was no longer an enforcer of the Authority. He was now a rebel, a fighter for freedom. He was ready to face whatever challenges lay ahead.,
+----Chapter-8.md
 # Chapter 8: The Codex's Secret
 
 Elias carefully adjusted his spectacles, the dim, flickering light of the library casting long, dancing shadows on the ancient shelves. The air hung heavy with the scent of aged paper and forgotten secrets. Before them, resting reverently on a plush, crimson velvet cushion, lay the Codex. Its once magnificent leather binding was now cracked and worn, a testament to the countless years it had guarded its secrets. The pages, yellowed and brittle with age, whispered tales of forgotten empires and forbidden knowledge. For weeks, they had relentlessly pursued it, braving treacherous, labyrinthine tunnels beneath the city and cleverly outwitting the ever-watchful patrols of the Authority. Now, at long last, the legendary book was finally within their grasp, radiating an almost palpable aura of mystery and power.

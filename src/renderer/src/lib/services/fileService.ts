@@ -1,14 +1,14 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
-import { profile } from 'console'
-
-
-
-
 
 export const getProjectMetadata = async (directory: string): Promise<Project> => {
   try {
-    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}/${directory.split('/').at(-1)}.md`)
-    const metadata = JSON.parse(fileContent.split('----').find(e => e.startsWith("Metadata.json")).split('.json')[1])
+    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}.md`)
+    const metadata = JSON.parse(
+      fileContent
+        .split('----')
+        .find((e) => e.startsWith('Metadata.json'))
+        .split('.json')[1]
+    )
     return {
       id: `${directory}`,
       title: metadata?.title || '',
@@ -28,15 +28,21 @@ export const getProjectMetadata = async (directory: string): Promise<Project> =>
   }
 }
 
-export const getProjectFragmentMeta = async (directory: string): Promise<ProjectFragment> => {
+export const getProjectFragmentMeta = async (filePath: string): Promise<ProjectFragment> => {
   try {
-    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}/${directory.split('/').at(-1)}.md`)
-    const metadata = JSON.parse(fileContent.split('----').find(e => e.startsWith("Metadata.json")).split('.json')[1])
+    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${filePath}`)
+
+    const metadata = JSON.parse(
+      fileContent
+        .split('----')
+        .find((e) => e.startsWith('Metadata.json'))
+        .split('.json')[1]
+    )
 
     return {
-      id: `${directory}`,
+      id: `${filePath}`,
       title: `${metadata.title}`,
-      fullPath: `${directory}`,
+      fullPath: `${filePath}`,
       genre: metadata?.genre || 'science-fiction',
       cover: ''
     } as ProjectFragment
@@ -49,9 +55,8 @@ export const getProjectFragmentMeta = async (directory: string): Promise<Project
 export const fetchProjects = async (rootDir: string | null): Promise<ProjectFragment[]> => {
   if (!!rootDir) {
     const projectDirs = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
-    const foldersList = projectDirs.filter((item) => item.type === 'folder').map((item) => item.name)
-
-    const projectsList = await Promise.all(foldersList.map((directory) => getProjectFragmentMeta(`${rootDir}/${directory}`)))
+    const filesList = projectDirs.filter((item) => item.type === 'file' && item.name.endsWith('.md')).map((item) => item.name)
+    const projectsList = await Promise.all(filesList.map((file) => getProjectFragmentMeta(`${rootDir}/${file}`)))
 
     return projectsList
   }
@@ -59,21 +64,29 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
 }
 
 export const fetchProjectDetails = async (projectFragment: ProjectFragment): Promise<Project> => {
-  const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectFragment.fullPath}/${projectFragment.fullPath.split('/').at(-1)}.md`)
-  const metadata = JSON.parse(fileContent.split('----').find(e => e.startsWith("Metadata.json")).split('.json')[1])
-  const projectFiles = fileContent.split('----').filter(e => !e.startsWith("Metadata.json")).map(e => ({type: 'file', name: e.split('.md')[0]+'.md', content: e.split('.md')[1]}))
-  console.log(projectFiles)
-  const chapterList = await Promise.all(
-    projectFiles
-      .filter((item) => item.type === 'file' && item.name.endsWith('.md'))
-      .map(async (item) => {
-        return {
-          title: item.name,
-          content: item.content,
-          hasEdits: false
-        } as ProjectFile
-      })
+  const fileContent = await window.electron.ipcRenderer.invoke('read-file', projectFragment.fullPath)
+  const metadata = JSON.parse(
+    fileContent
+      .split('----')
+      .find((e) => e.startsWith('Metadata.json'))
+      .split('.json')[1]
   )
+  const projectFiles = fileContent
+    .split('----')
+    .filter((e) => !e.startsWith('Metadata.json') && e.length > 1)
+    .map((e) => ({ type: 'file', name: e.split('.md\n')[0] + '.md', content: e.split('.md\n')[1] }))
+  console.log(projectFiles)
+  const chapterList = projectFiles
+    .filter((item) => item.type === 'file' && item.name.endsWith('.md'))
+    .map((item) => {
+      return {
+        title: item.name.indexOf('Chapter') != -1 ? item.content?.match(`# (.+)`)[0] || item.name : item.name,
+        content: item.content,
+        hasEdits: false
+      } as ProjectFile
+    })
+  console.log(chapterList)
+
   return {
     ...metadata,
     files: chapterList
@@ -115,10 +128,10 @@ export const saveProject = async (project: Project): Promise<boolean> => {
     fileContents += project.files.find((e) => e.title == 'Outline.md') ? '\n----Outline.md\n' + project.files.find((e) => e.title == 'Outline.md')?.content : ''
 
     fileContents += project.files
-      .filter((e) => e.title.startsWith('Chapter'))
+      .filter((e) => e.title.indexOf('Chapter'))
       .sort()
       .map((file, i) => `\n----Chapter-${[i + 1]}.md\n${file.content}`)
-      .join()
+      .join('')
 
     const writeResult = await window.electron.ipcRenderer.invoke('write-file', `${project.fullPath}/${project.title}.md`, fileContents)
     if (!writeResult.success) {

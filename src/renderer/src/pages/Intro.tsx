@@ -38,7 +38,7 @@ const Intro = (): JSX.Element => {
 
   useEffect(() => {
     if (!!settingsState.workingRootDirectory) {
-      console.log('Loading projects:' + settingsState.workingRootDirectory)
+      console.log('Loading projects... ' + settingsState.workingRootDirectory)
       dispatch(loadProjects() as any)
     }
   }, [settingsState.workingRootDirectory])
