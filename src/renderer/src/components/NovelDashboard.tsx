@@ -6,67 +6,21 @@ import { Star } from 'lucide-react'
 import { Project } from '@/types'
 // import { chapterData, characters } from './mockData'; // Removed mock data
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-
-const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
-
-function extractCharactersFromOutline(outlineContent: string): { name: string }[] {
-  const characters: { name: string }[] = []
-  const lines = outlineContent.split('\n')
-  let inCharacterSection = false
-
-  for (const line of lines) {
-    if (line.startsWith('## Characters')) {
-      inCharacterSection = true
-      continue
-    }
-
-    if (inCharacterSection) {
-      // Stop parsing when we reach another heading of the same or higher level
-      if (line.startsWith('#') && !line.startsWith('###')) {
-        break
-      }
-      const match = line.match(/\*\*([A-z -]+).*\*\*/i) // Capture the character name, should be in bold
-      if (match) {
-        characters.push({ name: match[1].trim() })
-      }
-    }
-  }
-  return characters
-}
-
-function getCharacterFrequencyData(activeProject: Project): any[] {
-  const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title.indexOf('Outline') != -1)?.content || '')
-
-  return activeProject.files
-    .filter((file) => file.title.indexOf('Chapter') != -1)
-    .map((file, i) => {
-      const chapterData: { [key: string]: number | string } = {
-        chapter: i + 1,
-        wordCount: file.content.split(/\s+/).length
-      }
-
-      characters.forEach((char, index) => {
-        const escapedName = char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        chapterData[char.name] = (file.content.match(new RegExp(`\\b${escapedName}\\b`, 'g')) || []).length
-        chapterData[`${char.name}_color`] = colors[index % colors.length] // Store color
-      })
-      return chapterData
-    })
-}
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star key={star} className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-      ))}
-      <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
-    </div>
-  )
-}
+import { extractCharactersFromOutline, getCharacterFrequencyData, StarRating, colors } from '@/lib/dashboardUtils'
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
+
+  function StarRating({ rating }: { rating: number }) {
+    return (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star key={star} className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+        ))}
+        <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-24 space-y-6">
