@@ -28,8 +28,7 @@ export const getFileContents = (dependencies: string[] | undefined): string => {
         (file) => `
 
 ---
-
-${file.title}:
+# ${file.title}
 
 ${file.content}
 `

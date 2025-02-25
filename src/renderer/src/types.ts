@@ -33,7 +33,7 @@ export interface ProjectFile {
   title: string
   content: string
   wordcount?: number
-  hasEdits: boolean
+  hasEdits?: boolean
 }
 
 export interface ExpertSuggestion {

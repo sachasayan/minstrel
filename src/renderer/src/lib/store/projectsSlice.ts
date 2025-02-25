@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ProjectState, ProjectFragment, Project, Genre } from '@/types'
+import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
 
@@ -27,20 +27,20 @@ export const projectsSlice = createSlice({
         chapter.hasEdits = false
       })
     },
-    updateFile: (state, action: PayloadAction<{ fileName: string; fileContent: string }>) => {
+    updateFile: (state, action: PayloadAction<ProjectFile>) => {
       if (state.activeProject) {
         //Get position of this file in the files list
-        const chapterIndex = state.activeProject.files.findIndex((file) => file.title === action.payload.fileName)
+        const chapterIndex = state.activeProject.files.findIndex((file) => file.title === action.payload.title)
         //If file exists, update it in the store
         if (chapterIndex !== -1) {
-          state.activeProject.files[chapterIndex].content = action.payload.fileContent
+          state.activeProject.files[chapterIndex].content = action.payload.content
           state.activeProject.files[chapterIndex].hasEdits = true
           state.projectHasLiveEdits = true
         } else {
           // If chapter doesn't exist, add it
           state.activeProject.files.push({
-            title: action.payload.fileName,
-            content: action.payload.fileContent,
+            title: action.payload.title,
+            content: action.payload.content,
             hasEdits: true
           })
           state.projectHasLiveEdits = true

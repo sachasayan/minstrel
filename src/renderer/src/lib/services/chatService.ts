@@ -7,6 +7,7 @@ import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
+import { stringToProjectFile } from '@/lib/nlpUtils'
 
 const isValidAgentType = (agent: string): agent is 'routingAgent' | 'criticAgent' | 'outlineAgent' | 'writerAgent' => {
   return ['routingAgent', 'criticAgent', 'outlineAgent', 'writerAgent'].includes(agent)
@@ -68,7 +69,7 @@ const processResponse = (responseString: string): RequestContext | null => {
     const content = response.write_file.content
     if (fileName && content) {
       // Fix Markdown formatting before updating the file
-      store.dispatch(updateFile({ fileName, fileContent: content }))
+      store.dispatch(updateFile(stringToProjectFile(content)))
       // Switch to ProjectOverview and set active file after successful
       store.dispatch(setActiveView('project/editor'))
       store.dispatch(setActiveFile(fileName))

@@ -39,7 +39,7 @@ const ProjectOverview = (): React.ReactNode => {
       <AppSidebar />
       <SidebarInset className="h-full max-h-screen">
         {appState.activeView == 'project/editor' ? (
-          <MarkdownViewer key={appState.activeFile} fileName={appState.activeFile} content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
+          <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
         ) : appState.activeView == 'project/dashboard' ? (
           <NovelDashboard />
         ) : appState.activeView == 'project/parameters' ? (
