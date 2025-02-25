@@ -27,11 +27,6 @@ The Memory Bank consists of required core files and optional context files, all 
 flowchart TD
     PB[projectbrief.md] --> PC[productContext.md]
     PB --> TC[techContext.md]
-
-    PC --> AC[activeContext.md]
-    TC --> AC
-
-    AC --> P[progress.md]
 ```
 
 ### Core Files (Required)
@@ -47,10 +42,7 @@ flowchart TD
    - Problems it solves
    - How it should work
 
-3. `memory-bank/activeContext.md`
-   - Current work focus
-
-4. `memory-bank/techContext.md`
+3. `memory-bank/techContext.md`
    - Technologies used
    - System architecture
    - Dependencies
@@ -58,8 +50,6 @@ flowchart TD
    - Component relationships
    - Development setup
 
-6. `memory-bank/progress.md`
-   - Phased development plan, updated as work progresses
 
 ## Core Workflows
 
@@ -111,7 +101,7 @@ flowchart TD
     Start --> Process
 ```
 
-Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state.
+Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates.
 
 ## Project Intelligence (.clinerules)
 
