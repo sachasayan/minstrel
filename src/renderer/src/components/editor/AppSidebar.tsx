@@ -200,14 +200,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenu>
                   {projectsState.activeProject?.files
                     ?.filter((item) => item.title.includes('Chapter'))
-                    .map((item) => {
-                      const chapterNumber = item.title.match(/Chapter-(\d+)/)?.[1] || ''
+                    .map((item, i) => {
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === item.title}>
                             <a onClick={() => handleFileSelect(item.title)} className={`flex items-center [&:active]:bg-highlight-700 [&:active]:text-white [data-active=true]:bg-highlight-600`}>
                               {!!sideBarOpen && <Book />}
-                              {!sideBarOpen && <ChapterIcon chapterNumber={chapterNumber} />}
+                              {!sideBarOpen && <ChapterIcon chapterNumber={i + 1} />}
                               <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>

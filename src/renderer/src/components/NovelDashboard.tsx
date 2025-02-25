@@ -35,12 +35,13 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
 }
 
 function getCharacterFrequencyData(activeProject: Project): any[] {
-  const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title === 'Outline')?.content || '')
+  const characters = extractCharactersFromOutline(activeProject.files.find((f) => f.title.indexOf('Outline') != -1)?.content || '')
+
   return activeProject.files
-    .filter((file) => file.title.startsWith('Chapter-'))
-    .map((file) => {
+    .filter((file) => file.title.indexOf('Chapter') != -1)
+    .map((file, i) => {
       const chapterData: { [key: string]: number | string } = {
-        chapter: file.title,
+        chapter: i + 1,
         wordCount: file.content.split(/\s+/).length
       }
 
@@ -103,17 +104,14 @@ export default function NovelDashboard() {
                     .filter((file) => file.title.startsWith('Chapter'))
                     .map((file, index) => ({
                       index: index,
-                      chapter: file.title,
+                      chapter: index + 1,
                       wordCount: file.content.split(/\s+/).length
                     }))}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="chapter"
-                    tickFormatter={(tick: string) => {
-                      const match = tick.match(/(\d+)/)
-                      return match ? match[1] : tick
-                    }}
+                    tickFormatter={(tick: string) => tick}
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
@@ -136,7 +134,7 @@ export default function NovelDashboard() {
             {activeProject ? (
               <ChartContainer
                 style={{ aspectRatio: 'auto' }}
-                config={extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline')?.content || '').reduce((acc, char) => {
+                config={extractCharactersFromOutline(activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || '').reduce((acc, char) => {
                   acc[char.name] = {
                     label: char.name
                   }
@@ -148,15 +146,12 @@ export default function NovelDashboard() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="chapter"
-                    tickFormatter={(tick: string) => {
-                      const match = tick.match(/(\\d+)/)
-                      return match ? match[1] : tick
-                    }}
+                    tickFormatter={(tick: string) => tick}
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
-                  {extractCharactersFromOutline(activeProject.files.find((file) => file.title === 'Outline')?.content || '').map((character, index) => (
+                  {extractCharactersFromOutline(activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || '').map((character, index) => (
                     <Line key={character.name} type="monotone" dataKey={character.name} stroke={colors[index % colors.length]} strokeWidth={2} />
                   ))}
                 </LineChart>
@@ -186,7 +181,7 @@ export default function NovelDashboard() {
           <CardHeader>
             <CardTitle>Progress</CardTitle>
           </CardHeader>
-          <CardContent>Looks like you're on a streak!</CardContent>
+          <CardContent>Looks like you&apos;re on a streak!</CardContent>
         </Card>
       </div>
     </div>
