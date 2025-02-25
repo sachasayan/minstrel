@@ -37,20 +37,19 @@ const ProjectOverview = (): React.ReactNode => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="h-full max-h-full">
-        <div className="h-full max-h-screen p-4">
-          {appState.activeView == 'project/editor' ? (
-            <MarkdownViewer
-              key={appState.activeFile}
-              fileName={appState.activeFile}
-              content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''}
-            />
-          ) : appState.activeView == 'project/dashboard' ? (
-            <NovelDashboard />
-          ) : appState.activeView == 'project/parameters' ? (
-            <ProjectParameters />
-          ) : null}
-        </div>
+      <SidebarInset className="h-full max-h-screen">
+        {appState.activeView == 'project/editor' ? (
+          <MarkdownViewer
+            key={appState.activeFile}
+            fileName={appState.activeFile}
+            content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''}
+          />
+        ) : appState.activeView == 'project/dashboard' ? (
+          <NovelDashboard />
+        ) : appState.activeView == 'project/parameters' ? (
+          <ProjectParameters />
+        ) : null}
+
 
         {/* Chat Interface */}
         <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />

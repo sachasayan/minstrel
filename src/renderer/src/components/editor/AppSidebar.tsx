@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { saveProject } from '@/lib/services/fileService'
 import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects } from '@/lib/store/projectsSlice'
 
-import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered } from 'lucide-react'
+import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered, Book } from 'lucide-react'
 import { Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -112,9 +112,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sidebar variant="sidebar" collapsible="icon" {...props}>
+      <Sidebar variant="sidebar" collapsible="icon" className={`[&_div]:transition-colors ${!sideBarOpen ? 'border-none [&_.bg-sidebar]:bg-transparent' :
+        '[&_.bg_sidebar]:bg-sidebar'
+        }`} {...props}>
         <SidebarHeader className="pt-8">
-          <div className={`flex justify-between ${sideBarOpen ? `flex-row` : `flex-col`}`}>
+          <div className={`flex justify-between ${sideBarOpen ? `max-h-30 flex-row` : `max-h-30 flex-col`} transition-all duration-500`}>
             <Button asChild variant="ghost" className="flex-grow transition-all">
               <SidebarTrigger className="w-8 h-full" />
             </Button>
@@ -204,9 +206,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       const chapterNumber = item.title.match(/Chapter-(\d+)/)?.[1] || ''
                       return (
                         <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild isActive={false}>
-                            <a onClick={() => handleFileSelect(item.title)} className="flex items-center">
-                              <ChapterIcon chapterNumber={chapterNumber} />
+                          <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === item.title}>
+                            < a onClick={() => handleFileSelect(item.title)} className={`flex items-center [&:active]:bg-highlight-700 [&:active]:text-white [data-active=true]:bg-highlight-600`}>
+                              {!!sideBarOpen && < Book />}
+                              {!sideBarOpen && < ChapterIcon chapterNumber={chapterNumber} />}
                               <span className="flex-grow ml-2">{item.title.replace('.md', '').replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>
@@ -214,21 +217,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       )
                     })}
                   <SidebarMenuItem key="addChapter">
-                    <SidebarMenuButton asChild>
-                      <Button
-                        className={`w-full flex items-center justify-center  rounded p-1`}
-                        onClick={() =>
-                          dispatch(
-                            addChatMessage({
-                              sender: 'User',
-                              text: 'Please add a new chapter.'
-                            })
-                          )
-                        }
-                        variant="outline"
-                      >
-                        <Plus className="mr-2" /> Add Chapter
-                      </Button>
+                    <SidebarMenuButton
+                      className={`w-full flex flex-row ${sideBarOpen ? 'justify-center' : ''}  overflow-hidden h-8 rounded p-1`}
+                      onClick={() =>
+                        dispatch(
+                          addChatMessage({
+                            sender: 'User',
+                            text: 'Please add a new chapter.'
+                          })
+                        )
+                      }
+                      variant="outline"
+                    >
+                      <Plus className="mr-2" /><span className="block overflow-hidden"> Add Chapter</span>
+
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -237,7 +239,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           )}
         </SidebarContent>
         <SidebarRail />
-      </Sidebar>
+      </Sidebar >
     </>
   )
 }
