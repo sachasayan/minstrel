@@ -1,4 +1,10 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
+import { stringToProjectFile } from '@/lib/nlpUtils'
+
+export function decodeHtmlEntities(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.documentElement.textContent;
+}
 
 export const getProjectFragmentMeta = async (projectPath: string): Promise<ProjectFragment> => {
   try {
@@ -38,7 +44,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
     fileContent.match(/----Metadata\.json([\s\S]+?)----/i)?.[1]
   )
   const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/ig)].map(m => ({name: m[2], content: m[3].trim()}) )
-  //console.log(projectFiles)
+  console.log(projectFiles)
   const chapterList = projectFiles
     .map((item) => {
       return {
@@ -47,7 +53,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
         hasEdits: false
       } as ProjectFile
     })
-  //console.log(chapterList)
+  console.log(chapterList)
 
   return {
     ...metadata,
@@ -87,13 +93,21 @@ export const saveProject = async (project: Project): Promise<boolean> => {
     let fileContents = ['----Metadata.json\n', JSON.stringify(metadata, null, 2)].join('')
 
     // Write skeleton (conditionally)
-    fileContents += (project.files.find((e) => e.title.indexOf('Skeleton') != -1) ? '\n----Skeleton\n' + project.files.find((e) => e.title.indexOf('Skeleton') != -1)?.content : '')
+    const skeleton = project.files.find((e) => e.title.indexOf('Skeleton') != -1)
+    if (skeleton){
+      fileContents +=  '\n----Skeleton\n# ' + skeleton.title + '\n\n' + decodeHtmlEntities(skeleton.content)
+    }
+
     // Write outline (conditionally)
-    fileContents += (project.files.find((e) => e.title.indexOf('Outline') != -1) ? '\n----Outline\n' + project.files.find((e) => e.title.indexOf('Outline') != -1)?.content : '')
+    const outline = project.files.find((e) => e.title.indexOf('Outline') != -1)
+    if (outline){
+      fileContents +=  '\n----Outline\n# ' + outline.title + '\n\n' + decodeHtmlEntities(outline.content)
+    }
+
 
     fileContents += project.files
       .filter((e) => e.title.indexOf('Chapter') != -1)
-      .map((file, i) => `\n----Chapter-${[i + 1]}\n# ${file.title}\n\n${file.content}`)
+      .map((file, i) => `\n----Chapter-${[i + 1]}\n# ${file.title}\n\n${decodeHtmlEntities(file.content)}`)
       .join('')
 
     const writeResult = await window.electron.ipcRenderer.invoke('write-file', `${project.projectPath}`, fileContents)
