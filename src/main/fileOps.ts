@@ -24,7 +24,6 @@ export const handleReadDirectory = async (_event, dirPath) => {
 
 export const handleReadFile = async (_event, filePath) => {
   const resolvedPath = filePath.replace('~', homedir) // Resolve "~" to user's home directory
-  console.log('resolvedPath', resolvedPath)
   try {
     const content = await fs.readFile(resolvedPath, 'utf-8')
     return content

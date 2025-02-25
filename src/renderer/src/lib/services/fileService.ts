@@ -1,4 +1,5 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
+import { profile } from 'console'
 
 export const getProjectMetadata = async (directory: string): Promise<Project> => {
   try {
@@ -102,22 +103,26 @@ export const saveProject = async (project: Project): Promise<boolean> => {
     }
 
     // Write the metadata file
-    const writeMetadataResult = await window.electron.ipcRenderer.invoke('write-file', `${project.fullPath}/metadata.json`, JSON.stringify(metadata, null, 2))
-    if (!writeMetadataResult.success) {
-      console.error('Failed to write metadata file:', writeMetadataResult.error)
+    let fileContents = ['----Metadata.json\n', JSON.stringify(metadata, null, 2)].join('')
+
+    // Write skeleton (conditionally)
+    fileContents += project.files.find((e) => e.title == 'Skeleton.md') ? '\n----Skeleton.md\n' + project.files.find((e) => e.title == 'Skeleton.md')?.content : ''
+    // Write outline (conditionally)
+    fileContents += project.files.find((e) => e.title == 'Outline.md') ? '\n----Outline.md\n' + project.files.find((e) => e.title == 'Outline.md')?.content : ''
+
+    fileContents += project.files
+      .filter((e) => e.title.startsWith('Chapter'))
+      .sort()
+      .map((file, i) => `\n----Chapter-${[i + 1]}.md\n${file.content}`)
+      .join()
+
+    const writeResult = await window.electron.ipcRenderer.invoke('write-file', `${project.fullPath}/${project.title}.md`, fileContents)
+    if (!writeResult.success) {
+      console.error('Failed to write file:', writeResult.error)
       return false
     }
+    console.log('File saved successfully' + project.title)
 
-    for (const file of project.files) {
-      if (file.hasEdits) {
-        const writeResult = await window.electron.ipcRenderer.invoke('write-file', `${project.fullPath}/${file.title}`, file.content)
-        if (!writeResult.success) {
-          console.error('Failed to write file:', writeResult.error)
-          return false
-        }
-        console.log('File saved successfully' + file.title)
-      }
-    }
     return true
   } catch (error) {
     console.error('Failed to save project:', error)
