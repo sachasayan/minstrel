@@ -1,10 +1,14 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 import { profile } from 'console'
 
+
+
+
+
 export const getProjectMetadata = async (directory: string): Promise<Project> => {
   try {
-    const metadataContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}/metadata.json`)
-    const metadata = JSON.parse(metadataContent)
+    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}/${directory.split('/').at(-1)}.md`)
+    const metadata = JSON.parse(fileContent.split('----').find(e => e.startsWith("Metadata.json")).split('.json')[1])
     return {
       id: `${directory}`,
       title: metadata?.title || '',
@@ -26,8 +30,8 @@ export const getProjectMetadata = async (directory: string): Promise<Project> =>
 
 export const getProjectFragmentMeta = async (directory: string): Promise<ProjectFragment> => {
   try {
-    const metadataContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}/metadata.json`)
-    const metadata = JSON.parse(metadataContent)
+    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${directory}/${directory.split('/').at(-1)}.md`)
+    const metadata = JSON.parse(fileContent.split('----').find(e => e.startsWith("Metadata.json")).split('.json')[1])
 
     return {
       id: `${directory}`,
@@ -55,17 +59,17 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
 }
 
 export const fetchProjectDetails = async (projectFragment: ProjectFragment): Promise<Project> => {
-  const projectFiles = await window.electron.ipcRenderer.invoke('read-directory', projectFragment.fullPath)
-  const metadata = await getProjectMetadata(projectFragment.fullPath)
+  const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectFragment.fullPath}/${projectFragment.fullPath.split('/').at(-1)}.md`)
+  const metadata = JSON.parse(fileContent.split('----').find(e => e.startsWith("Metadata.json")).split('.json')[1])
+  const projectFiles = fileContent.split('----').filter(e => !e.startsWith("Metadata.json")).map(e => ({type: 'file', name: e.split('.md')[0]+'.md', content: e.split('.md')[1]}))
+  console.log(projectFiles)
   const chapterList = await Promise.all(
     projectFiles
       .filter((item) => item.type === 'file' && item.name.endsWith('.md'))
       .map(async (item) => {
-        const content = await window.electron.ipcRenderer.invoke('read-file', `${projectFragment.fullPath}/${item.name}`)
-
         return {
           title: item.name,
-          content: content,
+          content: item.content,
           hasEdits: false
         } as ProjectFile
       })
