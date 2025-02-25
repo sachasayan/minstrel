@@ -46,7 +46,7 @@ export default function App(): ReactNode {
       case 'project/parameters':
       case 'project/dashboard':
       case 'project/editor':
-        return <ProjectOverview key={activeProject?.id} />
+        return <ProjectOverview key={activeProject?.fullPath} />
       default:
         return <Intro />
     }

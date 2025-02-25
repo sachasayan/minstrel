@@ -23,9 +23,8 @@ export interface Project extends ProjectFragment {
   expertSuggestions: ExpertSuggestion[]
 }
 export interface ProjectFragment {
-  id: string
-  title: string
   fullPath: string
+  title: string
   genre: Genre
   cover?: string
 }

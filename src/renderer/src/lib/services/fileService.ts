@@ -10,7 +10,6 @@ export const getProjectMetadata = async (directory: string): Promise<Project> =>
         .split('.json')[1]
     )
     return {
-      id: `${directory}`,
       title: metadata?.title || '',
       fullPath: `${directory}`,
       genre: metadata?.genre || 'science-fiction',
@@ -40,7 +39,6 @@ export const getProjectFragmentMeta = async (filePath: string): Promise<ProjectF
     )
 
     return {
-      id: `${filePath}`,
       title: `${metadata.title}`,
       fullPath: `${filePath}`,
       genre: metadata?.genre || 'science-fiction',

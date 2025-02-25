@@ -32,9 +32,9 @@ interface WizardContextProps {
 const WizardContext = createContext<WizardContextProps>({
   totalSteps: 4,
   currentStep: 0,
-  setCurrentStep: () => {},
+  setCurrentStep: () => { },
   formData: {},
-  setFormData: () => {}
+  setFormData: () => { }
 })
 
 // Custom hook for using wizard context
@@ -352,11 +352,9 @@ const SummaryPage = () => {
 
   const handleDream = async () => {
     const projectTitle = sanitizeFilename(formData.title || 'Untitled Project')
-    const projectId = Date.now().toString()
 
     dispatch(
       setActiveProject({
-        id: projectId,
         title: projectTitle,
         fullPath: `${settingsState?.workingRootDirectory}/${projectTitle}`,
         files: [],

@@ -17,14 +17,14 @@ const Intro = (): JSX.Element => {
   const projectList = useSelector(selectProjectList)
   const settingsState = useSelector(selectSettingsState)
 
-  const handleProjectSelect = (projectId: string) => {
-    if (projectId == 'add') {
+  const handleProjectSelect = (projectPath: string) => {
+    if (projectPath == 'add') {
       setShowBookOutlineWizard(true)
       //dispatch(setActiveView('wizard'))
       return
     }
 
-    const project = projectList.find((p) => p.id === projectId)
+    const project = projectList.find((p) => p.fullPath === projectPath)
     if (project) {
       dispatch(setActiveProjectFromFragment(project))
       dispatch(setActiveView('project/dashboard'))
