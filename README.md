@@ -1,5 +1,3 @@
-[![CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc/4.0/)
-
 # Minstrel
 
 <div style="width: 80%; margin: auto; margin-top: 20px; margin-bottom: 20px;">
@@ -78,14 +76,6 @@ To run Minstrel locally:
 4.  Obtain an API key for the Gemini API and set it in the application settings.
 5.  Optional: Set your project directory. If you'd like to use mocks, they've been provided in the mock-projects folder.
 
-## Usage
-
-## Licensing
-
-The application is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license. This means that you are free to share and adapt the application for non-commercial purposes, as long as you give appropriate credit and indicate if changes were made. Commercial use is not permitted under this license.
-
-Specific components or utility functions within the project are licensed under the MIT license. This allows for more permissive use, including commercial use, of these specific parts of the code. See the source code of individual files for license information.
-
 # Development
 
 ## Contributions
@@ -104,4 +94,13 @@ Forking the project? Using an AI-enabled LLM? This project is set up with a Clin
 
 ## Usage
 
-Portions of Minstrel may end up commercial, but it's intended that the base source code will always remain free/gratis. It's yours, y'all. Do what you want with it. Just don't sue me.
+
+## Usage
+
+## Licensing
+
+The application is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license. This means that you are free to share and adapt the application for non-commercial purposes, as long as you give appropriate credit and indicate if changes were made. Commercial use is not permitted under this license.
+
+Specific components or utility functions within the project are licensed under the MIT license. This allows for more permissive use, including commercial use, of these specific parts of the code. See the source code of individual files for license information.
+
+[![CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc/4.0/)
