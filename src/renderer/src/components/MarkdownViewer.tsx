@@ -40,6 +40,7 @@ export default function MarkdownViewer({ fileName }: MarkdownViewerProps): JSX.E
     <div className="relative px-2 py-1 mx-auto max-w-[1000px] md:px-36 md:py-20 max-h-full rounded-md">
       {fileName ? (
         <>
+          <h1 className="text-3xl font-bold mb-6 text-highlight-700">{fileName}</h1>
           <MDXEditor
             ref={ref}
             className="mdx-theme h-full"

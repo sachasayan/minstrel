@@ -6,6 +6,7 @@ export const projectFromFragment = (projectFragment: ProjectFragment): Project =
     files: [],
     summary: '',
     year: 0,
+    writingSample: '',
     totalWordCount: 0,
     expertSuggestions: []
   } as Project

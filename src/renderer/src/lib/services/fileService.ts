@@ -37,7 +37,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
   const metadata = JSON.parse(
     fileContent.match(/----Metadata\.json([\s\S]+?)----/i)?.[1]
   )
-  const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----)/ig)].map(m => ({name: m[2], content: m[3].trim()}) )
+  const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/ig)].map(m => ({name: m[2], content: m[3].trim()}) )
   //console.log(projectFiles)
   const chapterList = projectFiles
     .map((item) => {
@@ -51,12 +51,14 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
 
   return {
     ...metadata,
+    projectPath: projectFragment.projectPath,
     files: chapterList
   } as Project
 }
 
 export const saveProject = async (project: Project): Promise<boolean> => {
   console.log('Saving project...')
+  console.log(project)
   if (!project?.projectPath || !project?.files) {
     console.warn('Cannot save project: project details are missing.')
     return false
@@ -64,11 +66,11 @@ export const saveProject = async (project: Project): Promise<boolean> => {
 
   try {
     // Create the project directory if it doesn't exist
-    const mkdirResult = await window.electron.ipcRenderer.invoke('make-directory', project.projectPath)
-    if (!mkdirResult.success) {
-      console.error('Failed to create project directory:', mkdirResult.error)
-      return false
-    }
+    // const mkdirResult = await window.electron.ipcRenderer.invoke('make-directory', project.projectPath)
+    // if (!mkdirResult.success) {
+    //   console.error('Failed to create project directory:', mkdirResult.error)
+    //   return false
+    // }
 
     const metadata = {
       title: project.title,
@@ -85,13 +87,13 @@ export const saveProject = async (project: Project): Promise<boolean> => {
     let fileContents = ['----Metadata.json\n', JSON.stringify(metadata, null, 2)].join('')
 
     // Write skeleton (conditionally)
-    fileContents += project.files.find((e) => e.title == 'Skeleton') ? '\n----Skeleton\n' + project.files.find((e) => e.title == 'Skeleton')?.content : ''
+    fileContents += (project.files.find((e) => e.title.indexOf('Skeleton') != -1) ? '\n----Skeleton\n' + project.files.find((e) => e.title.indexOf('Skeleton') != -1)?.content : '')
     // Write outline (conditionally)
-    fileContents += project.files.find((e) => e.title == 'Outline') ? '\n----Outline\n' + project.files.find((e) => e.title == 'Outline')?.content : ''
+    fileContents += (project.files.find((e) => e.title.indexOf('Outline') != -1) ? '\n----Outline\n' + project.files.find((e) => e.title.indexOf('Outline') != -1)?.content : '')
 
     fileContents += project.files
-      .filter((e) => e.title.indexOf('Chapter'))
-      .map((file, i) => `\n----Chapter-${[i + 1]}\n${file.content}`)
+      .filter((e) => e.title.indexOf('Chapter') != -1)
+      .map((file, i) => `\n----Chapter-${[i + 1]}\n# ${file.title}\n\n${file.content}`)
       .join('')
 
     const writeResult = await window.electron.ipcRenderer.invoke('write-file', `${project.projectPath}`, fileContents)

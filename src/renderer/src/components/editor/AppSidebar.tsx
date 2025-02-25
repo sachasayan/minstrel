@@ -154,16 +154,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem key="Skeleton">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Skeleton'}>
-                    <a onClick={() => handleFileSelect('Skeleton')}>
+                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile?.indexOf('Skeleton') != -1}>
+                    <a onClick={() => handleFileSelect(projectsState.activeProject?.files?.find((item) => item.title.includes('Skeleton'))?.title || '')}>
                       <FileText className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Skeleton</span>{' '}
                       {projectsState.activeProject?.files?.find((item) => item.title.includes('Skeleton'))?.hasEdits && <Diff className="float-right text-orange-500" />}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem key="Outline">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === 'Outline'}>
-                    <a onClick={() => handleFileSelect('Outline')}>
+                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile?.indexOf('Outline') != -1}>
+                    <a onClick={() => handleFileSelect(projectsState.activeProject?.files?.find((item) => item.title.includes('Outline'))?.title || '')}>
                       <ListOrdered className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Outline</span>{' '}
                       {projectsState.activeProject?.files?.find((item) => item.title.includes('Outline'))?.hasEdits && <Diff className="float-right text-orange-500" />}
                     </a>
