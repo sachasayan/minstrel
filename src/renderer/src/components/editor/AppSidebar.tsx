@@ -40,8 +40,8 @@ import { addChatMessage } from '@/lib/store/chatSlice'
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (
     <div className="relative inline-block">
-      <Square className="w-4 h-4 text-muted-foreground" />
-      <span className="absolute inset-0 flex items-center justify-center leading-none text-[0.5rem] font-bold text-foreground">{chapterNumber}</span>
+      <Square className="w-4 h-4 " />
+      <span className="absolute inset-0 flex items-center justify-center leading-none text-[0.5rem] font-bold">{chapterNumber}</span>
     </div>
   )
 }
@@ -95,6 +95,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return true
   }
 
+
+  const ss = {
+    sidebar: ' border-none [&_div]:transition-color  [&_div]:duration-200 [&_.bg-sidebar]:bg-transparent text-highlight-600',
+    sidebarOpen: ' [&_.bg-sidebar]:bg-sidebar text-highlight-900',
+    sidebarButton: ' [&_[data-slot=sidebar-menu-button]_span]:truncate [&_[data-active=true]]:text-highlight-300',
+    sidebarButtonActive: ' [&_[data-slot=sidebar-menu-button]:active]:bg-highlight-800 [&_[data-active=true]]:bg-sidebar-primary [&_[data-active=true]]:text-white  [&_[data-slot=sidebar-menu-button]:active]:text-white',
+  }
+
   return (
     <>
       <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
@@ -112,16 +120,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sidebar variant="sidebar" collapsible="icon" className={`[&_div]:transition-colors ${!sideBarOpen ? 'border-none [&_.bg-sidebar]:bg-transparent' : '[&_.bg_sidebar]:bg-sidebar'}`} {...props}>
+      <Sidebar variant="sidebar" collapsible="icon" className={`{${ss.sidebar}  ${ss.sidebarButton}  ${ss.sidebarButtonActive} ${!!sideBarOpen ? ss.sidebarOpen : ''}`} {...props}>
         <SidebarHeader className="pt-8">
-          <div className={`flex justify-between ${sideBarOpen ? `max-h-30 flex-row` : `max-h-30 flex-col`} transition-all duration-500`}>
+          <div className={`flex justify-between ${sideBarOpen ? `max-h-30 flex-row` : `max-h-30 flex-col`}`}>
             <Button asChild variant="ghost" className="flex-grow transition-all">
               <SidebarTrigger className="w-8 h-full" />
             </Button>
             <Button variant="ghost" className="flex-grow transition-all" onClick={handleCloseSafe}>
               <X className="" /> {sideBarOpen ? 'Close' : ''}
             </Button>
-            <Button variant="ghost" className="flex-grow transition-all" disabled={!projectsState.projectHasLiveEdits} onClick={handleSave}>
+            <Button variant="ghost" className="flex-grow transition-all" onClick={handleSave}>
               <Save className="" />
               {sideBarOpen ? 'Save' : ''}
             </Button>
@@ -204,7 +212,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === item.title}>
-                            <a onClick={() => handleFileSelect(item.title)} className={`flex items-center [&:active]:bg-highlight-700 [&:active]:text-white [data-active=true]:bg-highlight-600`}>
+                            <a onClick={() => handleFileSelect(item.title)} className={`flex items-center`}>
                               {!!sideBarOpen && <Book />}
                               {!sideBarOpen && <ChapterIcon chapterNumber={i + 1} />}
                               <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
@@ -213,6 +221,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarMenuItem>
                       )
                     })}
+
+
                   <SidebarMenuItem key="addChapter">
                     <SidebarMenuButton
                       className={`w-full flex flex-row ${sideBarOpen ? 'justify-center' : ''}  overflow-hidden h-8 rounded p-1`}

@@ -72,7 +72,7 @@
 
   --sidebar-background: var(--neutral-200);
   --sidebar-foreground: var(--neutral-700);
-  --sidebar-primary: red;
+  --sidebar-primary: var(--highlight-700);
   --sidebar-primary-foreground: var(--neutral-50);
   --sidebar-accent: var(--neutral-300);
   --sidebar-accent-foreground: var(--emerald-800);
