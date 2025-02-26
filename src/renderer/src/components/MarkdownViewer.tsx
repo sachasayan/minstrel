@@ -2,10 +2,11 @@ import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin } from '@mdxed
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, CreateLink, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
-import { useRef, useEffect, JSX } from 'react'
+import { useRef, useEffect, JSX, useCallback } from 'react'
 
 import '@mdxeditor/editor/style.css'
-import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
+import { setProjectHasLiveEdits, selectProjects, updateFile, renameFile } from '@/lib/store/projectsSlice'
+import EditableHeading from './EditableHeading' // Import the new component
 
 interface MarkdownViewerProps {
   title: string | null // Allow null
@@ -36,6 +37,13 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
     console.error('Source Markdown:', error.source)
   }
 
+  const handleHeadlineChange = (newHeadline: string) => {
+    if (title) {
+      dispatch(renameFile({ oldTitle: title, newTitle: newHeadline }))
+    }
+  }
+
+
   return (
     <div className="relative container px-2 py-1 mx-auto md:p-24">
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
@@ -45,7 +53,7 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
             <div className="col-span-3">
             </div>
             <div className="col-span-6">
-              <h1 className="text-3xl font-bold mb-6 text-highlight-700">{title}</h1>
+              <EditableHeading heading={title} onHeadlineHasChanged={handleHeadlineChange} /> {/* REMOVE onHeadlineHasChanged prop */}
             </div>
             <div className="col-span-3">
             </div>

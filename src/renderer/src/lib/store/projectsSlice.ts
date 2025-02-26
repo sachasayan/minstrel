@@ -59,16 +59,32 @@ export const projectsSlice = createSlice({
       }
     },
     updateReviews: (state, action: PayloadAction<any>) => {
-      if (state.activeProject) {
-        state.activeProject.expertSuggestions = action.payload
-        state.projectHasLiveEdits = true
+      if (!state.activeProject) return
+      state.activeProject.expertSuggestions = action.payload
+      state.projectHasLiveEdits = true
+    },
+    renameFile: (state, action: PayloadAction<{ oldTitle: string; newTitle: string }>) => { // ADDED renameFile REDUCER
+      if (!state.activeProject) return
+      const { oldTitle, newTitle } = action.payload
+      const fileIndex = state.activeProject.files.findIndex(file => file.title === oldTitle)
+
+      if (fileIndex === -1) return // Do nothing if file with oldTitle not found
+
+      // Case-insensitive title conflict check
+      const titleConflict = state.activeProject.files.some(
+        file => file.title.toLowerCase() === newTitle.toLowerCase()
+      )
+      if (titleConflict) {
+        console.warn(`Title conflict detected: ${newTitle} already exists. RenameFile reducer cancelled.`) // Log warning for debugging
+        return
       }
+      state.activeProject.files[fileIndex].title = newTitle
+      state.projectHasLiveEdits = true
     }
   }
 })
 
-export const { setActiveProject, setActiveProjectFromFragment, setProjectHasLiveEdits, setAllFilesAsSaved, updateFile, updateParameters, updateReviews } = projectsSlice.actions
-
+export const { setActiveProject, setActiveProjectFromFragment, setProjectHasLiveEdits, setAllFilesAsSaved, updateFile, updateParameters, updateReviews, renameFile } = projectsSlice.actions // Export new action
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject
 
