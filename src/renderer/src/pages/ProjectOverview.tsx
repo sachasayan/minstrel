@@ -6,8 +6,6 @@ import { selectAppState } from '@/lib/store/appStateSlice'
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import MarkdownViewer from '@/components/MarkdownViewer'
 import NovelDashboard from '@/components/NovelDashboard'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { selectProjects } from '@/lib/store/projectsSlice'
 import ChatInterface from '@/components/ChatInterface'
@@ -37,7 +35,7 @@ const ProjectOverview = (): React.ReactNode => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="h-full max-h-screen">
+      <SidebarInset>
         {appState.activeView == 'project/editor' ? (
           <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
         ) : appState.activeView == 'project/dashboard' ? (

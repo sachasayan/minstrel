@@ -97,8 +97,8 @@ const ProjectParameters = (): ReactNode => {
       <h1 className="text-3xl font-bold mb-6 text-highlight-700">Project Parameters </h1>
 
       {activeProject ? (
-        <div className="grid md:grid-cols-2 gap-4">
-          <Card className="">
+        <div className="grid md:grid-cols-12 gap-6">
+          <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Basics</CardTitle>
             </CardHeader>
@@ -122,26 +122,30 @@ const ProjectParameters = (): ReactNode => {
                 <Label htmlFor="totalWordCount">Total Word Count</Label>
                 <Input id="totalWordCount" type="number" value={totalWordCount} onChange={(e) => setTotalWordCount(parseInt(e.target.value, 10))} />
               </div>
-              <div className="mb-4">
-                <Label htmlFor="summary">Summary</Label>
-                <Textarea id="summary" className="w-full border rounded p-2" value={summary} onChange={(e) => setSummary(e.target.value)} />
-              </div>
+              <Button onClick={handleSave}>Save</Button>
             </CardContent>
           </Card>
-
-          <Card className="">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea id="summary" className="w-full resize-none border rounded p-2" value={summary} onChange={(e) => setSummary(e.target.value)} />
+            </CardContent>
+          </Card>
+          <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Writing Sample</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea id="summary" className="w-full border rounded p-2 h-[400px]" value={writingSample} onChange={(e) => setWritingSample(e.target.value)} />
+              <Textarea id="writingSample" className="w-full resize-none border rounded p-2" value={writingSample} onChange={(e) => setWritingSample(e.target.value)} />
             </CardContent>
           </Card>
         </div>
       ) : (
         <p>Loading project parameters...</p>
       )}
-      <Button onClick={handleSave}>Save</Button>
+
     </div>
   )
 }

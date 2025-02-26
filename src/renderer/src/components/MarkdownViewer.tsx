@@ -56,9 +56,9 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
                   <>
                     <UndoRedo />
                     <BoldItalicUnderlineToggles />
-                    <CreateLink />
                     <BlockTypeSelect />
-                    <ListsToggle />
+                    <ListsToggle options={['number', 'bullet']} />
+
                   </>
                 )
               })
