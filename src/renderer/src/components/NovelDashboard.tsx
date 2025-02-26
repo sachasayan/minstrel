@@ -3,13 +3,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
+import { useEffect, useState } from 'react' // Corrected import for useState and useEffect
 import { Project } from '@/types'
 // import { chapterData, characters } from './mockData'; // Removed mock data
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { extractCharactersFromOutline, getCharacterFrequencyData, StarRating, colors } from '@/lib/dashboardUtils'
+import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from '@/lib/dashboardUtils'
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
+  const [characters, setCharacters] = useState<Array<{ name: string }>>([])
+  const [characterFrequencyData, setCharacterFrequencyData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (activeProject) {
+      const extractedCharacters = extractCharactersFromOutline(
+        activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || ''
+      );
+      setCharacters(extractedCharacters);
+      setCharacterFrequencyData(getCharacterFrequencyData(activeProject));
+    } else {
+      setCharacters([]);
+      setCharacterFrequencyData([]);
+    }
+  }, [activeProject]);
 
   function StarRating({ rating }: { rating: number }) {
     return (
@@ -88,7 +104,7 @@ export default function NovelDashboard() {
             {activeProject ? (
               <ChartContainer
                 style={{ aspectRatio: 'auto' }}
-                config={extractCharactersFromOutline(activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || '').reduce((acc, char) => {
+                config={characters.reduce((acc, char) => { // Use characters state
                   acc[char.name] = {
                     label: char.name
                   }
@@ -96,7 +112,7 @@ export default function NovelDashboard() {
                 }, {})}
                 className="h-[400px]"
               >
-                <LineChart data={getCharacterFrequencyData(activeProject)}>
+                <LineChart data={characterFrequencyData}> {/* Use characterFrequencyData state */}
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="chapter"
@@ -105,7 +121,7 @@ export default function NovelDashboard() {
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
-                  {extractCharactersFromOutline(activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || '').map((character, index) => (
+                  {characters.map((character, index) => ( // Use characters state
                     <Line key={character.name} type="monotone" dataKey={character.name} stroke={colors[index % colors.length]} strokeWidth={2} />
                   ))}
                 </LineChart>

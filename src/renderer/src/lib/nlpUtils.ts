@@ -1,5 +1,18 @@
 import { ProjectFile } from '../types'
 
+
+export const getBoldAsKey  = (markdownString: string): string => {
+  const match = markdownString.match(/^[*-]\s+\*\*([\p{L}\s]+)[-:]\*\*/iu) || []
+  if (match[1]){
+    return match[1]
+  }
+  return ''
+}
+
+export const lineIsHeading  = (markdownString: string): boolean => {
+    return markdownString.search(/^#+/) != -1
+}
+
 export const stringToProjectFile = (markdownString: string): ProjectFile => {
   const lines = markdownString.trim().split('\\n')
   let title = '(No title)';

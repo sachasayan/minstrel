@@ -1,6 +1,4 @@
 import { Project } from '@/types'
-import { Star } from 'lucide-react'
-import { Line } from 'recharts'
 
 const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 
@@ -12,14 +10,21 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
   const lines = outlineContent.split('\n')
   let inCharacterSection = false
 
+  const lineIsCharactersHeading  = (markdownString: string): boolean => {
+    return markdownString.search(/^#+\s+Characters/) != -1
+  }
+  const lineIsHeading  = (markdownString: string): boolean => {
+    return markdownString.search(/^#+\s+/) != -1
+  }
+
+
   for (const line of lines) {
-    if (line.startsWith('## Characters')) {
+    if (lineIsCharactersHeading(line)) {
       inCharacterSection = true
       continue
     }
-
     if (inCharacterSection) {
-      if (line.startsWith('#') && !line.startsWith('###')) {
+      if (lineIsHeading(line)) {
         break
       }
       // Regex breakdown:
@@ -27,7 +32,9 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
       // - ([\p{L} \'’. \\-]+): Captures character names with Unicode letters, apostrophes, periods, hyphens, and spaces.
       // - \*\*: Matches closing bold markdown.
       // - iu: Flags for case-insensitive and unicode matching.
-      const match = line.match(/\*\*([\p{L} \'’. \\-]+).*\*\*/iu)
+      const match = line.match(/^[*-]\s+\*\*([\p{L}\s]+)[-:]\*\*/iu)
+      console.log(match)
+
       if (match) {
         characters.push({ name: match[1].trim() })
       }
