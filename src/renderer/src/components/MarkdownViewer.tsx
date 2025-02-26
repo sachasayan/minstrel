@@ -1,5 +1,5 @@
 import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin } from '@mdxeditor/editor'
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, CreateLink, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRef, useEffect, JSX } from 'react'
@@ -37,38 +37,57 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
   }
 
   return (
-    <div className="relative px-2 py-1 mx-auto max-w-[1000px] md:px-36 md:py-20 max-h-full rounded-md">
-      {title ? (
-        <>
-          <h1 className="text-3xl font-bold mb-6 text-highlight-700">{title}</h1>
-          <MDXEditor
-            ref={ref}
-            className="mdx-theme h-full"
-            markdown={projectState.activeProject?.files.find((file) => file.title == title)?.content || ''}
-            onChange={handleContentChange}
-            onError={handleError}
-            plugins={[
-              headingsPlugin(),
-              listsPlugin(), // Add listsPlugin
-              toolbarPlugin({
-                toolbarClassName: 'mdx-toolbar',
-                toolbarContents: () => (
-                  <>
-                    <UndoRedo />
-                    <BoldItalicUnderlineToggles />
-                    <BlockTypeSelect />
-                    <ListsToggle options={['number', 'bullet']} />
+    <div className="relative container px-2 py-1 mx-auto md:p-24">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        {title ? (
+          <>
 
-                  </>
-                )
-              })
-            ]}
-            contentEditableClassName="prose"
-          />
-        </>
-      ) : (
-        <p className="text-center text-gray-500 mt-8">Select a file to view its content</p>
-      )}
+            <div className="col-span-3">
+            </div>
+            <div className="col-span-6">
+              <h1 className="text-3xl font-bold mb-6 text-highlight-700">{title}</h1>
+            </div>
+            <div className="col-span-3">
+            </div>
+            <div className="col-span-3">
+
+            </div>
+
+            <div className="col-span-6">
+
+
+              <MDXEditor
+                ref={ref}
+                className="mdx-theme h-full"
+                markdown={projectState.activeProject?.files.find((file) => file.title == title)?.content || ''}
+                onChange={handleContentChange}
+                onError={handleError}
+                plugins={[
+                  headingsPlugin(),
+                  listsPlugin(), // Add listsPlugin
+                  toolbarPlugin({
+                    toolbarClassName: 'mdx-toolbar',
+                    toolbarContents: () => (
+                      <>
+                        <UndoRedo />
+                        <BoldItalicUnderlineToggles />
+                        <BlockTypeSelect />
+                        <ListsToggle options={['number', 'bullet']} />
+
+                      </>
+                    )
+                  })
+                ]}
+                contentEditableClassName="prose"
+              />
+            </div>
+            <div className="col-span-2">
+            </div>
+          </>
+        ) : (
+          <p className="text-center text-gray-500 mt-8">Select a file to view its content</p>
+        )}
+      </div>
     </div>
   )
 }
