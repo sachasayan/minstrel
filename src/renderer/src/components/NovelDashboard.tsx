@@ -42,9 +42,9 @@ export default function NovelDashboard() {
     <div className="container mx-auto p-24 space-y-6">
       <h1 className="text-3xl font-bold mb-6 text-highlight-700">Your Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Novel Summary */}
-        <Card className="col-span-3">
+        <Card className="col-span-5">
           <CardHeader>
             <CardTitle>Novel Summary</CardTitle>
           </CardHeader>
@@ -54,7 +54,7 @@ export default function NovelDashboard() {
         </Card>
 
         {/* Per-Chapter Word Count Graph */}
-        <Card className="col-span-4">
+        <Card className="col-span-7">
           <CardHeader>
             <CardTitle>Word Count per Chapter</CardTitle>
           </CardHeader>
@@ -95,7 +95,7 @@ export default function NovelDashboard() {
         </Card>
 
         {/* Character Mentions per Chapter */}
-        <Card className="col-span-5">
+        <Card className="col-span-9">
           <CardHeader>
             <CardTitle>Character Mentions per Chapter</CardTitle>
             <CardDescription>Line graph showing mentions of each character per chapter</CardDescription>
@@ -134,7 +134,7 @@ export default function NovelDashboard() {
 
         {/* Expert Suggestions */}
         {activeProject?.expertSuggestions.map((suggestion, index) => (
-          <Card className="col-span-2" key={index}>
+          <Card className="col-span-3" key={index}>
             <CardHeader>
               <CardTitle>Expert feedback: {suggestion.name}</CardTitle>
               <CardDescription>{suggestion.expertise}</CardDescription>
@@ -147,7 +147,7 @@ export default function NovelDashboard() {
         ))}
 
         {/* Progress */}
-        <Card className="md:col-span-7 ">
+        <Card className="md:col-span-12 ">
           <CardHeader>
             <CardTitle>Progress</CardTitle>
           </CardHeader>
