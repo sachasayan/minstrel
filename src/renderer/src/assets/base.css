@@ -254,23 +254,23 @@
   }
 
   .prose h2 {
-    @apply text-3xl font-semibold my-8;
+    @apply text-3xl font-semibold my-16 text-highlight-700 text-center;
   }
 
   .prose h3 {
-    @apply text-2xl font-medium my-8;
+    @apply text-2xl font-medium my-16 text-highlight-700 text-center;
   }
 
   .prose h4 {
-    @apply text-xl font-semibold my-8;
+    @apply text-xl font-semibold my-16 text-highlight-700 text-center;
   }
 
   .prose h5 {
-    @apply text-lg font-medium my-8;
+    @apply text-lg font-medium my-16 text-highlight-700 text-center;
   }
 
   .prose h6 {
-    @apply text-base font-semibold my-8;
+    @apply text-base font-semibold my-16 text-highlight-700 text-center;
   }
 
   .prose p {
