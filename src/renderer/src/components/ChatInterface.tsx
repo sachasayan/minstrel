@@ -13,11 +13,13 @@ interface ChatInterfaceProps {
 
 const ChatLoadingIndicator = () => {
   return (
-    <div className="flex items-center justify-center p-2">
-      <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
-      <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>
-      <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-150"></div>
-    </div>
+    <>
+      <div className="flex items-center justify-center p-2">
+        <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
+        <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>
+        <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-150"></div>
+      </div>
+    </>
   )
 }
 
@@ -91,56 +93,63 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
   const actionSuggestions = useSelector((state: RootState) => selectChat(state).actionSuggestions)
 
   return (
-    <div ref={ref} className={`fixed bottom-4 right-4 z-50 ${expanded ? 'w-80' : 'w-0'}`} onFocus={handleFocus} onBlur={handleBlur}>
-      <div className={`duration-200 w-0 h-0 flex flex-col-reverse items-end absolute right-[100%] bottom-[0px] transition-all  bg-black `}>
-        {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-          <Button onClick={() => handleNextStage(suggestion)} key={index} className={` ${expanded ? 'opacity-100' : 'opacity-0'} transition-all py-4 mx-4 my-4  duration-500`}>
-            {suggestion}
-          </Button>
-        ))}
-      </div>
-      <button
-        onClick={toggleExpanded}
-        className={`z-2 bg-white shadow-lg rounded-lg border flex flex-col right-0 bottom-0 absolute overflow-hidden transition-[opacity, transform] duration-500 ${
-          expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
-        } `}
-      >
-        <BotMessageSquare className={'text-gray-500 hover:text-gray-700 hover:rotate-15 transition-transform size-8 m-4'} />
-      </button>
-      <div
-        className={`z-1 bg-white shadow-lg rounded-lg border flex flex-col transition-[max-height,max-width, width, height] duration-500 ease-in-out right-0 bottom-0 absolute overflow-hidden ${
-          expanded ? 'max-h-[500px] max-w-[320px] h-96 w-80' : 'max-h-10 max-w-10 h-10 w-10'
-        }`}
-      >
-        <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
-          {chatHistory.map((msg, index) => (
-            <div
-              key={index}
-              className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-gray-200 text-left ml-8' : 'bg-black text-white text-right mr-8'}`}
-              ref={index === chatHistory.length - 1 ? lastMessageRef : null}
-            >
-              {msg.text}
-            </div>
-          ))}
-          {pendingChat && <ChatLoadingIndicator />}
-        </div>
-        <div className="border-t p-2 flex items-center">
-          <input
-            ref={inputRef}
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your message..."
-            className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden"
-            disabled={pendingChat}
-          />
-          <button onClick={handleSend} className="bg-black text-white p-2 rounded-lg" disabled={pendingChat}>
-            Send
+    <>
+      <div ref={ref} onFocus={handleFocus} onBlur={handleBlur}>
+        {/* Clicky button. */}
+        <div className={` fixed bottom-2 right-2 z-50  `} >
+          <button
+            onClick={toggleExpanded}
+            className={`z-2 bg-neutral-100 shadow-lg rounded-lg border flex flex-col right-4 bottom-4 absolute overflow-hidden transition-[opacity, transform] duration-500 ${expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+              } `}
+          >
+            <BotMessageSquare className={'text-gray-500 hover:text-gray-700 hover:rotate-15 transition-transform size-8 m-4'} />
           </button>
-        </div>
+
+        </div >
+        {/* Chat flow */}
+        <div className={`h-screen overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'w-80' : 'w-0'} `}>
+          <div
+            className={` bg-neutral-100 shadow-lg rounded-lg border flex flex-col relative h-full w-[320px]`}
+          >
+            <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
+              {chatHistory.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-gray-200 text-left ml-8' : 'bg-highlight-800 text-white text-right mr-8'}`}
+                  ref={index === chatHistory.length - 1 ? lastMessageRef : null}
+                >
+                  {msg.text}
+                </div>
+              ))}
+
+              {/* Suggestions */}
+              {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                <Button onClick={() => handleNextStage(suggestion)} key={index} className={` ${expanded ? 'opacity-100' : 'opacity-0'} transition-all py-4 mx-4 my-4 inline-block  duration-500`}>
+                  {suggestion}
+                </Button>
+              ))}
+
+              {pendingChat && <ChatLoadingIndicator />}
+            </div>
+            <div className="border-t p-2 flex items-center">
+              <input
+                ref={inputRef}
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Type your message..."
+                className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden"
+                disabled={pendingChat}
+              />
+              <button onClick={handleSend} className="bg-highlight-700 text-white p-2 rounded-lg" disabled={pendingChat}>
+                Send
+              </button>
+            </div>
+          </div>
+        </div >
       </div>
-    </div>
+    </>
   )
 })
 

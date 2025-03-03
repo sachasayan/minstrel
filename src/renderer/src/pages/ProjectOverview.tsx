@@ -45,8 +45,8 @@ const ProjectOverview = (): React.ReactNode => {
         ) : null}
 
         {/* Chat Interface */}
-        <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />
       </SidebarInset>
+      <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />
     </SidebarProvider>
   )
 }
