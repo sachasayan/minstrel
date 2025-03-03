@@ -25,6 +25,7 @@ const prompt = () => `
 * Always respect the outline and any previously-written chapters. Maintain consistency.
 * Italics are permitted only when writing a chapter. Do not use them in other contexts.
 * Do not use code blocks, tables, task lists, emojis, highlights, images, or links. Strip them if they appear.
+* If the user provides a writing sample, mimic the style of their writing sample.
 
 ## SAMPLE WRITING INTERACTION:
 

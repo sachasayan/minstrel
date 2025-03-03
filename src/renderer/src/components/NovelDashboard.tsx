@@ -4,7 +4,6 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } f
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
 import { useEffect, useState } from 'react' // Corrected import for useState and useEffect
-import { Project } from '@/types'
 // import { chapterData, characters } from './mockData'; // Removed mock data
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from '@/lib/dashboardUtils'

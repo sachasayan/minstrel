@@ -363,7 +363,8 @@ const SummaryPage = () => {
         writingSample: formData.writing_sample,
         year: new Date().getFullYear(),
         totalWordCount: 0,
-        expertSuggestions: []
+        expertSuggestions: [],
+        knowledgeGraph: null
       })
     )
     generateSkeleton(formData)

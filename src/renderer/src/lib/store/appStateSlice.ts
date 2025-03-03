@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ActiveView, AppState, Project, ProjectFragment } from '@/types'
+import { ActiveView, AppState, ProjectFragment } from '@/types'
 import { RootState } from './store'
 
 const initialState: AppState = {

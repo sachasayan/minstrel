@@ -33,7 +33,7 @@
 
 ## Synopsis
 
-In a dystopian future where books are outlawed, librarian Elias protects a hidden collection. He joins forces with Anya, a young woman seeking knowledge, to spark a rebellion against the oppressive Authority.&#x20;
+In a dystopian future where books are outlawed, librarian Elias protects a hidden collection. He joins forces with Anya, a young woman seeking knowledge, to spark a rebellion against the oppressive Authority. 
 
 ## Characters
 
@@ -61,7 +61,7 @@ In a dystopian future where books are outlawed, librarian Elias protects a hidde
 ----Outline
 # Novel Outline: The Last Librarian
 
-Synopsis &#x20;
+## Synopsis  
 
 In a dystopian future where knowledge is suppressed, and books are outlawed, a solitary librarian named Elias maintains a hidden collection of forbidden literature. When a young woman named Anya, desperate for truth, stumbles upon his secret sanctuary, Elias must decide whether to risk everything to share the power of stories, or protect his haven from the iron fist of the Authority. Their alliance sparks a rebellion, challenging the very foundations of the oppressive regime and igniting a flame of hope in a world shrouded in darkness.
 
@@ -171,7 +171,7 @@ He ran his fingers along the spines of the books, a wistful smile gracing his li
 
 But his sanctuary was not without its dangers. The Authority was always watching, always searching for those who dared to defy their control. Elias knew that his library was a ticking time bomb, waiting to be discovered. But he couldn't bring himself to abandon it. The books were too important, the knowledge they contained too precious to be lost.
 
-He pulled a worn copy of "Moby Dick" from the shelf and settled into his favorite armchair. As he began to read, he was transported to another world, a world of adventure and freedom. For a few precious hours, he could forget the oppressive reality of the city outside and lose himself in the whispers of the past. But even in his sanctuary, he couldn't shake the feeling that his time was running out. The Authority's grip was tightening, and he knew it was only a matter of time before they came for him and his books.&#x20;
+He pulled a worn copy of "Moby Dick" from the shelf and settled into his favorite armchair. As he began to read, he was transported to another world, a world of adventure and freedom. For a few precious hours, he could forget the oppressive reality of the city outside and lose himself in the whispers of the past. But even in his sanctuary, he couldn't shake the feeling that his time was running out. The Authority's grip was tightening, and he knew it was only a matter of time before they came for him and his books. 
 
 The drones buzzed outside, their surveillance continuing.
 ----Chapter-2

@@ -1,5 +1,4 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
-import { stringToProjectFile } from '@/lib/nlpUtils'
 
 export function decodeHtmlEntities(html) {
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -58,7 +57,8 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
   return {
     ...metadata,
     projectPath: projectFragment.projectPath,
-    files: chapterList
+    files: chapterList,
+    knowledgeGraph: null
   } as Project
 }
 

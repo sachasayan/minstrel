@@ -8,7 +8,6 @@ export interface AppState {
   activeView: ActiveView
   activeFile: string | null
 }
-
 export interface ProjectState {
   projectHasLiveEdits: boolean
   activeProject: Project | null
@@ -21,6 +20,7 @@ export interface Project extends ProjectFragment {
   writingSample: string
   totalWordCount: number
   expertSuggestions: ExpertSuggestion[]
+  knowledgeGraph: KnowledgeGraph | null
 }
 export interface ProjectFragment {
   projectPath: string
@@ -35,6 +35,13 @@ export interface ProjectFile {
   wordcount?: number
   hasEdits?: boolean
 }
+
+export interface KnowledgeGraph {
+  characters: string[] | null
+  environments: string[] | null
+  chapters: string[] | null
+}
+
 
 export interface ExpertSuggestion {
   name: string

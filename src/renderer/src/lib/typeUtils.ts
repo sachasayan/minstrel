@@ -8,6 +8,7 @@ export const projectFromFragment = (projectFragment: ProjectFragment): Project =
     year: 0,
     writingSample: '',
     totalWordCount: 0,
-    expertSuggestions: []
+    expertSuggestions: [],
+    knowledgeGraph: null
   } as Project
 }
