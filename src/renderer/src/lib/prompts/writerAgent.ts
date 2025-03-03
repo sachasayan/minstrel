@@ -13,7 +13,10 @@ const prompt = () => `
 * If no chapter was specified by the user, write the earliest chapter of the story which hasn't been written yet, but which is listed in the Outline.
 * If the user requests a chapter rewrite for a chapter in the case where a previous chapter has not yet been written, politely decline and ask them to write the previous chapter.
 * When writing a chapter, the response <message> should include a brief description of the chapter events or any changes made.
-* Each chapter should be written in Markdown and saved in a file called "Chapter-$", where $ is the chapter number (e.g., "Chapter-1", "Chapter-2", etc.).
+* Each chapter should be written in Markdown.
+* If editing an existing chapter, you MUST use the existing title.
+* If creating a new chapter, you follow the outline guidance if possible.
+* Otherwise, you may use whichever title you like.
 
 ## WRITING STYLE
 * All chapters are written in markdown.
@@ -30,7 +33,7 @@ User: "Please re-write Chapter 3. Here are the needed files: [...] "
 \`\`\`xml
 <think>The user would like me to re-write Chapter 3. The user has provided the Outline, Chapter 2, and Chapter 3. I have the files needed, so [...] </think>
 <write_file>
-<file_name>Chapter-3</file_name>
+<file_name>Chapter 3: The Third Chapter</file_name>
 <content>
 [New content for Chapter 3]
 </content>

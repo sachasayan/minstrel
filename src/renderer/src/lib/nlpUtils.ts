@@ -14,7 +14,7 @@ export const lineIsHeading  = (markdownString: string): boolean => {
 }
 
 export const stringToProjectFile = (markdownString: string): ProjectFile => {
-  const lines = markdownString.trim().split('\\n')
+  const lines = markdownString.trim().split('\n')
   let title = '(No title)';
   let content = markdownString
   for (const line of lines) {

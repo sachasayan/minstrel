@@ -68,8 +68,10 @@ const processResponse = (responseString: string): RequestContext | null => {
     const fileName = response.write_file.file_name
     const content = response.write_file.content
     if (fileName && content) {
+
+      // console.log(stringToProjectFile("---- \n # " + fileName + "\n \n" +content))
       // Fix Markdown formatting before updating the file
-      store.dispatch(updateFile(stringToProjectFile(content)))
+      store.dispatch(updateFile({title: fileName, content: content}));
       // Switch to ProjectOverview and set active file after successful
       store.dispatch(setActiveView('project/editor'))
       store.dispatch(setActiveFile(fileName))
