@@ -1,7 +1,7 @@
 export const chapterData = [
   {
     chapter: 1,
-    wordCount: 3500,
+    chapterWordCount: 3500,
     Aria: 20,
     Thorne: 15,
     Elara: 10,
@@ -13,7 +13,7 @@ export const chapterData = [
   },
   {
     chapter: 2,
-    wordCount: 4200,
+    chapterWordCount: 4200,
     Aria: 25,
     Thorne: 20,
     Elara: 15,
@@ -25,7 +25,7 @@ export const chapterData = [
   },
   {
     chapter: 3,
-    wordCount: 3800,
+    chapterWordCount: 3800,
     Aria: 22,
     Thorne: 18,
     Elara: 12,
@@ -37,7 +37,7 @@ export const chapterData = [
   },
   {
     chapter: 4,
-    wordCount: 4500,
+    chapterWordCount: 4500,
     Aria: 28,
     Thorne: 22,
     Elara: 18,
@@ -49,7 +49,7 @@ export const chapterData = [
   },
   {
     chapter: 5,
-    wordCount: 4000,
+    chapterWordCount: 4000,
     Aria: 24,
     Thorne: 19,
     Elara: 14,
@@ -61,7 +61,7 @@ export const chapterData = [
   },
   {
     chapter: 6,
-    wordCount: 3900,
+    chapterWordCount: 3900,
     Aria: 23,
     Thorne: 18,
     Elara: 13,
@@ -73,7 +73,7 @@ export const chapterData = [
   },
   {
     chapter: 7,
-    wordCount: 4300,
+    chapterWordCount: 4300,
     Aria: 26,
     Thorne: 21,
     Elara: 16,
@@ -85,7 +85,7 @@ export const chapterData = [
   },
   {
     chapter: 8,
-    wordCount: 4100,
+    chapterWordCount: 4100,
     Aria: 25,
     Thorne: 20,
     Elara: 15,
@@ -97,7 +97,7 @@ export const chapterData = [
   },
   {
     chapter: 9,
-    wordCount: 3700,
+    chapterWordCount: 3700,
     Aria: 21,
     Thorne: 17,
     Elara: 11,
@@ -109,7 +109,7 @@ export const chapterData = [
   },
   {
     chapter: 10,
-    wordCount: 4200,
+    chapterWordCount: 4200,
     Aria: 27,
     Thorne: 23,
     Elara: 17,

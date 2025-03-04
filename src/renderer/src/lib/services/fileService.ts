@@ -85,7 +85,8 @@ export const saveProject = async (project: Project): Promise<boolean> => {
       author: 'Sacha',
       year: project.year,
       writingSample: project.writingSample,
-      totalWordCount: project.totalWordCount,
+      wordCountTarget: project.wordCountTarget,
+      wordCountCurrent: project.wordCountCurrent,
       expertSuggestions: project.expertSuggestions
     }
 

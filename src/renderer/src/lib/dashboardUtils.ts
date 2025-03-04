@@ -54,7 +54,7 @@ function getCharacterFrequencyData(activeProject: Project): any[] {
     .map((file, i) => {
       const chapterData: { [key: string]: number | string } = {
         chapter: i + 1,
-        wordCount: file.content.split(/\s+/).length
+        chapterWordCount: file.content.split(/\s+/).length
       }
 
       charactersList.forEach((char, index) => {

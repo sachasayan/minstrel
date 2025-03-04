@@ -73,7 +73,8 @@ const ProjectParameters = (): ReactNode => {
   const [summary, setSummary] = useState(activeProject?.summary || '')
   const [writingSample, setWritingSample] = useState(activeProject?.writingSample || '')
   const [year, setYear] = useState(activeProject?.year || 0)
-  const [totalWordCount, setTotalWordCount] = useState(activeProject?.totalWordCount || 0)
+  const [wordCountTarget, setWordCountTarget] = useState(activeProject?.wordCountTarget || 0)
+
 
   const handleSave = async () => {
     if (activeProject) {
@@ -83,7 +84,7 @@ const ProjectParameters = (): ReactNode => {
           genre,
           summary,
           year,
-          totalWordCount,
+          wordCountTarget,
           writingSample
         })
       )
@@ -119,8 +120,8 @@ const ProjectParameters = (): ReactNode => {
                 <Input id="year" type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value, 10))} />
               </div>
               <div className="mb-4">
-                <Label htmlFor="totalWordCount">Total Word Count</Label>
-                <Input id="totalWordCount" type="number" value={totalWordCount} onChange={(e) => setTotalWordCount(parseInt(e.target.value, 10))} />
+                <Label htmlFor="wordCountTarget">Target Word Count</Label>
+                <Input id="wordCountTarget" type="number" value={wordCountTarget} onChange={(e) => setWordCountTarget(parseInt(e.target.value, 10))} />
               </div>
               <Button onClick={handleSave}>Save</Button>
             </CardContent>

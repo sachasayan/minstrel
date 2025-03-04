@@ -54,13 +54,13 @@ export const projectsSlice = createSlice({
         }
       }
     },
-    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; totalWordCount: number; writingSample: string }>) => {
+    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; wordCountTarget: number; writingSample: string }>) => {
       if (state.activeProject) {
         state.activeProject.title = action.payload.title
         state.activeProject.genre = action.payload.genre
         state.activeProject.summary = action.payload.summary
         state.activeProject.year = action.payload.year
-        state.activeProject.totalWordCount = action.payload.totalWordCount
+        state.activeProject.wordCountTarget = action.payload.wordCountTarget
         state.activeProject.writingSample = action.payload.writingSample
         state.projectHasLiveEdits = true
       }

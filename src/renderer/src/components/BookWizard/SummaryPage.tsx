@@ -27,7 +27,8 @@ const SummaryPage = () => {
         summary: '',
         writingSample: formData.writing_sample,
         year: new Date().getFullYear(),
-        totalWordCount: 0,
+        wordCountCurrent: 0,
+        wordCountTarget: 0,
         expertSuggestions: [],
         knowledgeGraph: null
       })

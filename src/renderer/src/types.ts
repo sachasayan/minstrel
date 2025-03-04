@@ -19,7 +19,6 @@ export interface Project extends ProjectFragment {
   summary: string
   year: number
   writingSample: string
-  totalWordCount: number
   expertSuggestions: ExpertSuggestion[]
   knowledgeGraph: KnowledgeGraph | null
 }
@@ -27,6 +26,8 @@ export interface ProjectFragment {
   projectPath: string
   title: string
   genre: Genre
+  wordCountTarget: number
+  wordCountCurrent: number
   cover?: string
 }
 

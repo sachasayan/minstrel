@@ -143,7 +143,7 @@ export default function NovelDashboard() {
               <ChartContainer
                 style={{ aspectRatio: 'auto' }}
                 config={{
-                  wordCount: {
+                  chapterWordCount: {
                     label: 'Word Count'
                   }
                 }}
@@ -155,7 +155,7 @@ export default function NovelDashboard() {
                     .map((file, index) => ({
                       index: index,
                       chapter: index + 1,
-                      wordCount: file.content.split(/\s+/).length
+                      chapterWordCount: file.content.split(/\s+/).length
                     }))}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -165,7 +165,7 @@ export default function NovelDashboard() {
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="wordCount" fill="var(--color-highlight-900)" />
+                  <Bar dataKey="chapterWordCount" fill="var(--color-highlight-900)" />
                 </BarChart>
               </ChartContainer>
             ) : (

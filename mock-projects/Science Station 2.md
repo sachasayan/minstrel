@@ -6,7 +6,8 @@
   "author": "Sacha",
   "year": 2020,
   "writingSample": "",
-  "totalWordCount": 80000,
+  "wordCountCurrent": 0,
+  "wordCountTarget": 80000,
   "expertSuggestions": [
     {
       "name": "Dr. Evelyn Hayes",
