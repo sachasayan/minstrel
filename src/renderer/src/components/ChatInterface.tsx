@@ -124,7 +124,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
 
               {/* Suggestions */}
               {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-                <Button onClick={() => handleNextStage(suggestion)} key={index} className={` ${expanded ? 'opacity-100' : 'opacity-0'} transition-all py-4 mx-4 my-4 inline-block  duration-500`}>
+                <Button onClick={() => handleNextStage(suggestion)} key={index} className={`  transition-all mr-2 my-2 inline-block bg-highlight-600`}>
                   {suggestion}
                 </Button>
               ))}
