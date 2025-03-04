@@ -33,7 +33,7 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
       // - \*\*: Matches closing bold markdown.
       // - iu: Flags for case-insensitive and unicode matching.
       const match = line.match(/^[*-]\s+\*\*([\p{L}\s]+)[-:]\*\*/iu)
-      console.log(match)
+
 
       if (match) {
         characters.push({ name: match[1].trim() })

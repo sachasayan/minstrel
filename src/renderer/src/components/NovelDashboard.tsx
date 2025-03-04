@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux' // Import useDispatch
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
@@ -7,11 +7,19 @@ import { useEffect, useState } from 'react' // Corrected import for useState and
 // import { chapterData, characters } from './mockData'; // Removed mock data
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from '@/lib/dashboardUtils'
+import { ProgressTracker } from '@/components/dashboard/ProgressTracker' // Import ProgressTracker
+import { Button } from '@/components/ui/button' // Import Button
+import { addChatMessage } from '@/lib/store/chatSlice' // Import addChatMessage
+import { current } from '@reduxjs/toolkit'
+
+type NovelStage = 'Writing Skeleton' | 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define NovelStage type
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
+  // const [progressButtonCaption, setProgressButtonCaption] = useState<Array<{ name: string }>>([])
   const [characters, setCharacters] = useState<Array<{ name: string }>>([])
   const [characterFrequencyData, setCharacterFrequencyData] = useState<any[]>([]);
+  const dispatch = useDispatch() // Initialize useDispatch
 
   useEffect(() => {
     if (activeProject) {
@@ -37,11 +45,89 @@ export default function NovelDashboard() {
     )
   }
 
+  // Function to determine current novel stage
+  const getCurrentStage = (): NovelStage => { // Explicitly return NovelStage
+    if (!activeProject) return 'Writing Skeleton' // Default to Skeleton if no project
+    const hasSkeleton = activeProject.files.some(file => file.title.toLowerCase().includes('skeleton'))
+    const hasOutline = activeProject.files.some(file => file.title.toLowerCase().includes('outline'))
+    const chapterFiles = activeProject.files.filter(file => file.title.toLowerCase().startsWith('chapter'))
+    const hasChapters = chapterFiles.length > 0;
+    const chapterCount = chapterFiles.length;
+
+
+    if (!hasSkeleton) return 'Writing Skeleton'
+    if (!hasOutline) return 'Writing Outline'
+    return 'Writing Chapters'
+    if (!hasChapters) return 'Writing Chapters' // Stage is Write Chapters if outline and some chapters exist but less than 3
+    return 'Editing' // Default to 'Write Chapters' if both Skeleton and Outline exist but no chapters
+  }
+
+  const stages: NovelStage[] = ['Writing Skeleton', 'Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
+  const currentStage = getCurrentStage()
+  console.log(currentStage);
+
+  const getButtonCaption = () => {
+    switch (currentStage) {
+      case 'Writing Skeleton': return 'Write the skeleton..';
+      case 'Writing Outline': return 'Add the outline.';
+      case 'Writing Chapters': return 'Write the next chapter.';
+      case 'Editing': return 'Write a review.';
+      default: return 'Exploring your options.'
+    }
+  }
+  // Function to handle progress to next stage
+  const handleNextStage = () => {
+    let nextStageInstruction = '';
+    switch (currentStage) {
+      case 'Writing Skeleton':
+        nextStageInstruction = 'Please create a skeleton.';
+        break;
+      case 'Writing Outline':
+        nextStageInstruction = 'Please add the outline.';
+        break;
+      case 'Writing Chapters':
+        nextStageInstruction = 'Please write the next chapter.';
+        break;
+      case 'Editing':
+        nextStageInstruction = 'Please write a review of the story so far.';
+        break;
+      default:
+        nextStageInstruction = 'Hey there. What can I do next?';
+    }
+
+    if (nextStageInstruction) {
+      dispatch(addChatMessage({ sender: 'User', text: nextStageInstruction }));
+    }
+  }
+
+
   return (
     <div className="container mx-auto p-24 space-y-6">
       <h1 className="text-3xl font-bold mb-6 text-highlight-700">Your Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        {/* Guide */}
+        <Card className="md:col-span-12 ">
+          <CardHeader>
+            <CardTitle>Progress So Far</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ProgressTracker stages={stages} currentStage={currentStage} />
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Current Stage: {currentStage}</p>
+              {/* {currentStage !== 'Editing' && ( // Now comparison is valid */}
+              <div>
+                <div className="inline-block mr-4">What&apos;s next? Try...</div>
+                <Button variant="outline" size="sm" onClick={handleNextStage}>
+                  {getButtonCaption()}
+                </Button>
+              </div>
+              {/* )} */}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Novel Summary */}
         <Card className="col-span-5">
           <CardHeader>
