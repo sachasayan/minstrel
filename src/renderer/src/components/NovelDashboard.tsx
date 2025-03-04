@@ -64,7 +64,7 @@ export default function NovelDashboard() {
 
   const stages: NovelStage[] = ['Writing Skeleton', 'Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
   const currentStage = getCurrentStage()
-  console.log(currentStage);
+
 
   const getButtonCaption = () => {
     switch (currentStage) {

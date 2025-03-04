@@ -1,6 +1,5 @@
 import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin } from '@mdxeditor/editor'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, CreateLink, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
+import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRef, useEffect, JSX, useCallback } from 'react'
 
@@ -18,19 +17,19 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
   const projectState = useSelector(selectProjects)
   const ref = useRef<MDXEditorMethods>(null)
 
-  const handleContentChange = (content: string) => {
+  const handleContentChange = useCallback((content: string) => {
     if (title) {
-      // Only update if title is not null
       dispatch(updateFile({ title, content }))
       if (!projectState.projectHasLiveEdits) {
         dispatch(setProjectHasLiveEdits(true))
       }
     }
-  }
+
+  }, [dispatch, projectState.activeProject?.files, projectState.projectHasLiveEdits, title])
 
   useEffect(() => {
     ref.current?.setMarkdown(projectState.activeProject?.files.find((file) => file.title == title)?.content || '')
-  }, [projectState.activeProject?.files])
+  }, [projectState.activeProject?.files, title])
 
   const handleError = (error: { error: string; source: string }) => {
     console.error('MDXEditor Error:', error.error)
