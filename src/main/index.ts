@@ -51,9 +51,11 @@ import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  installExtension(REDUX_DEVTOOLS)
-    .then((ext) => console.log(`Added Extension:  ${ext.name}`))
-    .catch((err) => console.log('An error occurred: ', err))
+  if (is.dev) { // Conditionally install Redux DevTools in development
+    installExtension(REDUX_DEVTOOLS)
+      .then((ext) => console.log(`Added Extension:  ${ext.name}`))
+      .catch((err) => console.log('An error occurred: ', err))
+  }
 
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
