@@ -17,10 +17,9 @@ import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
-import { generateSkeleton } from '@/lib/services/chatService' // Import generateSkeleton
+import { generateSkeleton } from '@/lib/services/chatService'
 import { setActiveProject } from '@/lib/store/projectsSlice'
 
-// Context for managing wizard state
 interface WizardContextProps {
   totalSteps: number
   currentStep: number
@@ -30,17 +29,15 @@ interface WizardContextProps {
 }
 
 const WizardContext = createContext<WizardContextProps>({
-  totalSteps: 4,
+  totalSteps: 5,
   currentStep: 0,
   setCurrentStep: () => { },
   formData: {},
   setFormData: () => { }
 })
 
-// Custom hook for using wizard context
 const useWizard = () => useContext(WizardContext)
 
-// Utility function to sanitize filename
 const sanitizeFilename = (filename: string) => {
   return filename.replace(/[^a-z0-9_-]/gi, ' ')
 }
@@ -90,13 +87,11 @@ const genreSettings = {
   adventure: ['Jungle Expedition', 'Treasure Hunt', 'Lost Civilization', 'Pirate Adventure', 'Other']
 }
 
-// Navigation component
 const Navigation = () => {
-  // const dispatch = useDispatch()
   const { currentStep, setCurrentStep, formData } = useWizard()
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -110,11 +105,13 @@ const Navigation = () => {
   const isNextDisabled = () => {
     switch (currentStep) {
       case 1:
-        return false //!formData.length
+        return false
       case 2:
         return !formData.title || !formData.setting || !formData.genre
       case 3:
-        return !formData.plot || (formData.plot && formData.plot.length < 200) || !formData.writing_sample
+        return !formData.plot
+      case 4:
+        return !formData.writing_sample
       default:
         return false
     }
@@ -128,7 +125,7 @@ const Navigation = () => {
           Back
         </Button>
       )}
-      {currentStep < 4 && currentStep > 0 && (
+      {currentStep < 5 && currentStep > 0 && (
         <Button className="mx-1" onClick={handleNext} disabled={isNextDisabled()}>
           Next
         </Button>
@@ -137,14 +134,13 @@ const Navigation = () => {
   )
 }
 
-// Start Page
 const Intro = () => {
   const { setCurrentStep, setFormData, currentStep } = useWizard()
   const handleCheat = async () => {
     setFormData(cheatData)
     console.log('Cheating...')
-    if (currentStep < 4) {
-      setCurrentStep(4)
+    if (currentStep < 5) {
+      setCurrentStep(5)
     }
   }
 
@@ -154,7 +150,6 @@ const Intro = () => {
         <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
         <p className="text-center text-sm text-gray-500">{`It's nice to meet you! Do you have an idea for a story, or should I come up with something? `}</p>
         <div className="flex flex-row w-full gap-4 justify-between">
-          {/* <Button disabled>Start from existing file (Coming soon)</Button> */}
           <Button className="mx-1" onClick={handleCheat}>
             Help me!
           </Button>
@@ -166,10 +161,8 @@ const Intro = () => {
   )
 }
 
-// Page One
 const StoryLength = () => {
   const { currentStep, formData, setFormData, totalSteps } = useWizard()
-
 
   useEffect(() => {
     setFormData(formData.length || 50000)
@@ -179,7 +172,7 @@ const StoryLength = () => {
     <div className="flex flex-col h-full">
       <DialogHeader>
         <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
+          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
       </DialogHeader>
@@ -203,7 +196,6 @@ const StoryLength = () => {
   )
 }
 
-// Page Two
 const SettingAndTitle = () => {
   const { currentStep, formData, setFormData, totalSteps } = useWizard()
 
@@ -219,7 +211,7 @@ const SettingAndTitle = () => {
     <div className="flex flex-col h-full">
       <DialogHeader>
         <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
+          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
       </DialogHeader>
@@ -284,27 +276,18 @@ const SettingAndTitle = () => {
   )
 }
 
-// Page Three
-const PlotAndWritingStyle = () => {
+const PlotPage = () => {
   const { currentStep, formData, setFormData, totalSteps } = useWizard()
-  const [characterCount, setCharacterCount] = useState(0)
-
-  useEffect(() => {
-    setCharacterCount(formData.plot?.length || 0)
-  }, [formData.plot])
 
   const handlePlotChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setFormData({ ...formData, plot: e.target.value })
-    setCharacterCount(e.target.value.length)
   }
 
   return (
     <div className="flex flex-col h-full">
       <DialogHeader>
-        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
-          <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
-        </div>
+        <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
+        <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
       </DialogHeader>
       <div className="flex-grow flex flex-col items-center justify-center gap-4">
         <div>
@@ -313,17 +296,35 @@ const PlotAndWritingStyle = () => {
           <p className="text-sm text-gray-500"></p>
           <Textarea
             id="plot"
-            placeholder="Describe main characters, environments, what the story is about, and what the climax might be. Minimum 200 characters required."
+            placeholder="Describe main characters, environments, what the story is about, and what the climax might be. We recommend at least 200 characters."
             value={formData.plot || ''}
             onChange={handlePlotChange}
             className="mb-2"
           />
-
           <div className="text-sm text-gray-500 flex justify-between gap-4 items-top">
             <span>{`i.e "A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy."`}</span>
-            <span className={characterCount >= 200 ? 'text-black' : 'text-gray-500'}>{characterCount}/200</span>
+
           </div>
         </div>
+      </div>
+      <Navigation />
+    </div>
+  )
+}
+
+
+const WritingSamplePage = () => {
+  const { currentStep, formData, setFormData, totalSteps } = useWizard()
+
+  return (
+    <div className="flex flex-col h-full">
+      <DialogHeader>
+        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
+          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
+          <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
+        </div>
+      </DialogHeader>
+      <div className="flex-grow flex flex-col items-center justify-center gap-4">
         <div>
           <Label htmlFor="writing_sample">Writing Sample</Label>
           <Textarea
@@ -334,16 +335,15 @@ const PlotAndWritingStyle = () => {
           />
         </div>
       </div>
-
       <Navigation />
     </div>
   )
 }
 
-// Summary Page
+
 const SummaryPage = () => {
-  const { currentStep, formData, totalSteps } = useWizard()
   const dispatch = useDispatch()
+  const { currentStep, formData, totalSteps } = useWizard()
   const [requestPending, setRequestPending] = useState(false)
   const settingsState = useSelector(selectSettingsState)
 
@@ -372,7 +372,7 @@ const SummaryPage = () => {
     <div className="flex flex-col h-full">
       <DialogHeader>
         <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/4 </DialogTitle>
+          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
       </DialogHeader>
@@ -382,7 +382,7 @@ const SummaryPage = () => {
           <p className="text-sm text-gray-500">This&apos;ll take a few seconds. Just hang tight.</p>
         </div>
         <div className="flex flex-row items-center justify-center">
-          {!requestPending && <Button onClick={handleDream}>I&apos;m ready!</Button>}{' '}
+          {!requestPending && <Button onClick={handleDream}>I&apos;m ready!</Button>}
           {!!requestPending && (
             <Button disabled>
               Creating your story...
@@ -400,11 +400,10 @@ const SummaryPage = () => {
   )
 }
 
-// Wizard component
 export const BookOutlineWizard = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState({})
-  const totalSteps = 4 // Includes summary page, but not the start page
+  const totalSteps = 5
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -423,8 +422,9 @@ export const BookOutlineWizard = ({ open, onOpenChange }: { open: boolean; onOpe
               {currentStep === 0 && <Intro />}
               {currentStep === 1 && <StoryLength />}
               {currentStep === 2 && <SettingAndTitle />}
-              {currentStep === 3 && <PlotAndWritingStyle />}
-              {currentStep === 4 && <SummaryPage />}
+              {currentStep === 3 && <PlotPage />}
+              {currentStep === 4 && <WritingSamplePage />}
+              {currentStep === 5 && <SummaryPage />}
             </div>
           </div>
         </DialogContent>
