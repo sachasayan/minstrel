@@ -95,7 +95,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
   return (
     <>
       <div ref={ref} onFocus={handleFocus} onBlur={handleBlur}>
-        {/* Clicky button. */}
+        {/* Activate Chat button. */}
         <div className={` fixed bottom-2 right-2 z-50  `} >
           <button
             onClick={toggleExpanded}
@@ -107,47 +107,49 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
 
         </div >
         {/* Chat flow */}
-        <div className={`h-screen overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'w-80' : 'w-0'} `}>
-          <div
-            className={` bg-neutral-100 shadow-lg rounded-lg border flex flex-col relative h-full w-[320px]`}
-          >
-            <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
-              {chatHistory.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-gray-200 text-left ml-8' : 'bg-highlight-800 text-white text-right mr-8'}`}
-                  ref={index === chatHistory.length - 1 ? lastMessageRef : null}
-                >
-                  {msg.text}
-                </div>
-              ))}
+        <div className={`h-screen overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'max-w-80' : 'max-w-0'} `}>
+          <div className="h-full p-4 w-80">
+            <div
+              className={` bg-neutral-100 shadow-lg rounded-lg border flex flex-col h-full`}
+            >
+              <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
+                {chatHistory.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-gray-200 text-left ml-8' : 'bg-highlight-800 text-white text-right mr-8'}`}
+                    ref={index === chatHistory.length - 1 ? lastMessageRef : null}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
 
-              {/* Suggestions */}
-              {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-                <Button onClick={() => handleNextStage(suggestion)} key={index} className={`  transition-all mr-2 my-2 inline-block bg-highlight-600`}>
-                  {suggestion}
-                </Button>
-              ))}
+                {/* Suggestions */}
+                {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                  <Button onClick={() => handleNextStage(suggestion)} key={index} className={`  transition-all mr-2 my-2 inline-block bg-highlight-600`}>
+                    {suggestion}
+                  </Button>
+                ))}
 
-              {pendingChat && <ChatLoadingIndicator />}
-            </div>
-            <div className="border-t p-2 flex items-center">
-              <input
-                ref={inputRef}
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden"
-                disabled={pendingChat}
-              />
-              <button onClick={handleSend} className="bg-highlight-700 text-white p-2 rounded-lg" disabled={pendingChat}>
-                Send
-              </button>
+                {pendingChat && <ChatLoadingIndicator />}
+              </div>
+              <div className="border-t p-2 flex items-center">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="Type your message..."
+                  className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden"
+                  disabled={pendingChat}
+                />
+                <button onClick={handleSend} className="bg-highlight-700 text-white p-2 rounded-lg" disabled={pendingChat}>
+                  Send
+                </button>
+              </div>
             </div>
           </div>
-        </div >
+        </div>
       </div>
     </>
   )
