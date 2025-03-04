@@ -1,13 +1,12 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile, updateReviews } from '@/lib/store/projectsSlice'
+import { updateFile, setPendingFiles, resolvePendingFiles, updateReviews } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
-import { stringToProjectFile } from '@/lib/nlpUtils'
 
 const isValidAgentType = (agent: string): agent is 'routingAgent' | 'criticAgent' | 'outlineAgent' | 'writerAgent' => {
   return ['routingAgent', 'criticAgent', 'outlineAgent', 'writerAgent'].includes(agent)
@@ -124,6 +123,8 @@ export const sendMessage = async (context: RequestContext) => {
     console.groupCollapsed('User Prompt')
     console.log(prompt)
     console.groupEnd()
+    store.dispatch(setPendingFiles(context.requestedFiles || null))
+
 
     const response = await geminiService.generateContent(prompt)
 
@@ -161,8 +162,10 @@ export const sendMessage = async (context: RequestContext) => {
         })
       )
       store.dispatch(resolvePendingChat())
+      store.dispatch(setPendingFiles(null))
     }
   } finally {
+    store.dispatch(setPendingFiles(null))
     store.dispatch(resolvePendingChat())
     console.log('sendMessage() finished')
   }

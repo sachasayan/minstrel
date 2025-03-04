@@ -11,6 +11,7 @@ export interface AppState {
 export interface ProjectState {
   projectHasLiveEdits: boolean
   activeProject: Project | null
+  pendingFiles: string[] | null
 }
 
 export interface Project extends ProjectFragment {

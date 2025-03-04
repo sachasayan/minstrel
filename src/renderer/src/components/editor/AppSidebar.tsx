@@ -53,6 +53,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [alertDialogOpen, setAlertDialogOpen] = React.useState(false)
   const { open: sideBarOpen } = useSidebar()
 
+  const handleUniselect = (slug: string) => {
+    console.log(appState.activeFile)
+    console.log(slug)
+    if (slug.includes('Chapter') || slug == 'Skeleton' || slug == 'Outline') {
+      dispatch(setActiveFile(projectsState.activeProject?.files?.find((item) => item.title.includes(slug))?.title || ''))
+      dispatch(setActiveView('project/editor'))
+    } else if (slug.includes('Parameters')) {
+      dispatch(setActiveFile(null))
+      dispatch(setActiveView('project/parameters'))
+    }
+  }
+
   const handleFileSelect = (fileName: string) => {
     dispatch(setActiveFile(fileName))
     dispatch(setActiveView('project/editor'))
@@ -95,9 +107,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return true
   }
 
+  const structureItems = [
+    {
+      key: 'Parameters',
+      activeView: 'project/parameters',
+      icon: <Settings className="mr-2 h-4 w-4" />
+    },
+    {
+      select: 'Skeleton',
+      key: 'Skeleton',
+      activeView: 'project/editor',
+      activeFile: 'Skeleton',
+      icon: <FileText className="mr-2 h-4 w-4" />
+    },
+    {
+      key: 'Outline',
+      activeView: 'project/editor',
+      activeFile: 'Outline',
+      icon: <ListOrdered className="mr-2 h-4 w-4" />
+    }
+  ]
+
+
 
   const ss = {
-    sidebar: ' border-none [&_div]:transition-color  [&_div]:duration-200 [&_.bg-sidebar]:bg-transparent text-highlight-600',
+    sidebar: ' border-none [&_[data-sidebar=sidebar]]:transition-color  [&_[data-sidebar=sidebar]]:duration-200 [&_.bg-sidebar]:bg-transparent text-highlight-600',
     sidebarOpen: ' [&_.bg-sidebar]:bg-sidebar text-highlight-900',
     sidebarButton: ' [&_[data-slot=sidebar-menu-button]_span]:truncate [&_[data-active=true]]:text-highlight-300',
     sidebarButtonActive: ' [&_[data-slot=sidebar-menu-button]:active]:bg-highlight-800 [&_[data-active=true]]:bg-sidebar-primary [&_[data-active=true]]:text-white  [&_[data-slot=sidebar-menu-button]:active]:text-white',
@@ -142,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem key="Dashboard">
                   <SidebarMenuButton asChild isActive={appState.activeView === 'project/dashboard'}>
                     <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
-                      <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                      <LayoutDashboard className="mr-2 h-4 w-4" />  Dashboard
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -154,29 +188,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupLabel>Structure</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem key="Parameters">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/parameters'}>
-                    <a onClick={() => dispatch(setActiveView('project/parameters'))}>
-                      <Settings className="mr-2 h-4 w-4" /> Parameters
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem key="Skeleton">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile?.indexOf('Skeleton') != -1}>
-                    <a onClick={() => handleFileSelect(projectsState.activeProject?.files?.find((item) => item.title.includes('Skeleton'))?.title || '')}>
-                      <FileText className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Skeleton</span>{' '}
-                      {projectsState.activeProject?.files?.find((item) => item.title.includes('Skeleton'))?.hasEdits && <Diff className="float-right text-orange-500" />}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem key="Outline">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile?.indexOf('Outline') != -1}>
-                    <a onClick={() => handleFileSelect(projectsState.activeProject?.files?.find((item) => item.title.includes('Outline'))?.title || '')}>
-                      <ListOrdered className="mr-2 h-4 w-4" /> <span className="flex-grow ml-2">Outline</span>{' '}
-                      {projectsState.activeProject?.files?.find((item) => item.title.includes('Outline'))?.hasEdits && <Diff className="float-right text-orange-500" />}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {structureItems
+                  .map((item, i) => {
+                    return (
+                      <SidebarMenuItem key={i}>
+                        <SidebarMenuButton asChild isActive={appState.activeView === item.activeView && (!!item.activeFile ? (appState.activeFile?.includes(item.activeFile)) : true)}>
+                          <a onClick={() => handleUniselect(item.key)}>
+                            {projectsState.pendingFiles?.includes(projectsState.activeProject?.files?.find((e) => e.title.includes(item.key))?.title || '') ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
+                            {projectsState.activeProject?.files?.find((e) => e.title.includes(item.key))?.hasEdits && <Diff className="float-right text-orange-500" />}
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
                 {!projectsState.activeProject?.files?.find((item) => item.title.includes('Outline')) && (
                   <SidebarMenuItem key="Create Outline">
                     <SidebarMenuButton asChild>
@@ -213,8 +237,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === item.title}>
                             <a onClick={() => handleFileSelect(item.title)} className={`flex items-center`}>
-                              {!!sideBarOpen && <Book />}
-                              {!sideBarOpen && <ChapterIcon chapterNumber={i + 1} />}
+                              {projectsState.pendingFiles?.includes(item.title) ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : !!sideBarOpen ? <Book /> : <ChapterIcon chapterNumber={i + 1} />}
                               <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>

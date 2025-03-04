@@ -35,7 +35,7 @@ const ProjectOverview = (): React.ReactNode => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="relative">
         {appState.activeView == 'project/editor' ? (
           <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
         ) : appState.activeView == 'project/dashboard' ? (

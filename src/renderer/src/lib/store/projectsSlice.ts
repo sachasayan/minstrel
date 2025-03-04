@@ -5,7 +5,8 @@ import { projectFromFragment } from '@/lib/typeUtils'
 
 const initialState: ProjectState = {
   projectHasLiveEdits: false,
-  activeProject: null
+  activeProject: null,
+  pendingFiles: null,
 }
 
 export const projectsSlice = createSlice({
@@ -26,6 +27,12 @@ export const projectsSlice = createSlice({
       state.activeProject?.files?.forEach((chapter) => {
         chapter.hasEdits = false
       })
+    },
+    setPendingFiles: (state, action: PayloadAction<string[] | null>) => {
+      state.pendingFiles = action.payload
+    },
+    resolvePendingFiles: (state, action: PayloadAction<string[] | null>) => {
+      state.pendingFiles = action.payload
     },
     updateFile: (state, action: PayloadAction<ProjectFile>) => {
       if (state.activeProject) {
@@ -84,7 +91,17 @@ export const projectsSlice = createSlice({
   }
 })
 
-export const { setActiveProject, setActiveProjectFromFragment, setProjectHasLiveEdits, setAllFilesAsSaved, updateFile, updateParameters, updateReviews, renameFile } = projectsSlice.actions // Export new action
+export const { setActiveProject,
+  setPendingFiles,
+  resolvePendingFiles,
+  setActiveProjectFromFragment,
+  setProjectHasLiveEdits,
+  setAllFilesAsSaved,
+  updateFile,
+  updateParameters,
+  updateReviews,
+  renameFile
+} = projectsSlice.actions // Export new action
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject
 

@@ -254,23 +254,23 @@
   }
 
   .prose h2 {
-    @apply text-3xl font-semibold my-16 text-highlight-700 text-center;
+    @apply text-3xl font-semibold my-16 text-highlight-700;
   }
 
   .prose h3 {
-    @apply text-2xl font-medium my-16 text-highlight-700 text-center;
+    @apply text-2xl font-medium my-16 text-highlight-700;
   }
 
   .prose h4 {
-    @apply text-xl font-semibold my-16 text-highlight-700 text-center;
+    @apply text-xl font-semibold my-16 text-highlight-700;
   }
 
   .prose h5 {
-    @apply text-lg font-medium my-16 text-highlight-700 text-center;
+    @apply text-lg font-medium my-16 text-highlight-700;
   }
 
   .prose h6 {
-    @apply text-base font-semibold my-16 text-highlight-700 text-center;
+    @apply text-base font-semibold my-16 text-highlight-700;
   }
 
   .prose p {
@@ -288,13 +288,14 @@
 
 
   .loader {
-    width: 48px;
-    height: 48px;
+    width: 1rem;
+    height: 1rem;
     border: 5px solid var(--emerald-400);
     border-bottom-color: transparent;
     border-radius: 50%;
     display: inline-block;
     box-sizing: border-box;
+    animation-duration: 20s;
     animation: loader-rotation 1s linear infinite;
   }
 
