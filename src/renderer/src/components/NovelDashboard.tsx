@@ -65,39 +65,27 @@ export default function NovelDashboard() {
   const stages: NovelStage[] = ['Writing Skeleton', 'Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
   const currentStage = getCurrentStage()
 
-
-  const getButtonCaption = () => {
-    switch (currentStage) {
-      case 'Writing Skeleton': return 'Write the skeleton..';
-      case 'Writing Outline': return 'Add the outline.';
-      case 'Writing Chapters': return 'Write the next chapter.';
-      case 'Editing': return 'Write a review.';
-      default: return 'Exploring your options.'
+  const captions = {
+    'Writing Skeleton': {
+      caption: 'Write the skeleton.',
+      instruction: 'Please create a skeleton.'
+    },
+    'Writing Outline': {
+      caption: 'Add the outline.',
+      instruction: 'Please add the outline.'
+    },
+    'Writing Chapters': {
+      caption: 'Write the next chapter.',
+      instruction: 'Please write the next chapter.'
+    },
+    'Editing': {
+      caption: 'Explore your options. ',
+      instruction: 'Please write a review of the story so far.'
     }
-  }
+  };
   // Function to handle progress to next stage
   const handleNextStage = () => {
-    let nextStageInstruction = '';
-    switch (currentStage) {
-      case 'Writing Skeleton':
-        nextStageInstruction = 'Please create a skeleton.';
-        break;
-      case 'Writing Outline':
-        nextStageInstruction = 'Please add the outline.';
-        break;
-      case 'Writing Chapters':
-        nextStageInstruction = 'Please write the next chapter.';
-        break;
-      case 'Editing':
-        nextStageInstruction = 'Please write a review of the story so far.';
-        break;
-      default:
-        nextStageInstruction = 'Hey there. What can I do next?';
-    }
-
-    if (nextStageInstruction) {
-      dispatch(addChatMessage({ sender: 'User', text: nextStageInstruction }));
-    }
+    dispatch(addChatMessage({ sender: 'User', text: captions[currentStage].instruction }));
   }
 
 
@@ -120,7 +108,7 @@ export default function NovelDashboard() {
               <div>
                 <div className="inline-block mr-4">What&apos;s next? Try...</div>
                 <Button variant="outline" size="sm" onClick={handleNextStage}>
-                  {getButtonCaption()}
+                  {captions[currentStage].caption}
                 </Button>
               </div>
               {/* )} */}
