@@ -16,16 +16,17 @@ const WritingSamplePage = () => {
           <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
         </div>
       </DialogHeader>
-      <div className="flex-grow flex flex-col items-center justify-center gap-4">
-        <div>
-          <Label htmlFor="writing_sample">Writing Sample</Label>
-          <Textarea
-            id="writing_sample"
-            placeholder="Provide a writing sample. The tool will mirror your writing style."
-            value={formData.writing_sample || ''}
-            onChange={(e) => setFormData({ ...formData, writing_sample: e.target.value })}
-          />
-        </div>
+      <div className="flex-grow flex flex-col  gap-4 py-4">
+
+        <Label htmlFor="writing_sample">Writing Sample</Label>
+        <Textarea
+          className="flex-grow"
+          id="writing_sample"
+          placeholder="Provide an optional writing sample. The tool will mirror your writing style."
+          value={formData.writing_sample || ''}
+          onChange={(e) => setFormData({ ...formData, writing_sample: e.target.value })}
+        />
+
       </div>
       <WizardNavigation />
     </div>

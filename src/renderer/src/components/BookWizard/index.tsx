@@ -44,7 +44,7 @@ const Navigation = () => {
       case 3:
         return !formData.plot
       case 4:
-        return !formData.writing_sample
+        return false // Writing sample is now optional
       default:
         return false
     }
