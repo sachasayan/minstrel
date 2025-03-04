@@ -22,7 +22,7 @@ const StoryLength = () => {
         </div>
       </DialogHeader>
       <div className="flex-grow flex flex-col justify-center gap-4">
-        <div>w
+        <div>
           <p className="text-sm text-gray-500">{`Okay, let me walk you through the steps. First let's get an idea of where we should go with this. Don't worry, we can change everything later.`}</p>
         </div>
         <div>
