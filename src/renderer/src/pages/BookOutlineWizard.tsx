@@ -170,9 +170,6 @@ const Intro = () => {
 const StoryLength = () => {
   const { currentStep, formData, setFormData, totalSteps } = useWizard()
 
-  useEffect(() => {
-    setFormData(formData.length || 0)
-  }, [formData.length])
 
   useEffect(() => {
     setFormData(formData.length || 50000)
@@ -323,7 +320,7 @@ const PlotAndWritingStyle = () => {
           />
 
           <div className="text-sm text-gray-500 flex justify-between gap-4 items-top">
-            <span>i.e &quot;A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.&quot;</span>
+            <span>{`i.e "A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy."`}</span>
             <span className={characterCount >= 200 ? 'text-black' : 'text-gray-500'}>{characterCount}/200</span>
           </div>
         </div>
@@ -382,10 +379,10 @@ const SummaryPage = () => {
       <div className="flex-grow flex flex-col items-center justify-center p-8 gap-4">
         <div className="text-center">
           <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story.</h2>
-          <p className="text-sm text-gray-500">{`This'll take a few seconds. Just hang tight.`}</p>
+          <p className="text-sm text-gray-500">This&apos;ll take a few seconds. Just hang tight.</p>
         </div>
         <div className="flex flex-row items-center justify-center">
-          {!requestPending && <Button onClick={handleDream}>I'm ready!</Button>}{' '}
+          {!requestPending && <Button onClick={handleDream}>I&apos;m ready!</Button>}{' '}
           {!!requestPending && (
             <Button disabled>
               Creating your story...
