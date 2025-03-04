@@ -6,10 +6,11 @@ import { selectAppState } from '@/lib/store/appStateSlice'
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import MarkdownViewer from '@/components/MarkdownViewer'
 import NovelDashboard from '@/components/NovelDashboard'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { selectProjects } from '@/lib/store/projectsSlice'
 import ChatInterface from '@/components/ChatInterface'
 import ProjectParameters from './ProjectParameters'
+import CommandPalette from '@/components/CommandPalette'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -32,6 +33,7 @@ const ProjectOverview = (): React.ReactNode => {
     }
   }, [expanded])
 
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -47,6 +49,7 @@ const ProjectOverview = (): React.ReactNode => {
         {/* Chat Interface */}
       </SidebarInset>
       <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />
+      <CommandPalette />
     </SidebarProvider>
   )
 }
