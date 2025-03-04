@@ -68,19 +68,23 @@ export default function NovelDashboard() {
   const captions = {
     'Writing Skeleton': {
       caption: 'Write the skeleton.',
-      instruction: 'Please create a skeleton.'
+      instruction: 'Please create a skeleton.',
+      guidance: `How did you even get here? That shouldn't be possible!`
     },
     'Writing Outline': {
       caption: 'Add the outline.',
-      instruction: 'Please add the outline.'
+      instruction: 'Please add the outline.',
+      guidance: `Woohoo! You're on your way! At this stage, you can edit the Skeleton to your heart's content. When you're done, just ask Minstrel to create an Outline, and we'll flesh out Characters, Environments`
     },
     'Writing Chapters': {
       caption: 'Write the next chapter.',
-      instruction: 'Please write the next chapter.'
+      instruction: 'Please write the next chapter.',
+      guidance: `You've got an outline! That's great! If you have any more tweaks to make you can go ahead and make those changes. Otherwise, let's start our first chapter!`
     },
     'Editing': {
       caption: 'Explore your options. ',
-      instruction: 'Please write a review of the story so far.'
+      instruction: 'Please write a review of the story so far.',
+      guidance: `All the chapters are done! Incredible! Feel free to do more editing, seek counsel from the critics, or start publishing!`
     }
   };
   // Function to handle progress to next stage
@@ -98,19 +102,22 @@ export default function NovelDashboard() {
         {/* Guide */}
         <Card className="md:col-span-12 ">
           <CardHeader>
-            <CardTitle>Progress So Far</CardTitle>
+            <CardTitle>Current Stage: {currentStage}</CardTitle>
+
+
           </CardHeader>
           <CardContent className="space-y-4">
+            <p>{captions[currentStage].guidance}</p>
+
+            <Button variant="outline" size="sm" onClick={handleNextStage}>
+              {captions[currentStage].caption}
+            </Button>
+
             <ProgressTracker stages={stages} currentStage={currentStage} />
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Current Stage: {currentStage}</p>
+
               {/* {currentStage !== 'Editing' && ( // Now comparison is valid */}
-              <div>
-                <div className="inline-block mr-4">What&apos;s next? Try...</div>
-                <Button variant="outline" size="sm" onClick={handleNextStage}>
-                  {captions[currentStage].caption}
-                </Button>
-              </div>
+
               {/* )} */}
             </div>
           </CardContent>
