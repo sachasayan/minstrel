@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState } from 'react' // Corrected import for useState and useEffect
+import { useEffect, useState, useCallback } from 'react' // Corrected import for useState and useEffect
 // import { chapterData, characters } from './mockData'; // Removed mock data
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from '@/lib/dashboardUtils'
@@ -46,7 +46,7 @@ export default function NovelDashboard() {
   }
 
   // Function to determine current novel stage
-  const getCurrentStage = (): NovelStage => { // Explicitly return NovelStage
+  const getCurrentStage = useCallback((): NovelStage => { // Explicitly return NovelStage
     if (!activeProject) return 'Writing Skeleton' // Default to Skeleton if no project
     const hasSkeleton = activeProject.files.some(file => file.title.toLowerCase().includes('skeleton'))
     const hasOutline = activeProject.files.some(file => file.title.toLowerCase().includes('outline'))
@@ -60,7 +60,7 @@ export default function NovelDashboard() {
     return 'Writing Chapters'
     if (!hasChapters) return 'Writing Chapters' // Stage is Write Chapters if outline and some chapters exist but less than 3
     return 'Editing' // Default to 'Write Chapters' if both Skeleton and Outline exist but no chapters
-  }
+  }, [activeProject])
 
   const stages: NovelStage[] = ['Writing Skeleton', 'Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
   const currentStage = getCurrentStage()
