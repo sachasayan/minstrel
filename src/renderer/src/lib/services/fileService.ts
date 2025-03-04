@@ -15,6 +15,8 @@ export const getProjectFragmentMeta = async (projectPath: string): Promise<Proje
 
     return {
       title: metadata.title,
+      wordCountCurrent: metadata.wordCountCurrent,
+      wordCountTarget: metadata.wordCountTarget,
       projectPath: projectPath,
       genre: metadata?.genre || 'science-fiction',
       cover: ''
