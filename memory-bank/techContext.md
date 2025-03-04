@@ -6,6 +6,7 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
 
 - **Frontend (Renderer Process):**
   - **UI Components:** React components built using ShadCN UI. Handles user interaction, displays data, and dispatches actions to the Redux store. Key components include `AppSidebar`, `ChatInterface`, `MarkdownViewer`, `ProjectOverview`, `BookOutlineWizard`, and `Chart.tsx`.
+  - **Book Outline Wizard Pages:** The `BookOutlineWizard` feature is split into multiple page components located in `src/renderer/src/components/BookWizard`: `Intro`, `StoryLength`, `SettingAndTitle`, `PlotPage`, `WritingSamplePage`, and `SummaryPage`. These components manage the different steps of the book outline wizard flow.
   - **State Management:** Redux Toolkit manages the application state, including chat history (`chatSlice`), project data (`projectsSlice`), and application state (`appStateSlice`).
   - **Service Logic:** `chatManager.ts` handles communication with the Gemini API, prompt building, and response processing. `projectManager.ts` handles project loading, saving, and file system operations.
   - **Prompt Engineering:** `promptBuilder.ts` constructs prompts dynamically based on the current state and context. `prompts.ts` stores the static parts of the prompts.
@@ -18,7 +19,8 @@ Minstrel follows a client-server architecture, with a React/Vite/Electron fronte
 - `AppSidebar` interacts with `fileService` to save projects and with `chatSlice` and `appStateSlice` to manage UI state.
 - `ChatInterface` interacts with `chatSlice` to display and manage chat history and with `chatService` to send messages.
 - `MarkdownViewer` displays Markdown content from the `projectSlice`.
-- `BookOutlineWizard` collects initial project parameters and triggers the skeleton generation process.
+- `BookOutlineWizard` (container component) orchestrates the book outline wizard flow and renders the page components.
+- `Intro`, `StoryLength`, `SettingAndTitle`, `PlotPage`, `WritingSamplePage`, `SummaryPage` (page components) handle individual wizard steps and user input within the Book Outline Wizard.
 - `ProjectOverview` combines `ChatInterface` and `MarkdownViewer` to provide the main project view.
 - `chatService` interacts with `llmService` to communicate with the Gemini API, `promptBuilder` to construct prompts, and `projectsSlice` to update project data.
 - `fileService` uses Electron's IPC to interact with `fileOps.ts` in the main process for file system operations.
