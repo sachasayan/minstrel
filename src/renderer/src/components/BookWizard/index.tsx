@@ -1,9 +1,6 @@
-import React, { createContext, useContext } from 'react'
-import { DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { createContext, useContext } from 'react'
+import { DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { cn } from '@/lib/utils' // Import cn utility
-
 
 interface WizardContextProps {
   totalSteps: number

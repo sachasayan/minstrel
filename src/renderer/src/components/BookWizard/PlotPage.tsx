@@ -1,8 +1,7 @@
-import React from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress' // Corrected Progress import path
+import { Progress } from '@/components/ui/progress'
 import { useWizard, WizardNavigation } from '@/components/BookWizard/index' // Updated imports
 
 

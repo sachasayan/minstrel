@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress' // Corrected Progress import path
+import { Progress } from '@/components/ui/progress'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { generateSkeleton } from '@/lib/services/chatService'
@@ -50,7 +50,7 @@ const SummaryPage = () => {
           <p className="text-sm text-gray-500">This&apos;ll take a few seconds. Just hang tight.</p>
         </div>
         <div className="flex flex-row items-center justify-center">
-          {!requestPending && <Button onClick={handleDream}>I'm ready!</Button>}
+          {!requestPending && <Button onClick={handleDream}>I&apos;m ready!</Button>}
           {!!requestPending && (
             <Button disabled>
               Creating your story...

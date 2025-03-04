@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { useWizard, WizardNavigation, cheatData } from '@/components/BookWizard/index' // Updated import path for useWizard
+import { useWizard, WizardNavigation, cheatData } from '@/components/BookWizard/index'
 
 
 const Intro = () => {
