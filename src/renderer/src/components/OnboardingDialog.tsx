@@ -9,6 +9,7 @@ import { Key } from 'lucide-react'
 import geminiService from '@/lib/services/llmService'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch } from 'react-redux'
+import { motion, AnimatePresence } from 'framer-motion' // Correct import from framer-motion
 
 interface OnboardingDialogProps {
   showOnboarding: boolean
@@ -29,11 +30,11 @@ interface OnboardingFlowProps {
 const OnboardingFlow = createContext<OnboardingFlowProps>({
   totalSteps: 3,
   currentStep: 0,
-  setCurrentStep: () => {},
+  setCurrentStep: () => { },
   formData: {},
-  setFormData: () => {},
-  editFormData: () => {},
-  setShowOnboarding: () => {} // Added setShowOnboarding to default context value
+  setFormData: () => { },
+  editFormData: () => { },
+  setShowOnboarding: () => { } // Added setShowOnboarding to default context value
 })
 
 // Custom hook for using wizard context
@@ -51,32 +52,42 @@ const Intro = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
-        <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
-        <p className="text-center text-sm text-gray-500">
-          Welcome to Minstrel. It&apos;s nice to meet you! Before we get started, let&apos;s set up a couple things. First of all, where can we put our projects?
-          <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.
-        </p>
-        <div className="flex flex-row items-center justify-center gap-4">
-          <Button
-            onClick={() => {
-              selectFolder()
-              setCurrentStep(1)
-            }}
-          >
-            {' '}
-            <Folder /> {`Choose a Directory`}{' '}
-          </Button>
-          <Button
-            onClick={() => {
-              editFormData({ workingRootDirectory: '~/Documents/Minstrel' })
-              setCurrentStep(1)
-            }}
-          >
-            <WandSparkles /> {`Use the default.`}{' '}
-          </Button>
-        </div>
-      </div>
+      <AnimatePresence> {/* Wrap DialogContent with AnimatePresence */}
+        <motion.div
+          key="dialog-content" // Add a key for AnimatePresence
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 5.0 }}
+        >
+          <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
+            <h2 className="text-2xl font-bold text-center">Welcome to Minstrel</h2>
+            <p className="text-center text-sm text-gray-500">
+              Looks like you&apos;re new here! It&apos;s nice to meet you.  Before we get started, let&apos;s set up a couple things. First of all, where can we put our projects?
+              <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.
+            </p>
+            <div className="flex flex-row items-center justify-center gap-4">
+              <Button
+                onClick={() => {
+                  selectFolder()
+                  setCurrentStep(1)
+                }}
+              >
+                {' '}
+                <Folder /> {`Choose a Directory`}{' '}
+              </Button>
+              <Button
+                onClick={() => {
+                  editFormData({ workingRootDirectory: '~/Documents/Minstrel' })
+                  setCurrentStep(1)
+                }}
+              >
+                <WandSparkles /> {`Use the default.`}{' '}
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
@@ -150,7 +161,7 @@ const SetUpKey = () => {
       {keyError && <div className="text-red-700">Hmm that didn&apos;t work. Try again.</div>}
       {verifyingKey && <div className="text-xs">Verifying key...</div>}
       <p className="text-sm bg-amber-100 outline-1 outline-amber-300 text-amber-900 p-4 rounded-md">
-        <span className="font-bold">What is an API key?</span> It's like a password, but for computers. Minstrel needs to talk to Google on your behalf.{' '}
+        <span className="font-bold">What is an API key?</span> It&apos;s like a password, but for computers. Minstrel needs to talk to Google on your behalf.{' '}
         <a className="underline pointer text-amber-900" href="https://ai.google.dev/gemini-api/docs/api-key" target="blank" rel="noreferrer">
           More info here.
         </a>
@@ -183,7 +194,7 @@ const SummaryPage = () => {
         <p className="text-sm text-gray-500">{`That was painless, right? If you need to change things in the future, you can go to the Settings area.`}</p>
 
         <div className="flex flex-row items-center justify-center">
-          <Button onClick={handleSaveSettings}>I'm ready!</Button>
+          <Button onClick={handleSaveSettings}>I&apos;m ready!</Button>
         </div>
       </div>
     </div>
@@ -212,7 +223,19 @@ const OnboardingDialog = ({ showOnboarding, setShowOnboarding }: OnboardingDialo
         >
           <div className="grid grid-cols-5 gap-4">
             <div className="col-span-2 flex flex-col justify-center">
-              <Torrent />
+              <AnimatePresence> {/* Wrap DialogContent with AnimatePresence */}
+
+                <motion.div
+                  key="dialog-content" // Add a key for AnimatePresence
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+
+                  transition={{ duration: 8.0 }}
+                >
+                  <Torrent />
+                </motion.div>
+              </AnimatePresence>
             </div>
             <div className="col-span-3 flex flex-col">
               {currentStep === 0 && <Intro />}
