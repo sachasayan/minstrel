@@ -6,8 +6,8 @@
   "author": "Sacha",
   "year": 2020,
   "writingSample": "",
-  "wordCountCurrent": 0,
   "wordCountTarget": 80000,
+  "wordCountCurrent": 2147,
   "expertSuggestions": [
     {
       "name": "Dr. Emily Carter",

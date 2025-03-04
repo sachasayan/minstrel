@@ -73,12 +73,6 @@ export const saveProject = async (project: Project): Promise<boolean> => {
   }
 
   try {
-    // Create the project directory if it doesn't exist
-    // const mkdirResult = await window.electron.ipcRenderer.invoke('make-directory', project.projectPath)
-    // if (!mkdirResult.success) {
-    //   console.error('Failed to create project directory:', mkdirResult.error)
-    //   return false
-    // }
 
     const metadata = {
       title: project.title,

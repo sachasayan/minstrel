@@ -65,6 +65,11 @@ export const projectsSlice = createSlice({
         state.projectHasLiveEdits = true
       }
     },
+    updateMetaProperty: (state, action: PayloadAction<{ property: string; value: any }>) => {
+      if (!state.activeProject) return
+      state.activeProject[action.payload.property] = action.payload.value
+      state.projectHasLiveEdits = true
+    },
     updateReviews: (state, action: PayloadAction<any>) => {
       if (!state.activeProject) return
       state.activeProject.expertSuggestions = action.payload
@@ -100,6 +105,7 @@ export const { setActiveProject,
   updateFile,
   updateParameters,
   updateReviews,
+  updateMetaProperty,
   renameFile
 } = projectsSlice.actions // Export new action
 export const selectProjects = (state: RootState) => state.projects

@@ -6,8 +6,8 @@
   "author": "Sacha",
   "year": 2020,
   "writingSample": "",
-  "wordCountCurrent": 0,
   "wordCountTarget": 80000,
+  "wordCountCurrent": 884,
   "expertSuggestions": [
     {
       "name": "Dr. Evelyn Hayes",
@@ -66,7 +66,7 @@ Humanity has ventured deep into space, utilizing advanced AI companions to manag
 
 ## Chapter-by-Chapter Overview:
 
-### Part 1: Voyage and Discovery (Chapters 1-7)&#x20;
+### Part 1: Voyage and Discovery (Chapters 1-7) 
 
 * **Chapter 1: Deep Space Awakening**: Introduces the **Starseeker** crew awakening from cryosleep as they approach **Kepler-186f**. Establishes the ship environment, the crew dynamics, and the central role of **AURORA**.
 * **Chapter 2: Whispers of Kepler-186f**: Initial scans reveal promising signs of life on **Kepler-186f-B**, a moon of the gas giant **Kepler-186f**. Excitement and anticipation build. Introduction to the **Luminians** through faint, intriguing signals.

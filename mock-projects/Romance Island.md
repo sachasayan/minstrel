@@ -6,8 +6,8 @@
   "author": "Sacha",
   "year": 2020,
   "writingSample": "asdfasdf",
-  "wordCountCurrent": 0,
   "wordCountTarget": 80000,
+  "wordCountCurrent": 5468,
   "expertSuggestions": [
     {
       "name": "Dr. Evelyn Reed",
