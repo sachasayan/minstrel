@@ -43,7 +43,6 @@ export const getLatestUserMessage = (): string => {
   ${store.getState().chat.chatHistory.findLast((message) => message.sender === 'User')?.text}
   `
 }
-
 export const buildPrompt = (context: RequestContext): string => {
   let prompt = ''
 
@@ -55,6 +54,7 @@ export const buildPrompt = (context: RequestContext): string => {
         .availableFiles(getAvailableFiles())
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
+        .addTools(['think','read_file','action_suggestion','message'])
         .finish()
       break
     case 'outlineAgent':
@@ -65,6 +65,7 @@ export const buildPrompt = (context: RequestContext): string => {
           .availableFiles(getAvailableFiles())
           .providedFiles(getProvidedFiles(context.requestedFiles))
           .fileContents(getFileContents(context.requestedFiles))
+          .addTools(['think','write_file','message'])
           .finish()
       } else {
         prompt = promptly().outlineAgent().userPrompt(getLatestUserMessage()).parameters(context.carriedContext).finish()
@@ -78,6 +79,7 @@ export const buildPrompt = (context: RequestContext): string => {
         .availableFiles(getAvailableFiles())
         .providedFiles(getProvidedFiles(context.requestedFiles))
         .fileContents(getFileContents(context.requestedFiles))
+        .addTools(['think','write_file','message'])
         .finish()
 
       break
