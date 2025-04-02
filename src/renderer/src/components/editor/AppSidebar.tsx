@@ -4,7 +4,10 @@ import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
 import { toast } from 'sonner'
 
 import { saveProject } from '@/lib/services/fileService'
+// Import updateMetaProperty action
 import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects, updateMetaProperty } from '@/lib/store/projectsSlice'
+// Import chat history selector
+import { selectChatHistory, addChatMessage } from '@/lib/store/chatSlice'
 
 import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered, Book } from 'lucide-react'
 import { Square } from 'lucide-react'
@@ -35,7 +38,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { selectAppState } from '@/lib/store/appStateSlice'
-import { addChatMessage } from '@/lib/store/chatSlice'
+// Removed duplicate import of addChatMessage
 
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (
@@ -50,6 +53,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dispatch = useDispatch()
   const projectsState = useSelector(selectProjects)
   const appState = useSelector(selectAppState)
+  // Get current chat history
+  const currentChatHistory = useSelector(selectChatHistory)
   const [alertDialogOpen, setAlertDialogOpen] = React.useState(false)
   const { open: sideBarOpen } = useSidebar()
 
@@ -74,14 +79,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     dispatch(setProjectHasLiveEdits(false))
     dispatch(setActiveProject(null))
     dispatch(setActiveView('intro'))
+    // Consider clearing chat history here if desired when closing a project
+    // dispatch(setChatHistory([]));
   }
 
   // Updated handleSave function
   const handleSave = async () => {
     if (projectsState.activeProject) {
       const currentPath = projectsState.activeProject.projectPath
+
+      // Create the project object to save, including chat history
+      const projectToSave = {
+        ...projectsState.activeProject,
+        chatHistory: currentChatHistory
+      };
+
       // Call the updated saveProject which returns { success, finalPath }
-      const saveResult = await saveProject(projectsState.activeProject)
+      const saveResult = await saveProject(projectToSave) // Pass the object with chat history
 
       if (saveResult.success && saveResult.finalPath) {
         toast.success('Project saved successfully!')

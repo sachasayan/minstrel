@@ -29,19 +29,28 @@ const CREATE_TABLES_SQL = `
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Chat history table
+  CREATE TABLE IF NOT EXISTS chat_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+    sender TEXT NOT NULL,
+    text TEXT NOT NULL,
+    metadata TEXT -- Flexible metadata column as JSON string
+  );
 `
 
 // Initialize a new SQLite database for a project
 export const handleInitSqliteProject = async (_event, filePath: string, metadata: any) => {
   const resolvedPath = resolvePath(filePath)
-
+  let db
   try {
     // Ensure directory exists
     const dir = path.dirname(resolvedPath)
     await fs.mkdir(dir, { recursive: true })
 
     // Create and initialize the database
-    const db = new Database(resolvedPath)
+    db = new Database(resolvedPath)
 
     // Create tables
     db.exec(CREATE_TABLES_SQL)
@@ -56,11 +65,14 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
 
     insertMetadataTransaction(metadata)
 
-    db.close()
     return { success: true }
   } catch (error) {
     console.error(`Failed to initialize SQLite project at ${resolvedPath}:`, error)
     return { success: false, error: String(error) }
+  } finally {
+     if (db && db.open) {
+       db.close()
+     }
   }
 }
 
@@ -80,7 +92,10 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     // Ensure tables exist - crucial for first save/conversion
     db.exec(CREATE_TABLES_SQL)
 
-    // Update metadata
+    // --- Begin Transaction ---
+    db.exec('BEGIN');
+
+    // 1. Update metadata
     const metadata = {
       title: project.title,
       genre: project.genre,
@@ -92,53 +107,59 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       wordCountCurrent: project.wordCountCurrent,
       expertSuggestions: project.expertSuggestions
     }
-
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
-    const insertMetadataTransaction = db.transaction((metadata) => {
-      for (const [key, value] of Object.entries(metadata)) {
-        // Ensure value is stringified, handle potential non-JSON values if necessary
-        insertMetadata.run(key, JSON.stringify(value ?? null))
-      }
-    })
+    for (const [key, value] of Object.entries(metadata)) {
+      insertMetadata.run(key, JSON.stringify(value ?? null))
+    }
 
-    insertMetadataTransaction(metadata)
-
-    // Clear existing files and insert new ones
+    // 2. Clear existing files and insert new ones
     db.exec('DELETE FROM files')
-
     const insertFile = db.prepare(`
       INSERT INTO files (title, content, type, sort_order)
       VALUES (?, ?, ?, ?)
     `)
-
-    const insertFilesTransaction = db.transaction((files) => {
+    if (Array.isArray(project.files)) {
       let sortOrder = 0
-
-      // Insert skeleton if it exists
-      const skeleton = files.find((e) => e.title.indexOf('Skeleton') !== -1)
+      const skeleton = project.files.find((e) => e.title.indexOf('Skeleton') !== -1)
       if (skeleton) {
         insertFile.run(skeleton.title, skeleton.content, 'skeleton', sortOrder++)
       }
-
-      // Insert outline if it exists
-      const outline = files.find((e) => e.title.indexOf('Outline') !== -1)
+      const outline = project.files.find((e) => e.title.indexOf('Outline') !== -1)
       if (outline) {
         insertFile.run(outline.title, outline.content, 'outline', sortOrder++)
       }
-
-      // Insert chapters
-      const chapters = files.filter((e) => e.title.indexOf('Chapter') !== -1)
+      const chapters = project.files.filter((e) => e.title.indexOf('Chapter') !== -1)
       chapters.forEach((chapter) => {
         insertFile.run(chapter.title, chapter.content, 'chapter', sortOrder++)
       })
-    })
+    }
 
-    // Ensure project.files is an array before passing
-    insertFilesTransaction(Array.isArray(project.files) ? project.files : [])
+    // 3. Clear existing chat history and insert new messages
+    db.exec('DELETE FROM chat_history')
+    if (Array.isArray(project.chatHistory)) {
+      const insertChatMessage = db.prepare(`
+        INSERT INTO chat_history (sender, text, timestamp, metadata)
+        VALUES (?, ?, ?, ?)
+      `)
+      for (const message of project.chatHistory) {
+        // Use message timestamp if available, otherwise let DB default (NULL -> CURRENT_TIMESTAMP)
+        const timestamp = message.timestamp || null;
+        // Stringify metadata if it exists, otherwise null
+        const metadataJson = message.metadata ? JSON.stringify(message.metadata) : null;
+        insertChatMessage.run(message.sender, message.text, timestamp, metadataJson)
+      }
+    }
+
+    // --- Commit Transaction ---
+    db.exec('COMMIT');
 
     return { success: true }
   } catch (error) {
     console.error(`Failed to save SQLite project at ${resolvedPath}:`, error)
+    // --- Rollback Transaction on Error ---
+    if (db && db.inTransaction) {
+      db.exec('ROLLBACK');
+    }
     return { success: false, error: String(error) }
   } finally {
     // Ensure database connection is closed even if errors occur
@@ -211,11 +232,15 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
   try {
     // Check if file exists before trying to open
     await fs.access(resolvedPath, fs.constants.R_OK)
-    db = new Database(resolvedPath, { readonly: true, fileMustExist: true })
+    // Open read-write initially to ensure tables can be created if missing
+    db = new Database(resolvedPath, { fileMustExist: true })
+
+    // Ensure tables exist before reading (important for older files)
+    db.exec(CREATE_TABLES_SQL)
 
     // Get metadata
     const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
-    const metadata = metadataRows.reduce((acc, row) => {
+    const projectMetadata = metadataRows.reduce((acc, row) => {
        try {
         acc[row.key] = JSON.parse(row.value)
       } catch (e) {
@@ -238,16 +263,46 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       hasEdits: false // Default to no edits on load
     }))
 
+    // Get chat history
+    const chatHistoryRows = db.prepare(`
+      SELECT id, sender, text, timestamp, metadata
+      FROM chat_history
+      ORDER BY timestamp ASC, id ASC
+    `).all() // Use id as secondary sort for stability
+
+    const chatHistory = chatHistoryRows.map(row => {
+      let parsedMetadata = null;
+      if (row.metadata) {
+        try {
+          parsedMetadata = JSON.parse(row.metadata);
+        } catch (e) {
+          console.warn(`Failed to parse chat metadata for message id ${row.id} in project ${filePath}:`, e);
+          // Keep metadata as original string or null if parsing fails
+          parsedMetadata = row.metadata;
+        }
+      }
+      return {
+        // id: row.id, // Include id if needed in ChatMessage type
+        sender: row.sender,
+        text: row.text,
+        timestamp: row.timestamp,
+        metadata: parsedMetadata
+      };
+    });
+
+
     return {
-      ...metadata,
+      ...projectMetadata,
       projectPath: filePath,
       files: projectFiles,
+      chatHistory: chatHistory, // Include loaded chat history
       knowledgeGraph: null // Assuming this is still null on load
     }
   } catch (error) {
     console.error(`Failed to load SQLite project from ${resolvedPath}:`, error)
     throw new Error('Could not load project details.') // Still throw for full load failure
   } finally {
+    // Close the potentially read-write connection
     if (db && db.open) {
       db.close()
     }

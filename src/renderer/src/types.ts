@@ -21,6 +21,7 @@ export interface Project extends ProjectFragment {
   writingSample: string
   expertSuggestions: ExpertSuggestion[]
   knowledgeGraph: KnowledgeGraph | null
+  chatHistory?: ChatMessage[] // ADDED chatHistory field
 }
 export interface ProjectFragment {
   projectPath: string
@@ -51,6 +52,14 @@ export interface ExpertSuggestion {
   rating: number
   critique: string
 }
+
+export interface ChatMessage { // Assuming ChatMessage interface exists
+  sender: string;
+  text: string;
+  timestamp?: string; // Optional timestamp, adjust if needed
+  metadata?: any;     // Optional metadata, adjust type if needed
+}
+
 // interface SceneOutline {
 //   description: string
 // }
