@@ -1,15 +1,25 @@
-import { dialog, ipcMain } from 'electron'
+import { dialog, ipcMain, OpenDialogOptions } from 'electron' // Import OpenDialogOptions
 import * as os from 'os'
 import * as fs from 'fs/promises'
 
 const homedir = os.homedir()
 
-export const handleReadDirectory = async (_event, dirPath) => {
-  if (typeof dirPath !== 'string') {
-    console.error('dirPath is not a string:', dirPath)
-    return []
+// Helper function to resolve paths, handling '~'
+const resolvePath = (filePath: string): string => {
+  if (typeof filePath !== 'string') {
+    console.error('Invalid path provided:', filePath)
+    // Return a value or throw an error as appropriate for your error handling strategy
+    // For now, returning an empty string to avoid crashing, but this should be handled robustly
+    return ''
   }
-  const resolvedPath = dirPath.replace('~', homedir) // Resolve "~" to user's home directory
+  return filePath.replace('~', homedir)
+}
+
+
+export const handleReadDirectory = async (_event, dirPath) => {
+  const resolvedPath = resolvePath(dirPath)
+  if (!resolvedPath) return [] // Handle invalid path from resolvePath
+
   try {
     const entries = await fs.readdir(resolvedPath, { withFileTypes: true })
     return entries.map((entry) => ({
@@ -23,7 +33,9 @@ export const handleReadDirectory = async (_event, dirPath) => {
 }
 
 export const handleReadFile = async (_event, filePath) => {
-  const resolvedPath = filePath.replace('~', homedir) // Resolve "~" to user's home directory
+  const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath) return '' // Handle invalid path
+
   try {
     const content = await fs.readFile(resolvedPath, 'utf-8')
     return content
@@ -34,8 +46,10 @@ export const handleReadFile = async (_event, filePath) => {
 }
 
 export const handleWriteFile = async (_event, filePath, content) => {
-  const resolvedPath = filePath.replace('~', homedir) // Resolve "~" to user's home directory
-  console.log('resolvedPath', resolvedPath)
+  const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' } // Handle invalid path
+
+  console.log('Writing file to:', resolvedPath)
   try {
     await fs.writeFile(resolvedPath, content, 'utf-8')
     return { success: true }
@@ -46,19 +60,26 @@ export const handleWriteFile = async (_event, filePath, content) => {
 }
 
 export const handleSelectDirectory = async (_event, operation) => {
-  const properties = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory']
+  // Define the correct type for properties based on OpenDialogOptions['properties']
+  const properties: OpenDialogOptions['properties'] = operation === 'export'
+    ? ['openDirectory', 'createDirectory']
+    : ['openDirectory']
+
   const result = await dialog.showOpenDialog({
-    properties: properties
+    properties: properties // Now correctly typed
   })
   if (result.canceled) {
     return null
   } else {
-    return result.filePaths[0]
+    // Ensure filePaths exists and has elements before accessing
+    return result.filePaths && result.filePaths.length > 0 ? result.filePaths[0] : null
   }
 }
 
 export const handleMakeDirectory = async (_event, dirPath) => {
-  const resolvedPath = dirPath.replace('~', homedir) // Resolve "~"
+  const resolvedPath = resolvePath(dirPath)
+  if (!resolvedPath) return { success: false, error: 'Invalid directory path provided.' } // Handle invalid path
+
   console.log('Making directory at:', resolvedPath)
   try {
     await fs.mkdir(resolvedPath, { recursive: true })
@@ -69,10 +90,32 @@ export const handleMakeDirectory = async (_event, dirPath) => {
   }
 }
 
+// New handler for deleting a file
+export const handleDeleteFile = async (_event, filePath) => {
+  const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' } // Handle invalid path
+
+  console.log('Deleting file at:', resolvedPath)
+  try {
+    await fs.unlink(resolvedPath)
+    console.log('File deleted successfully:', resolvedPath)
+    return { success: true }
+  } catch (error: unknown) {
+    console.error('Failed to delete file:', error)
+    // Check for specific errors like file not found (ENOENT) if needed
+    // if (error.code === 'ENOENT') {
+    //   return { success: true }; // Or false depending on desired behavior if file doesn't exist
+    // }
+    return { success: false, error: String(error) }
+  }
+}
+
+
 export const registerFileOpsHandlers = () => {
   ipcMain.handle('read-directory', handleReadDirectory)
   ipcMain.handle('read-file', handleReadFile)
   ipcMain.handle('write-file', handleWriteFile)
   ipcMain.handle('make-directory', handleMakeDirectory)
   ipcMain.handle('select-directory', handleSelectDirectory)
+  ipcMain.handle('delete-file', handleDeleteFile) // Register the new handler
 }

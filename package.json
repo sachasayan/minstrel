@@ -57,6 +57,7 @@
     "@react-three/drei": "^10.0.0-rc.0",
     "@react-three/fiber": "^9.0.0-rc.7",
     "@reduxjs/toolkit": "^2.5.1",
+    "better-sqlite3": "^11.9.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",

@@ -4,7 +4,7 @@ import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
 import { toast } from 'sonner'
 
 import { saveProject } from '@/lib/services/fileService'
-import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects } from '@/lib/store/projectsSlice'
+import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects, updateMetaProperty } from '@/lib/store/projectsSlice'
 
 import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered, Book } from 'lucide-react'
 import { Square } from 'lucide-react'
@@ -75,36 +75,54 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     dispatch(setActiveProject(null))
     dispatch(setActiveView('intro'))
   }
+
+  // Updated handleSave function
   const handleSave = async () => {
     if (projectsState.activeProject) {
+      const currentPath = projectsState.activeProject.projectPath
+      // Call the updated saveProject which returns { success, finalPath }
       const saveResult = await saveProject(projectsState.activeProject)
-      if (saveResult) {
+
+      if (saveResult.success && saveResult.finalPath) {
         toast.success('Project saved successfully!')
-        dispatch(setAllFilesAsSaved())
-        return true
+        dispatch(setAllFilesAsSaved()) // Clear edit flags
+
+        // Check if the path changed (due to .md -> .mns conversion)
+        if (currentPath !== saveResult.finalPath) {
+          console.log(`Project path updated from ${currentPath} to ${saveResult.finalPath}`)
+          // Dispatch action to update the project path in Redux state
+          dispatch(updateMetaProperty({ property: 'projectPath', value: saveResult.finalPath }))
+          // Optional: Add a specific toast for conversion
+          toast.info('Project format updated to the latest version.')
+        }
+        return true // Indicate success
       } else {
-        toast.error(`Failed to save project: ${saveResult}`)
-        return false
+        // Use a more generic error message or potentially use saveResult.error if available
+        toast.error(`Failed to save project.`)
+        console.error('Save project failed:', saveResult) // Log details if needed
+        return false // Indicate failure
       }
-      dispatch(setProjectHasLiveEdits(false))
-      return true
     }
-    return false
+    // No active project to save
+    console.warn('handleSave called with no active project.')
+    return false // Indicate failure
   }
+
   const saveAndClose = async () => {
     const result = await handleSave()
     if (result) {
       handleClose()
     }
-    return false
+    // saveAndClose doesn't need to return a value, or return false if save failed
   }
   const handleCloseSafe = async () => {
     if (projectsState.projectHasLiveEdits) {
       setAlertDialogOpen(true)
-      return false
+      // Don't return false here, let the dialog handle the flow
+    } else {
+      handleClose()
+      // Don't need to return true here
     }
-    handleClose()
-    return true
   }
 
   const structureItems = [
@@ -190,12 +208,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {structureItems
                   .map((item, i) => {
+                    // Ensure activeProject and files exist before finding
+                    const file = projectsState.activeProject?.files?.find((e) => e.title.includes(item.key));
+                    const isActive = appState.activeView === item.activeView && (!!item.activeFile ? (appState.activeFile?.includes(item.activeFile)) : true);
+                    const isPending = projectsState.pendingFiles?.includes(file?.title || '');
+                    const hasEdits = file?.hasEdits;
+
                     return (
                       <SidebarMenuItem key={i}>
-                        <SidebarMenuButton asChild isActive={appState.activeView === item.activeView && (!!item.activeFile ? (appState.activeFile?.includes(item.activeFile)) : true)}>
+                        <SidebarMenuButton asChild isActive={isActive}>
                           <a onClick={() => handleUniselect(item.key)}>
-                            {projectsState.pendingFiles?.includes(projectsState.activeProject?.files?.find((e) => e.title.includes(item.key))?.title || '') ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
-                            {projectsState.activeProject?.files?.find((e) => e.title.includes(item.key))?.hasEdits && <Diff className="float-right text-orange-500" />}
+                            {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
+                            {hasEdits && <Diff className="float-right text-orange-500" />}
                           </a>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -233,11 +257,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {projectsState.activeProject?.files
                     ?.filter((item) => item.title.includes('Chapter'))
                     .map((item, i) => {
+                      const isActive = appState.activeView === 'project/editor' && appState.activeFile === item.title;
+                      const isPending = projectsState.pendingFiles?.includes(item.title);
                       return (
                         <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild isActive={appState.activeView === 'project/editor' && appState.activeFile === item.title}>
+                          <SidebarMenuButton asChild isActive={isActive}>
                             <a onClick={() => handleFileSelect(item.title)} className={`flex items-center`}>
-                              {projectsState.pendingFiles?.includes(item.title) ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : !!sideBarOpen ? <Book /> : <ChapterIcon chapterNumber={i + 1} />}
+                              {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : !!sideBarOpen ? <Book /> : <ChapterIcon chapterNumber={i + 1} />}
                               <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>

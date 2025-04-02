@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.icns?asset'
 import { registerFileOpsHandlers } from './fileOps'
 import { registerSettingsHandlers } from './settingsManager'
+import { registerSqliteOpsHandlers } from './sqliteOps'
 
 function createWindow(): void {
   // Create the browser window.
@@ -72,6 +73,7 @@ app.whenReady().then(() => {
 
   registerFileOpsHandlers()
   registerSettingsHandlers()
+  registerSqliteOpsHandlers()
 
   createWindow()
 
