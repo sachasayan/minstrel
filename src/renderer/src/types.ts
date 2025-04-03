@@ -21,7 +21,9 @@ export interface Project extends ProjectFragment {
   writingSample: string
   expertSuggestions: ExpertSuggestion[]
   knowledgeGraph: KnowledgeGraph | null
-  chatHistory?: ChatMessage[] // ADDED chatHistory field
+  chatHistory?: ChatMessage[]
+  coverImageBase64?: string | null // Base64 encoded image data
+  // coverImageMimeType is inherited from ProjectFragment and now allows null
 }
 export interface ProjectFragment {
   projectPath: string
@@ -29,7 +31,8 @@ export interface ProjectFragment {
   genre: Genre
   wordCountTarget: number
   wordCountCurrent: number
-  cover?: string
+  cover?: string // This will hold the displayable data URL
+  coverImageMimeType?: string | null // Mime type for the cover image (allow null)
 }
 
 export interface ProjectFile {
@@ -53,11 +56,11 @@ export interface ExpertSuggestion {
   critique: string
 }
 
-export interface ChatMessage { // Assuming ChatMessage interface exists
-  sender: string;
+export interface ChatMessage {
+  sender: string; // Keep as string to allow 'User', 'Gemini', agent names etc.
   text: string;
-  timestamp?: string; // Optional timestamp, adjust if needed
-  metadata?: any;     // Optional metadata, adjust type if needed
+  timestamp?: string; // Optional timestamp from DB
+  metadata?: any;     // Optional metadata from DB
 }
 
 // interface SceneOutline {

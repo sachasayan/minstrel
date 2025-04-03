@@ -55,15 +55,18 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
     // Create tables
     db.exec(CREATE_TABLES_SQL)
 
-    // Insert metadata
+    // Insert metadata (excluding potentially large base64 data during init)
+    const initialMetadata = { ...metadata };
+    delete initialMetadata.coverImageBase64; // Don't save base64 on initial create
+
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
-    const insertMetadataTransaction = db.transaction((metadata) => {
-      for (const [key, value] of Object.entries(metadata)) {
+    const insertMetadataTransaction = db.transaction((meta) => {
+      for (const [key, value] of Object.entries(meta)) {
         insertMetadata.run(key, JSON.stringify(value))
       }
     })
 
-    insertMetadataTransaction(metadata)
+    insertMetadataTransaction(initialMetadata)
 
     return { success: true }
   } catch (error) {
@@ -95,8 +98,8 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     // --- Begin Transaction ---
     db.exec('BEGIN');
 
-    // 1. Update metadata
-    const metadata = {
+    // 1. Update metadata (including cover image data)
+    const metadataToSave = {
       title: project.title,
       genre: project.genre,
       summary: project.summary,
@@ -105,11 +108,20 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       writingSample: project.writingSample,
       wordCountTarget: project.wordCountTarget,
       wordCountCurrent: project.wordCountCurrent,
-      expertSuggestions: project.expertSuggestions
+      expertSuggestions: project.expertSuggestions,
+      coverImageBase64: project.coverImageBase64, // Include base64 data
+      coverImageMimeType: project.coverImageMimeType // Include mime type
     }
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
-    for (const [key, value] of Object.entries(metadata)) {
-      insertMetadata.run(key, JSON.stringify(value ?? null))
+    // Clear existing metadata first to remove potentially deleted keys (like old cover data)
+    db.exec('DELETE FROM metadata');
+    for (const [key, value] of Object.entries(metadataToSave)) {
+        // Only save if value is not undefined
+        if (value !== undefined) {
+             // Store base64 directly as string, others as JSON
+             const valueToStore = (key === 'coverImageBase64' && value !== null) ? value : JSON.stringify(value ?? null);
+             insertMetadata.run(key, valueToStore)
+        }
     }
 
     // 2. Clear existing files and insert new ones
@@ -170,6 +182,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
 }
 
 // Load project metadata from SQLite database
+// This function now returns the full metadata object needed by the frontend service
 export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
   const resolvedPath = resolvePath(filePath)
   let db
@@ -178,21 +191,30 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
     await fs.access(resolvedPath, fs.constants.R_OK) // Check read access
     db = new Database(resolvedPath, { readonly: true, fileMustExist: true }) // Ensure file exists
 
-    // Get metadata
+    // Get all metadata
     const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
     if (!metadataRows || metadataRows.length === 0) {
-      // Handle case where metadata table is empty or query fails unexpectedly
       console.warn(`No metadata found for project ${filePath}`)
-      // Depending on requirements, might return null or a default structure
-      // For now, let it proceed, but check for essential keys later
+      return null; // Return null if no metadata rows found
     }
 
+    // Reduce metadata rows into a single object
+    // Parse JSON values where appropriate, keep base64 as string
     const metadata = metadataRows.reduce((acc, row) => {
       try {
-        acc[row.key] = JSON.parse(row.value)
+        if (row.key === 'coverImageBase64') {
+          acc[row.key] = row.value; // Keep base64 as string
+        } else {
+          // Attempt to parse other values as JSON
+          try {
+              acc[row.key] = JSON.parse(row.value);
+          } catch {
+              acc[row.key] = row.value; // Keep as string if JSON parse fails
+          }
+        }
       } catch (e) {
-        console.warn(`Failed to parse metadata key '${row.key}' for project ${filePath}:`, e)
-        acc[row.key] = row.value // Keep as string if parsing fails
+        console.warn(`Error processing metadata key '${row.key}' for project ${filePath}:`, e)
+        acc[row.key] = row.value // Keep raw value on error
       }
       return acc
     }, {})
@@ -200,20 +222,12 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
     // Check for essential metadata keys needed for a fragment
     if (!metadata.title) {
        console.warn(`Essential metadata 'title' missing for project ${filePath}`)
-       // Cannot form a valid fragment without a title
        return null; // Return null if essential data is missing
     }
 
+    // Return the full metadata object; frontend service will construct the fragment
+    return metadata;
 
-    return {
-      title: metadata.title,
-      // Provide defaults if optional fields are missing
-      wordCountCurrent: metadata.wordCountCurrent ?? 0,
-      wordCountTarget: metadata.wordCountTarget ?? 0,
-      projectPath: filePath,
-      genre: metadata.genre || 'science-fiction',
-      cover: ''
-    }
   } catch (error) {
     // Log the error but return null instead of throwing
     console.error(`Failed to get SQLite project metadata for ${resolvedPath}:`, error)
@@ -238,11 +252,16 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
     // Ensure tables exist before reading (important for older files)
     db.exec(CREATE_TABLES_SQL)
 
-    // Get metadata
+    // Get metadata (including base64 data)
     const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
     const projectMetadata = metadataRows.reduce((acc, row) => {
        try {
-        acc[row.key] = JSON.parse(row.value)
+         // Parse everything except base64 string
+         if (row.key !== 'coverImageBase64') {
+            acc[row.key] = JSON.parse(row.value)
+         } else {
+            acc[row.key] = row.value; // Keep base64 as string
+         }
       } catch (e) {
         console.warn(`Failed to parse metadata key '${row.key}' for project ${filePath}:`, e)
         acc[row.key] = row.value // Keep as string if parsing fails
@@ -292,7 +311,7 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
 
 
     return {
-      ...projectMetadata,
+      ...projectMetadata, // Includes coverImageBase64 and coverImageMimeType
       projectPath: filePath,
       files: projectFiles,
       chatHistory: chatHistory, // Include loaded chat history

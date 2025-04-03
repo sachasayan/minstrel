@@ -1,7 +1,7 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 import {
-  fetchSqliteProjects,
-  getSqliteProjectFragmentMeta, // This now returns Promise<ProjectFragment | null>
+  // Removed unused fetchSqliteProjects
+  // Removed unused getSqliteProjectFragmentMeta as getSqliteMetaFromService
   loadSqliteProject,
   saveSqliteProject,
   initSqliteProject
@@ -24,57 +24,108 @@ export const isSqliteFormat = (path: string): boolean => {
 
 /**
  * Gets project fragment metadata from a project file (.md or .mns)
+ * Constructs the cover data URL if image data is present.
  * @param projectPath Path to the project file
  * @returns Promise resolving to project fragment metadata or null if loading/parsing fails
  */
 export const getProjectFragmentMeta = async (projectPath: string): Promise<ProjectFragment | null> => {
   // Route to appropriate handler based on file extension
   if (isSqliteFormat(projectPath)) {
-    // getSqliteProjectFragmentMeta now correctly returns ProjectFragment | null
-    return await getSqliteProjectFragmentMeta(projectPath)
-  }
+    // Fetch the full metadata object from the backend (includes base64 potentially)
+    // This IPC call now returns the full metadata object or null
+    const fullMetadata = await window.electron.ipcRenderer.invoke('get-sqlite-project-meta', projectPath)
 
-  // Original Markdown format handler
-  try {
-    const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectPath}`)
-    // Added null check for fileContent match result
-    const metadataMatch = fileContent?.match(/----Metadata\.json([\s\S]+?)----/i) // Optional chaining for fileContent
-    if (!metadataMatch || !metadataMatch[1]) {
-      console.warn(`Metadata section not found in Markdown file: ${projectPath}`)
-      return null // Return null if metadata not found
-    }
-    const metadata = JSON.parse(metadataMatch[1])
-
-    // Basic check for essential data
-    if (!metadata?.title) {
-        console.warn(`Essential metadata 'title' missing in Markdown file: ${projectPath}`)
-        return null; // Return null if title is missing
+    if (!fullMetadata || !fullMetadata.title) {
+        console.warn(`Failed to load or essential metadata missing for SQLite project: ${projectPath}`)
+        return null;
     }
 
+    // Construct the cover data URL if possible
+    let coverDataUrl = '';
+    // Use the retrieved metadata directly
+    if (fullMetadata.coverImageBase64 && fullMetadata.coverImageMimeType) {
+        coverDataUrl = `data:${fullMetadata.coverImageMimeType};base64,${fullMetadata.coverImageBase64}`;
+    }
+
+    // Construct the ProjectFragment
     return {
-      title: metadata.title,
-      wordCountCurrent: metadata.wordCountCurrent ?? 0, // Default if missing
-      wordCountTarget: metadata.wordCountTarget ?? 0, // Default if missing
-      projectPath: projectPath,
-      genre: metadata?.genre || 'science-fiction',
-      cover: ''
-    } as ProjectFragment
-  } catch (e) {
-    console.error(`Error reading or parsing metadata for ${projectPath}:`, e)
-    return null // Return null on error
+        title: fullMetadata.title,
+        wordCountCurrent: fullMetadata.wordCountCurrent ?? 0,
+        wordCountTarget: fullMetadata.wordCountTarget ?? 0,
+        projectPath: projectPath,
+        genre: fullMetadata.genre || 'science-fiction',
+        cover: coverDataUrl, // Assign the generated data URL or empty string
+        coverImageMimeType: fullMetadata.coverImageMimeType ?? null
+    };
+
+  } else {
+      // Original Markdown format handler (doesn't support embedded covers)
+      try {
+        const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectPath}`)
+        const metadataMatch = fileContent?.match(/----Metadata\.json([\s\S]+?)----/i)
+        if (!metadataMatch || !metadataMatch[1]) {
+          console.warn(`Metadata section not found in Markdown file: ${projectPath}`)
+          return null
+        }
+        const metadata = JSON.parse(metadataMatch[1])
+
+        if (!metadata?.title) {
+            console.warn(`Essential metadata 'title' missing in Markdown file: ${projectPath}`)
+            return null;
+        }
+
+        return {
+          title: metadata.title,
+          wordCountCurrent: metadata.wordCountCurrent ?? 0,
+          wordCountTarget: metadata.wordCountTarget ?? 0,
+          projectPath: projectPath,
+          genre: metadata?.genre || 'science-fiction',
+          cover: '', // No cover support for MD files here
+          coverImageMimeType: null
+        } as ProjectFragment // Cast needed as we add coverImageMimeType explicitly
+      } catch (e) {
+        console.error(`Error reading or parsing metadata for MD file ${projectPath}:`, e)
+        return null
+      }
   }
 }
 
 export const fetchProjects = async (rootDir: string | null): Promise<ProjectFragment[]> => {
   if (!!rootDir) {
     try {
-      // Fetch both Markdown and SQLite projects
-      // Both helper functions now return only valid ProjectFragment[]
-      const markdownProjects = await fetchMarkdownProjects(rootDir)
-      const sqliteProjects = await fetchSqliteProjects(rootDir)
+      // Fetch directory items once
+      const directoryItems = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
+      if (!Array.isArray(directoryItems)) {
+          console.error('Read-directory did not return an array:', directoryItems)
+          return []
+      }
 
-      // Combine the results
-      return [...markdownProjects, ...sqliteProjects]
+      // Get list of all potential project files
+      const filesList = directoryItems
+          .filter((item) => item && item.type === 'file' && (item.name.endsWith('.md') || item.name.endsWith('.mns')))
+          .map((item) => item.name)
+
+      // Process all files concurrently
+      const results = await Promise.allSettled(
+          filesList.map((file) => getProjectFragmentMeta(`${rootDir}/${file}`))
+      );
+
+      // Filter out failed promises and null results
+      const projectsList = results
+          .filter(result => result.status === 'fulfilled' && result.value !== null)
+          .map(result => (result as PromiseFulfilledResult<ProjectFragment>).value);
+
+       // Log errors for rejected promises or null values
+       results.forEach((result, index) => {
+         if (result.status === 'rejected') {
+           console.error(`Failed to process project fragment for ${filesList[index]}:`, result.reason);
+         } else if (result.status === 'fulfilled' && result.value === null) {
+            console.warn(`Skipped loading project fragment for ${filesList[index]} due to missing/invalid metadata or load error.`);
+         }
+       });
+
+      return projectsList;
+
     } catch (error) {
         console.error("Failed to fetch projects:", error);
         return []; // Return empty array on error
@@ -83,48 +134,12 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
   return []
 }
 
-// Helper function to fetch only Markdown projects
-const fetchMarkdownProjects = async (rootDir: string): Promise<ProjectFragment[]> => {
-  try {
-    const directoryItems = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
-     if (!Array.isArray(directoryItems)) {
-          console.error('Read-directory did not return an array:', directoryItems)
-          return []
-      }
-
-    const filesList = directoryItems
-      .filter((item) => item && item.type === 'file' && item.name.endsWith('.md'))
-      .map((item) => item.name)
-
-    // Use Promise.allSettled to handle potential errors/nulls in getProjectFragmentMeta
-    const results = await Promise.allSettled(
-      filesList.map((file) => getProjectFragmentMeta(`${rootDir}/${file}`)) // This now returns ProjectFragment | null
-    )
-
-    // Filter out rejected promises AND null results from fulfilled promises, then extract values
-    const projectsList = results
-      .filter(result => result.status === 'fulfilled' && result.value !== null)
-      .map(result => (result as PromiseFulfilledResult<ProjectFragment>).value);
-
-    // Log errors for rejected promises or null values
-    results.forEach((result, index) => {
-      if (result.status === 'rejected') {
-        console.error(`Failed to process Markdown project fragment for ${filesList[index]}:`, result.reason);
-      } else if (result.status === 'fulfilled' && result.value === null) {
-         console.warn(`Skipped loading Markdown project fragment for ${filesList[index]} due to missing/invalid metadata.`);
-      }
-    });
-
-    return projectsList
-  } catch (error) {
-    console.error("Failed to fetch Markdown projects:", error);
-    return []; // Return empty array on error
-  }
-}
+// Removed fetchMarkdownProjects helper as fetchProjects now handles both
 
 export const fetchProjectDetails = async (projectFragment: ProjectFragment): Promise<Project> => {
   // Route to appropriate handler based on file extension
   if (isSqliteFormat(projectFragment.projectPath)) {
+    // loadSqliteProject returns the full Project object from backend
     return await loadSqliteProject(projectFragment)
   }
 
@@ -142,7 +157,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
     const metadata = JSON.parse(metadataMatch[1])
 
     const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/ig)].map(m => ({ name: m[2], content: m[3].trim() }))
-    console.log(projectFiles)
+    // console.log(projectFiles) // Reduced logging
     const chapterList = projectFiles
       .map((item) => {
         return {
@@ -151,17 +166,26 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
           hasEdits: false
         } as ProjectFile
       })
-    console.log(chapterList)
+    // console.log(chapterList) // Reduced logging
 
+    // Construct the Project object for MD files (no cover/chat support here)
     return {
       ...metadata,
       projectPath: projectFragment.projectPath,
       files: chapterList,
-      knowledgeGraph: null
+      knowledgeGraph: null,
+      chatHistory: [], // Default to empty chat history for MD
+      coverImageBase64: null,
+      coverImageMimeType: null,
+      // Ensure all ProjectFragment fields are present
+      title: metadata.title,
+      genre: metadata.genre || 'science-fiction',
+      wordCountTarget: metadata.wordCountTarget ?? 0,
+      wordCountCurrent: metadata.wordCountCurrent ?? 0,
+      cover: '', // No cover for MD
     } as Project
   } catch (error) {
     console.error(`Failed to fetch project details for ${projectFragment.projectPath}:`, error)
-    // Re-throw or handle as appropriate, maybe return a default Project structure or null
     throw new Error(`Could not load project details for ${projectFragment.title}.`)
   }
 }
@@ -195,6 +219,7 @@ export const saveProject = async (project: Project): Promise<{ success: boolean,
     // Handle conversion from .md to .mns
     console.log('Converting Markdown project to SQLite:', originalPath)
     const newPath = originalPath.replace(/\.md$/i, '.mns')
+    // Ensure the project object being saved has the *new* path
     const projectToSave = {
       ...project,
       projectPath: newPath // Update path for saving

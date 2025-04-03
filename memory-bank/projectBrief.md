@@ -45,8 +45,8 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 - The model must output ONLY within XML tags at the top level of its response.
 - The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton, Outline, and Chapter-1
 - The model must always begin with a <think> section, briefly explaining what it understands to be the current intent. This is hidden from the customer, but used for debugging.
-- If the model thinks it is being asked to write to a file, it must first <read_file> for that file if it hasn't been provided.
-- The model can use tools like <write_file> to perform actions via the service.
+- If the model thinks it is being asked to write to a file, it must first <read_file> for that file if it hasn't been provided. (Note: `<read_file>` now refers to reading data from the active project state).
+- The model can use tools like <write_file> to perform actions via the service. (Note: `<write_file>` now translates to updating data in the active project state).
 - The model must always end with a <message> section, briefly explaining the actions it has performed to the customer in first person, such as: "I've written Chapter 3."
 
 ---
@@ -54,7 +54,7 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 # RULES FOR THE SERVICE
 
 - The service communicates to the model using a mixture of markdown and xml.
-- The service never reads or writes to the filesystem. All 'reading' and 'writing' for this feature happens within the redux store. File contents are stored in projectSlice.current
+- The service layer for the agentic feature primarily interacts with the active project data held in the Redux store (`projectsSlice`). Persistence (saving/loading project data including files and chat history) is handled via IPC calls to the main process, which interacts with the project's `.mns` (SQLite) file.
 - The service always provides the base prompt to the model.
 - The service can process XML tags from the model using regex.
 - The service keeps a running history of the last twenty messages in the Chat slice of the Redux store, which contains a chatHistory array. (The reducer can be responsible for trimming history when it is full.)
@@ -66,11 +66,11 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 # CONTEXT
 
 - For each request, the service should provide the model with appropriate context.
-- Context consists of the full content of the files relevant to the current file.
-- When writing the skeleton, this means the story parameters by the customer.
+- Context consists of the relevant content (Skeleton, Outline, Chapters, etc.) from the currently loaded project data.
+- When writing the skeleton, this means the story parameters provided by the customer.
 - When writing the outline, this means the contents of the skeleton.
 - When writing a chapter, this means the contents of the Outline file and the preceding Chapter.
-- When writing a critique, this means every chapter in novel.
+- When writing a critique, this means every chapter in the novel.
 
 ---
 
@@ -86,7 +86,7 @@ For example:
 <write_file>
 	<file_name>Chapter-1</file_name>
 	<content>The content of a chapter would go here.</content>
-</write_chapter>
+</write_file> <!-- Note: This now updates data in the active project state, persisted via SQLite -->
 ```
 
 The model must always adhere to this format for tool use. It must never deviate.
@@ -104,23 +104,23 @@ What follows is a sample flow between customer, service, and model. For brevity,
 (Service sends API request to model:)
 
 {BASE_PROMPT}
-{AVAILABLE_FILES}
+{AVAILABLE_FILES} <!-- Represents available data sections like Outline, Chapter-2 etc. -->
 {MESSAGE_FROM_USER}
 
 (Model receives prompt from service, and provides a response:)
 
-<think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant file tree.</think>
+<think>It sounds like the customer wants me to edit Chapter 3 and 4, but I don't have context. I'll request the relevant data sections.</think>
 <read_file>Outline</read_file>
 <read_file>Chapter-2</read_file>
 <read_file>Chapter-3</read_file>
 <read_file>Chapter-4</read_file>
 
-<message>I'm looking at the files.</message>
+<message>I'm looking at the project data.</message>
 
-(Service processes model response, and then provides a response to the model with the context — Outline, Chapter 2, Chapter 3, and Chapter 4: )
+(Service processes model response, retrieves data from Redux state, and then provides a response to the model with the context — Outline, Chapter 2, Chapter 3, and Chapter 4 content: )
 
 {BASE_PROMPT}
-{FILE_CONTENTS}
+{FILE_CONTENTS} <!-- Represents the actual content of requested sections -->
 {MESSAGE_FROM_USER}
 
 (Model now has context, and provides a response:)
