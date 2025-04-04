@@ -26,15 +26,13 @@ Note: We may need two sides to the service — an encoder side which receives i
 
 We need to design and implement a feature which will allow the customer to write a novel with help from an AI model. All tasks involving customer interaction are handled through the chat interface, which sends messages to the model with the service as an intermediary. The model then sends a message back with actions, to be processed by the service.
 
-The normal process for writing a novel is as follows:
+The normal process for writing a novel is now as follows:
 
-(1) First the app sends story parameters (genre, title, etc.) to the model, which translates those patterns into a story skeleton consisting of a brief synopsis, characters, chapters, things to remember, etc. (Skeleton)
+(1) First the app sends story parameters (genre, title, etc.) to the model, which generates an outline (Outline), consisting of full character descriptions, full environment descriptions, detailed per-scene plans for each chapter, and key objects.
 
-(2) The customer is allowed to edit the Skeleton to their leisure, then sends the Skeleton to the model, which generates an outline (Outline), consisting of full character descriptions, full environment descriptions, detailed per-scene plans for each chapter, and key objects.
+(2) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter-1, Chapter-2, etc.)
 
-(3) The customer is allowed to edit the Outline. The model then uses the Outline to create each chapter. (Chapter-1, Chapter-2, etc.)
-
-(4) A message and critique is then produced. (Critique)
+(3) A message and critique is then produced. (Critique)
 
 Any above step can be repeated. For instance, the customer may ask the model to re-write a previous chapter, or make adjustments to the outline, or regenerate the critique.
 
@@ -43,7 +41,7 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 # RULES FOR THE MODEL
 
 - The model must output ONLY within XML tags at the top level of its response.
-- The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Skeleton, Outline, and Chapter-1
+- The model must use Markdown (within the relevant xml tag) as its syntax when writing files such as Outline, and Chapter-1.
 - The model must always begin with a <think> section, briefly explaining what it understands to be the current intent. This is hidden from the customer, but used for debugging.
 - If the model thinks it is being asked to write to a file, it must first <read_file> for that file if it hasn't been provided. (Note: `<read_file>` now refers to reading data from the active project state).
 - The model can use tools like <write_file> to perform actions via the service. (Note: `<write_file>` now translates to updating data in the active project state).
@@ -66,9 +64,8 @@ Any above step can be repeated. For instance, the customer may ask the model to 
 # CONTEXT
 
 - For each request, the service should provide the model with appropriate context.
-- Context consists of the relevant content (Skeleton, Outline, Chapters, etc.) from the currently loaded project data.
-- When writing the skeleton, this means the story parameters provided by the customer.
-- When writing the outline, this means the contents of the skeleton.
+- Context consists of the relevant content (Outline, Chapters, etc.) from the currently loaded project data.
+- When writing the initial outline, this means the story parameters provided by the customer.
 - When writing a chapter, this means the contents of the Outline file and the preceding Chapter.
 - When writing a critique, this means every chapter in the novel.
 

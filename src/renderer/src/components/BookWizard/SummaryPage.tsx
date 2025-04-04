@@ -4,7 +4,7 @@ import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
-import { generateSkeleton } from '@/lib/services/chatService'
+import { generateOutlineFromParams } from '@/lib/services/chatService' // Updated import
 import { setActiveProject } from '@/lib/store/projectsSlice'
 import { useWizard, genres, sanitizeFilename, WizardNavigation } from '@/components/BookWizard/index'
 
@@ -31,9 +31,11 @@ const SummaryPage = () => {
         wordCountTarget: 0,
         expertSuggestions: [],
         knowledgeGraph: null
+        // chatHistory and cover fields will be populated later or default
       })
     )
-    generateSkeleton(formData)
+    // Call the renamed function to generate the initial outline
+    generateOutlineFromParams(formData)
     setRequestPending(true)
   }
 
@@ -47,14 +49,14 @@ const SummaryPage = () => {
       </DialogHeader>
       <div className="flex-grow flex flex-col items-center justify-center p-8 gap-4">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story.</h2>
+          <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story outline.</h2> {/* Updated text */}
           <p className="text-sm text-gray-500">This&apos;ll take a few seconds. Just hang tight.</p>
         </div>
         <div className="flex flex-row items-center justify-center">
           {!requestPending && <Button onClick={handleDream}>I&apos;m ready!</Button>}
           {!!requestPending && (
             <Button disabled>
-              Creating your story...
+              Generating initial outline... {/* Updated text */}
               <div className="flex items-center justify-center p-2">
                 <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1"></div>
                 <div className="animate-ping h-2 w-2 bg-gray-400 rounded-full mx-1 delay-75"></div>

@@ -7,7 +7,7 @@ This project, Minstrel, aims to create a collaborative writing experience betwee
 ## Problems It Solves
 
 - **Writer's Block:** The AI model assists in generating ideas, overcoming creative hurdles, and providing fresh perspectives.
-- **Structure and Planning:** The system guides the user through a structured process of skeleton creation, outlining, and chapter writing, making the daunting task of writing a novel more manageable.
+- **Structure and Planning:** The system guides the user through a structured process of outlining, and chapter writing, making the daunting task of writing a novel more manageable.
 - **Consistency:** By providing context and tracking story elements, the AI helps maintain consistency in characters, plot points, and overall narrative.
 - **Co-creation:** It fosters a collaborative environment where the user and AI work together, combining human creativity with AI's ability to generate and process large amounts of text.
 - **Accessibility:** It provides a guided approach to novel-writing, making it more accessible to novice writers.
@@ -17,7 +17,7 @@ This project, Minstrel, aims to create a collaborative writing experience betwee
 The user should feel like they are collaborating with a knowledgeable and helpful writing partner. The interaction should be intuitive and seamless, with the AI providing assistance without being overly intrusive.
 
 1.  **Intuitive Interface:** The chat interface should be clean, easy to use, and provide clear feedback on the AI's actions.
-2.  **Guided Workflow:** The system should guide the user through the stages of novel writing (skeleton, outline, chapters, critique) in a logical and understandable way.
+2.  **Guided Workflow:** The system should guide the user through the stages of novel writing (outline, chapters, critique) in a logical and understandable way.
 3.  **Customization:** The user should be able to customize the story parameters and edit the AI-generated content at each stage.
 4.  **Transparency:** The AI should explain its reasoning (through the `<think>` tag, though this is hidden from the user) and clearly communicate its actions (through the `<message>` tag).
 5.  **Responsiveness:** The system should respond promptly to user input and provide timely feedback.

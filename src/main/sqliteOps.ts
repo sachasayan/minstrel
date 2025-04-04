@@ -3,6 +3,8 @@ import * as os from 'os'
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
+// Removed import of types from renderer process
+// import type { Project, ChatMessage, ProjectFile } from '../renderer/src/types'
 
 const homedir = os.homedir()
 
@@ -24,7 +26,7 @@ const CREATE_TABLES_SQL = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
-    type TEXT NOT NULL,
+    type TEXT NOT NULL, -- e.g., 'outline', 'chapter'
     sort_order INTEGER NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -79,7 +81,7 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
   }
 }
 
-// Save project to SQLite database
+// Save project to SQLite database - Reverted project type to 'any'
 export const handleSaveSqliteProject = async (_event, filePath: string, project: any) => {
   const resolvedPath = resolvePath(filePath)
 
@@ -99,32 +101,30 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     db.exec('BEGIN');
 
     // 1. Update metadata (including cover image data)
+    // Access properties assuming 'project' has the correct structure
     const metadataToSave = {
       title: project.title,
       genre: project.genre,
       summary: project.summary,
-      author: 'Sacha', // Hardcoded as in the original code
+      author: 'Sacha', // Still hardcoded
       year: project.year,
       writingSample: project.writingSample,
       wordCountTarget: project.wordCountTarget,
       wordCountCurrent: project.wordCountCurrent,
       expertSuggestions: project.expertSuggestions,
-      coverImageBase64: project.coverImageBase64, // Include base64 data
-      coverImageMimeType: project.coverImageMimeType // Include mime type
+      coverImageBase64: project.coverImageBase64,
+      coverImageMimeType: project.coverImageMimeType
     }
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
-    // Clear existing metadata first to remove potentially deleted keys (like old cover data)
-    db.exec('DELETE FROM metadata');
+    db.exec('DELETE FROM metadata'); // Clear existing metadata
     for (const [key, value] of Object.entries(metadataToSave)) {
-        // Only save if value is not undefined
         if (value !== undefined) {
-             // Store base64 directly as string, others as JSON
              const valueToStore = (key === 'coverImageBase64' && value !== null) ? value : JSON.stringify(value ?? null);
              insertMetadata.run(key, valueToStore)
         }
     }
 
-    // 2. Clear existing files and insert new ones
+    // 2. Clear existing files and insert new ones (excluding skeleton)
     db.exec('DELETE FROM files')
     const insertFile = db.prepare(`
       INSERT INTO files (title, content, type, sort_order)
@@ -132,16 +132,14 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     `)
     if (Array.isArray(project.files)) {
       let sortOrder = 0
-      const skeleton = project.files.find((e) => e.title.indexOf('Skeleton') !== -1)
-      if (skeleton) {
-        insertFile.run(skeleton.title, skeleton.content, 'skeleton', sortOrder++)
-      }
-      const outline = project.files.find((e) => e.title.indexOf('Outline') !== -1)
+      // Removed Skeleton saving logic explicitly
+      // Use 'any' for item types within loops as ProjectFile type is not available
+      const outline = project.files.find((e: any) => e.title.includes('Outline'))
       if (outline) {
         insertFile.run(outline.title, outline.content, 'outline', sortOrder++)
       }
-      const chapters = project.files.filter((e) => e.title.indexOf('Chapter') !== -1)
-      chapters.forEach((chapter) => {
+      const chapters = project.files.filter((e: any) => e.title.includes('Chapter'))
+      chapters.forEach((chapter: any) => {
         insertFile.run(chapter.title, chapter.content, 'chapter', sortOrder++)
       })
     }
@@ -153,10 +151,9 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
         INSERT INTO chat_history (sender, text, timestamp, metadata)
         VALUES (?, ?, ?, ?)
       `)
-      for (const message of project.chatHistory) {
-        // Use message timestamp if available, otherwise let DB default (NULL -> CURRENT_TIMESTAMP)
+      // Use 'any' for message type
+      for (const message of project.chatHistory as any[]) {
         const timestamp = message.timestamp || null;
-        // Stringify metadata if it exists, otherwise null
         const metadataJson = message.metadata ? JSON.stringify(message.metadata) : null;
         insertChatMessage.run(message.sender, message.text, timestamp, metadataJson)
       }
@@ -174,8 +171,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     }
     return { success: false, error: String(error) }
   } finally {
-    // Ensure database connection is closed even if errors occur
-    if (db && db.open) { // Check if db is initialized and open
+    if (db && db.open) {
       db.close()
     }
   }
@@ -246,11 +242,20 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
   try {
     // Check if file exists before trying to open
     await fs.access(resolvedPath, fs.constants.R_OK)
-    // Open read-write initially to ensure tables can be created if missing
+    // Open read-write to allow potential deletion of skeleton rows
     db = new Database(resolvedPath, { fileMustExist: true })
 
     // Ensure tables exist before reading (important for older files)
     db.exec(CREATE_TABLES_SQL)
+
+    // Delete any lingering skeleton rows from older versions
+    try {
+        db.exec("DELETE FROM files WHERE type = 'skeleton'");
+    } catch (deleteError) {
+        // Log error but continue loading if deletion fails (table might not exist yet etc.)
+        console.warn(`Could not delete skeleton rows for project ${filePath}:`, deleteError);
+    }
+
 
     // Get metadata (including base64 data)
     const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
@@ -269,7 +274,7 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       return acc
     }, {})
 
-    // Get files
+    // Get files (Skeleton rows are already deleted or never existed)
     const files = db.prepare(`
       SELECT title, content, type
       FROM files
@@ -310,13 +315,28 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
     });
 
 
-    return {
-      ...projectMetadata, // Includes coverImageBase64 and coverImageMimeType
+    // Construct the final Project object, ensuring type compatibility
+    // Return type is implicitly 'any' here, but structure should match Project
+    const loadedProject = {
+      // Spread required ProjectFragment fields first
       projectPath: filePath,
+      title: projectMetadata.title ?? 'Untitled', // Provide default
+      genre: projectMetadata.genre ?? 'science-fiction', // Provide default
+      wordCountTarget: projectMetadata.wordCountTarget ?? 0, // Provide default
+      wordCountCurrent: projectMetadata.wordCountCurrent ?? 0, // Provide default
+      // Spread remaining metadata
+      ...projectMetadata,
+      // Add files and chat history
       files: projectFiles,
-      chatHistory: chatHistory, // Include loaded chat history
+      chatHistory: chatHistory,
       knowledgeGraph: null // Assuming this is still null on load
-    }
+    };
+    // Remove potential 'any' type from spread if needed
+    delete (loadedProject as any).key; // Remove potential leftover key from reduce
+    delete (loadedProject as any).value; // Remove potential leftover value from reduce
+
+    return loadedProject;
+
   } catch (error) {
     console.error(`Failed to load SQLite project from ${resolvedPath}:`, error)
     throw new Error('Could not load project details.') // Still throw for full load failure

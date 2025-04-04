@@ -1,7 +1,7 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile, setPendingFiles, resolvePendingFiles, updateReviews } from '@/lib/store/projectsSlice'
+import { updateFile, setPendingFiles, updateReviews } from '@/lib/store/projectsSlice' // Removed resolvePendingFiles
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
@@ -171,10 +171,11 @@ export const sendMessage = async (context: RequestContext) => {
   }
 }
 
-export const generateSkeleton = async (parameters: { [key: string]: any }): Promise<void> => {
+// Renamed function to generate initial outline from parameters
+export const generateOutlineFromParams = async (parameters: { [key: string]: any }): Promise<void> => {
   const prompt = buildPrompt({
     agent: 'outlineAgent',
-    currentStep: -1, // Special trigger for the outline agent to generate the skeleton
+    currentStep: -1, // Special trigger for the outline agent to generate the initial outline
     carriedContext: JSON.stringify(parameters, null, 2),
     requestedFiles: undefined,
     sequenceInfo: undefined
@@ -185,14 +186,21 @@ export const generateSkeleton = async (parameters: { [key: string]: any }): Prom
     console.log('AI Response: \n \n', response)
     const context = processResponse(response)
     if (context === null) {
-      console.error('processResponse returned null in generateSkeleton, not calling sendMessage')
+      console.error('processResponse returned null in generateOutlineFromParams, not calling sendMessage')
       return
     }
     await sendMessage(context)
   } catch (error) {
-    console.error('Failed to send chat message:', error)
+    console.error('Failed to send chat message for outline generation:', error)
+    // Add user feedback on error
+     store.dispatch(
+        addChatMessage({
+          sender: 'Gemini',
+          text: `Sorry, I encountered an error trying to generate the initial outline. Please try again.`
+        })
+      )
   } finally {
     store.dispatch(resolvePendingChat())
-    console.log('generateSkeleton() finished')
+    console.log('generateOutlineFromParams() finished')
   }
 }

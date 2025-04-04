@@ -11,8 +11,8 @@ Minstrel follows a client-server architecture within an Electron application. Th
   - **Service Logic:**
       - `fileService.ts`: Acts as the primary interface for project persistence. It determines the project format (`.md` or `.mns`) and routes calls to either legacy Markdown logic (for loading only) or `sqliteService.ts`. Handles automatic conversion from `.md` to `.mns` on save. Interacts with `fileOps.ts` and `sqliteOps.ts` via IPC. Constructs project fragments, including cover data URLs.
       - `sqliteService.ts`: Wraps IPC calls specifically for SQLite database operations defined in `sqliteOps.ts`.
-      - `chatService.ts`: Handles communication with the Gemini API, prompt building, and response processing.
-  - **Prompt Engineering:** `promptBuilder.ts` constructs prompts dynamically. `prompts.ts` stores static prompt parts.
+      - `chatService.ts`: Handles communication with the Gemini API, prompt building, and response processing. Triggers initial Outline generation via `generateOutlineFromParams`.
+  - **Prompt Engineering:** `promptBuilder.ts` constructs prompts dynamically. Individual agent files (e.g., `outlineAgent.ts`) store static prompt parts and logic.
 - **Backend (Main Process):**
   - **`fileOps.ts`:** Handles generic file system operations (reading directories, reading/writing/deleting files, making directories, selecting directories) via Electron IPC handlers.
   - **`sqliteOps.ts`:** Handles all SQLite database interactions for project data (`.mns` files) via Electron IPC handlers (init, save, load meta, load full). Uses `better-sqlite3`.
@@ -22,10 +22,10 @@ Minstrel follows a client-server architecture within an Electron application. Th
 
 ### Component Relationships
 
-- `AppSidebar` interacts with `fileService` to save projects (triggering potential conversion and state updates) and uses Redux state (`projectsSlice`, `appStateSlice`, `chatSlice`) to manage UI state and data.
+- `AppSidebar` interacts with `fileService` to save projects (triggering potential conversion and state updates) and uses Redux state (`projectsSlice`, `appStateSlice`, `chatSlice`) to manage UI state and data. It displays links for Parameters, Outline, and Chapters (Skeleton link removed).
 - `ChatInterface` interacts with `chatSlice` to display/manage chat history and with `chatService` to send messages.
-- `MarkdownViewer` displays Markdown content from the `projectsSlice`.
-- `BookOutlineWizard` components manage the new project creation flow. `SummaryPage.tsx` now initiates project creation using the `.mns` format via `fileService`.
+- `MarkdownViewer` displays Markdown content (Outline, Chapters) from the `projectsSlice`.
+- `BookOutlineWizard` components manage the new project creation flow. `SummaryPage.tsx` now initiates project creation and triggers initial *Outline* generation via `chatService.ts`.
 - `Intro` uses `fileService` (via `fetchProjects`) to list projects (displaying covers via `ProjectLibrary`) and triggers the full project load via Redux actions handled by listeners.
 - `ProjectOverview` displays the loaded project data (including chat) from the Redux store (`projectsSlice`, `chatSlice`).
 - `ProjectParameters` allows editing metadata, including uploading cover artwork (via click or drag-drop), interacting with `projectsSlice`.
@@ -37,6 +37,8 @@ Minstrel follows a client-server architecture within an Electron application. Th
 ## Tech Context
 
 ### Technologies Used
+
+(This section remains unchanged)
 
 - **Frontend:**
   - **React:** JavaScript library for building user interfaces.
@@ -62,6 +64,8 @@ Minstrel follows a client-server architecture within an Electron application. Th
 
 ### Dependencies
 
+(This section remains unchanged)
+
 The project's dependencies are managed using `npm`. Key dependencies include `react`, `electron`, `@reduxjs/toolkit`, `better-sqlite3`, and UI libraries like `@radix-ui/*` (via ShadCN). The full list can be found in `package.json`.
 
 ### Project Persistence
@@ -70,16 +74,18 @@ The project's dependencies are managed using `npm`. Key dependencies include `re
 - **Conversion:** Existing `.md` projects are automatically converted to the `.mns` format upon the first save operation. The original `.md` file is deleted after successful conversion and saving.
 - **Schema:** The SQLite database (`.mns` file) contains tables for:
     - `metadata`: Stores key-value pairs for project metadata (title, genre, summary, `coverImageBase64`, `coverImageMimeType`, etc.). Base64 data is stored as TEXT.
-    - `files`: Stores the main content sections (Skeleton, Outline, Chapters) with columns like `title`, `content`, `type`, `sort_order`.
+    - `files`: Stores the main content sections (**Outline**, **Chapters**) with columns like `title`, `content`, `type` (e.g., 'outline', 'chapter'), `sort_order`. The 'skeleton' type is deprecated and removed/ignored during save/load.
     - `chat_history`: Stores chat messages with columns like `id`, `timestamp`, `sender`, `text`, and `metadata` (JSON string).
 - **Workflow:**
-    1.  **Loading:** `fileService.ts` lists `.md` and `.mns` files. It calls `sqliteOps.ts` (`get-sqlite-project-meta`) via IPC to get metadata (including artwork base64/mime) for `.mns` files and constructs `ProjectFragment` objects, generating the `cover` data URL. When a project is selected, a Redux listener triggers `fileService.ts` (`fetchProjectDetails`), which routes to `sqliteOps.ts` (`load-sqlite-project`) to load the full data (metadata, files, chat history, artwork base64/mime) from the `.mns` file. The listener then populates `projectsSlice` and `chatSlice`.
-    2.  **Saving:** `AppSidebar.tsx` triggers `fileService.ts` (`saveProject`), passing the current project state (including chat history and artwork base64/mime from `projectsSlice`). `saveProject` determines if conversion is needed. It calls `sqliteOps.ts` (`save-sqlite-project`) via `sqliteService.ts` to write all data (metadata including artwork, files, chat history) to the `.mns` file within a transaction. If conversion occurred, it calls `fileOps.ts` (`delete-file`) via IPC to remove the old `.md` file. `AppSidebar.tsx` updates the Redux state (`projectPath`) if the path changed.
+    1.  **Loading:** `fileService.ts` lists `.md` and `.mns` files. It calls `sqliteOps.ts` (`get-sqlite-project-meta`) via IPC to get metadata (including artwork base64/mime) for `.mns` files and constructs `ProjectFragment` objects, generating the `cover` data URL. When a project is selected, a Redux listener triggers `fileService.ts` (`fetchProjectDetails`), which routes to `sqliteOps.ts` (`load-sqlite-project`) to load the full data (metadata, files *excluding skeleton*, chat history, artwork base64/mime) from the `.mns` file. `load-sqlite-project` also deletes any residual `type='skeleton'` rows. The listener then populates `projectsSlice` and `chatSlice`.
+    2.  **Saving:** `AppSidebar.tsx` triggers `fileService.ts` (`saveProject`), passing the current project state (including chat history and artwork base64/mime from `projectsSlice`). `saveProject` determines if conversion is needed. It calls `sqliteOps.ts` (`save-sqlite-project`) via `sqliteService.ts` to write all data (metadata including artwork, files *excluding skeleton*, chat history) to the `.mns` file within a transaction. If conversion occurred, it calls `fileOps.ts` (`delete-file`) via IPC to remove the old `.md` file. `AppSidebar.tsx` updates the Redux state (`projectPath`) if the path changed.
 - **Backend Handlers:**
-    - `sqliteOps.ts` (Main Process): Contains IPC handlers (`init-sqlite-project`, `save-sqlite-project`, `load-sqlite-project`, `get-sqlite-project-meta`) using `better-sqlite3`. Ensures tables exist on save/load.
+    - `sqliteOps.ts` (Main Process): Contains IPC handlers (`init-sqlite-project`, `save-sqlite-project`, `load-sqlite-project`, `get-sqlite-project-meta`) using `better-sqlite3`. Ensures tables exist on save/load. `save-sqlite-project` no longer saves 'skeleton' type. `load-sqlite-project` deletes 'skeleton' type rows.
     - `fileOps.ts` (Main Process): Contains IPC handlers for generic file operations (`read-directory`, `delete-file`, etc.) using `fs/promises`.
 
 ### Artwork Handling
+
+(This section remains unchanged)
 
 - **Storage:** Cover artwork is stored as a base64 encoded string (`coverImageBase64`) and its corresponding mime type (`coverImageMimeType`) within the `metadata` table of the project's `.mns` file.
 - **Upload:** Users can upload an image via button click or drag-and-drop in `ProjectParameters.tsx`.
@@ -93,14 +99,14 @@ The project's dependencies are managed using `npm`. Key dependencies include `re
 
 ### Multi-Agent Architecture
 
-(This section remains unchanged).
+(This section remains unchanged)
 
 The project uses a multi-agent architecture with a routing agent delegating tasks to specialized agents (criticAgent, outlineAgent, writerAgent).
 
     - **Routing Agent:** Responsible for initial request handling and agent delegation. Defined in `promptBuilder.ts` and used by default in `chatService.ts`.
-    - **Specialized Agents:** `criticAgent`, `outlineAgent`, `writerAgent` are designed for specific tasks. Prompts for these agents are defined in `prompts.ts`.
+    - **Specialized Agents:** `criticAgent`, `outlineAgent`, `writerAgent` are designed for specific tasks. Prompts for these agents are defined in individual files (e.g., `outlineAgent.ts`). The `outlineAgent` now generates the initial outline directly from parameters.
     - **Agent Switching:** `chatService.ts` processes the `<route_to>` tag in the model's response to switch agents dynamically.
-    - **Context Handling:** `promptBuilder.ts` constructs prompts with relevant context for each agent, including user messages, available project data sections, and their content (sourced from Redux).
+    - **Context Handling:** `promptBuilder.ts` constructs prompts with relevant context for each agent, including user messages, available project data sections (Outline, Chapters), and their content (sourced from Redux).
 
 ### Do not read files named
 
@@ -113,6 +119,8 @@ The project uses a multi-agent architecture with a routing agent delegating task
 - writerAgent.ts
 
 ### Testing
+
+(This section remains unchanged)
 
 Mock projects for testing are located in the `mock-projects` folder. The available mock projects are now in the `.mns` format:
 

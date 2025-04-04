@@ -9,7 +9,7 @@ import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectPro
 // Import chat history selector
 import { selectChatHistory, addChatMessage } from '@/lib/store/chatSlice'
 
-import { Plus, Save, X, Diff, LayoutDashboard, Settings, FileText, ListOrdered, Book } from 'lucide-react'
+import { Plus, Save, X, Diff, LayoutDashboard, Settings, /* FileText, */ ListOrdered, Book } from 'lucide-react' // Removed FileText
 import { Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -61,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleUniselect = (slug: string) => {
     console.log(appState.activeFile)
     console.log(slug)
-    if (slug.includes('Chapter') || slug == 'Skeleton' || slug == 'Outline') {
+    if (slug.includes('Chapter') || slug == 'Outline') {
       dispatch(setActiveFile(projectsState.activeProject?.files?.find((item) => item.title.includes(slug))?.title || ''))
       dispatch(setActiveView('project/editor'))
     } else if (slug.includes('Parameters')) {
@@ -139,19 +139,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }
 
+  // Updated structureItems array (removed Skeleton entry)
   const structureItems = [
     {
       key: 'Parameters',
       activeView: 'project/parameters',
       icon: <Settings className="mr-2 h-4 w-4" />
     },
-    {
-      select: 'Skeleton',
-      key: 'Skeleton',
-      activeView: 'project/editor',
-      activeFile: 'Skeleton',
-      icon: <FileText className="mr-2 h-4 w-4" />
-    },
+    // Removed Skeleton item
+    // {
+    //   select: 'Skeleton',
+    //   key: 'Skeleton',
+    //   activeView: 'project/editor',
+    //   activeFile: 'Skeleton',
+    //   icon: <FileText className="mr-2 h-4 w-4" />
+    // },
     {
       key: 'Outline',
       activeView: 'project/editor',
