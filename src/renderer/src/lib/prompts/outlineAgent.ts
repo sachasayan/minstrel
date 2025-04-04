@@ -1,5 +1,5 @@
 // Function returning the prompt string
-const getOutlineAgentPrompt = () => `
+export const getOutlineAgentPrompt = () => `
 
 ---
 
@@ -72,21 +72,3 @@ BEGIN USER PROMPT
 
 `
 
-// Simplified export structure - assuming promptly utility uses this function
-export const outlineAgent = {
-  outlineAgent(this: any) { // Use 'any' for 'this' if type is unknown/complex from promptly
-    // Check if 'this' has a 'value' property before appending
-    if (typeof this.value === 'string') {
-         this.value += getOutlineAgentPrompt();
-    } else {
-         // Handle error or alternative logic if 'this.value' is not expected
-         console.error("Promptly context ('this') does not have expected 'value' property.");
-         // Potentially return the prompt string directly or throw error
-         // For now, let's assume it should append if possible
-    }
-    return this;
-  }
-};
-
-// Alternative simpler export if promptly just needs the function:
-// export const getOutlineAgentPrompt;

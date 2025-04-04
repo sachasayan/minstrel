@@ -12,7 +12,11 @@ Minstrel follows a client-server architecture within an Electron application. Th
       - `fileService.ts`: Acts as the primary interface for project persistence. It determines the project format (`.md` or `.mns`) and routes calls to either legacy Markdown logic (for loading only) or `sqliteService.ts`. Handles automatic conversion from `.md` to `.mns` on save. Interacts with `fileOps.ts` and `sqliteOps.ts` via IPC. Constructs project fragments, including cover data URLs.
       - `sqliteService.ts`: Wraps IPC calls specifically for SQLite database operations defined in `sqliteOps.ts`.
       - `chatService.ts`: Handles communication with the Gemini API, prompt building, and response processing. Triggers initial Outline generation via `generateOutlineFromParams`.
-  - **Prompt Engineering:** `promptBuilder.ts` constructs prompts dynamically. Individual agent files (e.g., `outlineAgent.ts`) store static prompt parts and logic.
+  - **Prompt Engineering:**
+      - `promptBuilder.ts` constructs the final prompt string sent to the LLM. It uses a pure functional approach, importing `basePrompt` and utility functions (e.g., `addAvailableFiles`, `addUserPrompt`, `appendWithSeparator`) from `promptsUtils.ts`.
+      - `promptsUtils.ts` defines the `basePrompt` and exports pure utility functions for adding specific context sections (like available files, user messages) to the prompt string. It handles consistent section separation.
+      - Individual agent files (`routingAgent.ts`, `outlineAgent.ts`, `writerAgent.ts`, `criticAgent.ts`) and `tools.ts` export functions (`get<Name>Prompt`) that return their specific static prompt instructions as strings.
+      - `promptBuilder.ts` combines the `basePrompt`, the relevant agent/tool prompt strings, and context-specific sections using the utility functions from `promptsUtils.ts`.
 - **Backend (Main Process):**
   - **`fileOps.ts`:** Handles generic file system operations (reading directories, reading/writing/deleting files, making directories, selecting directories) via Electron IPC handlers.
   - **`sqliteOps.ts`:** Handles all SQLite database interactions for project data (`.mns` files) via Electron IPC handlers (init, save, load meta, load full). Uses `better-sqlite3`.
@@ -103,10 +107,10 @@ The project's dependencies are managed using `npm`. Key dependencies include `re
 
 The project uses a multi-agent architecture with a routing agent delegating tasks to specialized agents (criticAgent, outlineAgent, writerAgent).
 
-    - **Routing Agent:** Responsible for initial request handling and agent delegation. Defined in `promptBuilder.ts` and used by default in `chatService.ts`.
-    - **Specialized Agents:** `criticAgent`, `outlineAgent`, `writerAgent` are designed for specific tasks. Prompts for these agents are defined in individual files (e.g., `outlineAgent.ts`). The `outlineAgent` now generates the initial outline directly from parameters.
+    - **Routing Agent:** Responsible for initial request handling and agent delegation. Its prompt logic is defined in `routingAgent.ts` (`getRoutingAgentPrompt`) and assembled by `promptBuilder.ts`. Used by default in `chatService.ts`.
+    - **Specialized Agents:** `criticAgent`, `outlineAgent`, `writerAgent` are designed for specific tasks. Prompts for these agents are defined in individual files (e.g., `outlineAgent.ts` exporting `getOutlineAgentPrompt`). The `outlineAgent` now generates the initial outline directly from parameters.
     - **Agent Switching:** `chatService.ts` processes the `<route_to>` tag in the model's response to switch agents dynamically.
-    - **Context Handling:** `promptBuilder.ts` constructs prompts with relevant context for each agent, including user messages, available project data sections (Outline, Chapters), and their content (sourced from Redux).
+    - **Context Handling:** `promptBuilder.ts` constructs prompts using pure functions from `promptsUtils.ts` to add relevant context for each agent, including user messages, available project data sections (Outline, Chapters), and their content (sourced from Redux via helper functions within `promptBuilder.ts`).
 
 ### Do not read files named
 

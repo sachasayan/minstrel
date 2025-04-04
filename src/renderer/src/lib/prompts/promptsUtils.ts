@@ -1,41 +1,5 @@
-import { routingAgent } from './routingAgent'
-import { outlineAgent } from './outlineAgent'
-import { writerAgent } from './writerAgent'
-import { criticAgent } from './criticAgent'
-import { tools } from './tools'
-
-export const promptUtils = {
-  availableFiles(files) {
-    this.value += `---\n\n# DIRECTORY LISTING: FILES IN PROJECT:\n\n${files.join('\n') || '(The user did not provide a listing of files in this project.)'}\n\n`
-    return this
-  },
-  providedFiles(files) {
-    this.value += `---\n\n# ACTIVE FILES:\n\n${files.join('\n') || '(The user did not provide any files.)'}\n\n`
-    return this
-  },
-  fileContents(item) {
-    this.value += `---\n\n# ACTIVE FILE CONTENTS:\n\n${item || '(The user did not provide any file contents.)'}\n\n`
-    return this
-  },
-  userPrompt(prompt) {
-    this.value += `---\n\n# CURRENT TASK FROM USER: \n\n${prompt}\n\n`
-    return this
-  },
-  parameters(parameters) {
-    this.value += `---\n\n# PARAMETERS FOR THE SKELETON:\n\n${parameters}\n\n`
-    return this
-  },
-  currentStep(currentStep) {
-    this.value += `---\n\n# CURRENT STEP: \n\n${currentStep}\n\n`
-    return this
-  },
-  currentSequence(currentSequence) {
-    this.value += `\n\n# A SEQUENCE IS ACTIVE: \n\n${currentSequence}\n\n`
-    return this
-  }
-}
-
-const basePrompt = `
+// Base prompt shared across agents
+export const basePrompt = `
 BEGIN SYSTEM PROMPT
 
 # INTRODUCTION:
@@ -65,21 +29,81 @@ BEGIN SYSTEM PROMPT
 
 `
 
-export function promptly() {
-  return Object.create({
-    value: `${basePrompt}`,
-    ...criticAgent,
-    ...outlineAgent,
-    ...routingAgent,
-    ...writerAgent,
-    ...promptUtils,
-    ...tools,
-    beginUserPrompt() {
-      this.value += `\n\n---\n\nEND SYSTEM PROMPT\nBEGIN USER PROMPT`
-      return this
-    },
-    finish() {
-      return this.value
-    }
-  })
+const separator = '\n\n---\n\n'
+
+// --- Pure Utility Functions ---
+
+/**
+ * Appends a new major section (like Agent or Tools prompt) to the main prompt using the standard separator.
+ * Skips appending if the sectionToAdd is empty or null.
+ */
+export function appendWithSeparator(prompt: string, sectionToAdd: string | null | undefined): string {
+  if (!sectionToAdd || sectionToAdd.trim() === '') {
+    return prompt
+  }
+  // Ensure the base prompt doesn't accidentally start with the separator if it was empty
+  if (prompt.trim() === '') {
+    return sectionToAdd;
+  }
+  return `${prompt}${separator}${sectionToAdd}`
+}
+
+
+/**
+ * Adds a formatted subsection (like Available Files, User Prompt) with a title.
+ * Uses the internal separator before the title.
+ */
+function addFormattedSection(prompt: string, sectionTitle: string, content: string): string {
+  if (!content || content.trim() === '') {
+    return prompt // Don't add empty sections
+  }
+  // Note: The separator is used *before* the # Title line for these subsections
+  return `${prompt}${separator}# ${sectionTitle}:\n\n${content}\n\n`
+}
+
+
+export function addAvailableFiles(prompt: string, files: string[]): string {
+  const content = files.join('\n') || '(The user did not provide a listing of files in this project.)'
+  return addFormattedSection(prompt, 'DIRECTORY LISTING: FILES IN PROJECT', content)
+}
+
+export function addProvidedFiles(prompt: string, files: string[]): string {
+  const content = files.join('\n') || '(The user did not provide any files.)'
+  return addFormattedSection(prompt, 'ACTIVE FILES', content)
+}
+
+export function addFileContents(prompt: string, item: string): string {
+  const content = item || '(The user did not provide any file contents.)'
+  return addFormattedSection(prompt, 'ACTIVE FILE CONTENTS', content)
+}
+
+export function addUserPrompt(prompt: string, userMessage: string): string {
+  const content = userMessage || '(No user prompt provided for this turn.)'
+  return addFormattedSection(prompt, 'CURRENT TASK FROM USER', content)
+}
+
+export function addParameters(prompt: string, parameters: string): string {
+  // Assuming parameters is already a formatted string or object stringified
+  const content = parameters || '(No parameters provided.)'
+  return addFormattedSection(prompt, 'PARAMETERS FOR THE SKELETON', content)
+}
+
+export function addCurrentStep(prompt: string, currentStep: number | undefined): string {
+  if (currentStep === undefined || currentStep < 0) {
+    return prompt // Don't add if step is invalid or not applicable
+  }
+  const content = `${currentStep}`
+  return addFormattedSection(prompt, 'CURRENT STEP', content)
+}
+
+export function addCurrentSequence(prompt: string, currentSequence: string | undefined): string {
+  if (!currentSequence) {
+    return prompt // Don't add if no sequence is active
+  }
+  const content = currentSequence
+  return addFormattedSection(prompt, 'A SEQUENCE IS ACTIVE', content)
+}
+
+export function addBeginUserPrompt(prompt: string): string {
+  return `${prompt}${separator}END SYSTEM PROMPT\nBEGIN USER PROMPT`
 }

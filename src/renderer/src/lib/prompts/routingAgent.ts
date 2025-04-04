@@ -1,4 +1,4 @@
-const prompt = () => `
+export const getRoutingAgentPrompt = () => `
 
 ---
 
@@ -81,19 +81,3 @@ BEGIN USER PROMPT
 
 
 `
-
-export const routingAgent = {
-  routingAgent(this) {
-    this.value += prompt()
-    return this
-  }
-}
-
-// # SEQUENCES:
-// * If the user You can use the "<sequence>" tool to plan and execute a series of steps.
-// * The sequence will take place over multiple prompt calls, one for each step.
-// * The <sequence> should contain a Markdown-numbered list of planned steps to complete the task.
-// * Each user prompt will contain information on where you are in the current sequence.
-// * You may only start a new sequence when the current step is 0.
-// * Don't forget to request files you'll need in the next step, if any.
-// * If the user does not tell you which step you're on, apologize using <message> and end the sequence. Do not write any files.

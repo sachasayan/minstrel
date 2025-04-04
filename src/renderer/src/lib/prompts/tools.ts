@@ -1,5 +1,5 @@
 //TOOL USE RULES//
-const toolPrompt = (tools: string[]) => `
+export const getToolsPrompt = (tools: string[]) => `
 
 ---
 
@@ -66,12 +66,3 @@ ${tools.includes('think') && `
  ` || ''}
 ---
 `
-
-// const chatHistory = (chatHistory: { sender: string; text: string }[]): string => `---\nCHAT HISTORY:\n\n${chatHistory.map((message) => `${message.sender}: ${message.text}`).join('\n \n')}`
-
-export const tools = {
-  addTools(tools) {
-    this.value += toolPrompt(tools)
-    return this
-  }
-}

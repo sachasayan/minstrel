@@ -1,4 +1,4 @@
-const prompt = () => `
+export const getWriterAgentPrompt = () => `
 
 ---
 
@@ -51,10 +51,3 @@ BEGIN USER PROMPT
 * The user will provide you with the contents of the files needed for the current task.
 
 `
-
-export const writerAgent = {
-  writerAgent(this) {
-    this.value += prompt()
-    return this
-  }
-}
