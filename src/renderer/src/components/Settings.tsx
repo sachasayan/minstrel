@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select" // Import Select components
 import { toast } from 'sonner' // Import toast for feedback
 import Versions from './Versions' // Import Versions component
+import { Folder } from 'lucide-react' // Import Folder icon
 
 // Define Model Options
 const modelOptions = [
@@ -42,7 +43,7 @@ const Settings = (): ReactNode => {
   // Local state ONLY for text inputs that aren't saved immediately
   const [apiValue, setApiValue] = useState<string>('') // Initialize empty
   const [apiKeyValue, setApiKeyValue] = useState<string>('') // Initialize empty
-  const [workingRootDirectoryValue, setWorkingRootDirectoryValue] = useState<string | null>('') // Initialize empty, allow null
+  // Removed workingRootDirectoryValue state
 
   // Effect to load settings on mount and sync local state for text inputs
   useEffect(() => {
@@ -53,7 +54,7 @@ const Settings = (): ReactNode => {
         // Sync local state for text inputs *after* Redux state is updated
         setApiValue(loadedSettings?.api || '')
         setApiKeyValue(loadedSettings?.apiKey || '')
-        setWorkingRootDirectoryValue(loadedSettings?.workingRootDirectory || '')
+        // Removed setting workingRootDirectoryValue
       } catch (error) {
         console.error("Failed to load settings:", error);
         toast.error("Failed to load settings.");
@@ -67,14 +68,15 @@ const Settings = (): ReactNode => {
   useEffect(() => {
     setApiValue(settings.api || '');
     setApiKeyValue(settings.apiKey || '');
-    setWorkingRootDirectoryValue(settings.workingRootDirectory || '');
-  }, [settings.api, settings.apiKey, settings.workingRootDirectory]);
+    // Removed setting workingRootDirectoryValue
+  }, [settings.api, settings.apiKey]); // Removed settings.workingRootDirectory dependency
 
 
   // Function to save the current FULL settings state from Redux via IPC
   const saveCurrentSettings = async () => {
     try {
-      const currentSettings = store.getState().settings; // Get latest full state
+      // Get latest full state including potentially updated directory from Redux
+      const currentSettings = store.getState().settings;
       await window.electron.ipcRenderer.invoke('save-app-settings', currentSettings);
       console.log("Settings saved via IPC.");
       toast.success("Settings Saved!"); // Use toast for feedback
@@ -84,27 +86,44 @@ const Settings = (): ReactNode => {
     }
   };
 
-  // Handler for the Save button (saves only text inputs)
+  // Handler for the Save button (saves API text inputs AND current Redux state)
   const handleSaveButton = () => {
-    // Dispatch actions for text inputs first
+    // Dispatch actions for text inputs first to update Redux state
     dispatch(setApi(apiValue));
     dispatch(setApiKey(apiKeyValue));
-    dispatch(setWorkingRootDirectory(workingRootDirectoryValue));
-    // Then save the entire current state (including potentially changed selects)
+    // The workingRootDirectory is already updated in Redux state by selectFolder
+    // Then save the entire current state via IPC
     saveCurrentSettings();
-    // Removed alert, using toast now
   }
 
   // Handler for High Preference Model Select change
   const handleHighModelChange = (value: string) => {
     dispatch(setHighPreferenceModelId(value));
-    saveCurrentSettings(); // Save immediately
+    // Don't save immediately, wait for button press
+    // saveCurrentSettings();
   };
 
   // Handler for Low Preference Model Select change
   const handleLowModelChange = (value: string) => {
     dispatch(setLowPreferenceModelId(value));
-    saveCurrentSettings(); // Save immediately
+    // Don't save immediately, wait for button press
+    // saveCurrentSettings();
+  };
+
+  // Handler for selecting the project directory - only updates Redux state
+  const selectFolder = async () => {
+    try {
+      const selectedPath = await window.electron.ipcRenderer.invoke('select-directory', 'export');
+      if (selectedPath) {
+        dispatch(setWorkingRootDirectory(selectedPath));
+        // Removed immediate save: saveCurrentSettings();
+      } else {
+        console.log("Folder selection cancelled.");
+      }
+    } catch (error) {
+      console.error("Error selecting directory:", error);
+      toast.error("Failed to select directory.");
+    }
   };
 
 
@@ -144,7 +163,8 @@ const Settings = (): ReactNode => {
           <div>
             <Label htmlFor="highModel">High Preference Model</Label>
             <Select
-              value={settings.highPreferenceModelId}
+              // Use value directly from Redux state
+              value={settings.highPreferenceModelId || ''}
               onValueChange={handleHighModelChange}
             >
               <SelectTrigger id="highModel" className="w-full">
@@ -165,7 +185,8 @@ const Settings = (): ReactNode => {
           <div>
             <Label htmlFor="lowModel">Low Preference Model</Label>
             <Select
-              value={settings.lowPreferenceModelId}
+              // Use value directly from Redux state
+              value={settings.lowPreferenceModelId || ''}
               onValueChange={handleLowModelChange}
             >
               <SelectTrigger id="lowModel" className="w-full">
@@ -185,17 +206,16 @@ const Settings = (): ReactNode => {
 
         {/* Right Column */}
         <div className="space-y-4">
-          {/* Project Path Input */}
+          {/* Project Path Selector */}
           <div>
-            <Label htmlFor="workingRootDirectory">Project Path</Label>
-            <Input
-              type="text"
-              id="workingRootDirectory"
-              value={workingRootDirectoryValue ?? ''} // Handle null for input value
-              onChange={(e) => setWorkingRootDirectoryValue(e.target.value)}
-              placeholder="e.g., /Users/you/Documents/MinstrelProjects"
-            />
-            <p className="text-xs text-muted-foreground pt-1">Leave blank to use default.</p>
+            <Label>Project Path</Label>
+            <Button variant="outline" onClick={selectFolder} className="w-full justify-start mt-1">
+              <Folder className="mr-2 h-4 w-4" />
+              Select Project Directory
+            </Button>
+            <p className="text-sm text-muted-foreground pt-2 truncate"> {/* Added truncate */}
+              Current: {settings.workingRootDirectory || 'Default (determined by system)'}
+            </p>
           </div>
           {/* Versions Component */}
           <div className="pt-4"> {/* Add some spacing */}
@@ -208,10 +228,10 @@ const Settings = (): ReactNode => {
         </div>
       </div>
 
-      {/* Save Button (for text inputs) - Kept below the grid */}
+      {/* Save Button - Saves ALL settings */}
       <div className="flex justify-end space-x-2 px-4 pb-4"> {/* Added padding */}
         <Button onClick={handleSaveButton}>
-          Save Text Fields
+          Save Settings {/* Changed button text back */}
         </Button>
         {/* Assuming there's a way to close the settings dialog/modal */}
         {/* <Button variant="outline">Close</Button> */}
