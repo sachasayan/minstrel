@@ -3,7 +3,7 @@ import { AppSettings } from '@/types'
 import { RootState } from '@/lib/store/store'
 
 // Default model IDs (match those in settingsManager.ts)
-const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking'
+const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking-exp-01-21'
 const DEFAULT_LOW_PREFERENCE_MODEL_ID = 'gemini-2.0-flash'
 
 const initialState: AppSettings = {

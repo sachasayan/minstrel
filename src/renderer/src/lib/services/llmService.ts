@@ -57,7 +57,7 @@ const llmService = {
     // Get configured model IDs from settings
     const settings = store.getState().settings;
     // Use defaults if settings are missing/empty
-    const highModelId = settings.highPreferenceModelId || 'gemini-2.0-flash-thinking';
+    const highModelId = settings.highPreferenceModelId || 'gemini-2.0-flash-thinking-exp-01-21';
     const lowModelId = settings.lowPreferenceModelId || 'gemini-2.0-flash';
 
     // Select model based on preference using configured IDs
