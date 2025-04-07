@@ -9,7 +9,7 @@ import {
   setLowPreferenceModelId,  // Import new action
   selectSettingsState // Import selector for full state
 } from '@/lib/store/settingsSlice'
-import { RootState, AppDispatch, store } from '@/lib/store/store' // Import store for getState
+import { AppDispatch, store } from '@/lib/store/store' // Import store for getState
 import { Button } from './ui/button'
 import { Label } from './ui/label' // Assuming Label component exists
 import { Input } from './ui/input' // Assuming Input component exists
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select" // Import Select components
 import { toast } from 'sonner' // Import toast for feedback
+import Versions from './Versions' // Import Versions component
 
 // Define Model Options
 const modelOptions = [
@@ -108,88 +109,107 @@ const Settings = (): ReactNode => {
 
 
   return (
-    <div className="space-y-4 p-4"> {/* Added padding */}
-      {/* API Input */}
-      <div>
-        <Label htmlFor="api">API Endpoint</Label>
-        <Input
-          type="text"
-          id="api"
-          value={apiValue}
-          onChange={(e) => setApiValue(e.target.value)}
-          placeholder="Optional API Endpoint"
-        />
+    // Removed space-y-4 and p-4 from root, moved padding to grid
+    <div>
+      {/* Grid container for two columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-6 p-4">
+
+        {/* Left Column */}
+        <div className="space-y-4">
+          {/* API Input */}
+          <div>
+            <Label htmlFor="api">API Endpoint</Label>
+            <Input
+              type="text"
+              id="api"
+              value={apiValue}
+              onChange={(e) => setApiValue(e.target.value)}
+              placeholder="Optional API Endpoint"
+            />
+          </div>
+
+          {/* API Key Input */}
+          <div>
+            <Label htmlFor="apiKey">API Key</Label>
+            <Input
+              type="password" // Use password type for API key
+              id="apiKey"
+              value={apiKeyValue}
+              onChange={(e) => setApiKeyValue(e.target.value)}
+              placeholder="Enter your Gemini API Key"
+            />
+          </div>
+
+          {/* High Preference Model Select */}
+          <div>
+            <Label htmlFor="highModel">High Preference Model</Label>
+            <Select
+              value={settings.highPreferenceModelId}
+              onValueChange={handleHighModelChange}
+            >
+              <SelectTrigger id="highModel" className="w-full">
+                <SelectValue placeholder="Select high preference model" />
+              </SelectTrigger>
+              <SelectContent>
+                {modelOptions.map((model) => (
+                  <SelectItem key={`high-${model}`} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground pt-1">Model used for complex tasks like outlining and writing.</p>
+          </div>
+
+          {/* Low Preference Model Select */}
+          <div>
+            <Label htmlFor="lowModel">Low Preference Model</Label>
+            <Select
+              value={settings.lowPreferenceModelId}
+              onValueChange={handleLowModelChange}
+            >
+              <SelectTrigger id="lowModel" className="w-full">
+                <SelectValue placeholder="Select low preference model" />
+              </SelectTrigger>
+              <SelectContent>
+                {modelOptions.map((model) => (
+                  <SelectItem key={`low-${model}`} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground pt-1">Model used for simpler tasks like routing and critique.</p>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4">
+          {/* Project Path Input */}
+          <div>
+            <Label htmlFor="workingRootDirectory">Project Path</Label>
+            <Input
+              type="text"
+              id="workingRootDirectory"
+              value={workingRootDirectoryValue ?? ''} // Handle null for input value
+              onChange={(e) => setWorkingRootDirectoryValue(e.target.value)}
+              placeholder="e.g., /Users/you/Documents/MinstrelProjects"
+            />
+            <p className="text-xs text-muted-foreground pt-1">Leave blank to use default.</p>
+          </div>
+          {/* Versions Component */}
+          <div className="pt-4"> {/* Add some spacing */}
+            <Label>App Versions</Label>
+            {/* Removed styling from this div */}
+            <div className="mt-2">
+              <Versions />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Project Path Input */}
-      <div>
-        <Label htmlFor="workingRootDirectory">Project Path</Label>
-        <Input
-          type="text"
-          id="workingRootDirectory"
-          value={workingRootDirectoryValue ?? ''} // Handle null for input value
-          onChange={(e) => setWorkingRootDirectoryValue(e.target.value)}
-          placeholder="e.g., /Users/you/Documents/MinstrelProjects"
-        />
-        <p className="text-xs text-muted-foreground pt-1">Leave blank to use default.</p>
-      </div>
-
-      {/* API Key Input */}
-      <div>
-        <Label htmlFor="apiKey">API Key</Label>
-        <Input
-          type="password" // Use password type for API key
-          id="apiKey"
-          value={apiKeyValue}
-          onChange={(e) => setApiKeyValue(e.target.value)}
-          placeholder="Enter your Gemini API Key"
-        />
-      </div>
-
-      {/* High Preference Model Select */}
-      <div>
-        <Label htmlFor="highModel">High Preference Model</Label>
-        <Select
-          value={settings.highPreferenceModelId}
-          onValueChange={handleHighModelChange}
-        >
-          <SelectTrigger id="highModel" className="w-full"> {/* Added class */}
-            <SelectValue placeholder="Select high preference model" />
-          </SelectTrigger>
-          <SelectContent>
-            {modelOptions.map((model) => (
-              <SelectItem key={`high-${model}`} value={model}>
-                {model}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground pt-1">Model used for complex tasks like outlining and writing.</p>
-      </div>
-
-      {/* Low Preference Model Select */}
-      <div>
-        <Label htmlFor="lowModel">Low Preference Model</Label>
-        <Select
-          value={settings.lowPreferenceModelId}
-          onValueChange={handleLowModelChange}
-        >
-          <SelectTrigger id="lowModel" className="w-full"> {/* Added class */}
-            <SelectValue placeholder="Select low preference model" />
-          </SelectTrigger>
-          <SelectContent>
-            {modelOptions.map((model) => (
-              <SelectItem key={`low-${model}`} value={model}>
-                {model}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground pt-1">Model used for simpler tasks like routing and critique.</p>
-      </div>
-
-      {/* Save Button (for text inputs) */}
-      <div className="flex justify-end space-x-2 pt-4"> {/* Added padding top */}
+      {/* Save Button (for text inputs) - Kept below the grid */}
+      <div className="flex justify-end space-x-2 px-4 pb-4"> {/* Added padding */}
         <Button onClick={handleSaveButton}>
           Save Text Fields
         </Button>

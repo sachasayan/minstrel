@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { setActiveView } from '@/lib/store/appStateSlice'
 import { AppDispatch } from '@/lib/store/store'
 import Settings from '@/components/Settings'
-import Versions from '@/components/Versions' // Include Versions here if desired
+// Removed Versions import
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'; // Import an icon for the back button
 import { cn } from '@/lib/utils' // Import cn utility
@@ -36,10 +36,7 @@ const SettingsPage = (): ReactNode => {
         <Settings />
       </main>
 
-      <footer className="mt-4 pt-4 border-t text-center text-xs text-muted-foreground">
-        {/* Render Versions component in the footer */}
-        <Versions />
-      </footer>
+      {/* Removed footer with Versions component */}
     </div>
   )
 }
