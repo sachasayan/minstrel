@@ -46,6 +46,7 @@ const processResponse = (responseString: string): RequestContext | null => {
   const context: RequestContext = {
     currentStep: 0,
     agent: 'routingAgent'
+    // modelPreference will be determined before calling generateContent
   }
 
   console.log(response?.think || 'No thoughts, only vibes.')
@@ -125,8 +126,13 @@ export const sendMessage = async (context: RequestContext) => {
     console.groupEnd()
     store.dispatch(setPendingFiles(context.requestedFiles || null))
 
+    // Determine model preference based on agent
+    let modelPreference: 'high' | 'low' = 'low'; // Default to low
+    if (context.agent === 'outlineAgent' || context.agent === 'writerAgent') {
+      modelPreference = 'high';
+    }
 
-    const response = await geminiService.generateContent(prompt)
+    const response = await geminiService.generateContent(prompt, modelPreference); // Pass preference
 
     console.groupCollapsed('AI Response')
     console.log(response)
@@ -179,9 +185,11 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
     carriedContext: JSON.stringify(parameters, null, 2),
     requestedFiles: undefined,
     sequenceInfo: undefined
+    // modelPreference is implicitly 'high' because agent is 'outlineAgent'
   })
   try {
-    const response = await geminiService.generateContent(prompt)
+    // Pass 'high' preference directly as this function always uses outlineAgent
+    const response = await geminiService.generateContent(prompt, 'high');
 
     console.log('AI Response: \n \n', response)
     const context = processResponse(response)

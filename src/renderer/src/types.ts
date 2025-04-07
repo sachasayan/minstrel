@@ -85,6 +85,7 @@ export interface RequestContext {
   sequenceInfo?: string
   requestedFiles?: string[]
   message?: string
+  modelPreference?: 'high' | 'low' // Added model preference
 }
 
 export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
