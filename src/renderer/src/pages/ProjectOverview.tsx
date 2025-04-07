@@ -11,6 +11,7 @@ import { selectProjects } from '@/lib/store/projectsSlice'
 import ChatInterface from '@/components/ChatInterface'
 import ProjectParameters from './ProjectParameters'
 import CommandPalette from '@/components/CommandPalette'
+import { cn } from '@/lib/utils' // Import cn utility
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -37,7 +38,11 @@ const ProjectOverview = (): React.ReactNode => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="relative">
+      {/* Added zoom-in-95 animation class to SidebarInset */}
+      <SidebarInset className={cn(
+        "relative",
+        "animate-in fade-in zoom-in-95 duration-300" // Added zoom
+      )}>
         {appState.activeView == 'project/editor' ? (
           <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={projectState.activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
         ) : appState.activeView == 'project/dashboard' ? (

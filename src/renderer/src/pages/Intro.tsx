@@ -10,6 +10,7 @@ import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/ap
 import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/fileService'
+import { cn } from '@/lib/utils' // Import cn utility
 
 const Intro = (): ReactNode => { // Changed return type to ReactNode
   const dispatch = useDispatch()
@@ -66,7 +67,11 @@ const Intro = (): ReactNode => { // Changed return type to ReactNode
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 h-full">
+    // Added zoom-in-95 animation class
+    <div className={cn(
+      "flex flex-col items-center justify-center p-8 h-full",
+      "animate-in fade-in zoom-in-95 duration-300" // Added zoom
+    )}>
       <h1 className="text-2xl font-bold mb-4">Welcome to Minstrel</h1>
       <p className="text-gray-500 mb-2">Start a new project or set your project directory to begin.</p>
       <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />

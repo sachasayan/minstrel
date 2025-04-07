@@ -6,6 +6,7 @@ import Settings from '@/components/Settings'
 import Versions from '@/components/Versions' // Include Versions here if desired
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'; // Import an icon for the back button
+import { cn } from '@/lib/utils' // Import cn utility
 
 const SettingsPage = (): ReactNode => {
   const dispatch = useDispatch<AppDispatch>()
@@ -17,7 +18,11 @@ const SettingsPage = (): ReactNode => {
   }
 
   return (
-    <div className="flex flex-col h-screen p-4 md:p-8">
+    // Added zoom-in-95 animation class
+    <div className={cn(
+      "flex flex-col h-screen p-4 md:p-8",
+      "animate-in fade-in zoom-in-95 duration-300" // Added zoom
+    )}>
       <header className="flex items-center mb-6">
         <Button variant="ghost" size="icon" onClick={handleGoBack} className="mr-2">
           <ArrowLeft className="h-5 w-5" />
