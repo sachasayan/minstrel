@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react'
-import Settings from '@/components/Settings'
-import Versions from '@/components/Versions'
+import { useState, useEffect, ReactNode } from 'react' // Removed React import, kept ReactNode
+// Removed Settings import as it's no longer rendered directly here
+// Removed Versions import as it's moved to SettingsPage
 import { Button } from '@/components/ui/button'
 import ProjectLibrary from '@/components/ProjectLibrary'
 import { BookOutlineWizard } from '@/pages/BookOutlineWizard'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+// Removed Dialog imports
 import { useDispatch, useSelector } from 'react-redux'
-import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice'
+import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice' // setActiveView is now used
 import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/fileService'
 
-const Intro = (): JSX.Element => {
+const Intro = (): ReactNode => { // Changed return type to ReactNode
   const dispatch = useDispatch()
   const [showBookOutlineWizard, setShowBookOutlineWizard] = useState(false)
   const projectList = useSelector(selectProjectList)
@@ -20,7 +20,7 @@ const Intro = (): JSX.Element => {
   const handleProjectSelect = (projectPath: string) => {
     if (projectPath == 'add') {
       setShowBookOutlineWizard(true)
-      //dispatch(setActiveView('wizard'))
+      //dispatch(setActiveView('wizard')) // Keep commented if wizard view isn't fully implemented
       return
     }
 
@@ -32,16 +32,38 @@ const Intro = (): JSX.Element => {
   }
 
   const loadProjects = () => async (dispatch) => {
-    const projectsList = await fetchProjects(settingsState?.workingRootDirectory || '')
-    dispatch(setProjectList(projectsList))
+    // Ensure working directory is not null/empty before fetching
+    const dir = settingsState?.workingRootDirectory;
+    if (dir) {
+      try {
+        const projectsList = await fetchProjects(dir);
+        dispatch(setProjectList(projectsList));
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+        // Optionally dispatch an error state or show a toast
+      }
+    } else {
+      console.log("Working directory not set, skipping project load.");
+      dispatch(setProjectList([])); // Clear project list if directory is invalid
+    }
   }
 
   useEffect(() => {
-    if (!!settingsState.workingRootDirectory) {
-      console.log('Loading projects... ' + settingsState.workingRootDirectory)
+    // Trigger loadProjects only when workingRootDirectory is valid
+    if (settingsState.workingRootDirectory) {
+      console.log('Loading projects from: ' + settingsState.workingRootDirectory)
       dispatch(loadProjects() as any)
+    } else {
+      // Handle case where directory becomes invalid later (e.g., cleared in settings)
+      dispatch(setProjectList([]));
     }
-  }, [settingsState.workingRootDirectory])
+    // Depend on the specific setting property
+  }, [settingsState.workingRootDirectory, dispatch])
+
+  // Function to navigate to the settings page
+  const goToSettings = () => {
+    dispatch(setActiveView('settings'))
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-8 h-full">
@@ -49,18 +71,13 @@ const Intro = (): JSX.Element => {
       <p className="text-gray-500 mb-2">Start a new project or set your project directory to begin.</p>
       <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
 
+      {/* Updated Settings Button */}
       <div className="mt-12">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Settings</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] p-8">
-            <Settings />
-            <Versions />
-          </DialogContent>
-        </Dialog>
+        <Button variant="outline" onClick={goToSettings}>Settings</Button>
       </div>
-      <p className="text-gray-300 m-4 text-xs">Current project path: {settingsState?.workingRootDirectory || ''}</p>
+      {/* Removed Dialog and Versions component */}
+
+      <p className="text-gray-300 m-4 text-xs">Current project path: {settingsState?.workingRootDirectory || 'Not Set'}</p>
 
       <p className="outline rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
         Minstrel is totally free for personal use. Like it?{' '}

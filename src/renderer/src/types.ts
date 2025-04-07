@@ -90,7 +90,7 @@ export interface RequestContext {
   modelPreference?: 'high' | 'low' // Added model preference
 }
 
-export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters'
+export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters' | 'settings' // Added 'settings'
 
 export type Genre =
   | 'dystopian-post-apocalyptic-climate-fiction'
