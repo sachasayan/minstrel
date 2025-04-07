@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils'
 // Define Model Options (Moved from Settings.tsx)
 const modelOptions = [
   'gemini-2.5-pro-preview-03-25',
-  'gemini-2.0-flash-thinking', // Default High
+  'gemini-2.0-flash-thinking-exp-01-21', // Default High
   'gemini-2.0-flash',         // Default Low
   'gemini-2.0-flash-lite',
   'gemini-1.5-flash',
