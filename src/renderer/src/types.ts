@@ -2,6 +2,8 @@ export interface AppSettings {
   api?: string
   apiKey?: string
   workingRootDirectory?: string | null
+  highPreferenceModelId?: string // Added
+  lowPreferenceModelId?: string  // Added
 }
 export interface AppState {
   projectList: ProjectFragment[]
