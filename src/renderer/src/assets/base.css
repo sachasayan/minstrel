@@ -18,30 +18,17 @@
   --neutral-900: #2D2D2D;
   --neutral-950: #111111;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  --highlight-100: #D1D8BB;
-  --highlight-200: #BDCAA0;
-  --highlight-300: #A7BC85;
-  --highlight-400: #90AF6A;
-  --highlight-500: #779D53;
-  --highlight-600: #5E8344;
-  --highlight-700: #476935;
-  --highlight-800: #324F27;
-  --highlight-900: #1F3419;
-  --highlight-950: #0D180B;
+  --highlight-50: #F5F6F1;
+  --highlight-100: #D8DDC9;
+  --highlight-200: #B9C5A0;
+  --highlight-300: #98AD76;
+  --highlight-400: #779256;
+  --highlight-500: #597242;
+  --highlight-600: #405731;
+  --highlight-700: #2D4023;
+  --highlight-800: #1F2E19;
+  --highlight-900: #142111;
+  --highlight-950: #0E180C;
   /* General dimensional characteristics */
   --radius: 0.6rem;
 
