@@ -2,7 +2,7 @@
 
 import type React from 'react'
 import { useState, useContext } from 'react'
-import Torrent from '@/components/visuals/torrent'
+import ParameterChecklist from '@/components/BookWizard/ParameterChecklist'
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -38,7 +38,7 @@ export const BookOutlineWizard = ({ open, onOpenChange }: { open: boolean; onOpe
         >
           <div className="grid grid-cols-5 gap-4">
             <div className="col-span-2">
-              <Torrent />
+              <ParameterChecklist />
             </div>
             <div className="col-span-3 flex flex-col">
               {currentStep === 0 && <Intro />}
