@@ -1,27 +1,24 @@
-import { useState, useEffect, ReactNode } from 'react' // Removed React import, kept ReactNode
-// Removed Settings import as it's no longer rendered directly here
-// Removed Versions import as it's moved to SettingsPage
+import { useEffect, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import ProjectLibrary from '@/components/ProjectLibrary'
-import { BookOutlineWizard } from '@/pages/BookOutlineWizard'
-// Removed Dialog imports
 import { useDispatch, useSelector } from 'react-redux'
 import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice' // setActiveView is now used
-import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
+import { setActiveProjectFromFragment, startNewProject } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/fileService'
 import { cn } from '@/lib/utils' // Import cn utility
 
 const Intro = (): ReactNode => { // Changed return type to ReactNode
   const dispatch = useDispatch()
-  const [showBookOutlineWizard, setShowBookOutlineWizard] = useState(false)
+
   const projectList = useSelector(selectProjectList)
   const settingsState = useSelector(selectSettingsState)
 
   const handleProjectSelect = (projectPath: string) => {
     if (projectPath == 'add') {
-      setShowBookOutlineWizard(true)
-      //dispatch(setActiveView('wizard')) // Keep commented if wizard view isn't fully implemented
+
+      dispatch(startNewProject());
+      dispatch(setActiveView('project/dashboard'));
       return
     }
 
@@ -76,11 +73,10 @@ const Intro = (): ReactNode => { // Changed return type to ReactNode
       <p className="text-gray-500 mb-2">Start a new project or set your project directory to begin.</p>
       <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
 
-      {/* Updated Settings Button */}
       <div className="mt-12">
         <Button variant="outline" onClick={goToSettings}>Settings</Button>
       </div>
-      {/* Removed Dialog and Versions component */}
+
 
       <p className="text-gray-300 m-4 text-xs">Current project path: {settingsState?.workingRootDirectory || 'Not Set'}</p>
 
@@ -92,7 +88,6 @@ const Intro = (): ReactNode => { // Changed return type to ReactNode
         ☕ ❤️
       </p>
 
-      <BookOutlineWizard open={showBookOutlineWizard} onOpenChange={setShowBookOutlineWizard} />
     </div>
   )
 }

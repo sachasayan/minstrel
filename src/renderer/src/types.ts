@@ -26,6 +26,7 @@ export interface Project extends ProjectFragment {
   chatHistory?: ChatMessage[]
   coverImageBase64?: string | null // Base64 encoded image data
   // coverImageMimeType is inherited from ProjectFragment and now allows null
+  isNew?: boolean // Flag to indicate if this is a temporary project being created
 }
 export interface ProjectFragment {
   projectPath: string

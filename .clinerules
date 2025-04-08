@@ -6,7 +6,7 @@
 - I build components using shadcn/ui if I can.
 - I'm  using Canary for the latest ShadCN features, so I always remember: Use npx shadcn@canary instead of npx shadcn-ui@latest
 - I leave NO todo’s, placeholders or missing pieces.
-- I don't leave comments saying something was added, removed, or changed.
+- I never leave comments saying a line of code was added, removed, or changed.
 - If I do not know the answer to a question, say so instead of guessing.
 - I don't clean up unused imports or variables which existed in a file before I started working on it.
 - I never clean up whitespace or empty lines.

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+// Import Project type explicitly if not already fully covered by ProjectState
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
@@ -13,6 +14,31 @@ export const projectsSlice = createSlice({
   name: 'projects',
   initialState,
   reducers: {
+    startNewProject: (state) => {
+      // Create a default temporary project object
+      const tempProject: Project = {
+        projectPath: '', // Use empty string instead of null for path initially
+        title: '',
+        genre: 'fantasy', // Use a valid Genre string literal as default
+        wordCountTarget: 0,
+        wordCountCurrent: 0,
+        cover: undefined,
+        coverImageMimeType: null,
+        coverImageBase64: null,
+        files: [],
+        summary: '',
+        year: new Date().getFullYear(),
+        writingSample: '',
+        expertSuggestions: [],
+        knowledgeGraph: null,
+        chatHistory: [], // Initialize chat history
+        isNew: true // Mark as new
+      };
+      state.activeProject = tempProject;
+      state.projectHasLiveEdits = true; // It's unsaved
+      // Clear pending files if any were leftover from a previous project state
+      state.pendingFiles = null;
+    },
     setActiveProjectFromFragment: (state, action: PayloadAction<ProjectFragment>) => {
       state.activeProject = projectFromFragment(action.payload)
     },
@@ -108,7 +134,9 @@ export const projectsSlice = createSlice({
   }
 })
 
-export const { setActiveProject,
+export const {
+  startNewProject, // Add new action here
+  setActiveProject,
   setPendingFiles,
   resolvePendingFiles,
   setActiveProjectFromFragment,
