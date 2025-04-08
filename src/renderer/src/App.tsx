@@ -10,7 +10,7 @@ import OnboardingDialog from '@/components/OnboardingDialog'
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
 import SettingsPage from '@/pages/SettingsPage' // Import new page
-
+import BookOutlineWizard from '@/pages/BookOutlineWizard' // Import wizard page
 export default function App(): ReactNode {
   const dispatch = useDispatch()
   const activeProject = useSelector(selectActiveProject)
@@ -42,7 +42,7 @@ export default function App(): ReactNode {
       case 'intro':
         return <Intro />
       case 'wizard':
-        return null // was <Wizard /> - component not defined in file
+        return <BookOutlineWizard /> // Render the wizard page
       case 'project/outline':
       case 'project/parameters':
       case 'project/dashboard':

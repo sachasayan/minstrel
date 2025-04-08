@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
+// Removed DialogHeader, DialogTitle import
+// Removed Progress import
 import { useWizard, WizardNavigation, novelLengths } from '@/components/BookWizard/index' // Updated imports
 
 
@@ -15,12 +15,13 @@ const StoryLength = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <DialogHeader>
-        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
-          <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
-        </div>
-      </DialogHeader>
+      {/* Removed DialogHeader */}
+      <div className="flex flex-row w-full justify-between mt-6 gap-4 items-center"> {/* Added items-center */}
+        {/* Replaced DialogTitle with a span */}
+        <span className="leading-2 font-semibold">{currentStep}/5 </span>
+        {/* Removed Progress component */}
+      </div>
+      {/* End of removed DialogHeader section */}
       <div className="flex-grow flex flex-col justify-center gap-4">
         <div>
           <p className="text-sm text-gray-500">{`Okay, let me walk you through the steps. First let's get an idea of where we should go with this. Don't worry, we can change everything later.`}</p>

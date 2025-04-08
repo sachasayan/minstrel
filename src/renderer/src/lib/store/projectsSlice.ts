@@ -32,7 +32,7 @@ export const projectsSlice = createSlice({
         expertSuggestions: [],
         knowledgeGraph: null,
         chatHistory: [], // Initialize chat history
-        isNew: true // Mark as new
+        // isNew: true // Removed: Flag is deprecated
       };
       state.activeProject = tempProject;
       state.projectHasLiveEdits = true; // It's unsaved

@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react' // Removed useEffect
 import { useSelector } from 'react-redux'
 import { selectAppState } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { BookOutlineWizard } from '@/pages/BookOutlineWizard'
+// Removed BookOutlineWizard import
 
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import MarkdownViewer from '@/components/MarkdownViewer'
@@ -18,14 +18,10 @@ const ProjectOverview = (): React.ReactNode => {
   const activeProject = useSelector(selectActiveProject)
   const [expanded, setExpanded] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-  const [showBookOutlineWizard, setShowBookOutlineWizard] = useState(false)
+  // Removed showBookOutlineWizard state
 
 
-  // Effect to show wizard when a new project is started
-  useEffect(() => {
-    // Only show wizard if the active project is marked as new
-    setShowBookOutlineWizard(!!activeProject?.isNew);
-  }, [activeProject]);
+  // Removed useEffect for showing wizard dialog based on isNew flag
 
   return (
     <SidebarProvider>
@@ -46,8 +42,7 @@ const ProjectOverview = (): React.ReactNode => {
       </SidebarInset>
       <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />
       <CommandPalette />
-      {/* Render the wizard conditionally */}
-      <BookOutlineWizard open={showBookOutlineWizard} onOpenChange={setShowBookOutlineWizard} />
+      {/* Removed conditional rendering of BookOutlineWizard dialog */}
     </SidebarProvider>
   )
 }

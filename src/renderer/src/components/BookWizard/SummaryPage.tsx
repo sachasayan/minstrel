@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
+// Removed DialogHeader, DialogTitle import
+// Removed Progress import
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { generateOutlineFromParams } from '@/lib/services/chatService' // Updated import
 import { setActiveProject } from '@/lib/store/projectsSlice'
+import { setActiveView } from '@/lib/store/appStateSlice' // Add setActiveView import
 import { useWizard, genres, sanitizeFilename, WizardNavigation } from '@/components/BookWizard/index'
 
 
@@ -34,6 +35,8 @@ const SummaryPage = () => {
         // chatHistory and cover fields will be populated later or default
       })
     )
+    // Navigate to dashboard after setting project
+    dispatch(setActiveView('project/dashboard'))
     // Call the renamed function to generate the initial outline
     generateOutlineFromParams(formData)
     setRequestPending(true)
@@ -41,12 +44,13 @@ const SummaryPage = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <DialogHeader>
-        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
-          <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
-        </div>
-      </DialogHeader>
+      {/* Removed DialogHeader */}
+      <div className="flex flex-row w-full justify-between mt-6 gap-4 items-center"> {/* Added items-center */}
+        {/* Replaced DialogTitle with a span */}
+        <span className="leading-2 font-semibold">{currentStep}/5 </span>
+        {/* Removed Progress component */}
+      </div>
+      {/* End of removed DialogHeader section */}
       <div className="flex-grow flex flex-col items-center justify-center p-8 gap-4">
         <div className="text-center">
           <h2 className="text-2xl font-bold">Great. We&apos;re ready to create your {genres?.find((item) => item.value === formData.genre)?.label} story outline.</h2> {/* Updated text */}

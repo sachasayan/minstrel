@@ -5,8 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { CommandList, CommandEmpty, CommandGroup, CommandItem, CommandInput, Command } from '@/components/ui/command'
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress' // Corrected Progress import path
+// Removed DialogHeader, DialogTitle import
+// Removed Progress import
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useWizard, genres, genreSettings, sanitizeFilename, WizardNavigation } from '@/components/BookWizard/index' // Updated imports from BookWizard/index.tsx
@@ -25,12 +25,13 @@ const SettingAndTitle = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <DialogHeader>
-        <div className="flex flex-row w-full justify-between mt-6 gap-4 align-center">
-          <DialogTitle className="leading-2 ">{currentStep}/5 </DialogTitle>
-          <Progress value={(currentStep / (totalSteps - 1)) * 100} className="mb-4" />
-        </div>
-      </DialogHeader>
+      {/* Removed DialogHeader */}
+      <div className="flex flex-row w-full justify-between mt-6 gap-4 items-center"> {/* Added items-center */}
+        {/* Replaced DialogTitle with a span */}
+        <span className="leading-2 font-semibold">{currentStep}/5 </span>
+        {/* Removed Progress component */}
+      </div>
+      {/* End of removed DialogHeader section */}
       <div className="flex-grow flex flex-col justify-center gap-4">
         <div>
           <Label htmlFor="genre">Genre</Label>
