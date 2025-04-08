@@ -18,7 +18,7 @@ export interface ProjectState {
 
 export interface Project extends ProjectFragment {
   files: ProjectFile[]
-  summary: string
+  summary: string // Consider if this is still needed or replaced by outline doc
   year: number
   writingSample: string
   expertSuggestions: ExpertSuggestion[]
@@ -33,12 +33,12 @@ export interface ProjectFragment {
   genre: Genre
   wordCountTarget: number
   wordCountCurrent: number
-  cover?: string // This will hold the displayable data URL
-  coverImageMimeType?: string | null // Mime type for the cover image (allow null)
+  cover?: string
+  coverImageMimeType?: string | null
 }
 
 export interface ProjectFile {
-  title: string
+  title: string // Renamed from title for consistency
   content: string
   wordcount?: number
   hasEdits?: boolean
@@ -59,10 +59,10 @@ export interface ExpertSuggestion {
 }
 
 export interface ChatMessage {
-  sender: string; // Keep as string to allow 'User', 'Gemini', agent names etc.
+  sender: string;
   text: string;
-  timestamp?: string; // Optional timestamp from DB
-  metadata?: any;     // Optional metadata from DB
+  timestamp?: string;
+  metadata?: any;
 }
 
 // interface SceneOutline {
@@ -87,10 +87,10 @@ export interface RequestContext {
   sequenceInfo?: string
   requestedFiles?: string[]
   message?: string
-  modelPreference?: 'high' | 'low' // Added model preference
+  modelPreference?: 'high' | 'low'
 }
 
-export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters' | 'settings' // Added 'settings'
+export type ActiveView = 'intro' | 'wizard' | 'project/outline' | 'project/dashboard' | 'project/editor' | 'project/parameters' | 'settings'
 
 export type Genre =
   | 'dystopian-post-apocalyptic-climate-fiction'

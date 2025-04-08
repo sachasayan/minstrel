@@ -1,13 +1,10 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google' // Import Vercel AI SDK Google provider
-import { generateText } from 'ai' // Import Vercel AI SDK core function
+import { generateText, streamText } from 'ai' // Import Vercel AI SDK core functions
 import { store } from '@/lib/store/store'
-
-// Removed hardcoded model ID constants
 
 const llmService = {
   apiKey: null as string | null,
 
-  // Keep getApiKey as it fetches from the store
   async getApiKey() {
     const apiKey = store.getState().settings.apiKey
     if (!apiKey) {
@@ -17,7 +14,6 @@ const llmService = {
     return apiKey
   },
 
-  // Update API key just stores the key now
   updateApiKey(apiKey: string | null) {
     this.apiKey = apiKey
   },
@@ -28,14 +24,12 @@ const llmService = {
       return false
     }
     try {
-      // Get configured low preference model from settings
       const settings = store.getState().settings;
-      // Use default if setting is missing/empty
-      const lowModelId = settings.lowPreferenceModelId || 'gemini-2.0-flash';
+      const lowModelId = settings.lowPreferenceModelId || 'gemini-2.0-flash'; // Use default if setting is missing/empty
 
       const google = createGoogleGenerativeAI({ apiKey })
       const { text } = await generateText({
-        model: google(lowModelId), // Use configured LOW preference model
+        model: google(lowModelId),
         prompt: 'Hey there!'
       })
       console.log('API Key is valid. Test response:', text)
@@ -46,7 +40,6 @@ const llmService = {
     }
   },
 
-  // Add modelPreference argument with a default value
   async generateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
     const currentApiKey = this.apiKey ?? (await this.getApiKey())
 
@@ -54,30 +47,59 @@ const llmService = {
       throw new Error('LLM API key is not initialized. Please set the API key in settings.')
     }
 
-    // Get configured model IDs from settings
     const settings = store.getState().settings;
-    // Use defaults if settings are missing/empty
-    const highModelId = settings.highPreferenceModelId || 'gemini-2.0-flash-thinking-exp-01-21';
-    const lowModelId = settings.lowPreferenceModelId || 'gemini-2.0-flash';
+    const highModelId = settings.highPreferenceModelId || 'gemini-2.0-flash-thinking-exp-01-21'; // Use default
+    const lowModelId = settings.lowPreferenceModelId || 'gemini-2.0-flash'; // Use default
 
-    // Select model based on preference using configured IDs
-    const selectedModelId = modelPreference === 'high'
-      ? highModelId
-      : lowModelId;
+    const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId;
 
-    console.log(`Using model: ${selectedModelId} for agent preference: ${modelPreference}`) // Logging
+    console.log(`Using model: ${selectedModelId} for agent preference: ${modelPreference}`)
 
     try {
       const google = createGoogleGenerativeAI({ apiKey: currentApiKey })
-
       const { text } = await generateText({
-        model: google(selectedModelId), // Use the selected model ID
+        model: google(selectedModelId),
         prompt: prompt
       })
       return text
     } catch (error) {
       console.error(`Error generating content with Vercel AI SDK (Model: ${selectedModelId}):`, error)
       throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  },
+
+  // Streaming version of generateContent
+  async *streamGenerateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
+    const currentApiKey = this.apiKey ?? (await this.getApiKey())
+
+    if (!currentApiKey) {
+      throw new Error('LLM API key is not initialized. Please set the API key in settings.')
+    }
+
+    const settings = store.getState().settings;
+    const highModelId = settings.highPreferenceModelId || 'gemini-2.0-flash-thinking-exp-01-21'; // Use default
+    const lowModelId = settings.lowPreferenceModelId || 'gemini-2.0-flash'; // Use default
+
+    const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId;
+
+    console.log(`Streaming using model: ${selectedModelId} for agent preference: ${modelPreference}`)
+
+    try {
+      const google = createGoogleGenerativeAI({ apiKey: currentApiKey })
+      const { textStream } = await streamText({ // Use streamText
+        model: google(selectedModelId),
+        prompt: prompt
+      })
+
+      // Yield each delta as it arrives
+      for await (const delta of textStream) {
+        yield delta
+      }
+
+    } catch (error) {
+      console.error(`Error streaming content with Vercel AI SDK (Model: ${selectedModelId}):`, error)
+      // Re-throw the error so the caller can handle it
+      throw new Error(`Failed to stream content: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 }

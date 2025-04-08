@@ -57,6 +57,7 @@
     "@react-three/drei": "^10.0.0-rc.0",
     "@react-three/fiber": "^9.0.0-rc.7",
     "@reduxjs/toolkit": "^2.5.1",
+    "@types/uuid": "^10.0.0",
     "ai": "^4.3.2",
     "better-sqlite3": "^11.9.1",
     "class-variance-authority": "^0.7.1",
@@ -81,6 +82,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.1",
     "three": "^0.173.0",
+    "uuid": "^11.1.0",
     "vaul": "^1.1.2",
     "zod": "^3.24.1"
   },

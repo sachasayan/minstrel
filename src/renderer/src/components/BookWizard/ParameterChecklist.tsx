@@ -19,12 +19,12 @@ export default function ParameterChecklist(): ReactNode {
       completed: !!formData.genre,
     },
     {
-      label: 'Title',
-      completed: !!formData.title,
-    },
-    {
       label: 'Setting',
       completed: !!formData.setting,
+    },
+    {
+      label: 'Title',
+
     },
     {
       label: 'Plot',

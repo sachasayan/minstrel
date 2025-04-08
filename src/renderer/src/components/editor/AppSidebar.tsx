@@ -146,14 +146,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       activeView: 'project/parameters',
       icon: <Settings className="mr-2 h-4 w-4" />
     },
-    // Removed Skeleton item
-    // {
-    //   select: 'Skeleton',
-    //   key: 'Skeleton',
-    //   activeView: 'project/editor',
-    //   activeFile: 'Skeleton',
-    //   icon: <FileText className="mr-2 h-4 w-4" />
-    // },
     {
       key: 'Outline',
       activeView: 'project/editor',

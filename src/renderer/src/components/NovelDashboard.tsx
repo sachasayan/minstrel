@@ -10,7 +10,6 @@ import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from 
 import { ProgressTracker } from '@/components/dashboard/ProgressTracker' // Import ProgressTracker
 import { Button } from '@/components/ui/button' // Import Button
 import { addChatMessage } from '@/lib/store/chatSlice' // Import addChatMessage
-import { current } from '@reduxjs/toolkit'
 
 type NovelStage = 'Writing Skeleton' | 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define NovelStage type
 
@@ -58,8 +57,6 @@ export default function NovelDashboard() {
     if (!hasSkeleton) return 'Writing Skeleton'
     if (!hasOutline) return 'Writing Outline'
     return 'Writing Chapters'
-    if (!hasChapters) return 'Writing Chapters' // Stage is Write Chapters if outline and some chapters exist but less than 3
-    return 'Editing' // Default to 'Write Chapters' if both Skeleton and Outline exist but no chapters
   }, [activeProject])
 
   const stages: NovelStage[] = ['Writing Skeleton', 'Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages

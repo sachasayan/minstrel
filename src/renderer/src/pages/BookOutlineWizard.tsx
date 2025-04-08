@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { ReactNode, UIEvent } from 'react'
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { setActiveView } from '@/lib/store/appStateSlice'
@@ -20,26 +20,31 @@ import SummaryStep from '@/components/BookWizard/SummaryPage'
 
 import { WizardContext } from '@/components/BookWizard/index'
 
+const SCROLL_THRESHOLD = 50 // Pixels from bottom to consider "at bottom"
+
 export default function BookOutlineWizard(): ReactNode {
-  const [currentStep, setCurrentStep] = useState(0) // Start at step 0 for Intro
+  const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<Record<string, any>>({})
+  const [isAtBottom, setIsAtBottom] = useState(true) // State for sticky scroll
   const dispatch = useDispatch()
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const handleGoBack = () => {
-    // If on step 1 or later, go back to step 0 (Intro)
     if (currentStep > 0) {
       setCurrentStep(0)
+      setIsAtBottom(true) // Reset scroll state when going back to Intro
     } else {
-      // If on step 0 (Intro), go back to the main app view
       dispatch(setActiveView('intro'))
     }
   }
 
   const handleProceedToStep = useCallback((nextStep: number) => {
     setCurrentStep(nextStep)
+    // Assuming proceeding should always try to scroll to bottom initially
+    // We might need more nuanced logic if steps can be added without user interaction
+    // For now, let useEffect handle the scroll based on isAtBottom
   }, [])
 
-  // Note: wizardSteps array now represents steps 1 through 7 (chat flow)
   const wizardSteps = useMemo(() => [
     { step: 1, Component: StoryLengthStep },
     { step: 2, Component: GenreStep },
@@ -50,17 +55,26 @@ export default function BookOutlineWizard(): ReactNode {
     { step: 7, Component: SummaryStep }
   ], [])
 
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-
+  // Effect to scroll to bottom if isAtBottom is true when step changes
   useEffect(() => {
-    // Only scroll if the chat container exists (i.e., currentStep > 0)
-    if (chatContainerRef.current && currentStep > 0) {
+    if (chatContainerRef.current && currentStep > 0 && isAtBottom) {
+      // Only scroll if we are considered "at the bottom"
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,
         behavior: 'smooth'
       })
     }
-  }, [currentStep])
+    // Dependency on currentStep ensures this runs when new steps are added
+    // Dependency on isAtBottom ensures we respect user scrolling away
+  }, [currentStep, isAtBottom])
+
+  // Handler for scroll events on the chat container
+  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget
+    const scrollFromBottom = target.scrollHeight - target.scrollTop - target.clientHeight
+    // Update isAtBottom state based on threshold
+    setIsAtBottom(scrollFromBottom <= SCROLL_THRESHOLD)
+  }, []) // No dependencies needed as it only uses event target
 
   return (
     <div className={cn(
@@ -75,18 +89,17 @@ export default function BookOutlineWizard(): ReactNode {
         <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      {/* Provide context globally */}
       <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 8 }}>
-        {/* Conditionally render Intro or the main chat flow */}
         {currentStep === 0 ? (
           <Intro />
         ) : (
           <div className="flex flex-grow overflow-hidden p-16 md:p-32">
-            <aside className="w-[280px] border-r p-4 overflow-y-auto bg-muted/40 shrink-0">
+            <aside className="w-[280px] border-r p-4 overflow-y-auto shrink-0">
               <ParameterChecklist />
             </aside>
 
-            <main ref={chatContainerRef} className="flex-grow p-6 overflow-y-auto space-y-6">
+            {/* Attach scroll handler here */}
+            <main ref={chatContainerRef} onScroll={handleScroll} className="flex-grow p-6 overflow-y-auto space-y-6">
               {wizardSteps
                 .filter(stepInfo => stepInfo.step <= currentStep)
                 .map(stepInfo => (

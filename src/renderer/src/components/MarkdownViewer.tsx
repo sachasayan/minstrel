@@ -1,4 +1,4 @@
-import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin } from '@mdxeditor/editor'
+import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin, thematicBreakPlugin } from '@mdxeditor/editor'
 import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRef, useEffect, JSX, useCallback } from 'react'
@@ -80,6 +80,7 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
                   plugins={[
                     headingsPlugin(),
                     listsPlugin(), // Add listsPlugin
+                    thematicBreakPlugin(),
                     toolbarPlugin({
                       toolbarClassName: 'mdx-toolbar',
                       toolbarContents: () => (
