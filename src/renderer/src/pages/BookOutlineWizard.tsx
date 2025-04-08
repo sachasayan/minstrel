@@ -1,76 +1,106 @@
 'use client'
 
-import type { ReactNode } from 'react' // Keep ReactNode
-import { useState } from 'react' // Keep useState, remove useContext
-import { useDispatch } from 'react-redux' // Add useDispatch
-import { setActiveView } from '@/lib/store/appStateSlice' // Add setActiveView
-import { Button } from '@/components/ui/button' // Keep Button
-import { ArrowLeft } from 'lucide-react' // Add ArrowLeft
-import { cn } from '@/lib/utils' // Add cn
+import type { ReactNode } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { setActiveView } from '@/lib/store/appStateSlice'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-// Removed Dialog imports
-// Removed Progress import
-// Removed selectSettingsState and useSelector imports
-
+import Intro from '@/components/BookWizard/Intro' // Import Intro component
 import ParameterChecklist from '@/components/BookWizard/ParameterChecklist'
-import Intro from '@/components/BookWizard/Intro'
-import StoryLength from '@/components/BookWizard/StoryLength'
-import SettingAndTitle from '@/components/BookWizard/SettingAndTitle'
-import PlotPage from '@/components/BookWizard/PlotPage'
-import WritingSamplePage from '@/components/BookWizard/WritingSamplePage'
-import SummaryPage from '@/components/BookWizard/SummaryPage'
-import { WizardContext } from '@/components/BookWizard/index' // Keep WizardContext, remove others for now
+import StoryLengthStep from '@/components/BookWizard/StoryLength'
+import GenreStep from '@/components/BookWizard/GenreStep'
+import SettingStep from '@/components/BookWizard/SettingStep'
+import TitleStep from '@/components/BookWizard/TitleStep'
+import PlotStep from '@/components/BookWizard/PlotPage'
+import WritingSampleStep from '@/components/BookWizard/WritingSamplePage'
+import SummaryStep from '@/components/BookWizard/SummaryPage'
 
-// Removed Navigation assignment
+import { WizardContext } from '@/components/BookWizard/index'
 
-export default function BookOutlineWizard(): ReactNode { // Changed export and removed props
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState({})
-  const totalSteps = 5 // Assuming Intro is step 0, then 5 steps for data entry + summary
-  const dispatch = useDispatch() // Add dispatch hook
+export default function BookOutlineWizard(): ReactNode {
+  const [currentStep, setCurrentStep] = useState(0) // Start at step 0 for Intro
+  const [formData, setFormData] = useState<Record<string, any>>({})
+  const dispatch = useDispatch()
 
   const handleGoBack = () => {
-    dispatch(setActiveView('intro')) // Navigate back to intro as decided
+    // If on step 1 or later, go back to step 0 (Intro)
+    if (currentStep > 0) {
+      setCurrentStep(0)
+    } else {
+      // If on step 0 (Intro), go back to the main app view
+      dispatch(setActiveView('intro'))
+    }
   }
 
+  const handleProceedToStep = useCallback((nextStep: number) => {
+    setCurrentStep(nextStep)
+  }, [])
+
+  // Note: wizardSteps array now represents steps 1 through 7 (chat flow)
+  const wizardSteps = useMemo(() => [
+    { step: 1, Component: StoryLengthStep },
+    { step: 2, Component: GenreStep },
+    { step: 3, Component: SettingStep },
+    { step: 4, Component: TitleStep },
+    { step: 5, Component: PlotStep },
+    { step: 6, Component: WritingSampleStep },
+    { step: 7, Component: SummaryStep }
+  ], [])
+
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Only scroll if the chat container exists (i.e., currentStep > 0)
+    if (chatContainerRef.current && currentStep > 0) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  }, [currentStep])
+
   return (
-    // Added SettingsPage layout structure
     <div className={cn(
-      "flex flex-col h-screen p-16 md:p-32", // Use SettingsPage padding
+      "flex flex-col h-screen",
       "animate-in fade-in zoom-in-95 duration-300"
     )}>
-      <header className="flex items-center mb-6">
+      <header className="flex items-center p-4 border-b shrink-0">
         <Button variant="ghost" size="icon" onClick={handleGoBack} className="mr-2">
           <ArrowLeft className="h-5 w-5" />
           <span className="sr-only">Back</span>
         </Button>
-        <h1 className="text-2xl font-bold">Create New Project Outline</h1>
+        <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      {/* Added main content wrapper */}
-      <main className="flex-grow overflow-y-auto">
-        {/* WizardContext Provider wraps the grid */}
-        <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps }}>
-          {/* Kept the 5-column grid */}
-          <div className="grid grid-cols-5 gap-4">
-            <div className="col-span-2">
+      {/* Provide context globally */}
+      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 8 }}>
+        {/* Conditionally render Intro or the main chat flow */}
+        {currentStep === 0 ? (
+          <Intro />
+        ) : (
+          <div className="flex flex-grow overflow-hidden p-16 md:p-32">
+            <aside className="w-[280px] border-r p-4 overflow-y-auto bg-muted/40 shrink-0">
               <ParameterChecklist />
-            </div>
-            <div className="col-span-3 flex flex-col">
-              {/* Step rendering logic remains the same */}
-              {currentStep === 0 && <Intro />}
-              {currentStep === 1 && <StoryLength />}
-              {currentStep === 2 && <SettingAndTitle />}
-              {currentStep === 3 && <PlotPage />}
-              {currentStep === 4 && <WritingSamplePage />}
-              {currentStep === 5 && <SummaryPage />}
-            </div>
+            </aside>
+
+            <main ref={chatContainerRef} className="flex-grow p-6 overflow-y-auto space-y-6">
+              {wizardSteps
+                .filter(stepInfo => stepInfo.step <= currentStep)
+                .map(stepInfo => (
+                  <stepInfo.Component
+                    key={stepInfo.step}
+                    handleProceed={handleProceedToStep}
+                    currentStep={stepInfo.step}
+                    isActive={stepInfo.step === currentStep}
+                  />
+                ))}
+            </main>
           </div>
-          {/* WizardNavigation is NOT rendered here - handled by steps */}
-        </WizardContext.Provider>
-      </main>
-      {/* Optional: Add a footer if needed later */}
-      {/* <footer className="mt-auto pt-4 border-t">Footer content</footer> */}
+        )}
+      </WizardContext.Provider>
     </div>
   )
 }

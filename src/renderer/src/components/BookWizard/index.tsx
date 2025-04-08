@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
-import { DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+// Removed DialogFooter import
+// Removed Button import
 
 interface WizardContextProps {
   totalSteps: number
@@ -20,52 +20,52 @@ const WizardContext = createContext<WizardContextProps>({
 
 const useWizard = () => useContext(WizardContext)
 
-const Navigation = () => {
-  const { currentStep, setCurrentStep, formData } = useWizard()
+// Removed Navigation component definition
 
-  const handleNext = () => {
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1)
-    }
-  }
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
 
-  const isNextDisabled = () => {
-    switch (currentStep) {
-      case 1:
-        return false
-      case 2:
-        return !formData.title || !formData.setting || !formData.genre
-      case 3:
-        return !formData.plot
-      case 4:
-        return false // Writing sample is now optional
-      default:
-        return false
-    }
-  }
 
-  return (
-    <DialogFooter className="flex justify-between">
-      <div className="flex flex-1"></div>
-      {currentStep > 0 && (
-        <Button className="mx-1" onClick={handleBack}>
-          Back
-        </Button>
-      )}
-      {currentStep < 5 && currentStep > 0 && (
-        <Button className="mx-1" onClick={handleNext} disabled={isNextDisabled()}>
-          Next
-        </Button>
-      )}
-    </DialogFooter>
-  )
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const sanitizeFilename = (filename: string) => { // Move sanitizeFilename to index.tsx
   return filename.replace(/[^a-z0-9_-]/gi, ' ')
@@ -117,4 +117,4 @@ const genreSettings = {
 }
 
 
-export { WizardContext, useWizard, Navigation as WizardNavigation, cheatData, genres, novelLengths, genreSettings, sanitizeFilename } // Export sanitizeFilename
+export { WizardContext, useWizard, /* Removed WizardNavigation */ cheatData, genres, novelLengths, genreSettings, sanitizeFilename } // Export sanitizeFilename
