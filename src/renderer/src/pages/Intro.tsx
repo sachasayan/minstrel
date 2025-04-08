@@ -1,4 +1,5 @@
 import { useEffect, ReactNode } from 'react'
+import StatusBar from '@/components/StatusBar'
 import { Button } from '@/components/ui/button'
 import ProjectLibrary from '@/components/ProjectLibrary'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,9 +15,9 @@ const Intro = (): ReactNode => { // Changed return type to ReactNode
   const projectList = useSelector(selectProjectList)
   const settingsState = useSelector(selectSettingsState)
 
+
   const handleProjectSelect = (projectPath: string) => {
     if (projectPath == 'add') {
-
       dispatch(startNewProject());
       dispatch(setActiveView('project/dashboard'));
       return
@@ -58,37 +59,27 @@ const Intro = (): ReactNode => { // Changed return type to ReactNode
     // Depend on the specific setting property
   }, [settingsState.workingRootDirectory, dispatch])
 
-  // Function to navigate to the settings page
-  const goToSettings = () => {
-    dispatch(setActiveView('settings'))
-  }
 
   return (
-    // Added zoom-in-95 animation class
-    <div className={cn(
-      "flex flex-col items-center justify-center p-8 h-full",
-      "animate-in fade-in zoom-in-95 duration-300" // Added zoom
-    )}>
-      <h1 className="text-2xl font-bold mb-4">Welcome to Minstrel</h1>
-      <p className="text-gray-500 mb-2">Start a new project or set your project directory to begin.</p>
-      <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
+    <>
+      <StatusBar />
+      <div className={cn(
+        "flex flex-col items-center justify-center p-8 h-full",
+        "animate-in fade-in zoom-in-95 duration-300"
+      )}>
+        <h1 className="text-2xl font-bold mb-4">Welcome to Minstrel</h1>
 
-      <div className="mt-12">
-        <Button variant="outline" onClick={goToSettings}>Settings</Button>
+        <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
+
+        <p className="outline rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
+          Minstrel is totally free for personal use. Like it?{' '}
+          <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">
+            Buy me a coffee.
+          </a>{' '}
+          ☕ ❤️
+        </p>
       </div>
-
-
-      <p className="text-gray-300 m-4 text-xs">Current project path: {settingsState?.workingRootDirectory || 'Not Set'}</p>
-
-      <p className="outline rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
-        Minstrel is totally free for personal use. Like it?{' '}
-        <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">
-          Buy me a coffee.
-        </a>{' '}
-        ☕ ❤️
-      </p>
-
-    </div>
+    </>
   )
 }
 

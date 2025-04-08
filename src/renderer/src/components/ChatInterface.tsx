@@ -112,6 +112,14 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
             <div
               className={` bg-neutral-100 shadow-lg rounded-lg border flex flex-col h-full`}
             >
+              <div className="flex justify-between items-center p-2 border-b">
+                <div className="font-semibold">Chat</div>
+                <Button size="icon" variant="ghost" onClick={() => setExpanded(false)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </Button>
+              </div>
               <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
                 {chatHistory.map((msg, index) => (
                   <div

@@ -20,20 +20,6 @@ const ProjectOverview = (): React.ReactNode => {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const [showBookOutlineWizard, setShowBookOutlineWizard] = useState(false)
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node) && expanded) {
-        console.log('click outside')
-        setExpanded(false)
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside)
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside)
-    }
-  }, [expanded])
 
   // Effect to show wizard when a new project is started
   useEffect(() => {

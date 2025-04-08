@@ -3,7 +3,7 @@ body {
 }
 
 .titlebar {
-  background-color: hsl(255, 0%, 0%, 2%);
+  background-color: hsl(255, 0%, 0%, 0%);
   position: fixed;
   z-index: 1000;
   top: 0px;

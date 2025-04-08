@@ -3,7 +3,6 @@ import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
 import { updateFile, setPendingFiles, updateReviews } from '@/lib/store/projectsSlice' // Removed resolvePendingFiles
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
-import { setActiveView, setActiveFile } from '@/lib/store/appStateSlice'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
@@ -72,9 +71,6 @@ const processResponse = (responseString: string): RequestContext | null => {
       // console.log(stringToProjectFile("---- \n # " + fileName + "\n \n" +content))
       // Fix Markdown formatting before updating the file
       store.dispatch(updateFile({title: fileName, content: content}));
-      // Switch to ProjectOverview and set active file after successful
-      store.dispatch(setActiveView('project/editor'))
-      store.dispatch(setActiveFile(fileName))
     }
   }
 
