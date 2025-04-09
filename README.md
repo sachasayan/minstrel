@@ -85,11 +85,8 @@ Minstrel is open to contributions. If you'd like to develop a new feature or fix
 
 Forking the project? Using an AI-enabled LLM? This project is set up with a Cline-compatible Memory Bank to maintain development context. The Memory Bank consists of the following core files:
 
-- `projectBrief.md`: Defines the project's core requirements and goals. Should not be modified by the LLM, only the user.
 - `productContext.md`: Descries the project's overall purpose, problems it solves, and user experience goals.
 - `techContext.md`: Contains system architecture, technologies used, development setup, and dependencies.
-- `progress.md`: Outlines the phased development plan and progress.
-- `activeContext.md`: Tracks the current work focus and development status.
 
 ## Usage
 

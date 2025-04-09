@@ -12,6 +12,8 @@
 - I never clean up whitespace or empty lines.
 - I don't add semicolons to the end of lines in JavaScript or TypeScript files.
 - I always use ReactNode as the TypeScript type for React components.
+- I don't worry about type errors involving 'any' or 'unknown' types.
+- I don't worry about linting rules regarding preferred whitespace.
 
 # Cline/Roo's Memory Bank
 
@@ -22,28 +24,19 @@ I MUST READ ALL MEMORY BANK FILES AT THE START OF EVERY TASK - THIS IS NOT OPTIO
 
 ## Memory Bank Structure
 
-The Memory Bank consists of required core files and optional context files, all in Markdown format. Files build upon each other in a clear hierarchy:
-
-```mermaid
-flowchart TD
-    PB[projectbrief.md] --> PC[productContext.md]
-    PB --> TC[techContext.md]
-```
+The Memory Bank consists of required core files and optional context files, all in Markdown format.
 
 ### Core Files (Required)
-1. `memory-bank/projectbrief.md`
-   - Never edit the projectbrief file, only read from it.
-   - Foundation document that shapes all other files
-   - Created at project start if it doesn't exist
+
+1. `memory-bank/productContext.md`
    - Defines core requirements and goals
    - Source of truth for project scope
-
-2. `memory-bank/productContext.md`
    - Why this project exists
    - Problems it solves
    - How it should work
+   - Created at project start if it doesn't exist
 
-3. `memory-bank/techContext.md`
+2. `memory-bank/techContext.md`
    - Technologies used
    - System architecture
    - Dependencies
