@@ -9,7 +9,6 @@ import MarkdownViewer from '@/components/MarkdownViewer'
 import NovelDashboard from '@/components/NovelDashboard'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import ChatInterface from '@/components/ChatInterface'
-import ProjectParameters from './ProjectParameters'
 import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
 
@@ -34,8 +33,6 @@ const ProjectOverview = (): React.ReactNode => {
           <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
         ) : appState.activeView == 'project/dashboard' ? (
           <NovelDashboard />
-        ) : appState.activeView == 'project/parameters' ? (
-          <ProjectParameters />
         ) : null}
 
         {/* Chat Interface */}
