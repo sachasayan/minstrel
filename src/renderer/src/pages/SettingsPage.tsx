@@ -1,5 +1,5 @@
-import { ReactNode, useState, useEffect } from 'react' // Added useState, useEffect
-import { useDispatch, useSelector } from 'react-redux' // Added useSelector
+import { ReactNode, useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { setActiveView } from '@/lib/store/appStateSlice'
 import {
   setSettingsState,
@@ -9,22 +9,22 @@ import {
   setHighPreferenceModelId,
   setLowPreferenceModelId,
   selectSettingsState
-} from '@/lib/store/settingsSlice' // Added settings slice imports
-import { AppDispatch, store } from '@/lib/store/store' // Added store import
-// Removed Settings import
+} from '@/lib/store/settingsSlice'
+import { AppDispatch, store } from '@/lib/store/store'
+
 import Versions from '@/components/Versions'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label' // Added Label import
-import { Input } from '@/components/ui/input' // Added Input import
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select" // Added Select imports
-import { toast } from 'sonner' // Added toast import
-import { ArrowLeft, Folder } from 'lucide-react'; // Added Folder import
+} from "@/components/ui/select"
+import { toast } from 'sonner'
+import { ArrowLeft, Folder } from 'lucide-react';
 import { cn } from '@/lib/utils'
 
 // Define Model Options (Moved from Settings.tsx)
@@ -126,9 +126,9 @@ const SettingsPage = (): ReactNode => {
   }
 
   return (
-    // Updated padding classes again
+
     <div className={cn(
-      "flex flex-col h-screen p-16 md:p-32", // Doubled padding again
+      "flex flex-col h-screen p-16 md:p-32",
       "animate-in fade-in zoom-in-95 duration-300"
     )}>
       <header className="flex items-center mb-6">

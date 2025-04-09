@@ -24,7 +24,7 @@ interface OnboardingFlowProps {
   formData: { [key: string]: any }
   setFormData: (data: { [key: string]: any }) => void
   editFormData: (newData) => void
-  setShowOnboarding: (show: boolean) => void // Added setShowOnboarding to context
+  setShowOnboarding: (show: boolean) => void
 }
 
 const OnboardingFlow = createContext<OnboardingFlowProps>({
@@ -34,7 +34,7 @@ const OnboardingFlow = createContext<OnboardingFlowProps>({
   formData: {},
   setFormData: () => { },
   editFormData: () => { },
-  setShowOnboarding: () => { } // Added setShowOnboarding to default context value
+  setShowOnboarding: () => { }
 })
 
 // Custom hook for using wizard context
@@ -94,11 +94,11 @@ const Intro = () => {
 
 // Page 1
 const SetUpKey = () => {
-  const { setCurrentStep, editFormData, setShowOnboarding } = useOnboarding() // Added setShowOnboarding from context
+  const { setCurrentStep, editFormData, setShowOnboarding } = useOnboarding()
   const [keyValue, setKeyValue] = useState('')
   const [keyError, setKeyError] = useState(false)
-  const [verifyingKey, setVerifyingKey] = useState(false) // Added loading state
-  let debounceTimeout // Changed to let and moved to component scope
+  const [verifyingKey, setVerifyingKey] = useState(false)
+  let debounceTimeout
 
   const handleKey = async (keyInput) => {
     setKeyValue(keyInput)
@@ -109,7 +109,7 @@ const SetUpKey = () => {
 
     // Set up new timeout
     debounceTimeout = setTimeout(async () => {
-      // Removed const timeoutId
+
       setVerifyingKey(true)
       try {
         console.log('Verifying key...' + keyInput)
@@ -172,8 +172,8 @@ const SetUpKey = () => {
 
 // Summary Page
 const SummaryPage = () => {
-  const { formData, setShowOnboarding } = useOnboarding() // Added setShowOnboarding from context
-  const dispatch = useDispatch() // moved useDispatch here
+  const { formData, setShowOnboarding } = useOnboarding()
+  const dispatch = useDispatch()
 
   const handleSaveSettings = () => {
     const apiCall = {

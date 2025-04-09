@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-// Import Project type explicitly if not already fully covered by ProjectState
+
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'

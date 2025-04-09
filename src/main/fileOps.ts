@@ -1,4 +1,4 @@
-import { dialog, ipcMain, OpenDialogOptions } from 'electron' // Import OpenDialogOptions
+import { dialog, ipcMain, OpenDialogOptions } from 'electron'
 import * as os from 'os'
 import * as fs from 'fs/promises'
 

@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
-// Removed DialogFooter import
-// Removed Button import
+
+
 
 interface WizardContextProps {
   totalSteps: number
@@ -20,7 +20,7 @@ const WizardContext = createContext<WizardContextProps>({
 
 const useWizard = () => useContext(WizardContext)
 
-// Removed Navigation component definition
+
 
 
 

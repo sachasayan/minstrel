@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from './store'
-import { ChatMessage } from '@/types' // Import ChatMessage from types.ts
+import { ChatMessage } from '@/types'
 
 // Remove local ChatMessage definition as it's now imported
 

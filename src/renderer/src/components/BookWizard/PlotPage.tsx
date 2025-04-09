@@ -8,7 +8,7 @@ import { useWizard } from '@/components/BookWizard/index'
 interface PlotStepProps {
   handleProceed: (nextStep: number) => void
   currentStep: number
-  isActive: boolean // Added isActive prop
+  isActive: boolean
 }
 
 const PlotStep = ({ handleProceed, currentStep, isActive }: PlotStepProps) => {

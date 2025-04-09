@@ -1,6 +1,6 @@
-// import { useSelector } from 'react-redux';
-// import { selectAppState } from '@/lib/utils/appStateSlice';
-// import { ChapterOutline } from '@/types';
+
+
+
 import { KanbanBoard } from './KanbanBoard'
 
 export default function ProjectOutline() {

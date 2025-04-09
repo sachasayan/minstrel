@@ -1,7 +1,7 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile, setPendingFiles, updateReviews } from '@/lib/store/projectsSlice' // Removed resolvePendingFiles
+import { updateFile, setPendingFiles, updateReviews } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
@@ -173,7 +173,7 @@ export const sendMessage = async (context: RequestContext) => {
   }
 }
 
-// Renamed function to generate initial outline from parameters
+
 export const generateOutlineFromParams = async (parameters: { [key: string]: any }): Promise<void> => {
   const prompt = buildPrompt({
     agent: 'outlineAgent',

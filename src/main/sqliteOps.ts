@@ -3,8 +3,8 @@ import * as os from 'os'
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-// Removed import of types from renderer process
-// import type { Project, ChatMessage, ProjectFile } from '../renderer/src/types'
+
+
 
 const homedir = os.homedir()
 
@@ -124,7 +124,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
         }
     }
 
-    // 2. Clear existing files and insert new ones (excluding skeleton)
+    // 2. Clear existing files and insert new ones
     db.exec('DELETE FROM files')
     const insertFile = db.prepare(`
       INSERT INTO files (title, content, type, sort_order)
@@ -132,7 +132,6 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     `)
     if (Array.isArray(project.files)) {
       let sortOrder = 0
-      // Removed Skeleton saving logic explicitly
       // Use 'any' for item types within loops as ProjectFile type is not available
       const outline = project.files.find((e: any) => e.title.includes('Outline'))
       if (outline) {

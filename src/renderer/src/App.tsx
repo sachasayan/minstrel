@@ -1,16 +1,16 @@
 import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectActiveView, setActiveView } from '@/lib/store/appStateSlice' // Import setActiveView
+import { selectActiveView, setActiveView } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
-// import { defaultSettings } from '@/lib/services/settingsService' // defaultSettings seems unused now
+
 import { Toaster } from '@/components/ui/sonner'
 import OnboardingDialog from '@/components/OnboardingDialog'
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
-import SettingsPage from '@/pages/SettingsPage' // Import new page
-import BookOutlineWizard from '@/pages/BookOutlineWizard' // Import wizard page
+import SettingsPage from '@/pages/SettingsPage'
+import BookOutlineWizard from '@/pages/BookOutlineWizard'
 export default function App(): ReactNode {
   const dispatch = useDispatch()
   const activeProject = useSelector(selectActiveProject)
@@ -19,7 +19,7 @@ export default function App(): ReactNode {
   const [hasLoaded, setHasLoaded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
-  // Refactored loadSettings to directly dispatch setSettingsState
+
   const loadSettings = async () => {
     console.log('Loading settings')
     try {
@@ -49,7 +49,7 @@ export default function App(): ReactNode {
       case 'project/editor':
         // Ensure activeProject exists before rendering ProjectOverview
         return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro />; // Fallback to Intro if no project
-      case 'settings': // Added case for settings
+      case 'settings':
         return <SettingsPage />
       default:
         return <Intro />
@@ -62,7 +62,7 @@ export default function App(): ReactNode {
       loadSettings() // Call the async function
       setHasLoaded(true)
     }
-  }, [hasLoaded, dispatch]) // Added dispatch dependency
+  }, [hasLoaded, dispatch])
 
   return (
     <>

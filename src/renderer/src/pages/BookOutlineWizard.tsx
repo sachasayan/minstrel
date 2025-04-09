@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-import Intro from '@/components/BookWizard/Intro' // Import Intro component
+import Intro from '@/components/BookWizard/Intro'
 import ParameterChecklist from '@/components/BookWizard/ParameterChecklist'
 import StoryLengthStep from '@/components/BookWizard/StoryLength'
 import GenreStep from '@/components/BookWizard/GenreStep'

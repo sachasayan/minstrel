@@ -10,8 +10,8 @@ const initialState: AppSettings = {
   api: '',
   apiKey: '',
   workingRootDirectory: null, // Match default type in settingsManager
-  highPreferenceModelId: DEFAULT_HIGH_PREFERENCE_MODEL_ID, // Added default
-  lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID   // Added default
+  highPreferenceModelId: DEFAULT_HIGH_PREFERENCE_MODEL_ID,
+  lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID
 }
 
 export const settingsSlice = createSlice({
@@ -37,7 +37,7 @@ export const settingsSlice = createSlice({
     setWorkingRootDirectory: (state, action: PayloadAction<string | null>) => {
       state.workingRootDirectory = action.payload
     },
-    // Added new reducers
+
     setHighPreferenceModelId: (state, action: PayloadAction<string>) => {
       state.highPreferenceModelId = action.payload
     },

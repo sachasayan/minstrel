@@ -4,12 +4,12 @@ import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
 import { toast } from 'sonner'
 
 import { saveProject } from '@/lib/services/fileService'
-// Import updateMetaProperty action
+
 import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects, updateMetaProperty } from '@/lib/store/projectsSlice'
-// Import chat history selector
+
 import { selectChatHistory, addChatMessage } from '@/lib/store/chatSlice'
 
-import { Plus, Save, X, Diff, LayoutDashboard, Settings, /* FileText, */ ListOrdered, Book } from 'lucide-react' // Removed FileText
+import { Plus, Save, X, Diff, LayoutDashboard, Settings, /* FileText, */ ListOrdered, Book } from 'lucide-react'
 import { Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -38,7 +38,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { selectAppState } from '@/lib/store/appStateSlice'
-// Removed duplicate import of addChatMessage
+
 
 const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
   return (
@@ -83,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // dispatch(setChatHistory([]));
   }
 
-  // Updated handleSave function
+
   const handleSave = async () => {
     if (projectsState.activeProject) {
       const currentPath = projectsState.activeProject.projectPath
@@ -139,7 +139,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }
 
-  // Updated structureItems array (removed Skeleton entry)
   const structureItems = [
     {
       key: 'Parameters',

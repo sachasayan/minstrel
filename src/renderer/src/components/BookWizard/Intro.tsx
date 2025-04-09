@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button'
-import { useWizard, cheatData } from '@/components/BookWizard/index' // Removed WizardNavigation import
+import { useWizard, cheatData } from '@/components/BookWizard/index'
 
 const Intro = () => {
-  const { setCurrentStep, setFormData } = useWizard() // Removed currentStep as it's always 0 here
+  const { setCurrentStep, setFormData } = useWizard()
 
   const handleCheat = async () => {
     setFormData(cheatData)
@@ -12,7 +12,7 @@ const Intro = () => {
   }
 
   return (
-    // Removed h-full and flex-col as the parent now controls layout
+
     <div className="flex-grow space-y-4 flex flex-col items-center justify-center p-16 ">
       <h2 className="text-2xl font-bold text-center">Hello, Dreamer</h2>
       <p className="text-center text-sm text-gray-500">{`It's nice to meet you! Do you have an idea for a story, or should I come up with something? `}</p>

@@ -15,7 +15,7 @@
 * 💬 **Familiar chat interface:** All interactions take place through a familiar chat window. Ask Minstrel questions, give it instructions, strategize on next steps. It's your writing buddy.
 
 - 🤹 **Multi-agent architecture:** Specialized agents (Project Managers, Writers, Critics, Storyline Specialists) work behind the scenes to get the best output. It's like having a whole team.
-- ✍️ **Iterative process:** Revisit and refine any part of the story, including skeletons and outlines. Restructure entire chapters, or just add and remove details.
+- ✍️ **Iterative process:** Revisit and refine any part of the story, including outlines. Restructure entire chapters, or just add and remove details.
 - 🔑 **Use your own key:** Minstrel is free to use, just provide your own API key. Currently, Minstrel uses the free (rate-limited) Gemini Flash 2.0 API.
 
 # Writing a Novel with Minstrel
@@ -30,7 +30,7 @@ Minstrel follows a structured process to guide users through the writing experie
 
 - Open Minstrel and select the "Add Project" option.
 - Minstrel will ask you some basic questions about your project, such as the name, genre, and storyline details you have in mind.
-- From those parameters, Minstrel will automatically generate a broad-strokes **Skeleton** for your story. A skeleton is a basic suggested structure with characters, chapters, and environments described in abstract. Change the Skeleton as much as you like — add or remove details, characters, names, chapters, or storyline events.
+- From those parameters, Minstrel will automatically generate a broad-strokes **Outline** for your story. A an outline is a basic suggested structure with characters, chaptes, and environments described in abstract. Change the Skeleton as much as you like — add or remove details, characters, names, chapters, or storyline events.
 
 <div style="padding: 20px; padding-left:50px; float:right">
 <img  margin="20" width="200" src="./resources/chat.png">
@@ -40,7 +40,6 @@ Minstrel follows a structured process to guide users through the writing experie
 - Minstrel can then generate **Chapters** based on the outline, or you can write them yourself. Each time you write a chapter, the full outline and previous chapter are passed to the AI to maintain consistency. Writing style, character appearances, and environments are all respected. Edits can be done by hand, or you can give Minstrel directions like "In Chapter 4, let's start Arthur outisde of his house rather than in the living room." or "Have the ship commander check for survivors before pursuing the aliens."
 - Updates made to chapters can then be syndicated back to the Outline. Try "Update the outline to reflect the new changes in Chapter 8" — soon this will happen automatically, but for the first version of Minstrel, you should actively instruct the AI to do it.
 
-All story files (Skeleton, Outline, Chapters) are written in Markdown and saved as plain text, so you aren't locked into a proprietary file format. Edit them the same you would any other text file, from any other program. Go nuts!
 
 #### Other Features coming soon:
 

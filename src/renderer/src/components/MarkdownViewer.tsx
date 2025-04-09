@@ -5,7 +5,7 @@ import { useRef, useEffect, JSX, useCallback } from 'react'
 
 import '@mdxeditor/editor/style.css'
 import { setProjectHasLiveEdits, selectProjects, updateFile, renameFile } from '@/lib/store/projectsSlice'
-import EditableHeading from './EditableHeading' // Import the new component
+import EditableHeading from './EditableHeading'
 
 interface MarkdownViewerProps {
   title: string | null // Allow null

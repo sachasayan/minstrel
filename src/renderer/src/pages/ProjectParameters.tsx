@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, useRef, ChangeEvent, DragEvent } from 'react' // Added DragEvent
+import { ReactNode, useState, useEffect, useRef, ChangeEvent, DragEvent } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload } from 'lucide-react'
-import { cn } from '@/lib/utils' // Import cn utility for conditional classes
+import { cn } from '@/lib/utils'
 
 // Define constants for validation
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

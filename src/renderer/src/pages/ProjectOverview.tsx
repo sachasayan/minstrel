@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react' // Removed useEffect
+import { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { selectAppState } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-// Removed BookOutlineWizard import
+
 
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import MarkdownViewer from '@/components/MarkdownViewer'
@@ -18,17 +18,17 @@ const ProjectOverview = (): React.ReactNode => {
   const activeProject = useSelector(selectActiveProject)
   const [expanded, setExpanded] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-  // Removed showBookOutlineWizard state
 
 
-  // Removed useEffect for showing wizard dialog based on isNew flag
+
+
 
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className={cn(
         "relative",
-        "animate-in fade-in zoom-in-95 duration-300" // Added zoom
+        "animate-in fade-in zoom-in-95 duration-300"
       )}>
         {appState.activeView == 'project/editor' ? (
           <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />

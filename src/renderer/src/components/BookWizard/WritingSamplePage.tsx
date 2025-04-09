@@ -1,4 +1,4 @@
-import { useMemo } from 'react' // Added useMemo
+import { useMemo } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { useWizard } from '@/components/BookWizard'
 interface WritingSampleStepProps {
   handleProceed: (nextStep: number) => void
   currentStep: number
-  isActive: boolean // Added isActive prop
+  isActive: boolean
 }
 
 const WritingSampleStep = ({ handleProceed, currentStep, isActive }: WritingSampleStepProps) => {

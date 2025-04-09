@@ -2,14 +2,14 @@ import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   setSettingsState,
-  setApi, // Import specific setters
-  setApiKey, // Import specific setters
-  setWorkingRootDirectory, // Import specific setters
-  setHighPreferenceModelId, // Import new action
-  setLowPreferenceModelId,  // Import new action
-  selectSettingsState // Import selector for full state
+  setApi,
+  setApiKey,
+  setWorkingRootDirectory,
+  setHighPreferenceModelId,
+  setLowPreferenceModelId,
+  selectSettingsState
 } from '@/lib/store/settingsSlice'
-import { AppDispatch, store } from '@/lib/store/store' // Import store for getState
+import { AppDispatch, store } from '@/lib/store/store'
 import { Button } from './ui/button'
 import { Label } from './ui/label' // Assuming Label component exists
 import { Input } from './ui/input' // Assuming Input component exists
@@ -19,10 +19,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select" // Import Select components
-import { toast } from 'sonner' // Import toast for feedback
-import Versions from './Versions' // Import Versions component
-import { Folder } from 'lucide-react' // Import Folder icon
+} from "@/components/ui/select"
+import { toast } from 'sonner'
+import Versions from './Versions'
+import { Folder } from 'lucide-react'
 
 // Define Model Options
 const modelOptions = [
@@ -43,7 +43,7 @@ const Settings = (): ReactNode => {
   // Local state ONLY for text inputs that aren't saved immediately
   const [apiValue, setApiValue] = useState<string>('') // Initialize empty
   const [apiKeyValue, setApiKeyValue] = useState<string>('') // Initialize empty
-  // Removed workingRootDirectoryValue state
+
 
   // Effect to load settings on mount and sync local state for text inputs
   useEffect(() => {
@@ -54,7 +54,7 @@ const Settings = (): ReactNode => {
         // Sync local state for text inputs *after* Redux state is updated
         setApiValue(loadedSettings?.api || '')
         setApiKeyValue(loadedSettings?.apiKey || '')
-        // Removed setting workingRootDirectoryValue
+
       } catch (error) {
         console.error("Failed to load settings:", error);
         toast.error("Failed to load settings.");
@@ -68,8 +68,8 @@ const Settings = (): ReactNode => {
   useEffect(() => {
     setApiValue(settings.api || '');
     setApiKeyValue(settings.apiKey || '');
-    // Removed setting workingRootDirectoryValue
-  }, [settings.api, settings.apiKey]); // Removed settings.workingRootDirectory dependency
+
+  }, [settings.api, settings.apiKey]);
 
 
   // Function to save the current FULL settings state from Redux via IPC
@@ -116,7 +116,7 @@ const Settings = (): ReactNode => {
       const selectedPath = await window.electron.ipcRenderer.invoke('select-directory', 'export');
       if (selectedPath) {
         dispatch(setWorkingRootDirectory(selectedPath));
-        // Removed immediate save: saveCurrentSettings();
+
       } else {
         console.log("Folder selection cancelled.");
       }
@@ -128,7 +128,7 @@ const Settings = (): ReactNode => {
 
 
   return (
-    // Removed space-y-4 and p-4 from root, moved padding to grid
+
     <div>
       {/* Grid container for two columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-6 p-4">

@@ -1,17 +1,17 @@
-import { useSelector, useDispatch } from 'react-redux' // Import useDispatch
+import { useSelector, useDispatch } from 'react-redux'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState, useCallback } from 'react' // Corrected import for useState and useEffect
-// import { chapterData, characters } from './mockData'; // Removed mock data
+import { useEffect, useState, useCallback } from 'react'
+
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from '@/lib/dashboardUtils'
-import { ProgressTracker } from '@/components/dashboard/ProgressTracker' // Import ProgressTracker
-import { Button } from '@/components/ui/button' // Import Button
-import { addChatMessage } from '@/lib/store/chatSlice' // Import addChatMessage
+import { ProgressTracker } from '@/components/dashboard/ProgressTracker'
+import { Button } from '@/components/ui/button'
+import { addChatMessage } from '@/lib/store/chatSlice'
 
-type NovelStage = 'Writing Skeleton' | 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define NovelStage type
+type NovelStage = 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define NovelStage type
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
@@ -46,32 +46,23 @@ export default function NovelDashboard() {
 
   // Function to determine current novel stage
   const getCurrentStage = useCallback((): NovelStage => { // Explicitly return NovelStage
-    if (!activeProject) return 'Writing Skeleton' // Default to Skeleton if no project
-    const hasSkeleton = activeProject.files.some(file => file.title.toLowerCase().includes('skeleton'))
+    if (!activeProject) return 'Writing Outline' // Default to Outline if no project
     const hasOutline = activeProject.files.some(file => file.title.toLowerCase().includes('outline'))
-    const chapterFiles = activeProject.files.filter(file => file.title.toLowerCase().startsWith('chapter'))
-    const hasChapters = chapterFiles.length > 0;
-    const chapterCount = chapterFiles.length;
 
 
-    if (!hasSkeleton) return 'Writing Skeleton'
+
     if (!hasOutline) return 'Writing Outline'
     return 'Writing Chapters'
   }, [activeProject])
 
-  const stages: NovelStage[] = ['Writing Skeleton', 'Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
+  const stages: NovelStage[] = ['Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
   const currentStage = getCurrentStage()
 
   const captions = {
-    'Writing Skeleton': {
-      caption: 'Write the skeleton.',
-      instruction: 'Please create a skeleton.',
-      guidance: `How did you even get here? That shouldn't be possible!`
-    },
     'Writing Outline': {
       caption: 'Add the outline.',
       instruction: 'Please add the outline.',
-      guidance: `Woohoo! You're on your way! At this stage, you can edit the Skeleton to your heart's content. When you're done, just ask Minstrel to create an Outline, and we'll flesh out Characters, Environments`
+      guidance: `Woohoo! You're on your way! At this stage, you can edit the Outline to your heart's content.`
     },
     'Writing Chapters': {
       caption: 'Write the next chapter.',

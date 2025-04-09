@@ -1,7 +1,7 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 import {
-  // Removed unused fetchSqliteProjects
-  // Removed unused getSqliteProjectFragmentMeta as getSqliteMetaFromService
+
+
   loadSqliteProject,
   saveSqliteProject,
   initSqliteProject
@@ -18,7 +18,7 @@ export function decodeHtmlEntities(html) {
  * @returns True if the file is SQLite format, false otherwise
  */
 export const isSqliteFormat = (path: string): boolean => {
-  // Added check for null/undefined path
+
   return typeof path === 'string' && path.toLowerCase().endsWith('.mns')
 }
 
@@ -134,7 +134,7 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
   return []
 }
 
-// Removed fetchMarkdownProjects helper as fetchProjects now handles both
+
 
 export const fetchProjectDetails = async (projectFragment: ProjectFragment): Promise<Project> => {
   // Route to appropriate handler based on file extension
@@ -157,7 +157,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
     const metadata = JSON.parse(metadataMatch[1])
 
     const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/ig)].map(m => ({ name: m[2], content: m[3].trim() }))
-    // console.log(projectFiles) // Reduced logging
+    // console.log(projectFiles)
     const chapterList = projectFiles
       .map((item) => {
         return {
@@ -166,7 +166,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
           hasEdits: false
         } as ProjectFile
       })
-    // console.log(chapterList) // Reduced logging
+    // console.log(chapterList)
 
     // Construct the Project object for MD files (no cover/chat support here)
     return {

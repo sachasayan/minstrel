@@ -85,7 +85,7 @@ export function addUserPrompt(prompt: string, userMessage: string): string {
 export function addParameters(prompt: string, parameters: string): string {
   // Assuming parameters is already a formatted string or object stringified
   const content = parameters || '(No parameters provided.)'
-  return addFormattedSection(prompt, 'PARAMETERS FOR THE SKELETON', content)
+  return addFormattedSection(prompt, 'PARAMETERS FOR THE OUTLINE', content)
 }
 
 export function addCurrentStep(prompt: string, currentStep: number | undefined): string {

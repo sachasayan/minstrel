@@ -2,7 +2,7 @@ import { createListenerMiddleware, isAnyOf, PayloadAction } from '@reduxjs/toolk
 import { setActiveProject, renameFile, setActiveProjectFromFragment } from '../projectsSlice'
 import { fetchProjectDetails } from '@/lib/services/fileService'
 import { setActiveFile } from '../appStateSlice'
-import { setChatHistory } from '../chatSlice' // Import setChatHistory action
+import { setChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
 

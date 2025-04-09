@@ -14,7 +14,7 @@ interface AppSettings {
   lowPreferenceModelId?: string  // Added
 }
 
-// Removed unused _event parameter
+
 export const loadAppSettings = async (): Promise<AppSettings> => {
   const appSettings: any = (await settings.get('settings')) || {}
 
@@ -40,7 +40,7 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   return appSettings as AppSettings
 }
 
-// Removed unused _event parameter
+
 export const saveAppSettings = async (config: AppSettings) => {
   // Provide defaults for potentially undefined values to satisfy electron-settings types
   const settingsToSave = {

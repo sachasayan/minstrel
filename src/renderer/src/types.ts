@@ -38,7 +38,7 @@ export interface ProjectFragment {
 }
 
 export interface ProjectFile {
-  title: string // Renamed from title for consistency
+  title: string
   content: string
   wordcount?: number
   hasEdits?: boolean

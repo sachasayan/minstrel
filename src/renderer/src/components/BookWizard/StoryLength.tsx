@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Slider } from '@/components/ui/slider'
-// Removed Label import
+
 import { Button } from '@/components/ui/button'
 import { useWizard, novelLengths } from '@/components/BookWizard/index'
 
@@ -8,7 +8,7 @@ import { useWizard, novelLengths } from '@/components/BookWizard/index'
 interface StoryLengthStepProps {
   handleProceed: (nextStep: number) => void
   currentStep: number
-  isActive: boolean // Added isActive prop
+  isActive: boolean
 }
 
 const StoryLengthStep = ({ handleProceed, currentStep, isActive }: StoryLengthStepProps) => {

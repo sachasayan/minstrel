@@ -1,5 +1,5 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google' // Import Vercel AI SDK Google provider
-import { generateText, streamText } from 'ai' // Import Vercel AI SDK core functions
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { generateText, streamText } from 'ai'
 import { store } from '@/lib/store/store'
 
 const llmService = {

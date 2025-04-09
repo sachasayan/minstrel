@@ -8,7 +8,7 @@ import { setActiveView } from '@/lib/store/appStateSlice'
 import { useWizard, genres, sanitizeFilename } from '@/components/BookWizard/index'
 import ReactMarkdown from 'react-markdown'
 import { Loader2 } from 'lucide-react'
-import { v4 as uuidv4 } from 'uuid' // Import uuid
+import { v4 as uuidv4 } from 'uuid'
 import type { ProjectFile } from '@/types' // Assuming ProjectFile type exists in types.ts
 
 interface SummaryStepProps {
