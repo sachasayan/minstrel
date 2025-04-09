@@ -1,4 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+// Patch Project interface to add dialogueAnalysis property
+declare module '@/types' {
+  interface Project {
+    dialogueAnalysis?: {
+      dialogCounts: Record<string, number[]>
+    } | null
+  }
+}
 
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
@@ -98,9 +106,10 @@ export const projectsSlice = createSlice({
       state.activeProject[action.payload.property as keyof Project] = action.payload.value
       state.projectHasLiveEdits = true
     },
-    updateReviews: (state, action: PayloadAction<any>) => { // Consider using specific ExpertSuggestion[] type
+    updateReviews: (state, action: PayloadAction<{critique: any[], analysis: { dialogCounts: Record<string, number[]> }}>) => {
       if (!state.activeProject) return
-      state.activeProject.expertSuggestions = action.payload
+      state.activeProject.expertSuggestions = action.payload.critique
+      state.activeProject.dialogueAnalysis = action.payload.analysis
       state.projectHasLiveEdits = true
     },
     renameFile: (state, action: PayloadAction<{ oldTitle: string; newTitle: string }>) => {

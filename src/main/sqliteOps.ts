@@ -113,7 +113,8 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       wordCountCurrent: project.wordCountCurrent,
       expertSuggestions: project.expertSuggestions,
       coverImageBase64: project.coverImageBase64,
-      coverImageMimeType: project.coverImageMimeType
+      coverImageMimeType: project.coverImageMimeType,
+      dialogueAnalysis: project.dialogueAnalysis
     }
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
     db.exec('DELETE FROM metadata'); // Clear existing metadata

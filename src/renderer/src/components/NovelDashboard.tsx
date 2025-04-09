@@ -18,6 +18,7 @@ export default function NovelDashboard() {
   // const [progressButtonCaption, setProgressButtonCaption] = useState<Array<{ name: string }>>([])
   const [characters, setCharacters] = useState<Array<{ name: string }>>([])
   const [characterFrequencyData, setCharacterFrequencyData] = useState<any[]>([]);
+  const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
   const dispatch = useDispatch() // Initialize useDispatch
 
   useEffect(() => {
@@ -27,9 +28,30 @@ export default function NovelDashboard() {
       );
       setCharacters(extractedCharacters);
       setCharacterFrequencyData(getCharacterFrequencyData(activeProject));
+
+      // Generate dialogue count data if available
+      const analysis = activeProject.dialogueAnalysis
+      if (analysis && analysis.dialogCounts) {
+        const charNames = Object.keys(analysis.dialogCounts)
+        const chapterCount = Math.max(
+          ...charNames.map(name => analysis.dialogCounts[name].length)
+        )
+        const transformed: any[] = []
+        for (let chapterIdx = 0; chapterIdx < chapterCount; chapterIdx++) {
+          const chapterData: any = { chapter: chapterIdx + 1 }
+          for (const charName of charNames) {
+            chapterData[charName] = analysis.dialogCounts[charName][chapterIdx] ?? 0
+          }
+          transformed.push(chapterData)
+        }
+        setDialogueCountData(transformed)
+      } else {
+        setDialogueCountData([])
+      }
     } else {
       setCharacters([]);
       setCharacterFrequencyData([]);
+      setDialogueCountData([]);
     }
   }, [activeProject]);
 
@@ -220,6 +242,44 @@ export default function NovelDashboard() {
             <CardTitle>Progress</CardTitle>
           </CardHeader>
           <CardContent>Looks like you&apos;re on a streak!</CardContent>
+        </Card>
+        {/* Dialogue Sentences per Chapter */}
+        <Card className="col-span-12">
+          <CardHeader>
+            <CardTitle>Dialogue Sentences per Chapter</CardTitle>
+            <CardDescription>Total number of spoken sentences per main character, for each chapter.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activeProject && dialogueCountData.length > 0 ? (
+              <ChartContainer
+                style={{ aspectRatio: 'auto' }}
+                config={characters.reduce((acc, char) => {
+                  acc[char.name] = { label: char.name }
+                  return acc
+                }, {})}
+                className="h-[400px]"
+              >
+                <LineChart data={dialogueCountData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="chapter" tickFormatter={(tick: string) => tick} />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend />
+                  {characters.map((character, index) => (
+                    <Line
+                      key={character.name}
+                      type="monotone"
+                      dataKey={character.name}
+                      stroke={colors[index % colors.length]}
+                      strokeWidth={2}
+                    />
+                  ))}
+                </LineChart>
+              </ChartContainer>
+            ) : (
+              <p>No dialogue analysis data available.</p>
+            )}
+          </CardContent>
         </Card>
       </div>
     </div>

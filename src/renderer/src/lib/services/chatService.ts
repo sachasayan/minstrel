@@ -81,9 +81,9 @@ const processResponse = (responseString: string): RequestContext | null => {
 
   if (!!response?.critique) {
     try {
-      const critiqueContent = JSON.parse(response.critique)
-      store.dispatch(updateReviews(critiqueContent))
-      console.log('Critique content dispatched to store:', critiqueContent)
+      const payload = JSON.parse(response.critique)
+      store.dispatch(updateReviews(payload))
+      console.log('Critique content dispatched to store:', payload)
     } catch (error) {
       console.error('Error parsing critique JSON:', error)
       store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing critique from AI response.' }))

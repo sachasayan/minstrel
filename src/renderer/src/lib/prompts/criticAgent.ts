@@ -18,11 +18,21 @@ export const getCriticAgentPrompt = () => `
 
 * This task provides output in JSON format via the <critique> tool and does not ever involve a <write_file> tool.
 * Only one critique tag pair is used.
-* The JSON output should be an array of three objects, each object containing four properties: {name, expertise, critique, rating}
-* The 'name' property should be the name of one of our experts.  (string)
-* The 'expertise' property should be their field of focus. (string)
-* The 'critique' property should be a short summary of their critique in paragraph form with key takwaways, not more than 200 characters long. (string)
-* The rating should be an integer from 1-5. (number)
+* The JSON output must be a single object with exactly two properties, in this order:
+* "critique": an array of three expert objects. Each object contains:
+  - "name": the expert's name. (string)
+  - "expertise": their field of focus. (string)
+  - "critique": short paragraph summary (max 200 chars) of their critique. (string)
+  - "rating": integer from 1-5. (number)
+* "analysis": an object containing at least:
+  - "dialogCounts": a map where each key is a **main** character's name (string), and each value is an **array** of integers.
+  - The array length equals the total chapters, where each integer is the total number of that character's spoken dialogue sentences **for that chapter**.
+  - When counting, split character speech by sentences.
+  - Exclude any sentence fragments or interjections **shorter than 3 words**.
+  - Include all main characters explicitly; if zero sentences for a chapter, put '0' in that chapter's array position.
+  - Do NOT include minor or side characters.
+  - Ignore unattributed dialogue entirely.
+* The experts' critiques should NOT reference the analysis data — it is included purely for the user's review.
 * If you cannot complete the task for any reason, do not output the <critique> tag. Apologize and explain why the task couldn't be completed using <message>.
 * Use the <summary> tool to let the user know the critiques have been written.
 
@@ -30,32 +40,41 @@ export const getCriticAgentPrompt = () => `
 
 User: "Please write a critique."
 
-\`\`\`xml
+
 <think>The user wants to critique of the storyline. It looks like I have all the required files.</think>
 <critique>
-[
-  {
-      "critic": "Alice Johnson",
+{
+  "critique": [
+    {
+      "name": "Alice Johnson",
       "expertise": "Fantasy Writer",
       "rating": 3,
-      "comment": "A captivating tale that...."
-  },
-  {
-      "critic": "Michael Chen",
-      "publication": "Character Consultant",
+      "critique": "A captivating tale with engaging themes and solid pacing."
+    },
+    {
+      "name": "Michael Chen",
+      "expertise": "Character Consultant",
       "rating": 4,
-      "comment": "The world-building is excep..."
-  },
-  {
-      "critic": "Sophia Rodriguez",
-      "publication": "The Quill Review",
+      "critique": "Well-executed world-building; character motivations could be clearer."
+    },
+    {
+      "name": "Sophia Rodriguez",
+      "expertise": "Literary Critic",
       "rating": 4,
-      "comment": "A masterful blend of fan..."
+      "critique": "Balances action and introspection effectively. Prose is vivid."
+    }
+  ],
+  "analysis": {
+    "dialogCounts": {
+      "Alice": [12, 8, 15],
+      "Bob": [3, 0, 9],
+      "Eve": [0, 0, 4]
+    }
   }
-]
+}
 </critique>
 <message>The critics have weighed in.</message>
-\`\`\`
+
 
 ---
 
