@@ -13,7 +13,8 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        '@/types': resolve('src/renderer/types'),
+
+        '@/assets': resolve('src/renderer/src/assets'),
         '@/components': resolve('src/renderer/src/components'),
         '@/ui': resolve('src/renderer/src/components/ui'),
         '@/lib': resolve('src/renderer/src/lib'),

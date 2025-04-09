@@ -154,15 +154,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   ]
 
-
-
-  const ss = {
-    sidebar: ' border-none [&_[data-sidebar=sidebar]]:transition-color  [&_[data-sidebar=sidebar]]:duration-200 [&_.bg-sidebar]:bg-transparent text-highlight-600',
-    sidebarOpen: ' [&_.bg-sidebar]:bg-sidebar text-highlight-900',
-    sidebarButton: ' [&_[data-slot=sidebar-menu-button]_span]:truncate [&_[data-active=true]]:text-highlight-300',
-    sidebarButtonActive: ' [&_[data-slot=sidebar-menu-button]:active]:bg-highlight-800 [&_[data-active=true]]:bg-sidebar-primary [&_[data-active=true]]:text-white  [&_[data-slot=sidebar-menu-button]:active]:text-white',
-  }
-
   return (
     <>
       <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
@@ -180,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sidebar variant="sidebar" collapsible="icon" className={`{${ss.sidebar}  ${ss.sidebarButton}  ${ss.sidebarButtonActive} ${!!sideBarOpen ? ss.sidebarOpen : ''}`} {...props}>
+      <Sidebar variant="sidebar" collapsible="icon" className={` border-none [&_[data-sidebar=sidebar]]:transition-color  [&_[data-slot=sidebar-menu-button]_span]:truncate [&_[data-sidebar=sidebar]]:duration-300`} {...props}>
         <SidebarHeader className="pt-8">
           <div className={`flex justify-between ${sideBarOpen ? `max-h-30 flex-row` : `max-h-30 flex-col`}`}>
             <Button asChild variant="ghost" className="flex-grow transition-all">

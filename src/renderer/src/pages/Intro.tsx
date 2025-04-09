@@ -65,13 +65,13 @@ const Intro = (): ReactNode => { // Changed return type to ReactNode
       <StatusBar />
       <div className={cn(
         "flex flex-col items-center justify-center p-8 h-full",
-        "animate-in fade-in zoom-in-95 duration-300"
+        "animate-in fade-in zoom-in-95 gap-8 duration-300"
       )}>
-        <h1 className="text-2xl font-bold mb-4">Welcome to Minstrel</h1>
+        <h1 className="text-2xl font-bold text-highlight-700 ">Welcome to Minstrel</h1>
 
         <ProjectLibrary workingRootDirectory={settingsState?.workingRootDirectory || ''} projects={projectList} onProjectChange={handleProjectSelect} />
 
-        <p className="outline rounded-2xl py-2 px-4 text-sm text-gray-800 m-4">
+        <p className="outline rounded-2xl py-2 px-4 text-sm text-highlight-800">
           Minstrel is totally free for personal use. Like it?{' '}
           <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">
             Buy me a coffee.

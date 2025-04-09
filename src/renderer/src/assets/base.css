@@ -34,19 +34,23 @@
 
   /* General colors and proxies */
   --background: var(--neutral-50);
-  --foreground: hsl(0, 0%, 5%);
-  --popover: var(--neutral-50);
-  --popover-foreground: var(--neutral-900);
+  --foreground: var(--highlight-950);
+  /* The main brand color, often used for primary actions like buttons. */
   --primary: var(--highlight-600);
   --primary-foreground: var(--neutral-50);
+  /* A secondary brand color, often used for less prominent actions or UI elements. */
   --secondary: var(--neutral-200);
   --secondary-foreground: var(--neutral-900);
+  /* A subtle background color, often used for things like card backgrounds or less important sections. */
   --muted: var(--neutral-300);
-  --muted-foreground: var(--neutral-700);
-  --accent: var(--neutral-300);
-  --accent-foreground: var(--neutral-900);
+  --muted-foreground: var(--highlight-800);
+  --accent: var(--highlight-200);
+  --accent-foreground: var(--highlight-600);
   --destructive: hsl(0, 72%, 51%);
-  --destructive-foreground: var(--neutral-50);
+  --destructive-foreground: white;
+
+  --popover: var(--neutral-50);
+  --popover-foreground: var(--neutral-900);
 
   --border: var(--neutral-400);
   --input: var(--neutral-300);
@@ -59,12 +63,15 @@
   /* Sidebar Colors & Proxies */
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 
-  --sidebar-background: var(--neutral-200);
-  --sidebar-foreground: var(--neutral-700);
-  --sidebar-primary: var(--highlight-700);
-  --sidebar-primary-foreground: var(--neutral-50);
-  --sidebar-accent: var(--neutral-300);
-  --sidebar-accent-foreground: var(--highlight-200);
+  /* Just the base color */
+  --sidebar-background: var(--highlight-700);
+  --sidebar-foreground: var(--neutral-300);
+  /* I'm not sure what this is for */
+  --sidebar-primary: var(--highlight-600);
+  --sidebar-primary-foreground: var(--neutral-100);
+  /* Active selected item color */
+  --sidebar-accent: var(--highlight-600);
+  --sidebar-accent-foreground: var(--neutral-50);
   --sidebar-border: var(--neutral-400);
 
   --sidebar-collapsed-foreground: var(--highlight-500);
@@ -97,6 +104,18 @@
   --color-highlight-800: var(--highlight-800);
   --color-highlight-900: var(--highlight-900);
   --color-highlight-950: var(--highlight-900);
+
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+  --color-neutral-950: var(--neutral-950);
 
   /* Base */
   --color-background: var(--background);
@@ -287,4 +306,30 @@
       transform: rotate(360deg);
     }
   }
+}
+
+
+[data-slot="sidebar"][data-state="collapsed"] {
+
+  /* Just the base color */
+  --sidebar-background: transparent;
+  --sidebar-foreground: var(--neutral-700);
+  /* I'm not sure what this is for */
+  --sidebar-primary: red;
+  --sidebar-primary-foreground: yellow;
+  /* Active selected item color */
+  --sidebar-accent: var(--highlight-600);
+  --sidebar-accent-foreground: var(--neutral-50);
+  --sidebar-border: transparent;
+
+  --sidebar-collapsed-foreground: var(--highlight-500);
+
+  /* @apply bg-red-500; */
+  [data-slot="sidebar-menu-button"]:hover {
+
+    --sidebar-accent: var(--highlight-100);
+    --sidebar-accent-foreground: var(--highlight-900);
+  }
+
+  [data-slot="sidebar-rail"] {}
 }

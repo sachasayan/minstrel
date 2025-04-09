@@ -27,7 +27,7 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps): ReactNode => {
     <div className="relative rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none" onClick={onClick}>
       <div className="relative" style={{ paddingTop: '175%' }}>
         {project === 'add' ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100"> {/* Added background for add card */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-highlight-200"> {/* Added background for add card */}
             <BookPlusIcon className="w-10 h-10 text-gray-800" />
             <h3 className="text-lg font-semibold text-gray-800 ">Add Project</h3>
           </div>
@@ -40,7 +40,7 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps): ReactNode => {
           // Add an onError handler for the div background might be complex,
           // rely on the selector/loading logic providing a valid URL or fallback.
           >
-            <div className="p-4 absolute bottom-0 left-0 right-0 bg-white bg-opacity-90"> {/* Added slight opacity */}
+            <div className="p-4 absolute bottom-0 left-0 right-0 bg-neutral-50"> {/* Added slight opacity */}
               <h3 className="text-lg font-semibold text-gray-800 truncate">{project?.title}</h3> {/* Added truncate */}
               <p className="text-sm text-gray-600"> {project?.wordCountCurrent?.toLocaleString()} / {project?.wordCountTarget?.toLocaleString()} words</p>
             </div>

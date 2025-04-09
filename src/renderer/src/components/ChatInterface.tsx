@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, forwardRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { BotMessageSquare } from 'lucide-react'
 import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
 import { RootState } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
+import minstrelIcon from '@/assets/minstrel.png'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 
 interface ChatInterfaceProps {
@@ -99,10 +99,10 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
         <div className={` fixed bottom-2 right-2 z-50  `} >
           <button
             onClick={toggleExpanded}
-            className={`z-2 bg-neutral-100 shadow-lg rounded-lg border flex flex-col right-4 bottom-4 absolute overflow-hidden transition-[opacity, transform] duration-500 ${expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+            className={`z-2 size-20 bg-neutral-100 shadow-lg rounded-lg border flex flex-col right-4 bottom-4 absolute overflow-hidden transition-[opacity, transform] duration-500 ${expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
               } `}
           >
-            <BotMessageSquare className={'text-gray-500 hover:text-gray-700 hover:rotate-15 transition-transform size-8 m-4'} />
+            <img src={minstrelIcon} alt="Chat Icon" className=" size-20  hover:rotate-[15deg] transition-all duration-300" />
           </button>
 
         </div >
@@ -110,7 +110,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
         <div className={`h-screen overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'max-w-80' : 'max-w-0'} `}>
           <div className="h-full p-4 w-80">
             <div
-              className={` bg-neutral-100 shadow-lg rounded-lg border flex flex-col h-full`}
+              className={` bg-background shadow-lg rounded-lg border flex flex-col h-full`}
             >
               <div className="flex justify-between items-center p-2 border-b">
                 <div className="font-semibold">Chat</div>
@@ -124,7 +124,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
                 {chatHistory.map((msg, index) => (
                   <div
                     key={index}
-                    className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-gray-200 text-left ml-8' : 'bg-highlight-800 text-white text-right mr-8'}`}
+                    className={`mb-2 p-2 rounded-lg ${msg.sender === 'User' ? 'bg-neutral-200 text-left ml-8' : 'bg-highlight-600 text-neutral-100 text-right mr-8'}`}
                     ref={index === chatHistory.length - 1 ? lastMessageRef : null}
                   >
                     {msg.text}
