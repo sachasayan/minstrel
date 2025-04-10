@@ -38,14 +38,17 @@
   /* The main brand color, often used for primary actions like buttons. */
   --primary: var(--highlight-600);
   --primary-foreground: var(--neutral-50);
+
   /* A secondary brand color, often used for less prominent actions or UI elements. */
   --secondary: var(--neutral-200);
   --secondary-foreground: var(--neutral-900);
   /* A subtle background color, often used for things like card backgrounds or less important sections. */
   --muted: var(--neutral-300);
   --muted-foreground: var(--highlight-800);
-  --accent: var(--highlight-200);
+  /* Highlight state for the main brand color. */
+  --accent: var(--neutral-100);
   --accent-foreground: var(--highlight-600);
+
   --destructive: hsl(0, 72%, 51%);
   --destructive-foreground: white;
 
