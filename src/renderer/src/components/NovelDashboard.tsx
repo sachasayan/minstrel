@@ -209,7 +209,7 @@ export default function NovelDashboard() {
     }
 
     return (
-      <Card className="mb-6">
+      <Card className="md:col-span-3">
         <CardHeader>
           <CardTitle>Cover Image</CardTitle>
         </CardHeader>
@@ -259,10 +259,12 @@ export default function NovelDashboard() {
 
   return (
     <div className="container mx-auto p-24 space-y-6">
-      <CoverCard />
+
       <h1 className="text-3xl font-bold mb-6 text-highlight-700">Your Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 grid-flow-row-dense">
+
+
 
         {/* Guide */}
         <Card className="md:col-span-12 ">
@@ -287,6 +289,8 @@ export default function NovelDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <CoverCard />
 
         {/* Novel Summary */}
         <Card className="col-span-5">

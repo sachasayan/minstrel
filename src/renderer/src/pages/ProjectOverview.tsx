@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
   const activeProject = useSelector(selectActiveProject)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
 

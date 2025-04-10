@@ -3,9 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
 import { RootState } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
-import minstrelIcon from '@/assets/minstrel.png'
+import minstrelIcon from '@/assets/bot/base.png'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { User } from 'lucide-react'
 
 interface ChatInterfaceProps {
   expanded: boolean
@@ -103,33 +102,27 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
     }
   }
 
-  const handleBlur = () => {
-    if (!collapseTimeout) {
-      collapseTimeout = setTimeout(() => {
-        // setExpanded(true);
-      }, 5000)
-    }
-  }
-
   const actionSuggestions = useSelector((state: RootState) => selectChat(state).actionSuggestions)
 
   return (
     <>
-      <div ref={ref} onFocus={handleFocus} onBlur={handleBlur}>
-        {/* Activate Chat button. */}
-        <div className={` fixed bottom-2 right-2 z-50  `} >
-          <button
-            onClick={toggleExpanded}
-            className={`z-2 size-20 bg-neutral-100 shadow-lg rounded-lg border flex flex-col right-4 bottom-4 absolute overflow-hidden transition-[opacity, transform] duration-500 ${expanded ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
-              } `}
-          >
-            <img src={minstrelIcon} alt="Chat Icon" className=" size-20  hover:rotate-[15deg] transition-all duration-300" />
-          </button>
+      <div ref={ref} onFocus={handleFocus} >
 
-        </div >
         {/* Chat flow */}
         <div className={`h-screen overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'max-w-[370px]' : 'max-w-0'} `}>
+
           <div className="h-full p-4 w-[370px]">
+            {/* Handle */}
+            <button
+              onClick={toggleExpanded}
+              className={`fixed top-1/2 right-0 rounded-md rounded-tr-none rounded-br-none -translate-y-1/2 z-50 h-[100px] w-[20px] bg-neutral-100 shadow-lg  border flex items-center justify-center transition-all duration-500 ${expanded ? 'opacity-50' : 'opacity-100 '}`}
+            >
+              <div className="grid grid-cols-2 grid-rows-8 gap-1">
+                {Array.from({ length: 16 }).map((_, idx) => (
+                  <div key={idx} className="w-1 h-1 bg-neutral-400 rounded-full"></div>
+                ))}
+              </div>
+            </button>
             <div
               className={`relative rounded-lg flex flex-col h-full`}
             >
@@ -146,11 +139,10 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
                       ref={index === chatHistory.length - 1 ? lastMessageRef : null}
                       className="flex items-start justify-end chat-message-container"
                     >
-                      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-neutral-200 text-left ml-8 relative">
-                        <div className="absolute right-0 top-2 translate-x-full w-0 h-0 border-[6px] border-transparent border-l-neutral-200"></div>
+                      <div className="mb-2 py-2 px-4  rounded-lg text-sm chat-message outline-1 outline-neutral-600  text-neutral-600 text-left ml-14 relative">
                         {msg.text}
                       </div>
-                      <User size={20} className="ml-1" />
+
                     </div>
                   ) : (
                     <div
@@ -158,8 +150,8 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
                       ref={index === chatHistory.length - 1 ? lastMessageRef : null}
                       className="flex items-start justify-end chat-message-container"
                     >
-                      <img src={minstrelIcon} className="w-5 h-5 mr-1" alt="" />
-                      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-200 text-black text-right mr-8 relative">
+                      <img src={minstrelIcon} className="size-10 mr-1" alt="" />
+                      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-right mr-8 relative">
                         <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-200"></div>
                         {msg.text}
                       </div>
