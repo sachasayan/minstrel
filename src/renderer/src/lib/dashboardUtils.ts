@@ -10,13 +10,12 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
   const lines = outlineContent.split('\n')
   let inCharacterSection = false
 
-  const lineIsCharactersHeading  = (markdownString: string): boolean => {
+  const lineIsCharactersHeading = (markdownString: string): boolean => {
     return markdownString.search(/^#+\s+Characters/) != -1
   }
-  const lineIsHeading  = (markdownString: string): boolean => {
+  const lineIsHeading = (markdownString: string): boolean => {
     return markdownString.search(/^#+\s+/) != -1
   }
-
 
   for (const line of lines) {
     if (lineIsCharactersHeading(line)) {
@@ -33,7 +32,6 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
       // - \*\*: Matches closing bold markdown.
       // - iu: Flags for case-insensitive and unicode matching.
       const match = line.match(/^[*-]\s+\*\*([\p{L}\s]+)[-:]\*\*/iu)
-
 
       if (match) {
         characters.push({ name: match[1].trim() })
@@ -66,5 +64,50 @@ function getCharacterFrequencyData(activeProject: Project): any[] {
     })
 }
 
+/**
+ * Updates project's rolling 30-day wordCountHistorical array.
+ */
+function updateRollingWordCountHistory(project: Project) {
+  const today = new Date().toISOString().slice(0, 10) // 'YYYY-MM-DD'
+  const history = Array.isArray(project.wordCountHistorical) ? [...project.wordCountHistorical] : []
 
-export { extractCharactersFromOutline, getCharacterFrequencyData, colors }
+  history.sort((a, b) => a.date.localeCompare(b.date))
+
+  const latestEntry = history[history.length - 1]
+
+  if (latestEntry && latestEntry.date === today) {
+    // Already has today's entry, update word count
+    latestEntry.wordCount = project.wordCountCurrent
+  } else {
+    const lastCount = latestEntry ? latestEntry.wordCount : project.wordCountCurrent
+    const lastDateStr = latestEntry ? latestEntry.date : null
+    const fillStartDate = lastDateStr ? new Date(lastDateStr) : new Date(today)
+
+    // Advance fillStartDate by 1 day if exists, else use today
+    if (latestEntry) {
+      fillStartDate.setDate(fillStartDate.getDate() + 1)
+    }
+
+    const fillDates: { date: string; wordCount: number }[] = []
+    const todayDate = new Date(today)
+
+    while (fillStartDate <= todayDate) {
+      fillDates.push({
+        date: fillStartDate.toISOString().slice(0, 10),
+        wordCount: fillStartDate.getTime() === todayDate.getTime() ? project.wordCountCurrent : lastCount
+      })
+      fillStartDate.setDate(fillStartDate.getDate() + 1)
+    }
+
+    history.push(...fillDates)
+  }
+
+  // Only keep last 30 days
+  if (history.length > 30) {
+    history.splice(0, history.length - 30)
+  }
+
+  return history
+}
+
+export { extractCharactersFromOutline, getCharacterFrequencyData, colors, updateRollingWordCountHistory }

@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { extractCharactersFromOutline, getCharacterFrequencyData, colors } from '@/lib/dashboardUtils'
+import { extractCharactersFromOutline, getCharacterFrequencyData, colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
+import { updateMetaProperty } from '@/lib/store/projectsSlice'
 import { ProgressTracker } from '@/components/dashboard/ProgressTracker'
 import { Button } from '@/components/ui/button'
 import { addChatMessage } from '@/lib/store/chatSlice'
@@ -21,10 +22,27 @@ export default function NovelDashboard() {
   const [characters, setCharacters] = useState<Array<{ name: string }>>([])
   const [characterFrequencyData, setCharacterFrequencyData] = useState<any[]>([]);
   const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
+  const [historyData, setHistoryData] = useState<Array<{ date: string, wordCount: number }>>([])
   const dispatch = useDispatch() // Initialize useDispatch
+
+  // Guard for infinite Redux loops: track last dispatched history
+  const lastDispatchedHistory = useRef<string>('')
 
   useEffect(() => {
     if (activeProject) {
+      const updatedHistory = updateRollingWordCountHistory(activeProject)
+      setHistoryData(updatedHistory)
+
+      const historical = activeProject.wordCountHistorical || []
+
+      // Only dispatch ONCE if it's entirely missing in Redux and we have data
+      if ((!historical || historical.length === 0) && updatedHistory.length > 0) {
+        dispatch(updateMetaProperty({
+          property: 'wordCountHistorical',
+          value: updatedHistory
+        }))
+      }
+
       const extractedCharacters = extractCharactersFromOutline(
         activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || ''
       );
@@ -54,6 +72,8 @@ export default function NovelDashboard() {
       setCharacters([]);
       setCharacterFrequencyData([]);
       setDialogueCountData([]);
+      setHistoryData([]);
+      lastDispatchedHistory.current = ''
     }
   }, [activeProject]);
 
@@ -81,6 +101,11 @@ export default function NovelDashboard() {
 
   const stages: NovelStage[] = ['Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
   const currentStage = getCurrentStage()
+
+  const burndownData = historyData.map(item => ({
+    date: item.date,
+    remainingWords: Math.max((activeProject?.wordCountTarget ?? 0) - item.wordCount, 0)
+  }))
 
   const captions = {
     'Writing Outline': {
@@ -253,11 +278,36 @@ export default function NovelDashboard() {
           ))}
 
           {/* Progress */}
-          <Card className="@lg:col-span-12 ">
+          <Card className="@lg:col-span-12">
             <CardHeader>
-              <CardTitle>Progress</CardTitle>
+              <CardTitle>Word Count Burndown</CardTitle>
             </CardHeader>
-            <CardContent>Looks like you&apos;re on a streak!</CardContent>
+            <CardContent>
+              {activeProject ? (
+                <ChartContainer
+                  style={{ aspectRatio: 'auto' }}
+                  className="h-[300px]"
+                  config={{
+                    remainingWords: { label: 'Words Remaining' }
+                  }}
+                >
+                  <LineChart data={burndownData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line
+                      type="monotone"
+                      dataKey="remainingWords"
+                      stroke="var(--color-highlight-600)"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ChartContainer>
+              ) : (
+                <p>No project data available.</p>
+              )}
+            </CardContent>
           </Card>
           {/* Dialogue Sentences per Chapter */}
           <Card className="@lg:col-span-6">
