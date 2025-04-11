@@ -11,6 +11,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import ChatInterface from '@/components/ChatInterface'
 import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
+import StatusBar from '@/components/StatusBar'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -24,6 +25,7 @@ const ProjectOverview = (): React.ReactNode => {
 
   return (
     <SidebarProvider>
+      <StatusBar />
       <AppSidebar />
       <SidebarInset className={cn(
         "relative",

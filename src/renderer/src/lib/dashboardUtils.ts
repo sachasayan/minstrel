@@ -77,7 +77,8 @@ function updateRollingWordCountHistory(project: Project) {
 
   if (latestEntry && latestEntry.date === today) {
     // Already has today's entry, update word count
-    latestEntry.wordCount = project.wordCountCurrent
+    const updatedEntry = { ...latestEntry, wordCount: project.wordCountCurrent }
+    history[history.length - 1] = updatedEntry
   } else {
     const lastCount = latestEntry ? latestEntry.wordCount : project.wordCountCurrent
     const lastDateStr = latestEntry ? latestEntry.date : null
