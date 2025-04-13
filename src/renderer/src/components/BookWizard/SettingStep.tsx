@@ -60,8 +60,7 @@ const SettingStep = ({ handleProceed, currentStep, isActive }: SettingStepProps)
         </>
       ) : (
         <div className="p-4 border rounded-lg bg-background">
-          <p className="text-sm font-medium text-muted-foreground">Initial Setting:</p>
-          <p className="text-sm">{formData.setting || 'Not set'}</p>
+          <p className="text-sm">Make the setting {formData.setting || 'Not set'}</p>
         </div>
       )}
     </div>

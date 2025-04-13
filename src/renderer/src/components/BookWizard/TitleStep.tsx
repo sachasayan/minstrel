@@ -37,7 +37,7 @@ const TitleStep = ({ handleProceed, currentStep, isActive }: TitleStepProps) => 
               placeholder="Enter a working title"
             />
             <p className="text-xs text-muted-foreground pt-1">
-              {formData.title ? `Folder: "${sanitizeFilename(formData.title)}.mns"` : ' '}
+              {formData.title ? `We'll save the project as "${sanitizeFilename(formData.title)}.mns"` : ' '}
             </p>
           </div>
 
@@ -49,8 +49,7 @@ const TitleStep = ({ handleProceed, currentStep, isActive }: TitleStepProps) => 
         </>
       ) : (
         <div className="p-4 border rounded-lg bg-background">
-          <p className="text-sm font-medium text-muted-foreground">Title:</p>
-          <p className="text-sm">{formData.title || 'Not set'}</p>
+          <p className="text-sm">We&apos;ll call it { formData.title || 'Not set'}</p>
         </div>
       )}
     </div>

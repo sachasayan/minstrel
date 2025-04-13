@@ -64,12 +64,7 @@ const CoverStep = ({
        <div className="flex items-start gap-3">
          <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
          <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Applied chat colors */}
-           <p className="text-sm font-semibold">Choose a Cover Image</p>
-           {isActive && (
-             <p className="text-sm text-muted-foreground mt-1">
-               Select a cover that best represents your story&apos;s genre: {selectedGenre || '(Genre not selected)'}.
-             </p>
-           )}
+           <p className="text-sm font-semibold">Choose a cover image. Again, don&apos;t worry, we can change this later!</p>
          </div>
        </div>
 
@@ -116,7 +111,7 @@ const CoverStep = ({
       ) : (
         // Summary View - Rendered when not active
         <div className="p-4 border rounded-lg bg-background flex items-center gap-4">
-          <p className="text-sm font-medium text-muted-foreground shrink-0">Selected Cover:</p>
+
           {selectedCoverPath ? (
             <img
               src={`./${selectedCoverPath}`}

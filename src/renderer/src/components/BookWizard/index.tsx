@@ -9,7 +9,8 @@ interface WizardContextProps {
   formData: { [key: string]: any }
   setFormData: (data: { [key: string]: any }) => void
   selectedCoverPath: string | null
-  requestScrollToBottom: () => void // <-- Add scroll request function type
+  setSelectedCoverPath: (path: string | null) => void // <-- Add setter for cover path
+  requestScrollToBottom: () => void
 }
 
 const WizardContext = createContext<WizardContextProps>({
@@ -19,56 +20,11 @@ const WizardContext = createContext<WizardContextProps>({
   formData: {},
   setFormData: () => { },
   selectedCoverPath: null,
-  requestScrollToBottom: () => {} // <-- Add default no-op function
+  setSelectedCoverPath: () => {}, // <-- Add default setter
+  requestScrollToBottom: () => {}
 })
 
 const useWizard = () => useContext(WizardContext)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 const sanitizeFilename = (filename: string) => { // Move sanitizeFilename to index.tsx
@@ -82,7 +38,8 @@ const cheatData = {
   setting: 'Alien Planet',
   plot: 'A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.',
   writing_sample:
-    'The red dust swirled around their boots as they trudged across the desolate landscape. The twin suns cast long, eerie shadows, painting the alien world in shades of crimson and ochre.'
+    'The red dust swirled around their boots as they trudged across the desolate landscape. The twin suns cast long, eerie shadows, painting the alien world in shades of crimson and ochre.', // <-- Added missing comma
+  coverPath: 'covers/science-fiction-soft-sci-fi.png'
 }
 
 const genres = [

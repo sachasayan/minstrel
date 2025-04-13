@@ -40,12 +40,9 @@ export default function BookOutlineWizard(): ReactNode {
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const handleGoBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(0)
-      setIsAtBottom(true) // Reset scroll state when going back to Intro
-    } else {
-      dispatch(setActiveView('intro'))
-    }
+    // Always navigate back to the main intro/library view when back is clicked
+    dispatch(setActiveView('intro'))
+    // No longer resetting step to 0
   }
 
   const handleProceedToStep = useCallback(() => {
@@ -68,14 +65,15 @@ export default function BookOutlineWizard(): ReactNode {
   }, []); // No dependencies needed, relies on the ref
 
   const wizardSteps = useMemo(() => [
+    { step: 0, Component: Intro }, // <-- Added Intro as Step 0
     { step: 1, Component: StoryLengthStep },
     { step: 2, Component: GenreStep },
     { step: 3, Component: SettingStep },
-    { step: 4, Component: CoverStep }, // <-- Add CoverStep here
+    { step: 4, Component: CoverStep },
     { step: 5, Component: TitleStep },
     { step: 6, Component: PlotStep },
     { step: 7, Component: WritingSampleStep },
-    { step: 8, Component: SummaryStep } // <-- Renumber subsequent steps
+    { step: 8, Component: SummaryStep }
   ], [])
 
   // Effect to scroll to bottom if isAtBottom is true when step changes
@@ -112,45 +110,43 @@ export default function BookOutlineWizard(): ReactNode {
         <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 9, selectedCoverPath, requestScrollToBottom }}> {/* <-- Pass scroll function */}
-        {currentStep === 0 ? (
-          <Intro />
-        ) : (
-          <div className="flex flex-grow overflow-hidden"> {/* <-- Removed padding from inner div */}
-            <aside className="w-[280px] border-r p-4 overflow-y-auto shrink-0">
+      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 9, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
+        {/* Removed old conditional Intro rendering */}
+        <div className="flex flex-grow overflow-hidden">
+          {/* Conditionally render sidebar */}
+          {currentStep > 0 && (
+            <aside className="w-[280px] border-r p-4 overflow-y-auto shrink-0 animate-in fade-in duration-300">
               <ParameterChecklist />
             </aside>
-
+          )}
             {/* Attach scroll handler here */}
             <main ref={chatContainerRef} onScroll={handleScroll} className="flex-grow p-6 overflow-y-auto space-y-6">
               {wizardSteps
                 .filter(stepInfo => stepInfo.step <= currentStep)
-                .map((stepInfo) => ( // Removed unused index
+                .map((stepInfo) => (
                   // Wrap component in motion.div for animation
                   <motion.div
-                    key={stepInfo.step} // Use step number as key for animation identity
+                    key={stepInfo.step} // Use step number as key
                     variants={stepVariants}
                     initial="hidden"
                     animate="visible"
-                    // layout // Optional: Add layout prop for smoother transitions if steps reorder/resize
+                    // layout
                   >
                     <stepInfo.Component
-                      // key prop is now on the motion.div wrapper
-                      handleProceed={handleProceedToStep}
+                      // Pass all potentially relevant props directly
+                      // Components will ignore props they don't use
+                      handleProceed={handleProceedToStep} // Note: Intro might not use this
                       currentStep={stepInfo.step}
                       isActive={stepInfo.step === currentStep}
-                      // Pass props needed by CoverStep (and potentially others)
-                      // Other components will ignore props they don't use.
-                      selectedGenre={formData.genre || ''} // Provide default empty string
+                      selectedGenre={formData.genre || ''}
                       selectedCoverPath={selectedCoverPath}
                       setSelectedCoverPath={setSelectedCoverPath}
-                      // Add other potentially shared props here if necessary
                     />
                   </motion.div>
-                ))}
-            </main>
-          </div>
-        )}
+              ))}
+          </main>
+        </div>
+        {/* End of main content flex container */}
       </WizardContext.Provider>
     </div>
   )

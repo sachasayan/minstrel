@@ -77,8 +77,8 @@ const GenreStep = ({ handleProceed, currentStep, isActive }: GenreStepProps) => 
         </>
       ) : (
         <div className="p-4 border rounded-lg bg-background">
-          <p className="text-sm font-medium text-muted-foreground">Genre:</p>
-          <p className="text-sm">{genres.find((g) => g.value === formData.genre)?.label || 'Not set'}</p>
+          <p className="text-sm font-medium text-muted-foreground"></p>
+          <p className="text-sm">Let&apos;s write a {genres.find((g) => g.value === formData.genre)?.label || 'Not set'}</p>
         </div>
       )}
     </div>

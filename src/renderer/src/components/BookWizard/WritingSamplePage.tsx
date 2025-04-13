@@ -65,7 +65,6 @@ const WritingSampleStep = ({ handleProceed, currentStep, isActive }: WritingSamp
       ) : (
         // Summary View - Rendered when not active
         <div className="p-4 border rounded-lg bg-background">
-          <p className="text-sm font-medium text-muted-foreground">Writing Sample:</p>
           <p className="text-sm whitespace-pre-wrap">{sampleSnippet}</p>
         </div>
       )}

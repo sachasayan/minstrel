@@ -77,7 +77,7 @@ const PlotStep = ({ handleProceed, currentStep, isActive }: PlotStepProps) => {
       ) : (
         // Summary View - Rendered when not active
         <div className="p-4 border rounded-lg bg-background">
-          <p className="text-sm font-medium text-muted-foreground">Plot Summary:</p>
+          <p className="text-sm font-medium text-muted-foreground">I&apos;m thinking</p>
           <p className="text-sm whitespace-pre-wrap">{plotSnippet || 'Not set'}</p>
         </div>
       )}

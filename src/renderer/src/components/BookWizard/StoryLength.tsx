@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import { useWizard, novelLengths } from '@/components/BookWizard/index'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+import minstrelIcon from '@/assets/bot/base.png'
 
 // Define props type
 interface StoryLengthStepProps {
@@ -22,8 +22,7 @@ const StoryLengthStep = ({ handleProceed, currentStep, isActive }: StoryLengthSt
     if (formData.length == null) {
       setFormData({ ...formData, length: 50000 })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Run only once on mount
+  }, [])
 
   const onNextClick = () => {
     handleProceed(currentStep + 1)
@@ -36,7 +35,7 @@ const StoryLengthStep = ({ handleProceed, currentStep, isActive }: StoryLengthSt
       <div className="flex items-start gap-3">
         <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" /> {/* Icon */}
         <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Message Bubble - Applied chat colors */}
-          <p className="text-sm font-semibold">How long of a story are we writing?</p>
+          <p className="text-sm font-semibold">Got it! How long of a story are we writing?</p>
           {/* Optional text can go here if needed */}
         </div>
       </div>
@@ -75,8 +74,7 @@ const StoryLengthStep = ({ handleProceed, currentStep, isActive }: StoryLengthSt
       ) : (
         // Summary View - Rendered when not active
         <div className="p-4 border rounded-lg bg-background"> {/* Use background color */}
-          <p className="text-sm font-medium text-muted-foreground">Selected Length:</p>
-          <p className="text-sm">{currentLengthLabel} (~{formData.length?.toLocaleString()} words)</p>
+          <p className="text-sm">Let&apos;s write a {currentLengthLabel} (~{formData.length?.toLocaleString()} words)</p>
         </div>
       )}
     </div>
