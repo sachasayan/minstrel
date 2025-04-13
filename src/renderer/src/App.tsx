@@ -1,11 +1,12 @@
 import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectActiveView, setActiveView } from '@/lib/store/appStateSlice'
+import { selectActiveView } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 
 import { Toaster } from '@/components/ui/sonner'
-import OnboardingDialog from '@/components/OnboardingDialog'
+// import OnboardingDialog from '@/components/OnboardingDialog' // Removed old dialog
+import OnboardingPage from '@/pages/OnboardingPage' // <-- Import new page
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
@@ -64,15 +65,18 @@ export default function App(): ReactNode {
     }
   }, [hasLoaded, dispatch])
 
+  // Conditionally render OnboardingPage or the main app router
   return (
     <>
-      <div className="h-screen">
-        {router(activeView)}
-        <Toaster position="bottom-center" richColors />
-      </div>
-
-      {/* Pass dispatch down if Onboarding needs to trigger settings save */}
-      <OnboardingDialog showOnboarding={showOnboarding} setShowOnboarding={setShowOnboarding} />
+      {showOnboarding ? (
+        <OnboardingPage /> // Render the full-page onboarding flow
+      ) : (
+        // Render the main application UI
+        <div className="h-screen">
+          {router(activeView)}
+          <Toaster position="bottom-center" richColors />
+        </div>
+      )}
     </>
   )
 }
