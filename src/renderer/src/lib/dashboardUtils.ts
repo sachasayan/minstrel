@@ -1,4 +1,7 @@
 import { Project } from '@/types'
+import { remark } from 'remark'
+import { visit } from 'unist-util-visit'
+import { toString } from 'mdast-util-to-string'
 
 const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 
@@ -7,37 +10,49 @@ const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--cha
  */
 function extractCharactersFromOutline(outlineContent: string): { name: string }[] {
   const characters: { name: string }[] = []
-  const lines = outlineContent.split('\n')
   let inCharacterSection = false
+  const tree = remark().parse(outlineContent)
 
-  const lineIsCharactersHeading = (markdownString: string): boolean => {
-    return markdownString.search(/^#+\s+Characters/) != -1
-  }
-  const lineIsHeading = (markdownString: string): boolean => {
-    return markdownString.search(/^#+\s+/) != -1
-  }
-
-  for (const line of lines) {
-    if (lineIsCharactersHeading(line)) {
-      inCharacterSection = true
-      continue
-    }
-    if (inCharacterSection) {
-      if (lineIsHeading(line)) {
-        break
-      }
-      // Regex breakdown:
-      // - \*\*: Matches bold markdown syntax.
-      // - ([\p{L} \'’. \\-]+): Captures character names with Unicode letters, apostrophes, periods, hyphens, and spaces.
-      // - \*\*: Matches closing bold markdown.
-      // - iu: Flags for case-insensitive and unicode matching.
-      const match = line.match(/^[*-]\s+\*\*([\p{L}\s]+)[-:]\*\*/iu)
-
-      if (match) {
-        characters.push({ name: match[1].trim() })
+  visit(tree, (node) => {
+    // Handle Headings to define the section
+    if (node.type === 'heading') {
+      const headingText = toString(node).trim()
+      if (headingText.toLowerCase() === 'characters') {
+        inCharacterSection = true
+      } else if (inCharacterSection) {
+        // Found a subsequent heading, stop processing lists
+        inCharacterSection = false
       }
     }
-  }
+
+    // Handle Lists within the character section
+    if (inCharacterSection && node.type === 'list') {
+      visit(node, 'listItem', (listItemNode) => {
+        // Find the bolded name within the list item
+        // We only visit the direct children to avoid deeply nested strong tags if any
+        visit(listItemNode, 'strong', (strongNode, index, parent) => {
+          // Only process the first strong tag found directly under the listItem's paragraph
+          // Assumes format like '* **Name**: description' or '- **Name** - description'
+          if (parent?.type === 'paragraph') {
+            // Extract text, trim whitespace, and remove trailing colons/hyphens/spaces
+            const rawName = toString(strongNode).trim()
+            const name = rawName.replace(/[-\s:]+$/, '').trim()
+            if (name) {
+              characters.push({ name })
+              // Stop visiting further strong tags within this listItem
+              return 'skip'
+            }
+          }
+          return undefined // Continue visiting other nodes
+        })
+      })
+      // After processing a list within the character section,
+      // we might want to stop if the structure guarantees only one list.
+      // However, allowing multiple lists might be more flexible.
+      // For now, we continue visiting other nodes after the list.
+    }
+  })
+
   return characters
 }
 
