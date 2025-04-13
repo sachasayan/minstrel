@@ -54,21 +54,14 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="flex flex-row gap-6 ">
           {title ? (
             <>
-              <div className="col-span-3">
+              <div className="flex-grow">
               </div>
-              <div className="col-span-6">
+              <div className=" max-w-2xl">
                 <EditableHeading heading={title} onHeadlineHasChanged={handleHeadlineChange} /> {/* REMOVE onHeadlineHasChanged prop */}
-              </div>
-              <div className="col-span-3">
-              </div>
-              <div className="col-span-3">
 
-              </div>
-
-              <div className="col-span-6">
 
 
                 <MDXEditor
@@ -97,7 +90,7 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
                   contentEditableClassName="prose"
                 />
               </div>
-              <div className="col-span-2">
+              <div className="flex-grow" >
               </div>
             </>
           ) : (

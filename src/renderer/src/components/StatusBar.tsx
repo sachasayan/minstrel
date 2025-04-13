@@ -24,7 +24,7 @@ const StatusBar = () => {
   }
 
   return (
-    <div className="fixed top-4 right-4 flex items-center gap-2 rounded-full border p-2 bg-white/75 dark:bg-black/50 backdrop-blur shadow z-50">
+    <div className="fixed top-4 right-4 flex items-center gap-2 rounded-full border p-2  z-50">
       <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
 
       <button
