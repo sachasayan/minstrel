@@ -1,6 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useWizard, sanitizeFilename } from '@/components/BookWizard/index'
+import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
 
 interface TitleStepProps {
   handleProceed: (nextStep: number) => void
@@ -17,8 +18,12 @@ const TitleStep = ({ handleProceed, currentStep, isActive }: TitleStepProps) => 
 
   return (
     <div className="space-y-4">
-      <div className="bg-muted p-4 rounded-lg">
-        <p className="text-sm font-semibold">Now, what should we call your story?</p>
+      {/* Assistant Message */}
+      <div className="flex items-start gap-3">
+        <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
+        <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Applied chat colors */}
+          <p className="text-sm font-semibold">Now, what should we call your story?</p>
+        </div>
       </div>
 
       {isActive ? (

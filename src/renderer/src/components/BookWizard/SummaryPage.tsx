@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react' // <-- Add useEffect import
 import { Button } from '@/components/ui/button'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
@@ -8,8 +8,9 @@ import { setActiveView } from '@/lib/store/appStateSlice'
 import { useWizard, genres, sanitizeFilename } from '@/components/BookWizard/index'
 import ReactMarkdown from 'react-markdown'
 import { Loader2 } from 'lucide-react'
-import { v4 as uuidv4 } from 'uuid'
-import type { ProjectFile } from '@/types' // Assuming ProjectFile type exists in types.ts
+import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+// import { v4 as uuidv4 } from 'uuid' // Removed unused import
+import type { ProjectFile, Project } from '@/types'
 
 interface SummaryStepProps {
   currentStep: number
@@ -18,11 +19,41 @@ interface SummaryStepProps {
 
 const SummaryStep = ({ isActive }: SummaryStepProps) => {
   const dispatch = useDispatch()
-  const { formData } = useWizard()
+  const { formData, selectedCoverPath, requestScrollToBottom } = useWizard() // <-- Get scroll function
   const [isGenerating, setIsGenerating] = useState(false)
   const [streamedText, setStreamedText] = useState('')
   const [generationError, setGenerationError] = useState<string | null>(null)
   const settingsState = useSelector(selectSettingsState)
+
+  // Helper function to convert image path to base64
+  const convertImageToBase64 = async (imagePath: string | null): Promise<{ base64: string | null; mimeType: string | null }> => {
+    if (!imagePath) {
+      return { base64: null, mimeType: null }
+    }
+    try {
+      // Assuming images are served from the root public directory during dev/build
+      const response = await fetch(`./${imagePath}`) // Relative path from public root
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.statusText}`)
+      }
+      const blob = await response.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const dataUrl = reader.result as string
+          // Format: data:[<mime type>];base64,<data>
+          const mimeType = dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'))
+          const base64 = dataUrl.substring(dataUrl.indexOf(',') + 1)
+          resolve({ base64, mimeType })
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch (error) {
+      console.error('Error converting image to base64:', error)
+      return { base64: null, mimeType: null } // Handle error case
+    }
+  }
 
   const handleDream = async () => {
     if (!formData.title || !formData.genre || !formData.setting || !formData.plot) {
@@ -44,8 +75,21 @@ Plot Summary: ${formData.plot}
 ${formData.writing_sample ? `Writing Sample/Style Guide:\n${formData.writing_sample}` : ''}
 Please provide the output in Markdown format.`
 
+    // --- Convert selected cover image to base64 ---
+    let coverData: { base64: string | null; mimeType: string | null } = { base64: null, mimeType: null } // Correct type initialization
+    if (selectedCoverPath) {
+      try {
+        coverData = await convertImageToBase64(selectedCoverPath)
+      } catch (err) {
+        console.error("Failed to process selected cover image:", err)
+        // Optionally set an error state or proceed without cover
+      }
+    }
+    // ---------------------------------------------
+
     // Initial project structure (without outline file yet)
-    const initialProjectData = {
+    // Use Partial<Project> and build up, or ensure all fields are present
+    const initialProjectData: Omit<Project, 'id' | 'lastModified'> = { // Use Omit or Partial from '@/types'
       title: projectTitle,
       projectPath: projectPath,
       files: [] as ProjectFile[], // Initialize files array
@@ -58,9 +102,10 @@ Please provide the output in Markdown format.`
       expertSuggestions: [],
       knowledgeGraph: null,
       chatHistory: [],
-      coverImageBase64: null,
-      coverImageMimeType: null,
-      cover: undefined,
+      coverImageBase64: coverData.base64, // <-- Use converted base64
+      coverImageMimeType: coverData.mimeType, // <-- Use converted mimeType
+      // 'cover' property might be deprecated or unused if base64 is primary
+      // Ensure Project type definition matches - Removed isNew as it's not in Project type
     };
 
     try {
@@ -78,17 +123,19 @@ Please provide the output in Markdown format.`
       // Create the outline file object
       const outlineFile: ProjectFile = {
         title: 'Outline', // Standard name
-        content: accumulatedText,
+        content: accumulatedText
+        // Removed type: 'outline' as it's not in ProjectFile type
       };
 
       // Create the final project object including the outline file
-      const projectWithOutline = {
+      // Ensure the final object matches the Project type expected by setActiveProject
+      const projectWithOutline: Omit<Project, 'id' | 'lastModified'> = {
         ...initialProjectData,
         files: [outlineFile], // Add the outline file
       };
 
       // Dispatch setActiveProject with the complete project data (including outline)
-      dispatch(setActiveProject(projectWithOutline));
+      dispatch(setActiveProject(projectWithOutline as Project)); // Cast if necessary, ensure type alignment
 
       setIsGenerating(false)
       dispatch(setActiveView('project/dashboard')) // Navigate after success
@@ -103,18 +150,29 @@ Please provide the output in Markdown format.`
 
   const genreLabel = genres?.find(item => item.value === formData.genre)?.label || 'story'
 
+  // Effect to scroll down as text streams in
+  useEffect(() => {
+    if (isGenerating || streamedText) {
+      requestScrollToBottom();
+    }
+  }, [streamedText, isGenerating, requestScrollToBottom]); // Depend on streamedText and isGenerating
+
   return (
     <div className="space-y-4">
-      <div className="bg-muted p-4 rounded-lg text-center">
-        <h2 className="text-lg font-semibold">Great! We&apos;re ready to create your {genreLabel} story outline.</h2>
-        <p className="text-sm text-muted-foreground mt-1">This&apos;ll take a few seconds once you click the button. Just hang tight.</p>
+      {/* Assistant Message */}
+      <div className="flex items-start gap-3">
+        <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
+        <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow text-center"> {/* Applied chat colors */}
+          <h2 className="text-lg font-semibold">Great! We&apos;re ready to create your {genreLabel} story outline.</h2>
+          <p className="text-sm text-muted-foreground mt-1">This&apos;ll take a few seconds once you click the button. Just hang tight.</p>
+        </div>
       </div>
 
       {isActive && (
         <div className="flex flex-col items-center justify-center p-4 border rounded-lg gap-4">
           <Button
             onClick={handleDream}
-            disabled={isGenerating || !formData.title || !formData.genre || !formData.setting || !formData.plot}
+            disabled={isGenerating || !formData.title || !formData.genre || !formData.setting || !formData.plot || !selectedCoverPath /* Ensure cover is selected */}
           >
             {isGenerating ? 'Generating...' : "Let's Go!"}
             {isGenerating && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}

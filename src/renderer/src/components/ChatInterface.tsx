@@ -109,7 +109,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
       <div ref={ref} onFocus={handleFocus} >
 
         {/* Chat flow */}
-        <div className={`h-screen overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'max-w-[370px]' : 'max-w-0'} `}>
+        <div className={`h-screen pt-10 overflow-hidden sticky top-0 right-0 transition-size duration-500 ${expanded ? 'max-w-[370px]' : 'max-w-0'} `}>
 
           <div className="h-full p-4 w-[370px]">
             {/* Handle */}
@@ -126,11 +126,6 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
             <div
               className={`relative rounded-lg flex flex-col h-full`}
             >
-              <Button size="icon" variant="ghost" onClick={() => setExpanded(false)} className="absolute top-2 right-2 z-50">
-                <svg xmlns="http://www.w3.org/2000/svg" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </Button>
               <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
                 {chatHistory.map((msg, index) => (
                   msg.sender === 'User' ? (

@@ -5,36 +5,49 @@ import { CheckCircle, Circle } from 'lucide-react'
 import { useWizard } from '@/components/BookWizard/index'
 
 export default function ParameterChecklist(): ReactNode {
-  const { formData, currentStep } = useWizard()
+  const { currentStep } = useWizard() // Removed unused formData
 
   if (currentStep === 0) return null
 
+  // Checklist items now include stepNumber and completion logic based on currentStep
   const checklistItems = [
     {
       label: 'Story Length',
-      completed: formData.length != null,
+      stepNumber: 1,
+      completed: currentStep > 1, // Completed if currentStep is past step 1
     },
     {
       label: 'Genre',
-      completed: !!formData.genre,
+      stepNumber: 2,
+      completed: currentStep > 2,
     },
     {
       label: 'Setting',
-      completed: !!formData.setting,
+      stepNumber: 3,
+      completed: currentStep > 3,
+    },
+    {
+      label: 'Cover', // Added Cover step
+      stepNumber: 4,
+      completed: currentStep > 4,
     },
     {
       label: 'Title',
-
+      stepNumber: 5,
+      completed: currentStep > 5,
     },
     {
       label: 'Plot',
-      completed: !!formData.plot,
+      stepNumber: 6,
+      completed: currentStep > 6,
     },
     {
       label: 'Writing Sample (optional)',
-      completed: !!formData.writing_sample,
+      stepNumber: 7,
+      completed: currentStep > 7, // Optional step completion still based on passing it
       optional: true,
     },
+    // Summary step (step 8) is usually not shown in the checklist
   ]
 
   return (
@@ -44,14 +57,14 @@ export default function ParameterChecklist(): ReactNode {
         {checklistItems.map(item => (
           <li key={item.label} className="flex items-center gap-2">
             {item.completed ? (
-              <CheckCircle className="w-5 h-5 text-green-500" />
+              <CheckCircle className="w-5 h-5 text-primary" />
             ) : (
-              <Circle className="w-5 h-5 text-gray-400" />
+              <Circle className="w-5 h-5 text-muted-foreground" />
             )}
             <span
               className={
                 'text-sm ' +
-                (item.completed ? 'text-green-700 font-medium' : 'text-gray-500') +
+                (item.completed ? 'text-primary font-medium' : 'text-muted-foreground') +
                 (item.optional ? ' italic' : '')
               }
             >

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useWizard, genreSettings } from '@/components/BookWizard/index'
+import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
 
 interface SettingStepProps {
   handleProceed: (nextStep: number) => void
@@ -22,8 +23,12 @@ const SettingStep = ({ handleProceed, currentStep, isActive }: SettingStepProps)
 
   return (
     <div className="space-y-4">
-      <div className="bg-muted p-4 rounded-lg">
-        <p className="text-sm font-semibold">Next, what's the initial setting for your story?</p>
+      {/* Assistant Message */}
+      <div className="flex items-start gap-3">
+        <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
+        <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Applied chat colors */}
+          <p className="text-sm font-semibold">Next, what&apos;s the initial setting for your story?</p> {/* Escaped apostrophe */}
+        </div>
       </div>
 
       {isActive ? (

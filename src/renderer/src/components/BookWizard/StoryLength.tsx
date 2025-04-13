@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { Slider } from '@/components/ui/slider'
-
 import { Button } from '@/components/ui/button'
 import { useWizard, novelLengths } from '@/components/BookWizard/index'
+import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
 
 // Define props type
 interface StoryLengthStepProps {
@@ -32,12 +32,13 @@ const StoryLengthStep = ({ handleProceed, currentStep, isActive }: StoryLengthSt
   return (
     <div className="space-y-4"> {/* Reduced outer spacing */}
       {/* Assistant Message Style - Always visible */}
-      <div className="bg-muted p-4 rounded-lg">
-        <p className="text-sm font-semibold">How long of a story are we writing?</p>
-        {/* Optional: Add the introductory text here if needed */}
-        {/* <p className="text-sm mt-1">
-            Okay, let me walk you through the steps...
-        </p> */}
+      {/* Wrap icon and message bubble in a flex container */}
+      <div className="flex items-start gap-3">
+        <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" /> {/* Icon */}
+        <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Message Bubble - Applied chat colors */}
+          <p className="text-sm font-semibold">How long of a story are we writing?</p>
+          {/* Optional text can go here if needed */}
+        </div>
       </div>
 
       {/* Conditional Rendering based on isActive */}

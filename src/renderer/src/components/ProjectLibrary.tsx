@@ -27,9 +27,9 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps): ReactNode => {
     <div className="relative rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none" onClick={onClick}>
       <div className="relative" style={{ paddingTop: '175%' }}>
         {project === 'add' ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-highlight-200"> {/* Added background for add card */}
-            <BookPlusIcon className="w-10 h-10 text-gray-800" />
-            <h3 className="text-lg font-semibold text-gray-800 ">Add Project</h3>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-primary"> {/* Added background for add card */}
+            <BookPlusIcon className="w-10 h-10 text-primary-foreground" />
+            <h3 className="text-lg font-semibold text-primary-foreground ">Add Project</h3>
           </div>
         ) : (
           <div

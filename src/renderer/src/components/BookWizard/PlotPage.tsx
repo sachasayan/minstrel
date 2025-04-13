@@ -3,6 +3,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useWizard } from '@/components/BookWizard/index'
+import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
 
 // Define props type
 interface PlotStepProps {
@@ -37,12 +38,15 @@ const PlotStep = ({ handleProceed, currentStep, isActive }: PlotStepProps) => {
 
 
   return (
-    <div className="space-y-4"> {/* Reduced outer spacing */}
-      {/* Assistant Message Style - Always visible */}
-      <div className="bg-muted p-4 rounded-lg">
-        <p className="text-sm font-semibold">
-          Excellent. Now, let's sketch out the core story. Describe the main characters, environments, what the story is generally about, and perhaps the climax. Don't worry about perfection, just the basics!
-        </p>
+    <div className="space-y-4">
+      {/* Assistant Message */}
+      <div className="flex items-start gap-3">
+        <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
+        <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Applied chat colors */}
+          <p className="text-sm font-semibold">
+            Excellent. Now, let&apos;s sketch out the core story. Describe the main characters, environments, what the story is generally about, and perhaps the climax. Don&apos;t worry about perfection, just the basics! {/* Escaped apostrophes */}
+          </p>
+        </div>
       </div>
 
       {/* Conditional Rendering based on isActive */}

@@ -8,14 +8,18 @@ interface WizardContextProps {
   setCurrentStep: (step: number) => void
   formData: { [key: string]: any }
   setFormData: (data: { [key: string]: any }) => void
+  selectedCoverPath: string | null
+  requestScrollToBottom: () => void // <-- Add scroll request function type
 }
 
 const WizardContext = createContext<WizardContextProps>({
-  totalSteps: 5,
+  totalSteps: 9, // Default value, will be overridden by Provider
   currentStep: 0,
   setCurrentStep: () => { },
   formData: {},
-  setFormData: () => { }
+  setFormData: () => { },
+  selectedCoverPath: null,
+  requestScrollToBottom: () => {} // <-- Add default no-op function
 })
 
 const useWizard = () => useContext(WizardContext)
