@@ -27,8 +27,11 @@ const StatusBar = () => {
     <div className="fixed top-4 right-4 flex items-center gap-2 rounded-full border p-2 bg-white/75 dark:bg-black/50 backdrop-blur shadow z-50">
       <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
 
-      <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      <button
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        title={theme === 'dark' ? 'Disable dark mode' : 'Enable dark mode'}
+      >
+        {theme === 'dark' ? <Sun className="size-4" fill="currentColor" />: <Moon className="size-4" />}
       </button>
 
       <button onClick={openSettings}>
