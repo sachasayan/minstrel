@@ -6,7 +6,7 @@ import { Star } from 'lucide-react'
 import { useEffect, useState, useCallback, useRef } from 'react'
 
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { extractCharactersFromOutline, getCharacterFrequencyData, colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
+import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
 import { updateMetaProperty } from '@/lib/store/projectsSlice'
 import { ProgressTracker } from '@/components/dashboard/ProgressTracker'
 import { Button } from '@/components/ui/button'
@@ -19,8 +19,6 @@ type NovelStage = 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
   // const [progressButtonCaption, setProgressButtonCaption] = useState<Array<{ name: string }>>([])
-  const [characters, setCharacters] = useState<Array<{ name: string }>>([])
-  const [characterFrequencyData, setCharacterFrequencyData] = useState<any[]>([]);
   const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
   const [historyData, setHistoryData] = useState<Array<{ date: string, wordCount: number }>>([])
   const dispatch = useDispatch() // Initialize useDispatch
@@ -43,11 +41,6 @@ export default function NovelDashboard() {
         }))
       }
 
-      const extractedCharacters = extractCharactersFromOutline(
-        activeProject.files.find((file) => file.title.indexOf('Outline') != -1)?.content || ''
-      );
-      setCharacters(extractedCharacters);
-      setCharacterFrequencyData(getCharacterFrequencyData(activeProject));
 
       // Generate dialogue count data if available
       const analysis = activeProject.dialogueAnalysis
@@ -69,8 +62,6 @@ export default function NovelDashboard() {
         setDialogueCountData([])
       }
     } else {
-      setCharacters([]);
-      setCharacterFrequencyData([]);
       setDialogueCountData([]);
       setHistoryData([]);
       lastDispatchedHistory.current = ''
@@ -225,43 +216,6 @@ export default function NovelDashboard() {
             </CardContent>
           </Card>
 
-          {/* Character Mentions per Chapter */}
-          <Card className="@lg:col-span-9">
-            <CardHeader>
-              <CardTitle>Character Mentions per Chapter</CardTitle>
-              <CardDescription>Line graph showing mentions of each character per chapter</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {activeProject ? (
-                <ChartContainer
-                  style={{ aspectRatio: 'auto' }}
-                  config={characters.reduce((acc, char) => { // Use characters state
-                    acc[char.name] = {
-                      label: char.name
-                    }
-                    return acc
-                  }, {})}
-                  className="h-[400px]"
-                >
-                  <LineChart data={characterFrequencyData}> {/* Use characterFrequencyData state */}
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="chapter"
-                      tickFormatter={(tick: string) => tick}
-                    />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    {characters.map((character, index) => ( // Use characters state
-                      <Line key={character.name} type="monotone" dataKey={character.name} stroke={colors[index % colors.length]} strokeWidth={2} />
-                    ))}
-                  </LineChart>
-                </ChartContainer>
-              ) : (
-                <p>No active project data available.</p>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Expert Suggestions */}
           {activeProject?.expertSuggestions.map((suggestion, index) => (
@@ -319,10 +273,10 @@ export default function NovelDashboard() {
               {activeProject && dialogueCountData.length > 0 ? (
                 <ChartContainer
                   style={{ aspectRatio: 'auto' }}
-                  config={characters.reduce((acc, char) => {
-                    acc[char.name] = { label: char.name }
+                  config={dialogueCountData.length > 0 ? Object.keys(dialogueCountData[0]).filter(k => k !== 'chapter').reduce((acc, key) => {
+                    acc[key] = { label: key }
                     return acc
-                  }, {})}
+                  }, {}) : {}}
                   className="h-[400px]"
                 >
                   <LineChart data={dialogueCountData}>
@@ -331,11 +285,11 @@ export default function NovelDashboard() {
                     <YAxis />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    {characters.map((character, index) => (
+                    {dialogueCountData.length > 0 && Object.keys(dialogueCountData[0]).filter(key => key !== 'chapter').map((charName, index) => (
                       <Line
-                        key={character.name}
+                        key={charName}
                         type="monotone"
-                        dataKey={character.name}
+                        dataKey={charName}
                         stroke={colors[index % colors.length]}
                         strokeWidth={2}
                       />

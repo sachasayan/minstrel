@@ -5,7 +5,7 @@
 Minstrel follows a client-server architecture within an Electron application. The React/Vite frontend runs in the Renderer Process, while backend operations involving file system access and database management occur in the Main Process, communicated via Electron IPC.
 
 - **Frontend (Renderer Process):**
-  - **UI Components:** React components built using ShadCN UI. Handles user interaction, displays data, and dispatches actions to the Redux store. Key components include `AppSidebar`, `ChatInterface`, `MarkdownViewer`, `ProjectOverview`, `BookOutlineWizard`, `ProjectParameters`, `CoverStep`, and various UI elements from `src/renderer/src/components/ui/`. Key pages include `Intro.tsx` (main app intro/library), `SettingsPage.tsx`, `ProjectOverview.tsx`, `OnboardingPage.tsx`. Onboarding steps are in `src/renderer/src/components/OnboardingSteps/`.
+  - **UI Components:** React components built using ShadCN UI. Handles user interaction, displays data, and dispatches actions to the Redux store. Key components include `AppSidebar`, `ChatInterface`, `MarkdownViewer`, `ProjectOverview`, `BookOutlineWizard`, `ProjectParameters`, `CoverStep`, `NovelDashboard`, and various UI elements from `src/renderer/src/components/ui/`. Key pages include `Intro.tsx` (main app intro/library), `SettingsPage.tsx`, `ProjectOverview.tsx`, `OnboardingPage.tsx`. Onboarding steps are in `src/renderer/src/components/OnboardingSteps/`.
     - `StatusBar`: A floating overlay component positioned fixed at the top of the page. Displays internet connectivity status, a theme toggle (light/dark), and a button to navigate to Settings. Initially implemented on the Intro page but designed to be reusable throughout the app.
   - **Book Outline Wizard Pages:** The `BookOutlineWizard` feature (`src/renderer/src/pages/BookOutlineWizard.tsx`) renders step components from `src/renderer/src/components/BookWizard/`: `Intro`, `StoryLengthStep`, `GenreStep`, `SettingStep`, `CoverStep`, `TitleStep`, `PlotPage`, `WritingSamplePage`, and `SummaryPage`.
   - **State Management:** Redux Toolkit manages the application state, including chat history (`chatSlice` - persistent), project data (`projectsSlice` - includes artwork data), application state (`appStateSlice` - includes `activeView`), and settings (`settingsSlice` - includes API key, project path, `highPreferenceModelId`, `lowPreferenceModelId`). Redux listeners (`src/renderer/src/lib/store/listeners/`) handle side effects like loading full project data. Selectors (e.g., `selectActiveProjectWithCoverDataUrl`) derive state like displayable cover image URLs.
@@ -61,6 +61,7 @@ Minstrel follows a client-server architecture within an Electron application. Th
   - **Lucide React:** Icon library.
   - **Recharts:** Charting library.
   - **MDXEditor:** Markdown editor component.
+  - **Remark:** Markdown processor used for parsing outlines (`dashboardUtils.ts`). Includes `unist-util-visit` and `mdast-util-to-string` for AST traversal and text extraction.
 - **State Management:**
   - **Redux Toolkit:** Library for managing application state, including listener middleware for side effects.
 - **Communication:**
@@ -77,7 +78,7 @@ Minstrel follows a client-server architecture within an Electron application. Th
 
 ### Dependencies
 
-The project's dependencies are managed using `npm`. Key dependencies include `react`, `electron`, `@reduxjs/toolkit`, `better-sqlite3`, `ai`, `@ai-sdk/google`, and UI libraries like `@radix-ui/*` (via ShadCN). The full list can be found in `package.json`.
+The project's dependencies are managed using `npm`. Key dependencies include `react`, `electron`, `@reduxjs/toolkit`, `better-sqlite3`, `ai`, `@ai-sdk/google`, `remark`, `unist-util-visit`, `mdast-util-to-string`, and UI libraries like `@radix-ui/*` (via ShadCN). The full list can be found in `package.json`.
 
 ### Project Persistence
 
