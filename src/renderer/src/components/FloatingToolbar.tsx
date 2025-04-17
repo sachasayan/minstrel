@@ -5,14 +5,17 @@ import { useSelector } from 'react-redux'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { toast } from 'sonner'
 import pdfService from '@/lib/services/pdfService' // Import the service
+import PdfExportConfigModal, { PdfExportConfig } from './PdfExportConfigModal' // Import modal and config type
 
 const FloatingToolbar: React.FC = () => {
   const activeProject = useSelector(selectActiveProject)
   const [isExporting, setIsExporting] = useState(false) // State for loading indicator
 
-  const handleExportClick = async () => { // Make async
+  // This function is now called by the modal on export
+  const handleExportConfigured = async (config: PdfExportConfig) => {
     if (!activeProject || isExporting) {
-      if (!activeProject) toast.error('No active project to export.')
+      // This check might be redundant if the button is disabled, but good practice
+      if (!activeProject) toast.error('No active project selected.')
       return
     }
 
@@ -20,7 +23,8 @@ const FloatingToolbar: React.FC = () => {
     const exportToastId = toast.loading(`Generating PDF for ${activeProject.title}...`)
 
     try {
-      const blob = await pdfService.generateProjectPdf(activeProject)
+      // Pass the config options to the service
+      const blob = await pdfService.generateProjectPdf(activeProject, config)
 
       if (blob) {
         const filename = `${activeProject.title || 'Untitled Project'}.pdf`
@@ -47,19 +51,22 @@ const FloatingToolbar: React.FC = () => {
   return (
     // Changed positioning classes: removed right-4, added left-1/2 -translate-x-1/2
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 p-2 bg-card/80 backdrop-blur-sm rounded-lg shadow-lg border border-border">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handleExportClick}
-        title="Export Project to PDF"
-        disabled={isExporting} // Disable button while exporting
-      >
-        {isExporting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <FileDown className="h-4 w-4" />
-        )}
-      </Button>
+      {/* Wrap the Button with the Modal component */}
+      <PdfExportConfigModal onExport={handleExportConfigured}>
+        {/* The Button now acts as the DialogTrigger */}
+        <Button
+          variant="outline"
+          size="icon"
+          title="Export Project to PDF"
+          disabled={isExporting} // Disable button while exporting
+        >
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileDown className="h-4 w-4" />
+          )}
+        </Button>
+      </PdfExportConfigModal>
     </div>
   )
 }
