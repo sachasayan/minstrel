@@ -97,7 +97,8 @@ interface ProjectPdfProps {
   config: PdfExportConfig; // Add config to props
 }
 
-const ProjectPdfDocument: React.FC<ProjectPdfProps> = ({ project, config }) => {
+// Export the component so it can be used by the previewer
+export const ProjectPdfDocument: React.FC<ProjectPdfProps> = ({ project, config }) => {
   // Create styles dynamically based on config
   const styles = createStyles(config);
   const coverDataUrl = dataUrlFromBase64(project.coverImageBase64, project.coverImageMimeType)

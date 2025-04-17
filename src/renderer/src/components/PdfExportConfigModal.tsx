@@ -1,4 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react' // Added useMemo
+import { PDFViewer } from '@react-pdf/renderer'; // Import PDFViewer
+import { useSelector } from 'react-redux'; // Import useSelector
+import { selectActiveProject } from '@/lib/store/projectsSlice'; // Import selector
+import { ProjectPdfDocument } from '@/lib/services/pdfService'; // Import the document component
 import {
   Dialog,
   DialogContent,
@@ -53,6 +57,24 @@ const PdfExportConfigModal: React.FC<PdfExportConfigModalProps> = ({ children, o
   const [selectedFont, setSelectedFont] = useState<string>(fontOptions[0].value)
   const [selectedPaperSizeValue, setSelectedPaperSizeValue] = useState<string>(paperSizeOptions[0].value)
   const [isOpen, setIsOpen] = useState(false); // Control dialog open state
+  const activeProject = useSelector(selectActiveProject); // Get active project
+
+  // Memoize the current config for the preview
+  const currentPreviewConfig = useMemo((): PdfExportConfig | null => {
+    const selectedSizeOption = paperSizeOptions.find(opt => opt.value === selectedPaperSizeValue);
+    const paperSizeForPdf = selectedSizeOption?.dimensions
+      ? (selectedSizeOption.dimensions as [number, number])
+      : (selectedSizeOption?.value as 'A4' | 'Letter');
+
+    if (!paperSizeForPdf) return null; // Return null if size is invalid
+
+    return {
+      fontFamily: selectedFont,
+      paperSizeValue: selectedPaperSizeValue,
+      paperSize: paperSizeForPdf,
+    };
+  }, [selectedFont, selectedPaperSizeValue]);
+
 
   const handleExportClick = () => {
     const selectedSizeOption = paperSizeOptions.find(opt => opt.value === selectedPaperSizeValue)
@@ -84,16 +106,20 @@ const PdfExportConfigModal: React.FC<PdfExportConfigModalProps> = ({ children, o
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      {/* Increase max width and height for preview */}
+      <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>PDF Export Options</DialogTitle>
           <DialogDescription>
             Configure the appearance of your exported PDF document.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {/* Font Selection */}
-          <div className="grid grid-cols-4 items-center gap-4">
+        {/* Use flex layout for options and preview */}
+        <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6 overflow-hidden">
+          {/* Options Panel */}
+          <div className="md:col-span-1 space-y-4 py-4 pr-4 border-r">
+            {/* Font Selection */}
+            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="font-family" className="text-right">
               Font
             </Label>
@@ -128,8 +154,25 @@ const PdfExportConfigModal: React.FC<PdfExportConfigModalProps> = ({ children, o
               </SelectContent>
             </Select>
           </div>
+          {/* End Options Panel */}
+          </div>
+
+          {/* Preview Panel */}
+          {/* Changed bg-gray-100 to bg-muted and added border */}
+          <div className="md:col-span-2 h-full overflow-hidden bg-muted rounded border border-border">
+            {activeProject && currentPreviewConfig ? (
+              <PDFViewer style={{ width: '100%', height: '100%', border: 'none' }}>
+                <ProjectPdfDocument project={activeProject} config={currentPreviewConfig} />
+              </PDFViewer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                { !activeProject ? "No active project for preview." : "Select valid options for preview."}
+              </div>
+            )}
+          </div>
+        {/* End Flex Layout */}
         </div>
-        <DialogFooter>
+        <DialogFooter className="mt-4"> {/* Add margin top to footer */}
           <DialogClose asChild>
              <Button type="button" variant="outline">Cancel</Button>
           </DialogClose>
