@@ -52,7 +52,8 @@ const genres = [
   { value: 'historical-fiction', label: 'Historical Fiction' },
   { value: 'literary-fiction', label: 'Literary Fiction' },
   { value: 'dystopian', label: 'Dystopian' },
-  { value: 'adventure', label: 'Adventure' }
+  { value: 'adventure', label: 'Adventure' },
+  { value: 'humor', label: 'Humor' } // Added Humor
 ]
 
 const novelLengths = [
@@ -74,7 +75,8 @@ const genreSettings = {
   'historical-fiction': ['Ancient Civilization', 'Medieval Europe', 'Victorian Era', 'World War Era', 'Other'],
   'literary-fiction': ['Character-Driven', 'Experimental', 'Social Commentary', 'Psychological', 'Other'],
   dystopian: ['Post-Apocalyptic', 'Totalitarian Regime', 'Cyberpunk', 'Environmental Collapse', 'Other'],
-  adventure: ['Jungle Expedition', 'Treasure Hunt', 'Lost Civilization', 'Pirate Adventure', 'Other']
+  adventure: ['Jungle Expedition', 'Treasure Hunt', 'Lost Civilization', 'Pirate Adventure', 'Other'],
+  humor: ['Satirical World', 'Everyday Life', 'Workplace Comedy', 'Absurdist Setting', 'Other'] // Added Humor settings
 }
 
 

@@ -3,7 +3,7 @@ export interface AppSettings {
   apiKey?: string
   workingRootDirectory?: string | null
   highPreferenceModelId?: string // Added
-  lowPreferenceModelId?: string  // Added
+  lowPreferenceModelId?: string
 }
 export interface AppState {
   projectList: ProjectFragment[]
@@ -55,7 +55,6 @@ export interface KnowledgeGraph {
   chapters: string[] | null
 }
 
-
 export interface ExpertSuggestion {
   name: string
   expertise?: string
@@ -64,10 +63,10 @@ export interface ExpertSuggestion {
 }
 
 export interface ChatMessage {
-  sender: string;
-  text: string;
-  timestamp?: string;
-  metadata?: any;
+  sender: string
+  text: string
+  timestamp?: string
+  metadata?: any
 }
 
 // interface SceneOutline {
@@ -142,3 +141,25 @@ export type Genre =
   | 'true-crime-'
   | 'true-crime-white-collar-crime'
   | 'true-crime'
+  | 'adventure-survival'
+  | 'dystopian-cyberpunk'
+  | 'dystopian-future'
+  | 'dystopian-totalitarian-regime'
+  | 'fantasy-medieval-kingdom'
+  | 'fantasy-middle-earth'
+  | 'fantasy-mythological'
+  | 'fantasy-wizard-world'
+  | 'historical-fiction-american-civil-war'
+  | 'historical-fiction-medieval-europe'
+  | 'horror-folk-horror'
+  | 'humor-dark-comedy'
+  | 'mystery-thriller-organized-crime'
+  | 'mystery-cozy-mystery'
+  | 'mystery-small-town-secrets'
+  | 'romance-slow-burn'
+  | 'science-fiction-alien-planet'
+  | 'science-fiction-artificial-intelligence'
+  | 'science-fiction-mars-colony'
+  | 'science-fiction-space'
+  | 'thriller-espionage'
+  | 'thriller-tech-thriller'

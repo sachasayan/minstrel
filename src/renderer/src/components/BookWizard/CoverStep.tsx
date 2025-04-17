@@ -2,6 +2,7 @@ import { ReactNode, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { bookCovers } from '@/assets/book-covers'
+import { genres } from '@/components/BookWizard/index' // Import genres to get labels
 import { cn } from '@/lib/utils'
 import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
 
@@ -35,9 +36,16 @@ const CoverStep = ({
        // Let's return empty array if no genre is selected. User must select genre first.
        return []
     }
-    // Filter based on image path starting with covers/{genre}- or covers/{genre}.png
+    // Find the display label for the selected genre value
+    const selectedGenreLabel = genres.find(g => g.value === selectedGenre)?.label
+    if (!selectedGenreLabel) {
+      return [] // Should not happen if selectedGenre is valid, but good practice
+    }
+
+    // Filter covers where the categoryName starts with the selected genre's label
+    // This handles both top-level genres (e.g., "Fantasy") and subgenres (e.g., "Fantasy - Dark Fantasy")
     const genreMatches = bookCovers.filter(cover =>
-        cover.image.startsWith(`covers/${selectedGenre}-`) || cover.image === `covers/${selectedGenre}.png`
+      cover.categoryName.startsWith(selectedGenreLabel)
     )
     return genreMatches
   }, [selectedGenre])
