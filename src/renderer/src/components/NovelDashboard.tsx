@@ -12,6 +12,7 @@ import { ProgressTracker } from '@/components/dashboard/ProgressTracker'
 import { Button } from '@/components/ui/button'
 import { addChatMessage } from '@/lib/store/chatSlice'
 import { CoverCard } from '@/components/CoverCard'
+import FloatingToolbar from '@/components/FloatingToolbar' // Import the new toolbar
 
 
 type NovelStage = 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define NovelStage type
@@ -303,6 +304,7 @@ export default function NovelDashboard() {
           </Card>
         </div>
       </div>
+      <FloatingToolbar /> {/* Add the toolbar here */}
     </div >
   )
 }

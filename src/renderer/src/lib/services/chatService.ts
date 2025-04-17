@@ -67,10 +67,29 @@ const processResponse = (responseString: string): RequestContext | null => {
     const fileName = response.write_file.file_name
     const content = response.write_file.content
     if (fileName && content) {
+      let fileType: string = 'unknown'
+      let sortOrder: number = 0 // Default sort order
 
-      // console.log(stringToProjectFile("---- \n # " + fileName + "\n \n" +content))
-      // Fix Markdown formatting before updating the file
-      store.dispatch(updateFile({title: fileName, content: content}));
+      // Infer type and sort_order based on filename
+      if (fileName.toLowerCase().includes('outline')) {
+        fileType = 'outline'
+        sortOrder = 0 // Outline always comes first
+      } else if (fileName.toLowerCase().includes('chapter')) {
+        fileType = 'chapter'
+        // Assign a default sort order for chapters, relying on DB load order
+        sortOrder = 1 // Outline is 0, chapters start from 1
+      }
+      // Note: Files not matching 'outline' or 'chapter' will keep sortOrder = 0
+
+      // Dispatch updateFile with inferred type and simplified sort_order
+      store.dispatch(
+        updateFile({
+          title: fileName,
+          content: content,
+          type: fileType,
+          sort_order: sortOrder
+        })
+      )
     }
   }
 
@@ -123,12 +142,12 @@ export const sendMessage = async (context: RequestContext) => {
     store.dispatch(setPendingFiles(context.requestedFiles || null))
 
     // Determine model preference based on agent
-    let modelPreference: 'high' | 'low' = 'low'; // Default to low
+    let modelPreference: 'high' | 'low' = 'low' // Default to low
     if (context.agent === 'outlineAgent' || context.agent === 'writerAgent') {
-      modelPreference = 'high';
+      modelPreference = 'high'
     }
 
-    const response = await geminiService.generateContent(prompt, modelPreference); // Pass preference
+    const response = await geminiService.generateContent(prompt, modelPreference) // Pass preference
 
     console.groupCollapsed('AI Response')
     console.log(response)
@@ -173,7 +192,6 @@ export const sendMessage = async (context: RequestContext) => {
   }
 }
 
-
 export const generateOutlineFromParams = async (parameters: { [key: string]: any }): Promise<void> => {
   const prompt = buildPrompt({
     agent: 'outlineAgent',
@@ -185,7 +203,7 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
   })
   try {
     // Pass 'high' preference directly as this function always uses outlineAgent
-    const response = await geminiService.generateContent(prompt, 'high');
+    const response = await geminiService.generateContent(prompt, 'high')
 
     console.log('AI Response: \n \n', response)
     const context = processResponse(response)
@@ -197,12 +215,12 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
   } catch (error) {
     console.error('Failed to send chat message for outline generation:', error)
     // Add user feedback on error
-     store.dispatch(
-        addChatMessage({
-          sender: 'Gemini',
-          text: `Sorry, I encountered an error trying to generate the initial outline. Please try again.`
-        })
-      )
+    store.dispatch(
+      addChatMessage({
+        sender: 'Gemini',
+        text: `Sorry, I encountered an error trying to generate the initial outline. Please try again.`
+      })
+    )
   } finally {
     store.dispatch(resolvePendingChat())
     console.log('generateOutlineFromParams() finished')

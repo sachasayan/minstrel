@@ -47,6 +47,8 @@ export interface ProjectFile {
   content: string
   wordcount?: number
   hasEdits?: boolean
+  type?: string // Added: e.g., 'outline', 'chapter'
+  sort_order?: number // Added: Order within the type
 }
 
 export interface KnowledgeGraph {

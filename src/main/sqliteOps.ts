@@ -4,8 +4,6 @@ import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
 
-
-
 const homedir = os.homedir()
 
 // Helper function to resolve paths with home directory
@@ -58,8 +56,8 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
     db.exec(CREATE_TABLES_SQL)
 
     // Insert metadata (excluding potentially large base64 data during init)
-    const initialMetadata = { ...metadata };
-    delete initialMetadata.coverImageBase64; // Don't save base64 on initial create
+    const initialMetadata = { ...metadata }
+    delete initialMetadata.coverImageBase64 // Don't save base64 on initial create
 
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
     const insertMetadataTransaction = db.transaction((meta) => {
@@ -75,9 +73,9 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
     console.error(`Failed to initialize SQLite project at ${resolvedPath}:`, error)
     return { success: false, error: String(error) }
   } finally {
-     if (db && db.open) {
-       db.close()
-     }
+    if (db && db.open) {
+      db.close()
+    }
   }
 }
 
@@ -98,7 +96,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     db.exec(CREATE_TABLES_SQL)
 
     // --- Begin Transaction ---
-    db.exec('BEGIN');
+    db.exec('BEGIN')
 
     // 1. Update metadata (including cover image data)
     // Access properties assuming 'project' has the correct structure
@@ -118,12 +116,12 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       wordCountHistorical: project.wordCountHistorical ?? []
     }
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
-    db.exec('DELETE FROM metadata'); // Clear existing metadata
+    db.exec('DELETE FROM metadata') // Clear existing metadata
     for (const [key, value] of Object.entries(metadataToSave)) {
-        if (value !== undefined) {
-             const valueToStore = (key === 'coverImageBase64' && value !== null) ? value : JSON.stringify(value ?? null);
-             insertMetadata.run(key, valueToStore)
-        }
+      if (value !== undefined) {
+        const valueToStore = key === 'coverImageBase64' && value !== null ? value : JSON.stringify(value ?? null)
+        insertMetadata.run(key, valueToStore)
+      }
     }
 
     // 2. Clear existing files and insert new ones
@@ -132,17 +130,14 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       INSERT INTO files (title, content, type, sort_order)
       VALUES (?, ?, ?, ?)
     `)
+    // Use 'any' for file type as ProjectFile type is not available in main process context
     if (Array.isArray(project.files)) {
-      let sortOrder = 0
-      // Use 'any' for item types within loops as ProjectFile type is not available
-      const outline = project.files.find((e: any) => e.title.includes('Outline'))
-      if (outline) {
-        insertFile.run(outline.title, outline.content, 'outline', sortOrder++)
+      for (const file of project.files as any[]) {
+        // Ensure type and sort_order have default values if missing
+        const fileType = file.type ?? 'unknown' // Default type if missing
+        const sortOrder = file.sort_order ?? 0 // Default sort order if missing
+        insertFile.run(file.title, file.content, fileType, sortOrder)
       }
-      const chapters = project.files.filter((e: any) => e.title.includes('Chapter'))
-      chapters.forEach((chapter: any) => {
-        insertFile.run(chapter.title, chapter.content, 'chapter', sortOrder++)
-      })
     }
 
     // 3. Clear existing chat history and insert new messages
@@ -154,21 +149,21 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       `)
       // Use 'any' for message type
       for (const message of project.chatHistory as any[]) {
-        const timestamp = message.timestamp || null;
-        const metadataJson = message.metadata ? JSON.stringify(message.metadata) : null;
+        const timestamp = message.timestamp || null
+        const metadataJson = message.metadata ? JSON.stringify(message.metadata) : null
         insertChatMessage.run(message.sender, message.text, timestamp, metadataJson)
       }
     }
 
     // --- Commit Transaction ---
-    db.exec('COMMIT');
+    db.exec('COMMIT')
 
     return { success: true }
   } catch (error) {
     console.error(`Failed to save SQLite project at ${resolvedPath}:`, error)
     // --- Rollback Transaction on Error ---
     if (db && db.inTransaction) {
-      db.exec('ROLLBACK');
+      db.exec('ROLLBACK')
     }
     return { success: false, error: String(error) }
   } finally {
@@ -192,7 +187,7 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
     const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
     if (!metadataRows || metadataRows.length === 0) {
       console.warn(`No metadata found for project ${filePath}`)
-      return null; // Return null if no metadata rows found
+      return null // Return null if no metadata rows found
     }
 
     // Reduce metadata rows into a single object
@@ -200,13 +195,13 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
     const metadata = metadataRows.reduce((acc, row) => {
       try {
         if (row.key === 'coverImageBase64') {
-          acc[row.key] = row.value; // Keep base64 as string
+          acc[row.key] = row.value // Keep base64 as string
         } else {
           // Attempt to parse other values as JSON
           try {
-              acc[row.key] = JSON.parse(row.value);
+            acc[row.key] = JSON.parse(row.value)
           } catch {
-              acc[row.key] = row.value; // Keep as string if JSON parse fails
+            acc[row.key] = row.value // Keep as string if JSON parse fails
           }
         }
       } catch (e) {
@@ -218,13 +213,12 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
 
     // Check for essential metadata keys needed for a fragment
     if (!metadata.title) {
-       console.warn(`Essential metadata 'title' missing for project ${filePath}`)
-       return null; // Return null if essential data is missing
+      console.warn(`Essential metadata 'title' missing for project ${filePath}`)
+      return null // Return null if essential data is missing
     }
 
     // Return the full metadata object; frontend service will construct the fragment
-    return metadata;
-
+    return metadata
   } catch (error) {
     // Log the error but return null instead of throwing
     console.error(`Failed to get SQLite project metadata for ${resolvedPath}:`, error)
@@ -251,23 +245,22 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
 
     // Delete any lingering skeleton rows from older versions
     try {
-        db.exec("DELETE FROM files WHERE type = 'skeleton'");
+      db.exec("DELETE FROM files WHERE type = 'skeleton'")
     } catch (deleteError) {
-        // Log error but continue loading if deletion fails (table might not exist yet etc.)
-        console.warn(`Could not delete skeleton rows for project ${filePath}:`, deleteError);
+      // Log error but continue loading if deletion fails (table might not exist yet etc.)
+      console.warn(`Could not delete skeleton rows for project ${filePath}:`, deleteError)
     }
-
 
     // Get metadata (including base64 data)
     const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
     const projectMetadata = metadataRows.reduce((acc, row) => {
-       try {
-         // Parse everything except base64 string
-         if (row.key !== 'coverImageBase64') {
-            acc[row.key] = JSON.parse(row.value)
-         } else {
-            acc[row.key] = row.value; // Keep base64 as string
-         }
+      try {
+        // Parse everything except base64 string
+        if (row.key !== 'coverImageBase64') {
+          acc[row.key] = JSON.parse(row.value)
+        } else {
+          acc[row.key] = row.value // Keep base64 as string
+        }
       } catch (e) {
         console.warn(`Failed to parse metadata key '${row.key}' for project ${filePath}:`, e)
         acc[row.key] = row.value // Keep as string if parsing fails
@@ -275,35 +268,46 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       return acc
     }, {})
 
-    // Get files (Skeleton rows are already deleted or never existed)
-    const files = db.prepare(`
-      SELECT title, content, type
+    // Get files, including type and sort_order
+    const files = db
+      .prepare(
+        `
+      SELECT title, content, type, sort_order
       FROM files
-      ORDER BY sort_order
-    `).all()
+      ORDER BY sort_order ASC
+    `
+      )
+      .all() // Ensure ASC order
 
-    const projectFiles = files.map(file => ({
+    // Map loaded data to ProjectFile structure, including new fields
+    const projectFiles = files.map((file) => ({
       title: file.title,
       content: file.content,
+      type: file.type, // Map type
+      sort_order: file.sort_order, // Map sort_order
       hasEdits: false // Default to no edits on load
     }))
 
     // Get chat history
-    const chatHistoryRows = db.prepare(`
+    const chatHistoryRows = db
+      .prepare(
+        `
       SELECT id, sender, text, timestamp, metadata
       FROM chat_history
       ORDER BY timestamp ASC, id ASC
-    `).all() // Use id as secondary sort for stability
+    `
+      )
+      .all() // Use id as secondary sort for stability
 
-    const chatHistory = chatHistoryRows.map(row => {
-      let parsedMetadata = null;
+    const chatHistory = chatHistoryRows.map((row) => {
+      let parsedMetadata = null
       if (row.metadata) {
         try {
-          parsedMetadata = JSON.parse(row.metadata);
+          parsedMetadata = JSON.parse(row.metadata)
         } catch (e) {
-          console.warn(`Failed to parse chat metadata for message id ${row.id} in project ${filePath}:`, e);
+          console.warn(`Failed to parse chat metadata for message id ${row.id} in project ${filePath}:`, e)
           // Keep metadata as original string or null if parsing fails
-          parsedMetadata = row.metadata;
+          parsedMetadata = row.metadata
         }
       }
       return {
@@ -312,9 +316,8 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
         text: row.text,
         timestamp: row.timestamp,
         metadata: parsedMetadata
-      };
-    });
-
+      }
+    })
 
     // Construct the final Project object, ensuring type compatibility
     // Return type is implicitly 'any' here, but structure should match Project
@@ -331,13 +334,12 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       files: projectFiles,
       chatHistory: chatHistory,
       knowledgeGraph: null // Assuming this is still null on load
-    };
+    }
     // Remove potential 'any' type from spread if needed
-    delete (loadedProject as any).key; // Remove potential leftover key from reduce
-    delete (loadedProject as any).value; // Remove potential leftover value from reduce
+    delete (loadedProject as any).key // Remove potential leftover key from reduce
+    delete (loadedProject as any).value // Remove potential leftover value from reduce
 
-    return loadedProject;
-
+    return loadedProject
   } catch (error) {
     console.error(`Failed to load SQLite project from ${resolvedPath}:`, error)
     throw new Error('Could not load project details.') // Still throw for full load failure
