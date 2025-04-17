@@ -11,6 +11,7 @@ This project, Minstrel, aims to create a collaborative writing experience betwee
 - **Consistency:** By providing context and tracking story elements, the AI helps maintain consistency in characters, plot points, and overall narrative.
 - **Co-creation:** It fosters a collaborative environment where the user and AI work together, combining human creativity with AI's ability to generate and process large amounts of text.
 - **Accessibility:** It provides a guided approach to novel-writing, making it more accessible to novice writers.
+- **Export & Sharing:** Allows users to export their novel (cover, title, chapters) to a standard PDF format for easy sharing, printing, or archiving.
 
 ## How It Should Work (User Experience Goals)
 
