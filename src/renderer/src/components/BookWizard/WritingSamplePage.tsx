@@ -3,7 +3,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useWizard } from '@/components/BookWizard'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+import minstrelIcon from '@/assets/bot/base.png'
 
 // Define props type
 interface WritingSampleStepProps {

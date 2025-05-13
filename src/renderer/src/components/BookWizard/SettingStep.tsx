@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useWizard, genreSettings } from '@/components/BookWizard/index'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+import minstrelIcon from '@/assets/bot/base.png'
 
 interface SettingStepProps {
   handleProceed: (nextStep: number) => void

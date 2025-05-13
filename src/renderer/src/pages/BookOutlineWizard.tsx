@@ -7,7 +7,7 @@ import { setActiveView } from '@/lib/store/appStateSlice'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion' // <-- Import motion
+import { motion } from 'framer-motion'
 
 import Intro from '@/components/BookWizard/Intro'
 import ParameterChecklist from '@/components/BookWizard/ParameterChecklist'
@@ -18,7 +18,7 @@ import TitleStep from '@/components/BookWizard/TitleStep'
 import PlotStep from '@/components/BookWizard/PlotPage'
 import WritingSampleStep from '@/components/BookWizard/WritingSamplePage'
 import SummaryStep from '@/components/BookWizard/SummaryPage'
-import CoverStep from '@/components/BookWizard/CoverStep' // <-- Import CoverStep
+import CoverStep from '@/components/BookWizard/CoverStep'
 
 import { WizardContext } from '@/components/BookWizard/index'
 
@@ -34,7 +34,7 @@ const stepVariants = {
 export default function BookOutlineWizard(): ReactNode {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<Record<string, any>>({})
-  const [selectedCoverPath, setSelectedCoverPath] = useState<string | null>(null) // <-- State for selected cover
+  const [selectedCoverPath, setSelectedCoverPath] = useState<string | null>(null)
   const [isAtBottom, setIsAtBottom] = useState(true) // State for sticky scroll
   const dispatch = useDispatch()
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -65,13 +65,13 @@ export default function BookOutlineWizard(): ReactNode {
   }, []); // No dependencies needed, relies on the ref
 
   const wizardSteps = useMemo(() => [
-    { step: 0, Component: Intro }, // <-- Added Intro as Step 0
+    { step: 0, Component: Intro },
     { step: 1, Component: StoryLengthStep },
     { step: 2, Component: GenreStep },
     { step: 3, Component: SettingStep },
     { step: 4, Component: CoverStep },
-    { step: 5, Component: TitleStep },
-    { step: 6, Component: PlotStep },
+    { step: 5, Component: PlotStep },
+    { step: 6, Component: TitleStep },
     { step: 7, Component: WritingSampleStep },
     { step: 8, Component: SummaryStep }
   ], [])
@@ -99,7 +99,7 @@ export default function BookOutlineWizard(): ReactNode {
 
   return (
     <div className={cn(
-      "flex flex-col h-screen p-16 md:p-32", // <-- Added padding to root
+      "flex flex-col h-screen p-16 md:p-32",
       "animate-in fade-in zoom-in-95 duration-300"
     )}>
       <header className="flex items-center p-4 border-b shrink-0">

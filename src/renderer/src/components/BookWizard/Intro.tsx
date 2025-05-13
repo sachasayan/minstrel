@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { useWizard, cheatData } from '@/components/BookWizard/index'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+import minstrelIcon from '@/assets/bot/base.png'
 
 const Intro = () => {
-  const { setCurrentStep, setFormData, setSelectedCoverPath } = useWizard() // <-- Get setter
+  const { setCurrentStep, setFormData, setSelectedCoverPath } = useWizard()
 
   const handleCheat = async () => {
     setFormData(cheatData)

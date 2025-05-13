@@ -5,7 +5,7 @@ import { Command, CommandGroup, CommandInput, CommandItem, CommandList, CommandE
 import { ChevronsUpDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useWizard, genres } from '@/components/BookWizard/index'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Add icon import
+import minstrelIcon from '@/assets/bot/base.png'
 
 interface GenreStepProps {
   handleProceed: (nextStep: number) => void

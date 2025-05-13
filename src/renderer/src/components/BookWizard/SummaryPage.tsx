@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react' // <-- Add useEffect import
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { useDispatch, useSelector } from 'react-redux'
@@ -8,7 +8,7 @@ import { setActiveView } from '@/lib/store/appStateSlice'
 import { useWizard, genres, sanitizeFilename } from '@/components/BookWizard/index'
 import ReactMarkdown from 'react-markdown'
 import { Loader2 } from 'lucide-react'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+import minstrelIcon from '@/assets/bot/base.png'
 // import { v4 as uuidv4 } from 'uuid' // Removed unused import
 import type { ProjectFile, Project } from '@/types'
 
@@ -19,7 +19,7 @@ interface SummaryStepProps {
 
 const SummaryStep = ({ isActive }: SummaryStepProps) => {
   const dispatch = useDispatch()
-  const { formData, selectedCoverPath, requestScrollToBottom } = useWizard() // <-- Get scroll function
+  const { formData, selectedCoverPath, requestScrollToBottom } = useWizard()
   const [isGenerating, setIsGenerating] = useState(false)
   const [streamedText, setStreamedText] = useState('')
   const [generationError, setGenerationError] = useState<string | null>(null)
@@ -102,8 +102,8 @@ Please provide the output in Markdown format.`
       expertSuggestions: [],
       knowledgeGraph: null,
       chatHistory: [],
-      coverImageBase64: coverData.base64, // <-- Use converted base64
-      coverImageMimeType: coverData.mimeType, // <-- Use converted mimeType
+      coverImageBase64: coverData.base64,
+      coverImageMimeType: coverData.mimeType,
       // 'cover' property might be deprecated or unused if base64 is primary
       // Ensure Project type definition matches - Removed isNew as it's not in Project type
     };

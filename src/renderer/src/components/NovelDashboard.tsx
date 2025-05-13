@@ -220,7 +220,7 @@ export default function NovelDashboard() {
 
           {/* Expert Suggestions */}
           {activeProject?.expertSuggestions.map((suggestion, index) => (
-            <Card className="@lg:col-span-3" key={index}>
+            <Card className="@lg:col-span-6" key={index}>
               <CardHeader>
                 <CardTitle>Expert feedback: {suggestion.name}</CardTitle>
                 <CardDescription>{suggestion.expertise}</CardDescription>

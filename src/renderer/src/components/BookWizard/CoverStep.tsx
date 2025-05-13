@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { bookCovers } from '@/assets/book-covers'
 import { genres } from '@/components/BookWizard/index' // Import genres to get labels
 import { cn } from '@/lib/utils'
-import minstrelIcon from '@/assets/bot/base.png' // <-- Import icon
+import minstrelIcon from '@/assets/bot/base.png'
 
 interface CoverStepProps {
   handleProceed: () => void

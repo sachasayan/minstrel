@@ -22,6 +22,8 @@ const parser = new XMLParser({
   ignoreAttributes: true,
   trimValues: true,
   isArray: (name, jpath) => {
+    // Ensure 'title' within 'titles' is always treated as an array
+    if (jpath === 'root.titles.title') return true
     return ['root.read_file'].includes(jpath) ? true : false
   }
 })
@@ -224,5 +226,57 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
   } finally {
     store.dispatch(resolvePendingChat())
     console.log('generateOutlineFromParams() finished')
+  }
+}
+
+/**
+ * Generates book title suggestions based on plot, genre, and setting.
+ * @param plotSummary - The basic plot description.
+ * @param genre - The selected genre.
+ * @param setting - The selected setting description.
+ * @returns A promise that resolves to an array of title suggestions.
+ */
+export const generateTitleSuggestions = async (plotSummary: string, genre: string, setting: string): Promise<string[]> => {
+  // Construct the prompt specifically for title generation
+  const prompt = `
+You are an expert book title generator. Based on the following details, generate approximately 12 diverse and compelling book title suggestions.
+
+Genre: ${genre || 'Not specified'}
+Setting: ${setting || 'Not specified'}
+Plot Summary:
+${plotSummary}
+
+Return the suggestions ONLY within the following XML structure:
+<titles>
+  <title>Suggestion 1</title>
+  <title>Suggestion 2</title>
+  ...
+</titles>
+Do not include any other text or explanation outside the <titles> tag.
+  `.trim()
+
+  console.log('Generating title suggestions with prompt:', prompt)
+
+  try {
+    // Use the 'low' preference model for speed/cost efficiency
+    const responseString = await geminiService.generateContent(prompt, 'low')
+    console.log('Raw title suggestions response:', responseString)
+
+    // Parse the XML response
+    const parsed = parser.parse(`<root>${responseString}</root>`).root
+
+    if (parsed && parsed.titles && parsed.titles.title) {
+      // Ensure titles are always returned as an array, even if only one is generated
+      const titles = Array.isArray(parsed.titles.title) ? parsed.titles.title : [parsed.titles.title]
+      // Filter out any empty strings that might result from parsing issues
+      return titles.filter((title) => typeof title === 'string' && title.trim() !== '')
+    } else {
+      console.warn('No titles found in the expected format:', parsed)
+      return [] // Return empty array if structure is not as expected
+    }
+  } catch (error) {
+    console.error('Failed to generate title suggestions:', error)
+    toast.error('Failed to generate title suggestions. Please try entering one manually.') // Inform user
+    return [] // Return empty array on error
   }
 }
