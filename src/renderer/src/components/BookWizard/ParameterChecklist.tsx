@@ -5,7 +5,7 @@ import { CheckCircle, Circle } from 'lucide-react'
 import { useWizard } from '@/components/BookWizard/index'
 
 export default function ParameterChecklist(): ReactNode {
-  const { currentStep } = useWizard() // Removed unused formData
+  const { currentStep } = useWizard()
 
   if (currentStep === 0) return null
 
@@ -27,7 +27,7 @@ export default function ParameterChecklist(): ReactNode {
       completed: currentStep > 3,
     },
     {
-      label: 'Cover', // Added Cover step
+      label: 'Cover',
       stepNumber: 4,
       completed: currentStep > 4,
     },

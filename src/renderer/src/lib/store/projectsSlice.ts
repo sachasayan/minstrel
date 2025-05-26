@@ -40,7 +40,7 @@ export const projectsSlice = createSlice({
         expertSuggestions: [],
         knowledgeGraph: null,
         chatHistory: [] // Initialize chat history
-        // isNew: true // Removed: Flag is deprecated
+        // isNew: true
       }
       state.activeProject = tempProject
       state.projectHasLiveEdits = true // It's unsaved
@@ -103,9 +103,9 @@ export const projectsSlice = createSlice({
       }
     },
     updateMetaProperty: (state, action: PayloadAction<{ property: string; value: any }>) => {
-      if (!state.activeProject) return
-      // Use type assertion carefully or add type checks if property is specific
-      // Cast to any to bypass TS error when assigning 'any' value to dynamic property
+      if (!state.activeProject)
+        return // Use type assertion carefully or add type checks if property is specific
+        // Cast to any to bypass TS error when assigning 'any' value to dynamic property
       ;(state.activeProject as any)[action.payload.property] = action.payload.value
       state.projectHasLiveEdits = true
     },
@@ -145,7 +145,7 @@ export const projectsSlice = createSlice({
 })
 
 export const {
-  startNewProject, // Add new action here
+  startNewProject,
   setActiveProject,
   setPendingFiles,
   resolvePendingFiles,

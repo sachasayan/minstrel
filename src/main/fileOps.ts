@@ -15,10 +15,9 @@ const resolvePath = (filePath: string): string => {
   return filePath.replace('~', homedir)
 }
 
-
 export const handleReadDirectory = async (_event, dirPath) => {
   const resolvedPath = resolvePath(dirPath)
-  if (!resolvedPath) return [] // Handle invalid path from resolvePath
+  if (!resolvedPath) return []
 
   try {
     const entries = await fs.readdir(resolvedPath, { withFileTypes: true })
@@ -34,7 +33,7 @@ export const handleReadDirectory = async (_event, dirPath) => {
 
 export const handleReadFile = async (_event, filePath) => {
   const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return '' // Handle invalid path
+  if (!resolvedPath) return ''
 
   try {
     const content = await fs.readFile(resolvedPath, 'utf-8')
@@ -47,7 +46,7 @@ export const handleReadFile = async (_event, filePath) => {
 
 export const handleWriteFile = async (_event, filePath, content) => {
   const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' } // Handle invalid path
+  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
 
   console.log('Writing file to:', resolvedPath)
   try {
@@ -61,9 +60,7 @@ export const handleWriteFile = async (_event, filePath, content) => {
 
 export const handleSelectDirectory = async (_event, operation) => {
   // Define the correct type for properties based on OpenDialogOptions['properties']
-  const properties: OpenDialogOptions['properties'] = operation === 'export'
-    ? ['openDirectory', 'createDirectory']
-    : ['openDirectory']
+  const properties: OpenDialogOptions['properties'] = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory']
 
   const result = await dialog.showOpenDialog({
     properties: properties // Now correctly typed
@@ -78,7 +75,7 @@ export const handleSelectDirectory = async (_event, operation) => {
 
 export const handleMakeDirectory = async (_event, dirPath) => {
   const resolvedPath = resolvePath(dirPath)
-  if (!resolvedPath) return { success: false, error: 'Invalid directory path provided.' } // Handle invalid path
+  if (!resolvedPath) return { success: false, error: 'Invalid directory path provided.' }
 
   console.log('Making directory at:', resolvedPath)
   try {
@@ -93,7 +90,7 @@ export const handleMakeDirectory = async (_event, dirPath) => {
 // New handler for deleting a file
 export const handleDeleteFile = async (_event, filePath) => {
   const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' } // Handle invalid path
+  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
 
   console.log('Deleting file at:', resolvedPath)
   try {
@@ -109,7 +106,6 @@ export const handleDeleteFile = async (_event, filePath) => {
     return { success: false, error: String(error) }
   }
 }
-
 
 export const registerFileOpsHandlers = () => {
   ipcMain.handle('read-directory', handleReadDirectory)

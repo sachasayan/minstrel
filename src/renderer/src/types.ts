@@ -2,7 +2,7 @@ export interface AppSettings {
   api?: string
   apiKey?: string
   workingRootDirectory?: string | null
-  highPreferenceModelId?: string // Added
+  highPreferenceModelId?: string
   lowPreferenceModelId?: string
 }
 export interface AppState {
@@ -47,8 +47,8 @@ export interface ProjectFile {
   content: string
   wordcount?: number
   hasEdits?: boolean
-  type?: string // Added: e.g., 'outline', 'chapter'
-  sort_order?: number // Added: Order within the type
+  type?: string
+  sort_order?: number
 }
 
 export interface KnowledgeGraph {

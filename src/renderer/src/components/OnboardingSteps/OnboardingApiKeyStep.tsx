@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
-// import { Button } from '@/components/ui/button' // Removed unused import
+// import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Key, MoveRight, Loader2 } from 'lucide-react' // Added Loader2
+import { Key, MoveRight, Loader2 } from 'lucide-react'
 import { useOnboarding } from './context'
 import geminiService from '@/lib/services/llmService'
 import minstrelIcon from '@/assets/bot/base.png'
@@ -11,7 +11,7 @@ interface OnboardingApiKeyStepProps {
   isActive: boolean // Prop received from parent map
 }
 
-const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNode => { // Added isActive back
+const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNode => {
   const { setCurrentStep, setFormData } = useOnboarding()
   const [keyValue, setKeyValue] = useState('')
   const [keyError, setKeyError] = useState(false)
@@ -93,7 +93,7 @@ const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNod
                 <Input
                     value={keyValue}
                     onChange={(e) => handleKey(e.target.value)}
-                    className="w-full text-black pr-8" // Added padding-right for loader
+                    className="w-full text-black pr-8"
                     placeholder="Paste API Key here..."
                     type="password" // Hide key visually
                     disabled={verifyingKey}

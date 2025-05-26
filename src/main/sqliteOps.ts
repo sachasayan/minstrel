@@ -49,10 +49,8 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
     const dir = path.dirname(resolvedPath)
     await fs.mkdir(dir, { recursive: true })
 
-    // Create and initialize the database
     db = new Database(resolvedPath)
 
-    // Create tables
     db.exec(CREATE_TABLES_SQL)
 
     // Insert metadata (excluding potentially large base64 data during init)
@@ -195,18 +193,18 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
     const metadata = metadataRows.reduce((acc, row) => {
       try {
         if (row.key === 'coverImageBase64') {
-          acc[row.key] = row.value // Keep base64 as string
+          acc[row.key] = row.value
         } else {
           // Attempt to parse other values as JSON
           try {
             acc[row.key] = JSON.parse(row.value)
           } catch {
-            acc[row.key] = row.value // Keep as string if JSON parse fails
+            acc[row.key] = row.value
           }
         }
       } catch (e) {
         console.warn(`Error processing metadata key '${row.key}' for project ${filePath}:`, e)
-        acc[row.key] = row.value // Keep raw value on error
+        acc[row.key] = row.value
       }
       return acc
     }, {})
@@ -259,11 +257,11 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
         if (row.key !== 'coverImageBase64') {
           acc[row.key] = JSON.parse(row.value)
         } else {
-          acc[row.key] = row.value // Keep base64 as string
+          acc[row.key] = row.value
         }
       } catch (e) {
         console.warn(`Failed to parse metadata key '${row.key}' for project ${filePath}:`, e)
-        acc[row.key] = row.value // Keep as string if parsing fails
+        acc[row.key] = row.value
       }
       return acc
     }, {})
@@ -330,7 +328,7 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       wordCountCurrent: projectMetadata.wordCountCurrent ?? 0, // Provide default
       // Spread remaining metadata
       ...projectMetadata,
-      // Add files and chat history
+
       files: projectFiles,
       chatHistory: chatHistory,
       knowledgeGraph: null // Assuming this is still null on load

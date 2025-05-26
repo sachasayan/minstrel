@@ -9,7 +9,7 @@ import { useWizard, genres, sanitizeFilename } from '@/components/BookWizard/ind
 import ReactMarkdown from 'react-markdown'
 import { Loader2 } from 'lucide-react'
 import minstrelIcon from '@/assets/bot/base.png'
-// import { v4 as uuidv4 } from 'uuid' // Removed unused import
+// import { v4 as uuidv4 } from 'uuid'
 import type { ProjectFile, Project } from '@/types'
 
 interface SummaryStepProps {
@@ -51,7 +51,7 @@ const SummaryStep = ({ isActive }: SummaryStepProps) => {
       })
     } catch (error) {
       console.error('Error converting image to base64:', error)
-      return { base64: null, mimeType: null } // Handle error case
+      return { base64: null, mimeType: null }
     }
   }
 
@@ -120,7 +120,7 @@ Please provide the output in Markdown format.`
       // --- Stream finished successfully ---
       console.log("Outline generation complete.")
 
-      // Create the outline file object
+
       const outlineFile: ProjectFile = {
         title: 'Outline', // Standard name
         content: accumulatedText
@@ -131,7 +131,7 @@ Please provide the output in Markdown format.`
       // Ensure the final object matches the Project type expected by setActiveProject
       const projectWithOutline: Omit<Project, 'id' | 'lastModified'> = {
         ...initialProjectData,
-        files: [outlineFile], // Add the outline file
+        files: [outlineFile],
       };
 
       // Dispatch setActiveProject with the complete project data (including outline)

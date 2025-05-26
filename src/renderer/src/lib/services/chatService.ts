@@ -216,7 +216,7 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
     await sendMessage(context)
   } catch (error) {
     console.error('Failed to send chat message for outline generation:', error)
-    // Add user feedback on error
+
     store.dispatch(
       addChatMessage({
         sender: 'Gemini',

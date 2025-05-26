@@ -86,12 +86,11 @@ export const getSqliteProjectFragmentMeta = async (projectPath: string): Promise
 
     // Ensure the returned object looks like a ProjectFragment (basic check)
     if (typeof metadata === 'object' && metadata !== null && 'title' in metadata && 'projectPath' in metadata) {
-       return metadata as ProjectFragment
+      return metadata as ProjectFragment
     } else {
-       console.warn(`Invalid metadata structure received for project: ${projectPath}`, metadata)
-       return null
+      console.warn(`Invalid metadata structure received for project: ${projectPath}`, metadata)
+      return null
     }
-
   } catch (e) {
     // Catch errors invoking the IPC handler itself
     console.error(`Error invoking get-sqlite-project-meta for ${projectPath}:`, e)
@@ -107,9 +106,9 @@ export const getSqliteProjectFragmentMeta = async (projectPath: string): Promise
 export const loadSqliteProject = async (projectFragment: ProjectFragment): Promise<Project> => {
   try {
     const project = await window.electron.ipcRenderer.invoke('load-sqlite-project', projectFragment.projectPath)
-    // Add basic validation if needed
+
     if (!project || typeof project !== 'object') {
-        throw new Error('Invalid project data received from backend.')
+      throw new Error('Invalid project data received from backend.')
     }
     return project as Project
   } catch (e) {
@@ -130,38 +129,31 @@ export const fetchSqliteProjects = async (rootDir: string | null): Promise<Proje
       const directoryItems = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
       // Ensure directoryItems is an array before filtering
       if (!Array.isArray(directoryItems)) {
-          console.error('Read-directory did not return an array:', directoryItems)
-          return []
+        console.error('Read-directory did not return an array:', directoryItems)
+        return []
       }
 
-      const filesList = directoryItems
-        .filter((item) => item && item.type === 'file' && item.name.endsWith('.mns'))
-        .map((item) => item.name)
+      const filesList = directoryItems.filter((item) => item && item.type === 'file' && item.name.endsWith('.mns')).map((item) => item.name)
 
       // Use Promise.allSettled to handle potential nulls from getSqliteProjectFragmentMeta
-      const results = await Promise.allSettled(
-        filesList.map((file) => getSqliteProjectFragmentMeta(`${rootDir}/${file}`))
-      )
+      const results = await Promise.allSettled(filesList.map((file) => getSqliteProjectFragmentMeta(`${rootDir}/${file}`)))
 
       // Filter out failed promises and null results, then extract the valid fragments
-      const projectsList = results
-        .filter(result => result.status === 'fulfilled' && result.value !== null)
-        .map(result => (result as PromiseFulfilledResult<ProjectFragment>).value)
+      const projectsList = results.filter((result) => result.status === 'fulfilled' && result.value !== null).map((result) => (result as PromiseFulfilledResult<ProjectFragment>).value)
 
       // Log errors for rejected promises or null values
       results.forEach((result, index) => {
         if (result.status === 'rejected') {
-          console.error(`Failed to process project fragment for ${filesList[index]}:`, result.reason);
+          console.error(`Failed to process project fragment for ${filesList[index]}:`, result.reason)
         } else if (result.status === 'fulfilled' && result.value === null) {
-          console.warn(`Skipped loading project fragment for ${filesList[index]} due to null metadata.`);
+          console.warn(`Skipped loading project fragment for ${filesList[index]} due to null metadata.`)
         }
-      });
-
+      })
 
       return projectsList
     } catch (error) {
-        console.error("Failed to fetch SQLite projects:", error);
-        return []; // Return empty array on error during directory read or processing
+      console.error('Failed to fetch SQLite projects:', error)
+      return [] // Return empty array on error during directory read or processing
     }
   }
   return [] // Return empty array if rootDir is null or empty

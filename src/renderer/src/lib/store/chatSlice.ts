@@ -7,7 +7,7 @@ import { ChatMessage } from '@/types'
 interface ChatState {
   chatHistory: ChatMessage[]
   pendingChat: boolean
-  actionSuggestions: string[] // Add actionSuggestions to state
+  actionSuggestions: string[]
 }
 
 const initialState: ChatState = {
@@ -35,7 +35,7 @@ const chatSlice = createSlice({
         state.pendingChat = true
       }
       state.chatHistory.push(action.payload)
-      // Keep history trimming logic
+
       if (state.chatHistory.length > 20) {
         state.chatHistory = state.chatHistory.slice(-20)
       }

@@ -72,7 +72,7 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
                   onError={handleError}
                   plugins={[
                     headingsPlugin(),
-                    listsPlugin(), // Add listsPlugin
+                    listsPlugin(),
                     thematicBreakPlugin(),
                     toolbarPlugin({
                       toolbarClassName: 'mdx-toolbar',

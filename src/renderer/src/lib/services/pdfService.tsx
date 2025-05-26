@@ -6,7 +6,7 @@ import { PdfExportConfig } from '@/components/PdfExportConfigModal' // Import th
 
 // Define the specific type expected by the Page component's size prop
 type PdfPageSize = 'A4' | 'LETTER' | [number, number]; // Add other standard sizes like 'LEGAL', 'A3' etc. if needed
-// Removed duplicate import below
+
 
 // Define styles dynamically based on config
 const createStyles = (config: PdfExportConfig) => StyleSheet.create({
@@ -94,7 +94,7 @@ const stripMarkdown = (markdown: string): string => {
 // --- PDF Document Component ---
 interface ProjectPdfProps {
   project: Project;
-  config: PdfExportConfig; // Add config to props
+  config: PdfExportConfig;
 }
 
 // Export the component so it can be used by the previewer

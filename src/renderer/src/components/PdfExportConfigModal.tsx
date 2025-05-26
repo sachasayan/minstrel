@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react' // Added useMemo
+import React, { useState, useMemo } from 'react'
 import { PDFViewer } from '@react-pdf/renderer'; // Import PDFViewer
 import { useSelector } from 'react-redux'; // Import useSelector
 import { selectActiveProject } from '@/lib/store/projectsSlice'; // Import selector
@@ -49,7 +49,7 @@ export interface PdfExportConfig {
 interface PdfExportConfigModalProps {
   children: React.ReactNode // Trigger element
   onExport: (config: PdfExportConfig) => void
-  // Add disabled prop if needed later
+
 }
 
 // --- Component ---

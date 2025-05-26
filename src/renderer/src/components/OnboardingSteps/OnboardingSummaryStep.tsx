@@ -9,7 +9,7 @@ import { AppDispatch } from '@/lib/store/store'
 interface OnboardingSummaryStepProps {
   isActive: boolean // Prop received from parent map
 }
-const OnboardingSummaryStep = ({ isActive }: OnboardingSummaryStepProps): ReactNode => { // Added isActive back
+const OnboardingSummaryStep = ({ isActive }: OnboardingSummaryStepProps): ReactNode => {
   const { formData } = useOnboarding()
   const dispatch = useDispatch<AppDispatch>() // Use typed dispatch
 

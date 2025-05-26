@@ -1,15 +1,9 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
-import {
-
-
-  loadSqliteProject,
-  saveSqliteProject,
-  initSqliteProject
-} from './sqliteService'
+import { loadSqliteProject, saveSqliteProject, initSqliteProject } from './sqliteService'
 
 export function decodeHtmlEntities(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  return doc.documentElement.textContent;
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.documentElement.textContent
 }
 
 /**
@@ -18,7 +12,6 @@ export function decodeHtmlEntities(html) {
  * @returns True if the file is SQLite format, false otherwise
  */
 export const isSqliteFormat = (path: string): boolean => {
-
   return typeof path === 'string' && path.toLowerCase().endsWith('.mns')
 }
 
@@ -36,57 +29,56 @@ export const getProjectFragmentMeta = async (projectPath: string): Promise<Proje
     const fullMetadata = await window.electron.ipcRenderer.invoke('get-sqlite-project-meta', projectPath)
 
     if (!fullMetadata || !fullMetadata.title) {
-        console.warn(`Failed to load or essential metadata missing for SQLite project: ${projectPath}`)
-        return null;
+      console.warn(`Failed to load or essential metadata missing for SQLite project: ${projectPath}`)
+      return null
     }
 
     // Construct the cover data URL if possible
-    let coverDataUrl = '';
+    let coverDataUrl = ''
     // Use the retrieved metadata directly
     if (fullMetadata.coverImageBase64 && fullMetadata.coverImageMimeType) {
-        coverDataUrl = `data:${fullMetadata.coverImageMimeType};base64,${fullMetadata.coverImageBase64}`;
+      coverDataUrl = `data:${fullMetadata.coverImageMimeType};base64,${fullMetadata.coverImageBase64}`
     }
 
     // Construct the ProjectFragment
     return {
-        title: fullMetadata.title,
-        wordCountCurrent: fullMetadata.wordCountCurrent ?? 0,
-        wordCountTarget: fullMetadata.wordCountTarget ?? 0,
-        projectPath: projectPath,
-        genre: fullMetadata.genre || 'science-fiction',
-        cover: coverDataUrl, // Assign the generated data URL or empty string
-        coverImageMimeType: fullMetadata.coverImageMimeType ?? null
-    };
-
+      title: fullMetadata.title,
+      wordCountCurrent: fullMetadata.wordCountCurrent ?? 0,
+      wordCountTarget: fullMetadata.wordCountTarget ?? 0,
+      projectPath: projectPath,
+      genre: fullMetadata.genre || 'science-fiction',
+      cover: coverDataUrl, // Assign the generated data URL or empty string
+      coverImageMimeType: fullMetadata.coverImageMimeType ?? null
+    }
   } else {
-      // Original Markdown format handler (doesn't support embedded covers)
-      try {
-        const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectPath}`)
-        const metadataMatch = fileContent?.match(/----Metadata\.json([\s\S]+?)----/i)
-        if (!metadataMatch || !metadataMatch[1]) {
-          console.warn(`Metadata section not found in Markdown file: ${projectPath}`)
-          return null
-        }
-        const metadata = JSON.parse(metadataMatch[1])
-
-        if (!metadata?.title) {
-            console.warn(`Essential metadata 'title' missing in Markdown file: ${projectPath}`)
-            return null;
-        }
-
-        return {
-          title: metadata.title,
-          wordCountCurrent: metadata.wordCountCurrent ?? 0,
-          wordCountTarget: metadata.wordCountTarget ?? 0,
-          projectPath: projectPath,
-          genre: metadata?.genre || 'science-fiction',
-          cover: '', // No cover support for MD files here
-          coverImageMimeType: null
-        } as ProjectFragment // Cast needed as we add coverImageMimeType explicitly
-      } catch (e) {
-        console.error(`Error reading or parsing metadata for MD file ${projectPath}:`, e)
+    // Original Markdown format handler (doesn't support embedded covers)
+    try {
+      const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectPath}`)
+      const metadataMatch = fileContent?.match(/----Metadata\.json([\s\S]+?)----/i)
+      if (!metadataMatch || !metadataMatch[1]) {
+        console.warn(`Metadata section not found in Markdown file: ${projectPath}`)
         return null
       }
+      const metadata = JSON.parse(metadataMatch[1])
+
+      if (!metadata?.title) {
+        console.warn(`Essential metadata 'title' missing in Markdown file: ${projectPath}`)
+        return null
+      }
+
+      return {
+        title: metadata.title,
+        wordCountCurrent: metadata.wordCountCurrent ?? 0,
+        wordCountTarget: metadata.wordCountTarget ?? 0,
+        projectPath: projectPath,
+        genre: metadata?.genre || 'science-fiction',
+        cover: '', // No cover support for MD files here
+        coverImageMimeType: null
+      } as ProjectFragment // Cast needed as we add coverImageMimeType explicitly
+    } catch (e) {
+      console.error(`Error reading or parsing metadata for MD file ${projectPath}:`, e)
+      return null
+    }
   }
 }
 
@@ -96,45 +88,36 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
       // Fetch directory items once
       const directoryItems = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
       if (!Array.isArray(directoryItems)) {
-          console.error('Read-directory did not return an array:', directoryItems)
-          return []
+        console.error('Read-directory did not return an array:', directoryItems)
+        return []
       }
 
       // Get list of all potential project files
-      const filesList = directoryItems
-          .filter((item) => item && item.type === 'file' && (item.name.endsWith('.md') || item.name.endsWith('.mns')))
-          .map((item) => item.name)
+      const filesList = directoryItems.filter((item) => item && item.type === 'file' && (item.name.endsWith('.md') || item.name.endsWith('.mns'))).map((item) => item.name)
 
       // Process all files concurrently
-      const results = await Promise.allSettled(
-          filesList.map((file) => getProjectFragmentMeta(`${rootDir}/${file}`))
-      );
+      const results = await Promise.allSettled(filesList.map((file) => getProjectFragmentMeta(`${rootDir}/${file}`)))
 
       // Filter out failed promises and null results
-      const projectsList = results
-          .filter(result => result.status === 'fulfilled' && result.value !== null)
-          .map(result => (result as PromiseFulfilledResult<ProjectFragment>).value);
+      const projectsList = results.filter((result) => result.status === 'fulfilled' && result.value !== null).map((result) => (result as PromiseFulfilledResult<ProjectFragment>).value)
 
-       // Log errors for rejected promises or null values
-       results.forEach((result, index) => {
-         if (result.status === 'rejected') {
-           console.error(`Failed to process project fragment for ${filesList[index]}:`, result.reason);
-         } else if (result.status === 'fulfilled' && result.value === null) {
-            console.warn(`Skipped loading project fragment for ${filesList[index]} due to missing/invalid metadata or load error.`);
-         }
-       });
+      // Log errors for rejected promises or null values
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`Failed to process project fragment for ${filesList[index]}:`, result.reason)
+        } else if (result.status === 'fulfilled' && result.value === null) {
+          console.warn(`Skipped loading project fragment for ${filesList[index]} due to missing/invalid metadata or load error.`)
+        }
+      })
 
-      return projectsList;
-
+      return projectsList
     } catch (error) {
-        console.error("Failed to fetch projects:", error);
-        return []; // Return empty array on error
+      console.error('Failed to fetch projects:', error)
+      return [] // Return empty array on error
     }
   }
   return []
 }
-
-
 
 export const fetchProjectDetails = async (projectFragment: ProjectFragment): Promise<Project> => {
   // Route to appropriate handler based on file extension
@@ -156,16 +139,15 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
     }
     const metadata = JSON.parse(metadataMatch[1])
 
-    const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/ig)].map(m => ({ name: m[2], content: m[3].trim() }))
+    const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/gi)].map((m) => ({ name: m[2], content: m[3].trim() }))
     // console.log(projectFiles)
-    const chapterList = projectFiles
-      .map((item) => {
-        return {
-          title: item.name,
-          content: item.content,
-          hasEdits: false
-        } as ProjectFile
-      })
+    const chapterList = projectFiles.map((item) => {
+      return {
+        title: item.name,
+        content: item.content,
+        hasEdits: false
+      } as ProjectFile
+    })
     // console.log(chapterList)
 
     // Construct the Project object for MD files (no cover/chat support here)
@@ -182,7 +164,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
       genre: metadata.genre || 'science-fiction',
       wordCountTarget: metadata.wordCountTarget ?? 0,
       wordCountCurrent: metadata.wordCountCurrent ?? 0,
-      cover: '', // No cover for MD
+      cover: '' // No cover for MD
     } as Project
   } catch (error) {
     console.error(`Failed to fetch project details for ${projectFragment.projectPath}:`, error)
@@ -197,7 +179,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
  * @param project The project data to save.
  * @returns Promise resolving to an object { success: boolean, finalPath: string | null }
  */
-export const saveProject = async (project: Project): Promise<{ success: boolean, finalPath: string | null }> => {
+export const saveProject = async (project: Project): Promise<{ success: boolean; finalPath: string | null }> => {
   if (!project?.projectPath || !project?.files) {
     console.warn('Cannot save project: project details are missing.')
     return { success: false, finalPath: null }
@@ -216,7 +198,6 @@ export const saveProject = async (project: Project): Promise<{ success: boolean,
       return { success: false, finalPath: null }
     }
   } else {
-    // Handle conversion from .md to .mns
     console.log('Converting Markdown project to SQLite:', originalPath)
     const newPath = originalPath.replace(/\.md$/i, '.mns')
     // Ensure the project object being saved has the *new* path
@@ -259,7 +240,6 @@ export const saveProject = async (project: Project): Promise<{ success: boolean,
     }
   }
 }
-
 
 /**
  * Creates a new project with the SQLite format

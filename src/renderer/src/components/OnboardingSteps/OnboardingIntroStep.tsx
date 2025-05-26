@@ -8,7 +8,7 @@ interface OnboardingIntroStepProps {
   isActive: boolean // Prop received from parent map
 }
 
-const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode => { // Added isActive back
+const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode => {
   // Get context methods - use setFormData for partial updates
   const { setCurrentStep, setFormData } = useOnboarding()
 

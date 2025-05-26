@@ -5,7 +5,6 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 
 import { Toaster } from '@/components/ui/sonner'
-// import OnboardingDialog from '@/components/OnboardingDialog' // Removed old dialog
 import OnboardingPage from '@/pages/OnboardingPage'
 
 import ProjectOverview from '@/pages/ProjectOverview'

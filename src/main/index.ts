@@ -7,13 +7,12 @@ import { registerSettingsHandlers } from './settingsManager'
 import { registerSqliteOpsHandlers } from './sqliteOps'
 
 function createWindow(): void {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     show: false,
     autoHideMenuBar: true,
-    titleBarStyle: 'hidden', // remove default titlebar
+    titleBarStyle: 'hidden',
     ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}), // expose window controls in Windows/Linux
     ...(process.platform === 'darwin'
       ? {
@@ -52,7 +51,8 @@ import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  if (is.dev) { // Conditionally install Redux DevTools in development
+  if (is.dev) {
+    // Conditionally install Redux DevTools in development
     installExtension(REDUX_DEVTOOLS)
       .then((ext) => console.log(`Added Extension:  ${ext.name}`))
       .catch((err) => console.log('An error occurred: ', err))

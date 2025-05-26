@@ -8,7 +8,7 @@ import minstrelIcon from '@/assets/bot/base.png'
 
 interface CoverStepProps {
   handleProceed: () => void
-  // currentStep: number // Removed as unused
+  // currentStep: number
   isActive: boolean
   selectedGenre: string // Genre selected in a previous step
   selectedCoverPath: string | null // The path of the selected cover, e.g., 'covers/fantasy.png'
@@ -22,7 +22,7 @@ interface CoverStepProps {
 
 const CoverStep = ({
   handleProceed,
-  // currentStep, // Removed as unused
+  // currentStep,
   isActive,
   selectedGenre,
   selectedCoverPath,

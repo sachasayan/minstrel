@@ -10,10 +10,9 @@ interface AppSettings {
   api?: string
   apiKey?: string
   workingRootDirectory?: string | null
-  highPreferenceModelId?: string // Added
-  lowPreferenceModelId?: string  // Added
+  highPreferenceModelId?: string
+  lowPreferenceModelId?: string
 }
-
 
 export const loadAppSettings = async (): Promise<AppSettings> => {
   const appSettings: any = (await settings.get('settings')) || {}
@@ -32,14 +31,12 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   }
 
   // Ensure other fields have defaults if missing (to match expected type on load)
-  if (appSettings.api === undefined) appSettings.api = '';
-  if (appSettings.apiKey === undefined) appSettings.apiKey = '';
-  if (appSettings.workingRootDirectory === undefined) appSettings.workingRootDirectory = null;
-
+  if (appSettings.api === undefined) appSettings.api = ''
+  if (appSettings.apiKey === undefined) appSettings.apiKey = ''
+  if (appSettings.workingRootDirectory === undefined) appSettings.workingRootDirectory = null
 
   return appSettings as AppSettings
 }
-
 
 export const saveAppSettings = async (config: AppSettings) => {
   // Provide defaults for potentially undefined values to satisfy electron-settings types
@@ -49,7 +46,7 @@ export const saveAppSettings = async (config: AppSettings) => {
     workingRootDirectory: config.workingRootDirectory ?? null, // Default to null if undefined
     highPreferenceModelId: config.highPreferenceModelId ?? DEFAULT_HIGH_PREFERENCE_MODEL_ID,
     lowPreferenceModelId: config.lowPreferenceModelId ?? DEFAULT_LOW_PREFERENCE_MODEL_ID
-  };
+  }
   // Type assertion might be needed if electron-settings types are very strict,
   // but providing defaults should generally work.
   await settings.set('settings', settingsToSave as any) // Using 'as any' temporarily if strict typing persists as an issue
