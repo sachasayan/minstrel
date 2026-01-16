@@ -1,6 +1,6 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
-import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
+import { addChatMessage, resolvePendingChat, setActionSuggestions, appendPendingChatMessage, clearStreamingMessage } from '@/lib/store/chatSlice'
 import { updateFile, setPendingFiles, updateReviews } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { XMLParser } from 'fast-xml-parser'
@@ -35,6 +35,16 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 // Add the message to the chat history
 // Take action with tools: Update the relevant files with the new content, etc.
 // If files were requested, send a new response with file contents
+const extractThinkContent = (xmlString: string): string => {
+  try {
+    const parsed = parser.parse(`<root>${xmlString}</root>`).root
+    return parsed?.think || ''
+  } catch (error) {
+    // Expected to fail during streaming as XML is incomplete
+    return ''
+  }
+}
+
 const processResponse = (responseString: string): RequestContext | null => {
   let response
   try {
@@ -50,7 +60,7 @@ const processResponse = (responseString: string): RequestContext | null => {
     // modelPreference will be determined before calling generateContent
   }
 
-  console.log(response?.think || 'No thoughts, only vibes.')
+  // console.log(response?.think || 'No thoughts, only vibes.') // This will now be handled by streaming
 
   if (!!response?.route_to) {
     console.log('Switching agents to ' + response.route_to)
@@ -149,13 +159,24 @@ export const sendMessage = async (context: RequestContext) => {
       modelPreference = 'high'
     }
 
-    const response = await geminiService.generateContent(prompt, modelPreference) // Pass preference
+    let fullResponse = ''
+    let lastStreamedThinkContent = ''
+
+    for await (const chunk of geminiService.streamGenerateContent(prompt, modelPreference)) {
+      fullResponse += chunk
+      const currentThinkContent = extractThinkContent(fullResponse)
+      if (currentThinkContent.length > lastStreamedThinkContent.length) {
+        const newThinkPart = currentThinkContent.substring(lastStreamedThinkContent.length)
+        store.dispatch(appendPendingChatMessage(newThinkPart))
+        lastStreamedThinkContent = currentThinkContent
+      }
+    }
 
     console.groupCollapsed('AI Response')
-    console.log(response)
+    console.log(fullResponse)
     console.groupEnd()
-    console.log('AI Response: \n \n', response)
-    const newContext = processResponse(response)
+    console.log('AI Response: \n \n', fullResponse)
+    const newContext = processResponse(fullResponse)
 
     if (newContext === null) {
       return // Stop recursion if processResponse failed
@@ -190,6 +211,7 @@ export const sendMessage = async (context: RequestContext) => {
   } finally {
     store.dispatch(setPendingFiles(null))
     store.dispatch(resolvePendingChat())
+    store.dispatch(clearStreamingMessage()) // Clear streaming message on completion/error
     console.log('sendMessage() finished')
   }
 }
@@ -204,11 +226,21 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
     // modelPreference is implicitly 'high' because agent is 'outlineAgent'
   })
   try {
-    // Pass 'high' preference directly as this function always uses outlineAgent
-    const response = await geminiService.generateContent(prompt, 'high')
+    let fullResponse = ''
+    let lastStreamedThinkContent = ''
 
-    console.log('AI Response: \n \n', response)
-    const context = processResponse(response)
+    for await (const chunk of geminiService.streamGenerateContent(prompt, 'high')) {
+      fullResponse += chunk
+      const currentThinkContent = extractThinkContent(fullResponse)
+      if (currentThinkContent.length > lastStreamedThinkContent.length) {
+        const newThinkPart = currentThinkContent.substring(lastStreamedThinkContent.length)
+        store.dispatch(appendPendingChatMessage(newThinkPart))
+        lastStreamedThinkContent = currentThinkContent
+      }
+    }
+
+    console.log('AI Response: \n \n', fullResponse)
+    const context = processResponse(fullResponse)
     if (context === null) {
       console.error('processResponse returned null in generateOutlineFromParams, not calling sendMessage')
       return
@@ -225,6 +257,7 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
     )
   } finally {
     store.dispatch(resolvePendingChat())
+    store.dispatch(clearStreamingMessage()) // Clear streaming message on completion/error
     console.log('generateOutlineFromParams() finished')
   }
 }
@@ -259,7 +292,12 @@ Do not include any other text or explanation outside the <titles> tag.
 
   try {
     // Use the 'low' preference model for speed/cost efficiency
-    const responseString = await geminiService.generateContent(prompt, 'low')
+    let responseString = ''
+    for await (const chunk of geminiService.streamGenerateContent(prompt, 'low')) {
+      responseString += chunk
+      // For title suggestions, we don't append to chat history directly,
+      // as it's a separate flow.
+    }
     console.log('Raw title suggestions response:', responseString)
 
     // Parse the XML response

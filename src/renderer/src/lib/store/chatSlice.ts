@@ -7,6 +7,7 @@ import { ChatMessage } from '@/types'
 interface ChatState {
   chatHistory: ChatMessage[]
   pendingChat: boolean
+  streamingMessage: string | null // New field for streaming content
   actionSuggestions: string[]
 }
 
@@ -14,6 +15,7 @@ const initialState: ChatState = {
   // Update initial message to conform to ChatMessage type (if needed, assuming sender is string)
   chatHistory: [{ sender: 'Gemini', text: 'Hello there! Ask me anything about your story. I can help you build an outline, write a chapter, and more.' }],
   pendingChat: false,
+  streamingMessage: null, // Initialize streamingMessage
   actionSuggestions: [] // Initialize actionSuggestions as empty array
 }
 
@@ -42,11 +44,20 @@ const chatSlice = createSlice({
     },
     setActionSuggestions: (state, action: PayloadAction<string[]>) => {
       state.actionSuggestions = action.payload
+    },
+    // New action to append streamed content
+    appendPendingChatMessage: (state, action: PayloadAction<string>) => {
+      state.pendingChat = true // Ensure pendingChat is true when streaming
+      state.streamingMessage = (state.streamingMessage || '') + action.payload
+    },
+    // New action to clear streaming message when done
+    clearStreamingMessage: (state) => {
+      state.streamingMessage = null
     }
   }
 })
 
-export const { setChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions } = chatSlice.actions
+export const { setChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions, appendPendingChatMessage, clearStreamingMessage } = chatSlice.actions
 
 // Selector for the whole chat state
 export const selectChat = (state: RootState): ChatState => state.chat

@@ -20,8 +20,8 @@ const WizardContext = createContext<WizardContextProps>({
   formData: {},
   setFormData: () => { },
   selectedCoverPath: null,
-  setSelectedCoverPath: () => {},
-  requestScrollToBottom: () => {}
+  setSelectedCoverPath: () => { },
+  requestScrollToBottom: () => { }
 })
 
 const useWizard = () => useContext(WizardContext)
@@ -33,7 +33,6 @@ const sanitizeFilename = (filename: string) => { // Move sanitizeFilename to ind
 
 const cheatData = {
   genre: 'science-fiction',
-  length: 80000,
   title: 'The Crimson Nebula',
   setting: 'Alien Planet',
   plot: 'A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.',
@@ -56,15 +55,6 @@ const genres = [
   { value: 'humor', label: 'Humor' }
 ]
 
-const novelLengths = [
-  { value: 7500, label: 'Short story: 1,000–7,500 words' },
-  { value: 20000, label: 'Novelette: 7,500–20,000 words' },
-  { value: 50000, label: 'Novella: 20,000–50,000 words' },
-  { value: 80000, label: 'Short novel: 50,000–80,000 words' },
-  { value: 100000, label: 'Standard novel: 80,000–100,000 words' },
-  { value: 120000, label: 'Epic novel: 100,000+ words' }
-]
-
 const genreSettings = {
   'science-fiction': ['Space', 'Alien Planet', 'Mars Colony', 'Dystopian Future', 'Other'],
   fantasy: ['Middle Earth', 'Wizard World', 'Medieval Kingdom', 'Other'],
@@ -80,4 +70,4 @@ const genreSettings = {
 }
 
 
-export { WizardContext, useWizard, /* Removed WizardNavigation */ cheatData, genres, novelLengths, genreSettings, sanitizeFilename } // Export sanitizeFilename
+export { WizardContext, useWizard, /* Removed WizardNavigation */ cheatData, genres, genreSettings, sanitizeFilename } // Export sanitizeFilename

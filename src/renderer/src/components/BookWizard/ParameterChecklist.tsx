@@ -12,22 +12,22 @@ export default function ParameterChecklist(): ReactNode {
   // Checklist items now include stepNumber and completion logic based on currentStep
   const checklistItems = [
     {
-      label: 'Story Length',
+      label: 'Genre',
       stepNumber: 1,
-      completed: currentStep > 1, // Completed if currentStep is past step 1
+      completed: currentStep > 1,
     },
     {
-      label: 'Genre',
+      label: 'Setting',
       stepNumber: 2,
       completed: currentStep > 2,
     },
     {
-      label: 'Setting',
+      label: 'Cover',
       stepNumber: 3,
       completed: currentStep > 3,
     },
     {
-      label: 'Cover',
+      label: 'Plot',
       stepNumber: 4,
       completed: currentStep > 4,
     },
@@ -37,17 +37,12 @@ export default function ParameterChecklist(): ReactNode {
       completed: currentStep > 5,
     },
     {
-      label: 'Plot',
-      stepNumber: 6,
-      completed: currentStep > 6,
-    },
-    {
       label: 'Writing Sample (optional)',
-      stepNumber: 7,
-      completed: currentStep > 7, // Optional step completion still based on passing it
+      stepNumber: 6,
+      completed: currentStep > 6, // Optional step completion still based on passing it
       optional: true,
     },
-    // Summary step (step 8) is usually not shown in the checklist
+    // Summary step (step 7) is usually not shown in the checklist
   ]
 
   return (

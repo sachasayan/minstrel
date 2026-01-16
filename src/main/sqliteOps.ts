@@ -266,6 +266,12 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       return acc
     }, {})
 
+    // Migration: Remove deprecated 'length' property if it exists
+    if ('length' in projectMetadata) {
+      console.log(`Removing deprecated 'length' property from project ${filePath}`)
+      delete projectMetadata.length
+    }
+
     // Get files, including type and sort_order
     const files = db
       .prepare(

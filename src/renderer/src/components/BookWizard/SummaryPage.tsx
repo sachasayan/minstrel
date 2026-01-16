@@ -69,7 +69,7 @@ const SummaryStep = ({ isActive }: SummaryStepProps) => {
     const projectTitle = sanitizeFilename(formData.title)
     const projectPath = `${settingsState?.workingRootDirectory}/${projectTitle}.mns`
 
-    const prompt = `Generate a detailed chapter-by-chapter outline for a ${formData.length || 'standard length'} ${formData.genre} story titled "${formData.title}".
+    const prompt = `Generate a detailed chapter-by-chapter outline for a ${formData.genre} story titled "${formData.title}".
 Setting: ${formData.setting}.
 Plot Summary: ${formData.plot}
 ${formData.writing_sample ? `Writing Sample/Style Guide:\n${formData.writing_sample}` : ''}
@@ -98,7 +98,7 @@ Please provide the output in Markdown format.`
       writingSample: formData.writing_sample || '',
       year: new Date().getFullYear(),
       wordCountCurrent: 0,
-      wordCountTarget: formData.length || 0,
+      wordCountTarget: 0,
       expertSuggestions: [],
       knowledgeGraph: null,
       chatHistory: [],
