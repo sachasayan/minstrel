@@ -31,16 +31,6 @@ const sanitizeFilename = (filename: string) => { // Move sanitizeFilename to ind
   return filename.replace(/[^a-z0-9_-]/gi, ' ')
 }
 
-const cheatData = {
-  genre: 'science-fiction',
-  title: 'The Crimson Nebula',
-  setting: 'Alien Planet',
-  plot: 'A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.',
-  writing_sample:
-    'The red dust swirled around their boots as they trudged across the desolate landscape. The twin suns cast long, eerie shadows, painting the alien world in shades of crimson and ochre.',
-  coverPath: 'covers/science-fiction-soft-sci-fi.png'
-}
-
 const genres = [
   { value: 'fantasy', label: 'Fantasy' },
   { value: 'science-fiction', label: 'Science Fiction' },
@@ -70,4 +60,4 @@ const genreSettings = {
 }
 
 
-export { WizardContext, useWizard, /* Removed WizardNavigation */ cheatData, genres, genreSettings, sanitizeFilename } // Export sanitizeFilename
+export { WizardContext, useWizard, genres, genreSettings, sanitizeFilename }
