@@ -7,8 +7,6 @@ import { useWizard } from '@/components/BookWizard/index'
 export default function ParameterChecklist(): ReactNode {
   const { currentStep } = useWizard()
 
-  if (currentStep === 0) return null
-
   // Checklist items now include stepNumber and completion logic based on currentStep
   const checklistItems = [
     {

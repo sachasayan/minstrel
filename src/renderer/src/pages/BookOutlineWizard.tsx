@@ -9,7 +9,6 @@ import { ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
-import Intro from '@/components/BookWizard/Intro'
 import ParameterChecklist from '@/components/BookWizard/ParameterChecklist'
 import GenreStep from '@/components/BookWizard/GenreStep'
 import SettingStep from '@/components/BookWizard/SettingStep'
@@ -31,7 +30,7 @@ const stepVariants = {
 
 
 export default function BookOutlineWizard(): ReactNode {
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [selectedCoverPath, setSelectedCoverPath] = useState<string | null>(null)
   const [isAtBottom, setIsAtBottom] = useState(true) // State for sticky scroll
@@ -64,7 +63,6 @@ export default function BookOutlineWizard(): ReactNode {
   }, []); // No dependencies needed, relies on the ref
 
   const wizardSteps = useMemo(() => [
-    { step: 0, Component: Intro },
     { step: 1, Component: GenreStep },
     { step: 2, Component: SettingStep },
     { step: 3, Component: CoverStep },
@@ -108,15 +106,13 @@ export default function BookOutlineWizard(): ReactNode {
         <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 8, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
+      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 7, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
         {/* Removed old conditional Intro rendering */}
         <div className="flex flex-grow overflow-hidden">
-          {/* Conditionally render sidebar */}
-          {currentStep > 0 && (
-            <aside className="w-[280px] border-r p-4 overflow-y-auto shrink-0 animate-in fade-in duration-300">
-              <ParameterChecklist />
-            </aside>
-          )}
+          {/* Sidebar always visible since we start at step 1 */}
+          <aside className="w-[280px] border-r p-4 overflow-y-auto shrink-0 animate-in fade-in duration-300">
+            <ParameterChecklist />
+          </aside>
           {/* Attach scroll handler here */}
           <main ref={chatContainerRef} onScroll={handleScroll} className="flex-grow p-6 overflow-y-auto space-y-6">
             {wizardSteps
