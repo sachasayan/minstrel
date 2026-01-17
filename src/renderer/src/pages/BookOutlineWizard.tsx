@@ -25,7 +25,7 @@ const SCROLL_THRESHOLD = 50 // Pixels from bottom to consider "at bottom"
 // Animation variants for steps appearing
 const stepVariants = {
   hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut", delay: 0.5 } } // Increased delay to 0.5s
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const, delay: 0.5 } } // Increased delay to 0.5s
 };
 
 

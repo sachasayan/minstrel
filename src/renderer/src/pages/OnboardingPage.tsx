@@ -43,10 +43,10 @@ export default function OnboardingPage(): ReactNode {
       // Add a slight delay to ensure content has rendered before scrolling
       setTimeout(() => {
         if (chatContainerRef.current) {
-           chatContainerRef.current.scrollTo({
-             top: chatContainerRef.current.scrollHeight,
-             behavior: 'smooth'
-           });
+          chatContainerRef.current.scrollTo({
+            top: chatContainerRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
         }
       }, 50); // Short delay
     }
@@ -99,7 +99,10 @@ export default function OnboardingPage(): ReactNode {
               .map((stepInfo) => (
                 <motion.div
                   key={stepInfo.step}
-                  variants={stepVariants}
+                  variants={{
+                    hidden: { opacity: 0, y: 15 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const, delay: 0.5 } }
+                  }}
                   initial="hidden"
                   animate="visible"
                   layout // Add layout for smoother transitions if needed

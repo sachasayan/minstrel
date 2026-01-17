@@ -7,7 +7,7 @@ export const appStateListeners = createListenerMiddleware()
 // Listen for changes to the active project — if it's a new project, fetch and update the projects state
 appStateListeners.startListening({
   matcher: isAnyOf(setActiveFile),
-  effect: async (action, listenerApi: ListenerEffect) => {
+  effect: async (action, listenerApi: any) => {
     const state = listenerApi.getState().projects.activeProject
 
     const wordCountCurrent = state.files
