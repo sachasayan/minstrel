@@ -42,7 +42,7 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps): ReactNode => {
           >
             <div className="p-4 absolute bottom-0 left-0 right-0 bg-neutral-50"> {/* Added slight opacity */}
               <h3 className="text-lg font-semibold text-gray-800 truncate">{project?.title}</h3> {/* Added truncate */}
-              <p className="text-sm text-gray-600"> {project?.wordCountCurrent?.toLocaleString()} / {project?.wordCountTarget?.toLocaleString()} words</p>
+              <p className="text-sm text-gray-600"> {project?.wordCountCurrent?.toLocaleString()} words</p>
             </div>
           </div>
         )}
