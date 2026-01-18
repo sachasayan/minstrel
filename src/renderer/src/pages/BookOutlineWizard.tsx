@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 
 import Intro from '@/components/BookWizard/Intro'
 import ParameterChecklist from '@/components/BookWizard/ParameterChecklist'
-import StoryLengthStep from '@/components/BookWizard/StoryLength'
+
 import GenreStep from '@/components/BookWizard/GenreStep'
 import SettingStep from '@/components/BookWizard/SettingStep'
 import TitleStep from '@/components/BookWizard/TitleStep'
@@ -32,8 +32,8 @@ const stepVariants = {
 
 
 export default function BookOutlineWizard(): ReactNode {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<Record<string, any>>({})
+  const [currentStep, setCurrentStep] = useState(1)
+  const [formData, setFormData] = useState<Record<string, any>>({ length: 80000 })
   const [selectedCoverPath, setSelectedCoverPath] = useState<string | null>(null)
   const [isAtBottom, setIsAtBottom] = useState(true) // State for sticky scroll
   const dispatch = useDispatch()
@@ -66,14 +66,13 @@ export default function BookOutlineWizard(): ReactNode {
 
   const wizardSteps = useMemo(() => [
     { step: 0, Component: Intro },
-    { step: 1, Component: StoryLengthStep },
-    { step: 2, Component: GenreStep },
-    { step: 3, Component: SettingStep },
-    { step: 4, Component: CoverStep },
-    { step: 5, Component: PlotStep },
-    { step: 6, Component: TitleStep },
-    { step: 7, Component: WritingSampleStep },
-    { step: 8, Component: SummaryStep }
+    { step: 1, Component: GenreStep },
+    { step: 2, Component: SettingStep },
+    { step: 3, Component: CoverStep },
+    { step: 4, Component: PlotStep },
+    { step: 5, Component: TitleStep },
+    { step: 6, Component: WritingSampleStep },
+    { step: 7, Component: SummaryStep }
   ], [])
 
   // Effect to scroll to bottom if isAtBottom is true when step changes
@@ -119,30 +118,30 @@ export default function BookOutlineWizard(): ReactNode {
               <ParameterChecklist />
             </aside>
           )}
-            {/* Attach scroll handler here */}
-            <main ref={chatContainerRef} onScroll={handleScroll} className="flex-grow p-6 overflow-y-auto space-y-6">
-              {wizardSteps
-                .filter(stepInfo => stepInfo.step <= currentStep)
-                .map((stepInfo) => (
-                  // Wrap component in motion.div for animation
-                  <motion.div
-                    key={stepInfo.step} // Use step number as key
-                    variants={stepVariants}
-                    initial="hidden"
-                    animate="visible"
-                    // layout
-                  >
-                    <stepInfo.Component
-                      // Pass all potentially relevant props directly
-                      // Components will ignore props they don't use
-                      handleProceed={handleProceedToStep} // Note: Intro might not use this
-                      currentStep={stepInfo.step}
-                      isActive={stepInfo.step === currentStep}
-                      selectedGenre={formData.genre || ''}
-                      selectedCoverPath={selectedCoverPath}
-                      setSelectedCoverPath={setSelectedCoverPath}
-                    />
-                  </motion.div>
+          {/* Attach scroll handler here */}
+          <main ref={chatContainerRef} onScroll={handleScroll} className="flex-grow p-6 overflow-y-auto space-y-6">
+            {wizardSteps
+              .filter(stepInfo => stepInfo.step <= currentStep)
+              .map((stepInfo) => (
+                // Wrap component in motion.div for animation
+                <motion.div
+                  key={stepInfo.step} // Use step number as key
+                  variants={stepVariants}
+                  initial="hidden"
+                  animate="visible"
+                // layout
+                >
+                  <stepInfo.Component
+                    // Pass all potentially relevant props directly
+                    // Components will ignore props they don't use
+                    handleProceed={handleProceedToStep} // Note: Intro might not use this
+                    currentStep={stepInfo.step}
+                    isActive={stepInfo.step === currentStep}
+                    selectedGenre={formData.genre || ''}
+                    selectedCoverPath={selectedCoverPath}
+                    setSelectedCoverPath={setSelectedCoverPath}
+                  />
+                </motion.div>
               ))}
           </main>
         </div>
