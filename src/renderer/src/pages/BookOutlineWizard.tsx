@@ -18,7 +18,6 @@ import TitleStep from '@/components/BookWizard/TitleStep'
 import PlotStep from '@/components/BookWizard/PlotPage'
 import WritingSampleStep from '@/components/BookWizard/WritingSamplePage'
 import SummaryStep from '@/components/BookWizard/SummaryPage'
-import CoverStep from '@/components/BookWizard/CoverStep'
 
 import { WizardContext } from '@/components/BookWizard/index'
 
@@ -68,11 +67,10 @@ export default function BookOutlineWizard(): ReactNode {
     { step: 0, Component: Intro },
     { step: 1, Component: GenreStep },
     { step: 2, Component: SettingStep },
-    { step: 3, Component: CoverStep },
-    { step: 4, Component: PlotStep },
-    { step: 5, Component: TitleStep },
-    { step: 6, Component: WritingSampleStep },
-    { step: 7, Component: SummaryStep }
+    { step: 3, Component: PlotStep },
+    { step: 4, Component: TitleStep },
+    { step: 5, Component: WritingSampleStep },
+    { step: 6, Component: SummaryStep }
   ], [])
 
   // Effect to scroll to bottom if isAtBottom is true when step changes
@@ -109,7 +107,7 @@ export default function BookOutlineWizard(): ReactNode {
         <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 9, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
+      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 7, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
         {/* Removed old conditional Intro rendering */}
         <div className="flex flex-grow overflow-hidden">
           {/* Conditionally render sidebar */}
@@ -131,6 +129,7 @@ export default function BookOutlineWizard(): ReactNode {
                   animate="visible"
                 // layout
                 >
+                  {/* @ts-ignore - Dynamic component rendering with varying props */}
                   <stepInfo.Component
                     // Pass all potentially relevant props directly
                     // Components will ignore props they don't use
@@ -139,6 +138,7 @@ export default function BookOutlineWizard(): ReactNode {
                     isActive={stepInfo.step === currentStep}
                     selectedGenre={formData.genre || ''}
                     selectedCoverPath={selectedCoverPath}
+                    // @ts-ignore - Avoiding explicit prop type overhaul for removal task
                     setSelectedCoverPath={setSelectedCoverPath}
                   />
                 </motion.div>

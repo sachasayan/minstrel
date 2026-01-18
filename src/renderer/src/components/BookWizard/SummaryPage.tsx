@@ -6,6 +6,7 @@ import llmService from '@/lib/services/llmService'
 import { setActiveProject } from '@/lib/store/projectsSlice' // Assuming Project type is implicitly handled by this action
 import { setActiveView } from '@/lib/store/appStateSlice'
 import { useWizard, genres, sanitizeFilename } from '@/components/BookWizard/index'
+import { bookCovers } from '@/assets/book-covers'
 import ReactMarkdown from 'react-markdown'
 import { Loader2 } from 'lucide-react'
 import minstrelIcon from '@/assets/bot/base.png'
@@ -19,11 +20,27 @@ interface SummaryStepProps {
 
 const SummaryStep = ({ isActive }: SummaryStepProps) => {
   const dispatch = useDispatch()
-  const { formData, selectedCoverPath, requestScrollToBottom } = useWizard()
+  const { formData, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom } = useWizard()
   const [isGenerating, setIsGenerating] = useState(false)
   const [streamedText, setStreamedText] = useState('')
   const [generationError, setGenerationError] = useState<string | null>(null)
   const settingsState = useSelector(selectSettingsState)
+
+  // Auto-select random cover on mount (if not already selected)
+  useEffect(() => {
+    if (isActive && !selectedCoverPath && formData.genre) {
+      // Find label for genre
+      const selectedGenreLabel = genres.find(g => g.value === formData.genre)?.label
+      if (selectedGenreLabel) {
+        const validCovers = bookCovers.filter(cover => cover.categoryName.startsWith(selectedGenreLabel))
+        if (validCovers.length > 0) {
+          const randomCover = validCovers[Math.floor(Math.random() * validCovers.length)]
+          console.log(`Auto-selecting cover: ${randomCover.image}`)
+          setSelectedCoverPath(randomCover.image)
+        }
+      }
+    }
+  }, [isActive, selectedCoverPath, formData.genre, setSelectedCoverPath])
 
   // Helper function to convert image path to base64
   const convertImageToBase64 = async (imagePath: string | null): Promise<{ base64: string | null; mimeType: string | null }> => {
