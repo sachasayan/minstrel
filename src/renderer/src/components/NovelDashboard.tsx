@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
@@ -21,16 +21,15 @@ export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
   // const [progressButtonCaption, setProgressButtonCaption] = useState<Array<{ name: string }>>([])
   const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
-  const [historyData, setHistoryData] = useState<Array<{ date: string, wordCount: number }>>([])
+
   const dispatch = useDispatch() // Initialize useDispatch
 
-  // Guard for infinite Redux loops: track last dispatched history
-  const lastDispatchedHistory = useRef<string>('')
+
 
   useEffect(() => {
     if (activeProject) {
       const updatedHistory = updateRollingWordCountHistory(activeProject)
-      setHistoryData(updatedHistory)
+
 
       const historical = activeProject.wordCountHistorical || []
 
@@ -64,8 +63,7 @@ export default function NovelDashboard() {
       }
     } else {
       setDialogueCountData([]);
-      setHistoryData([]);
-      lastDispatchedHistory.current = ''
+
     }
   }, [activeProject]);
 
@@ -94,10 +92,7 @@ export default function NovelDashboard() {
   const stages: NovelStage[] = ['Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
   const currentStage = getCurrentStage()
 
-  const burndownData = historyData.map(item => ({
-    date: item.date,
-    remainingWords: Math.max((activeProject?.wordCountTarget ?? 0) - item.wordCount, 0)
-  }))
+
 
   const captions = {
     'Writing Outline': {
@@ -232,38 +227,7 @@ export default function NovelDashboard() {
             </Card>
           ))}
 
-          {/* Progress */}
-          <Card className="@lg:col-span-12">
-            <CardHeader>
-              <CardTitle>Word Count Burndown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {activeProject ? (
-                <ChartContainer
-                  style={{ aspectRatio: 'auto' }}
-                  className="h-[300px]"
-                  config={{
-                    remainingWords: { label: 'Words Remaining' }
-                  }}
-                >
-                  <LineChart data={burndownData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line
-                      type="monotone"
-                      dataKey="remainingWords"
-                      stroke="var(--color-highlight-600)"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ChartContainer>
-              ) : (
-                <p>No project data available.</p>
-              )}
-            </CardContent>
-          </Card>
+
           {/* Dialogue Sentences per Chapter */}
           <Card className="@lg:col-span-6">
             <CardHeader>
