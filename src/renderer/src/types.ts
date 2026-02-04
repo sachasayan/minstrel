@@ -4,6 +4,13 @@ export interface AppSettings {
   workingRootDirectory?: string | null
   highPreferenceModelId?: string
   lowPreferenceModelId?: string
+  // Provider configuration
+  provider?: string
+  googleApiKey?: string
+  anthropicApiKey?: string
+  deepseekApiKey?: string
+  zaiApiKey?: string
+  openaiApiKey?: string
 }
 export interface AppState {
   projectList: ProjectFragment[]

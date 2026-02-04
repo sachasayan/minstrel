@@ -12,10 +12,9 @@ const isValidAgentType = (agent: string): agent is 'routingAgent' | 'criticAgent
 }
 
 export const initializeGeminiService = () => {
-  const apiKey = store.getState().settings.apiKey
-  if (apiKey) {
-    geminiService.updateApiKey(apiKey)
-  }
+  // API keys are now managed through the Redux store and read dynamically
+  // No initialization needed with the new multi-provider system
+  console.log('LLM service initialized with multi-provider support')
 }
 
 const parser = new XMLParser({

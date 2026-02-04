@@ -5,13 +5,21 @@ import { RootState } from '@/lib/store/store'
 // Default model IDs (match those in settingsManager.ts)
 const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking-exp-01-21'
 const DEFAULT_LOW_PREFERENCE_MODEL_ID = 'gemini-2.0-flash'
+const DEFAULT_PROVIDER = 'google'
 
 const initialState: AppSettings = {
   api: '',
   apiKey: '',
   workingRootDirectory: null, // Match default type in settingsManager
   highPreferenceModelId: DEFAULT_HIGH_PREFERENCE_MODEL_ID,
-  lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID
+  lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID,
+  // Provider configuration
+  provider: DEFAULT_PROVIDER,
+  googleApiKey: '',
+  anthropicApiKey: '',
+  deepseekApiKey: '',
+  zaiApiKey: '',
+  openaiApiKey: ''
 }
 
 export const settingsSlice = createSlice({
@@ -20,12 +28,19 @@ export const settingsSlice = createSlice({
   reducers: {
     setSettingsState: (state, action: PayloadAction<AppSettings>) => {
       // Ensure defaults are applied if loaded settings are missing the new fields
-      const loadedSettings = action.payload;
-      state.api = loadedSettings.api ?? initialState.api;
-      state.apiKey = loadedSettings.apiKey ?? initialState.apiKey;
-      state.workingRootDirectory = loadedSettings.workingRootDirectory ?? initialState.workingRootDirectory;
-      state.highPreferenceModelId = loadedSettings.highPreferenceModelId ?? initialState.highPreferenceModelId;
-      state.lowPreferenceModelId = loadedSettings.lowPreferenceModelId ?? initialState.lowPreferenceModelId;
+      const loadedSettings = action.payload
+      state.api = loadedSettings.api ?? initialState.api
+      state.apiKey = loadedSettings.apiKey ?? initialState.apiKey
+      state.workingRootDirectory = loadedSettings.workingRootDirectory ?? initialState.workingRootDirectory
+      state.highPreferenceModelId = loadedSettings.highPreferenceModelId ?? initialState.highPreferenceModelId
+      state.lowPreferenceModelId = loadedSettings.lowPreferenceModelId ?? initialState.lowPreferenceModelId
+      // Provider configuration
+      state.provider = loadedSettings.provider ?? initialState.provider
+      state.googleApiKey = loadedSettings.googleApiKey ?? initialState.googleApiKey
+      state.anthropicApiKey = loadedSettings.anthropicApiKey ?? initialState.anthropicApiKey
+      state.deepseekApiKey = loadedSettings.deepseekApiKey ?? initialState.deepseekApiKey
+      state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
+      state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
     },
     setApi: (state, action: PayloadAction<string>) => {
       state.api = action.payload
@@ -43,6 +58,25 @@ export const settingsSlice = createSlice({
     },
     setLowPreferenceModelId: (state, action: PayloadAction<string>) => {
       state.lowPreferenceModelId = action.payload
+    },
+    // Provider configuration reducers
+    setProvider: (state, action: PayloadAction<string>) => {
+      state.provider = action.payload
+    },
+    setGoogleApiKey: (state, action: PayloadAction<string>) => {
+      state.googleApiKey = action.payload
+    },
+    setAnthropicApiKey: (state, action: PayloadAction<string>) => {
+      state.anthropicApiKey = action.payload
+    },
+    setDeepseekApiKey: (state, action: PayloadAction<string>) => {
+      state.deepseekApiKey = action.payload
+    },
+    setZaiApiKey: (state, action: PayloadAction<string>) => {
+      state.zaiApiKey = action.payload
+    },
+    setOpenaiApiKey: (state, action: PayloadAction<string>) => {
+      state.openaiApiKey = action.payload
     }
   }
 })
@@ -54,7 +88,13 @@ export const {
   setWorkingRootDirectory,
   setSettingsState,
   setHighPreferenceModelId,
-  setLowPreferenceModelId
+  setLowPreferenceModelId,
+  setProvider,
+  setGoogleApiKey,
+  setAnthropicApiKey,
+  setDeepseekApiKey,
+  setZaiApiKey,
+  setOpenaiApiKey
 } = settingsSlice.actions
 
 export const selectSettingsState = (state: RootState) => state.settings

@@ -3,8 +3,9 @@ import * as os from 'os'
 import { ipcMain } from 'electron'
 
 // Default model IDs
-const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking'
+const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking-exp-01-21'
 const DEFAULT_LOW_PREFERENCE_MODEL_ID = 'gemini-2.0-flash'
+const DEFAULT_PROVIDER = 'google'
 
 interface AppSettings {
   api?: string
@@ -12,6 +13,13 @@ interface AppSettings {
   workingRootDirectory?: string | null
   highPreferenceModelId?: string
   lowPreferenceModelId?: string
+  // Provider configuration
+  provider?: string
+  googleApiKey?: string
+  anthropicApiKey?: string
+  deepseekApiKey?: string
+  zaiApiKey?: string
+  openaiApiKey?: string
 }
 
 export const loadAppSettings = async (): Promise<AppSettings> => {
@@ -30,10 +38,20 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
     appSettings.lowPreferenceModelId = DEFAULT_LOW_PREFERENCE_MODEL_ID
   }
 
+  // Set default provider if not exists
+  if (appSettings.provider === undefined) {
+    appSettings.provider = DEFAULT_PROVIDER
+  }
+
   // Ensure other fields have defaults if missing (to match expected type on load)
   if (appSettings.api === undefined) appSettings.api = ''
   if (appSettings.apiKey === undefined) appSettings.apiKey = ''
   if (appSettings.workingRootDirectory === undefined) appSettings.workingRootDirectory = null
+  if (appSettings.googleApiKey === undefined) appSettings.googleApiKey = ''
+  if (appSettings.anthropicApiKey === undefined) appSettings.anthropicApiKey = ''
+  if (appSettings.deepseekApiKey === undefined) appSettings.deepseekApiKey = ''
+  if (appSettings.zaiApiKey === undefined) appSettings.zaiApiKey = ''
+  if (appSettings.openaiApiKey === undefined) appSettings.openaiApiKey = ''
 
   return appSettings as AppSettings
 }
@@ -45,7 +63,14 @@ export const saveAppSettings = async (config: AppSettings) => {
     apiKey: config.apiKey ?? '', // Default to empty string if undefined
     workingRootDirectory: config.workingRootDirectory ?? null, // Default to null if undefined
     highPreferenceModelId: config.highPreferenceModelId ?? DEFAULT_HIGH_PREFERENCE_MODEL_ID,
-    lowPreferenceModelId: config.lowPreferenceModelId ?? DEFAULT_LOW_PREFERENCE_MODEL_ID
+    lowPreferenceModelId: config.lowPreferenceModelId ?? DEFAULT_LOW_PREFERENCE_MODEL_ID,
+    // Provider configuration
+    provider: config.provider ?? DEFAULT_PROVIDER,
+    googleApiKey: config.googleApiKey ?? '',
+    anthropicApiKey: config.anthropicApiKey ?? '',
+    deepseekApiKey: config.deepseekApiKey ?? '',
+    zaiApiKey: config.zaiApiKey ?? '',
+    openaiApiKey: config.openaiApiKey ?? ''
   }
   // Type assertion might be needed if electron-settings types are very strict,
   // but providing defaults should generally work.
