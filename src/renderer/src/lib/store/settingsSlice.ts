@@ -9,14 +9,12 @@ const DEFAULT_PROVIDER = 'google'
 
 const initialState: AppSettings = {
   api: '',
-  apiKey: '',
   workingRootDirectory: null, // Match default type in settingsManager
   highPreferenceModelId: DEFAULT_HIGH_PREFERENCE_MODEL_ID,
   lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID,
   // Provider configuration
   provider: DEFAULT_PROVIDER,
   googleApiKey: '',
-  anthropicApiKey: '',
   deepseekApiKey: '',
   zaiApiKey: '',
   openaiApiKey: ''
@@ -30,23 +28,18 @@ export const settingsSlice = createSlice({
       // Ensure defaults are applied if loaded settings are missing the new fields
       const loadedSettings = action.payload
       state.api = loadedSettings.api ?? initialState.api
-      state.apiKey = loadedSettings.apiKey ?? initialState.apiKey
       state.workingRootDirectory = loadedSettings.workingRootDirectory ?? initialState.workingRootDirectory
       state.highPreferenceModelId = loadedSettings.highPreferenceModelId ?? initialState.highPreferenceModelId
       state.lowPreferenceModelId = loadedSettings.lowPreferenceModelId ?? initialState.lowPreferenceModelId
       // Provider configuration
       state.provider = loadedSettings.provider ?? initialState.provider
       state.googleApiKey = loadedSettings.googleApiKey ?? initialState.googleApiKey
-      state.anthropicApiKey = loadedSettings.anthropicApiKey ?? initialState.anthropicApiKey
       state.deepseekApiKey = loadedSettings.deepseekApiKey ?? initialState.deepseekApiKey
       state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
       state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
     },
     setApi: (state, action: PayloadAction<string>) => {
       state.api = action.payload
-    },
-    setApiKey: (state, action: PayloadAction<string>) => {
-      state.apiKey = action.payload
     },
     // Ensure payload type allows null for working directory
     setWorkingRootDirectory: (state, action: PayloadAction<string | null>) => {
@@ -66,9 +59,6 @@ export const settingsSlice = createSlice({
     setGoogleApiKey: (state, action: PayloadAction<string>) => {
       state.googleApiKey = action.payload
     },
-    setAnthropicApiKey: (state, action: PayloadAction<string>) => {
-      state.anthropicApiKey = action.payload
-    },
     setDeepseekApiKey: (state, action: PayloadAction<string>) => {
       state.deepseekApiKey = action.payload
     },
@@ -84,14 +74,12 @@ export const settingsSlice = createSlice({
 // Export new actions
 export const {
   setApi,
-  setApiKey,
   setWorkingRootDirectory,
   setSettingsState,
   setHighPreferenceModelId,
   setLowPreferenceModelId,
   setProvider,
   setGoogleApiKey,
-  setAnthropicApiKey,
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey

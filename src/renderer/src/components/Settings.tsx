@@ -3,13 +3,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   setSettingsState,
   setApi,
-  setApiKey,
   setWorkingRootDirectory,
   setHighPreferenceModelId,
   setLowPreferenceModelId,
   setProvider,
   setGoogleApiKey,
-  setAnthropicApiKey,
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
@@ -33,7 +31,6 @@ import { Folder } from 'lucide-react'
 // Define Provider Options
 const providerOptions = [
   { value: 'google', label: 'Google (Gemini)' },
-  { value: 'anthropic', label: 'Anthropic (Claude)' },
   { value: 'openai', label: 'OpenAI (ChatGPT)' },
   { value: 'deepseek', label: 'DeepSeek' },
   { value: 'zai', label: 'Z.AI' }
@@ -43,19 +40,13 @@ const providerOptions = [
 const modelOptionsByProvider: Record<string, string[]> = {
   google: [
     'gemini-2.5-pro-preview-03-25',
-    'gemini-flash-3-preview',
+    'gemini-3-flash-preview',
     'gemini-2.0-flash-thinking-exp-01-21', // Default High
     'gemini-2.0-flash',         // Default Low
     'gemini-2.0-flash-lite',
     'gemini-1.5-flash',
     'gemini-1.5-flash-8b',
     'gemini-1.5-pro'
-  ],
-  anthropic: [
-    'claude-3-5-sonnet-20241022',
-    'claude-3-opus-20240229',
-    'claude-3-sonnet-20240229',
-    'claude-3-haiku-20240307'
   ],
   openai: [
     'gpt-4o',
@@ -80,10 +71,8 @@ const Settings = (): ReactNode => {
 
   // Local state for text inputs
   const [apiValue, setApiValue] = useState<string>('')
-  const [apiKeyValue, setApiKeyValue] = useState<string>('')
   // Provider-specific API key states
   const [googleApiKeyValue, setGoogleApiKeyValue] = useState<string>('')
-  const [anthropicApiKeyValue, setAnthropicApiKeyValue] = useState<string>('')
   const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
   const [deepseekApiKeyValue, setDeepseekApiKeyValue] = useState<string>('')
   const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
@@ -99,9 +88,7 @@ const Settings = (): ReactNode => {
         dispatch(setSettingsState(loadedSettings || {}))
         // Sync local state
         setApiValue(loadedSettings?.api || '')
-        setApiKeyValue(loadedSettings?.apiKey || '')
         setGoogleApiKeyValue(loadedSettings?.googleApiKey || '')
-        setAnthropicApiKeyValue(loadedSettings?.anthropicApiKey || '')
         setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
         setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
         setZaiApiKeyValue(loadedSettings?.zaiApiKey || '')
@@ -117,17 +104,13 @@ const Settings = (): ReactNode => {
   // Effect to update local state when Redux state changes
   useEffect(() => {
     setApiValue(settings.api || '');
-    setApiKeyValue(settings.apiKey || '');
     setGoogleApiKeyValue(settings.googleApiKey || '');
-    setAnthropicApiKeyValue(settings.anthropicApiKey || '');
     setOpenaiApiKeyValue(settings.openaiApiKey || '');
     setDeepseekApiKeyValue(settings.deepseekApiKey || '');
     setZaiApiKeyValue(settings.zaiApiKey || '');
   }, [
     settings.api,
-    settings.apiKey,
     settings.googleApiKey,
-    settings.anthropicApiKey,
     settings.openaiApiKey,
     settings.deepseekApiKey,
     settings.zaiApiKey
@@ -159,11 +142,6 @@ const Settings = (): ReactNode => {
     dispatch(setGoogleApiKey(value));
   };
 
-  const handleAnthropicApiKeyChange = (value: string) => {
-    setAnthropicApiKeyValue(value);
-    dispatch(setAnthropicApiKey(value));
-  };
-
   const handleOpenaiApiKeyChange = (value: string) => {
     setOpenaiApiKeyValue(value);
     dispatch(setOpenaiApiKey(value));
@@ -183,10 +161,8 @@ const Settings = (): ReactNode => {
   const handleSaveButton = () => {
     // Dispatch actions for text inputs first to update Redux state
     dispatch(setApi(apiValue));
-    dispatch(setApiKey(apiKeyValue));
     // Dispatch provider API keys
     dispatch(setGoogleApiKey(googleApiKeyValue));
-    dispatch(setAnthropicApiKey(anthropicApiKeyValue));
     dispatch(setOpenaiApiKey(openaiApiKeyValue));
     dispatch(setDeepseekApiKey(deepseekApiKeyValue));
     dispatch(setZaiApiKey(zaiApiKeyValue));
@@ -268,19 +244,6 @@ const Settings = (): ReactNode => {
             </div>
           )}
 
-          {settings.provider === 'anthropic' && (
-            <div>
-              <Label htmlFor="anthropicApiKey">Anthropic API Key</Label>
-              <Input
-                type="password"
-                id="anthropicApiKey"
-                value={anthropicApiKeyValue}
-                onChange={(e) => handleAnthropicApiKeyChange(e.target.value)}
-                placeholder="Enter your Anthropic API Key"
-              />
-            </div>
-          )}
-
           {settings.provider === 'openai' && (
             <div>
               <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
@@ -319,19 +282,6 @@ const Settings = (): ReactNode => {
               />
             </div>
           )}
-
-          {/* Legacy API Key (for backward compatibility) */}
-          <div>
-            <Label htmlFor="apiKey">Legacy API Key</Label>
-            <Input
-              type="password"
-              id="apiKey"
-              value={apiKeyValue}
-              onChange={(e) => setApiKeyValue(e.target.value)}
-              placeholder="Legacy API Key (for backward compatibility)"
-            />
-            <p className="text-xs text-muted-foreground pt-1">This field is maintained for backward compatibility.</p>
-          </div>
 
           {/* API Endpoint */}
           <div>

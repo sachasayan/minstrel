@@ -27,7 +27,7 @@ export default function App(): ReactNode {
       dispatch(setSettingsState(appSettings || {})) // Dispatch loaded settings or empty object
 
       // Check if onboarding is needed *after* settings are loaded into state
-      if (!appSettings?.workingRootDirectory || !appSettings?.apiKey) {
+      if (!appSettings?.workingRootDirectory || !appSettings?.googleApiKey) {
         console.log('Onboarding needed based on loaded settings:', appSettings)
         setShowOnboarding(true)
       }

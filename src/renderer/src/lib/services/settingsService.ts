@@ -2,7 +2,6 @@ import { AppSettings } from '@/types'
 
 export const defaultSettings: AppSettings = {
   api: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=',
-  apiKey: '',
   workingRootDirectory: '~/Documents/minstrel'
 }
 

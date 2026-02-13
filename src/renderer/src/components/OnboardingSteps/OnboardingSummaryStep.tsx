@@ -17,7 +17,8 @@ const OnboardingSummaryStep = ({ isActive }: OnboardingSummaryStepProps): ReactN
     // Ensure formData has the expected structure before saving
     const settingsToSave = {
       api: '', // Assuming default empty API endpoint if not collected
-      apiKey: formData.apiKey || '',
+      googleApiKey: formData.googleApiKey || '',
+      provider: 'google',
       workingRootDirectory: formData.workingRootDirectory || '',
       // Include default model IDs if they should be set during onboarding
       // highPreferenceModelId: 'default-high-model', // Example

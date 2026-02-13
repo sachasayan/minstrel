@@ -1,13 +1,11 @@
 export interface AppSettings {
   api?: string
-  apiKey?: string
   workingRootDirectory?: string | null
   highPreferenceModelId?: string
   lowPreferenceModelId?: string
   // Provider configuration
   provider?: string
   googleApiKey?: string
-  anthropicApiKey?: string
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string

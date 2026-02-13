@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 // import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Key, MoveRight, Loader2 } from 'lucide-react'
+import { Key, MoveRight, Loader2, CircleCheck, CircleX } from 'lucide-react'
 import { useOnboarding } from './context'
-import geminiService from '@/lib/services/llmService'
+import llmService from '@/lib/services/llmService'
 import minstrelIcon from '@/assets/bot/base.png'
 
 interface OnboardingApiKeyStepProps {
@@ -14,53 +14,49 @@ interface OnboardingApiKeyStepProps {
 const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNode => {
   const { setCurrentStep, setFormData } = useOnboarding()
   const [keyValue, setKeyValue] = useState('')
-  const [keyError, setKeyError] = useState(false)
-  const [verifyingKey, setVerifyingKey] = useState(false)
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Use ref for timeout
+  const [keyValidationStatus, setKeyValidationStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle')
+  const validationRequestIdRef = useRef(0)
 
-  // Clear timeout on unmount
+  // Prevent stale async responses from updating state after unmount.
   useEffect(() => {
     return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
+      validationRequestIdRef.current += 1
+    }
+  }, [])
 
-  const handleKey = async (keyInput: string) => {
-    setKeyValue(keyInput)
-    setKeyError(false) // Reset error on new input
-
-    if (keyInput.length < 10) { // Basic length check
-      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
-      setVerifyingKey(false); // Ensure verification stops if key becomes too short
+  useEffect(() => {
+    const apiKey = keyValue.trim()
+    if (!apiKey) {
+      validationRequestIdRef.current += 1
+      setKeyValidationStatus('idle')
       return
     }
 
-    if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
+    setKeyValidationStatus('checking')
+    const requestId = ++validationRequestIdRef.current
 
-    debounceTimeoutRef.current = setTimeout(async () => {
-      setVerifyingKey(true)
+    const timeoutId = window.setTimeout(async () => {
       try {
-        console.log('Verifying key...' + keyInput)
-        const keyTest = await geminiService.verifyKey(keyInput)
-        console.log('Key verification result:', keyTest)
-        if (!keyTest) {
-          console.error('Key verification failed.')
-          setKeyError(true)
-        } else {
-          console.log('Key verified.')
-          setFormData(prev => ({ ...prev, apiKey: keyInput.trim() }))
+        const isValid = await llmService.verifyKey(apiKey, 'google')
+        if (requestId !== validationRequestIdRef.current) return
+
+        if (isValid) {
+          setKeyValidationStatus('valid')
+          setFormData(prev => ({ ...prev, googleApiKey: apiKey }))
           setCurrentStep(2) // Proceed to next step (Summary)
+        } else {
+          console.error('API key validation failed for provider: google')
+          setKeyValidationStatus('invalid')
         }
-      } catch (e) {
-        console.error('Error during key verification:', e)
-        setKeyError(true)
-      } finally {
-        setVerifyingKey(false)
+      } catch (error) {
+        if (requestId !== validationRequestIdRef.current) return
+        console.error('API key validation request errored for provider: google', error)
+        setKeyValidationStatus('invalid')
       }
-    }, 750) // Increased debounce slightly
-  }
+    }, 500)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [keyValue, setCurrentStep, setFormData])
 
   return (
     <div className="space-y-4">
@@ -92,18 +88,35 @@ const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNod
              <div className="relative w-full sm:w-auto flex-grow">
                 <Input
                     value={keyValue}
-                    onChange={(e) => handleKey(e.target.value)}
+                    onChange={(e) => setKeyValue(e.target.value)}
                     className="w-full text-black pr-8"
                     placeholder="Paste API Key here..."
                     type="password" // Hide key visually
-                    disabled={verifyingKey}
                 />
-                {verifyingKey && (
+                {keyValidationStatus === 'checking' && (
                     <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
                 )}
              </div>
           </div>
-           {keyError && <div className="text-sm text-red-400 mt-2 text-center">Hmm, that key didn&apos;t seem to work. Please double-check and try again.</div>}
+          {keyValue.trim() && (
+            <div className="mt-2 text-center text-sm">
+              {keyValidationStatus === 'checking' && (
+                <span>Checking API key...</span>
+              )}
+              {keyValidationStatus === 'valid' && (
+                <span className="inline-flex items-center gap-1 text-green-300">
+                  <CircleCheck className="h-4 w-4" />
+                  API key is valid.
+                </span>
+              )}
+              {keyValidationStatus === 'invalid' && (
+                <span className="inline-flex items-center gap-1 text-red-300">
+                  <CircleX className="h-4 w-4" />
+                  API key is invalid.
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Info Box */}
           <p className="text-xs bg-background/10 text-highlight-100/80 p-3 rounded mt-4">

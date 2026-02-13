@@ -1,5 +1,5 @@
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
-import { setGoogleApiKey, setAnthropicApiKey, setOpenaiApiKey, setDeepseekApiKey, setZaiApiKey } from '@/lib/store/settingsSlice'
+import { setGoogleApiKey, setOpenaiApiKey, setDeepseekApiKey, setZaiApiKey } from '@/lib/store/settingsSlice'
 import geminiService from '@/lib/services/llmService'
 import { AppSettings } from '@/types'
 
@@ -7,7 +7,7 @@ export const settingsListeners = createListenerMiddleware()
 
 // Listen for API key changes and verify them
 settingsListeners.startListening({
-  matcher: isAnyOf(setGoogleApiKey, setAnthropicApiKey, setOpenaiApiKey, setDeepseekApiKey, setZaiApiKey),
+  matcher: isAnyOf(setGoogleApiKey, setOpenaiApiKey, setDeepseekApiKey, setZaiApiKey),
   effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as any
     const settings = state.settings as AppSettings
@@ -18,9 +18,6 @@ settingsListeners.startListening({
     switch (provider) {
       case 'google':
         apiKey = settings.googleApiKey || null
-        break
-      case 'anthropic':
-        apiKey = settings.anthropicApiKey || null
         break
       case 'openai':
         apiKey = settings.openaiApiKey || null

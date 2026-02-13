@@ -1,5 +1,4 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { createAnthropic } from '@ai-sdk/anthropic'
 import { createOpenAI } from '@ai-sdk/openai'
 import { generateText, streamText } from 'ai'
 import { store } from '@/lib/store/store'
@@ -7,7 +6,6 @@ import { store } from '@/lib/store/store'
 // Provider factory functions
 const providerFactories: Record<string, any> = {
   google: createGoogleGenerativeAI,
-  anthropic: createAnthropic,
   openai: createOpenAI
   // deepseek and zai need to be implemented when SDKs are available
 }
@@ -15,7 +13,6 @@ const providerFactories: Record<string, any> = {
 // Model mapping for each provider
 const providerModelMapping: Record<string, (modelId: string) => string> = {
   google: (modelId: string) => modelId, // Google uses model IDs directly
-  anthropic: (modelId: string) => modelId, // Anthropic uses model IDs directly
   openai: (modelId: string) => modelId, // OpenAI uses model IDs directly
   deepseek: (modelId: string) => modelId, // Placeholder
   zai: (modelId: string) => modelId // Placeholder
@@ -28,17 +25,15 @@ const llmService = {
 
     switch (provider) {
       case 'google':
-        return settings.googleApiKey || settings.apiKey || null
-      case 'anthropic':
-        return settings.anthropicApiKey || settings.apiKey || null
+        return settings.googleApiKey || null
       case 'openai':
-        return settings.openaiApiKey || settings.apiKey || null
+        return settings.openaiApiKey || null
       case 'deepseek':
-        return settings.deepseekApiKey || settings.apiKey || null
+        return settings.deepseekApiKey || null
       case 'zai':
-        return settings.zaiApiKey || settings.apiKey || null
+        return settings.zaiApiKey || null
       default:
-        return settings.apiKey || null
+        return null
     }
   },
 
@@ -70,7 +65,19 @@ const llmService = {
       console.log(`API Key is valid for provider ${provider}. Test response:`, text)
       return true
     } catch (error) {
-      console.error(`Invalid API Key or verification request failed for provider ${provider}:`, error)
+      const err = error as any
+      const structuredError = {
+        provider,
+        message: err?.message ?? null,
+        name: err?.name ?? null,
+        status: err?.status ?? err?.statusCode ?? err?.response?.status ?? null,
+        code: err?.code ?? err?.response?.data?.error?.code ?? null,
+        cause: err?.cause ?? null,
+        responseData: err?.response?.data ?? err?.data ?? null,
+        responseBody: err?.body ?? err?.response?.body ?? null
+      }
+      console.error(`Invalid API key or verification request failed for provider ${provider}.`, structuredError)
+      console.error('Raw verifyKey error object:', error)
       return false
     }
   },
@@ -81,10 +88,6 @@ const llmService = {
       google: {
         high: 'gemini-2.0-flash-thinking-exp-01-21',
         low: 'gemini-2.0-flash'
-      },
-      anthropic: {
-        high: 'claude-3-5-sonnet-20241022',
-        low: 'claude-3-haiku-20240307'
       },
       openai: {
         high: 'gpt-4o',
@@ -109,7 +112,7 @@ const llmService = {
 
     if (provider === 'google') {
       return aiProvider(mappedModelId)
-    } else if (provider === 'anthropic' || provider === 'openai') {
+    } else if (provider === 'openai') {
       return aiProvider(mappedModelId)
     } else {
       // For unsupported providers, throw error
