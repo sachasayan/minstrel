@@ -22,6 +22,7 @@ export interface ProjectState {
 }
 
 export interface Project extends ProjectFragment {
+  storyContent: string
   files: ProjectFile[]
   summary: string // Consider if this is still needed or replaced by outline doc
   year: number

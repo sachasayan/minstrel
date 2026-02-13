@@ -6,6 +6,7 @@ import { setChatHistory, clearChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
 import { convertImagePathToBase64 } from '@/lib/coverImage'
+import { isChapterFile } from '@/lib/storyContent'
 
 export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
@@ -13,10 +14,13 @@ const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fict
 const findChapterOneTitle = (files: Project['files'] | undefined): string => {
   if (!files || files.length === 0) return 'Chapter 1'
 
-  const exactMatch = files.find((file) => /^chapter[\s_-]*1\b/i.test(file.title))
+  const chapterFiles = files.filter((file) => isChapterFile(file))
+  if (chapterFiles.length === 0) return 'Chapter 1'
+
+  const exactMatch = chapterFiles.find((file) => /^chapter[\s_-]*1\b/i.test(file.title))
   if (exactMatch) return exactMatch.title
 
-  return 'Chapter 1'
+  return chapterFiles[0].title
 }
 
 // Listen for setting active project from fragment - fetch full details and set chat history

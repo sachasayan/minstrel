@@ -11,11 +11,22 @@ declare module '@/types' {
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
+import {
+  isChapterFile,
+  isChapterTitle,
+  normalizeProjectStoryContent,
+  rebuildProjectFilesFromStoryContent,
+  serializeChapterFilesToStoryContent
+} from '@/lib/storyContent'
 
 const initialState: ProjectState = {
   projectHasLiveEdits: false,
   activeProject: null,
   pendingFiles: null
+}
+
+const syncProjectFilesFromStory = (project: Project, editedTitles: Set<string> = new Set()) => {
+  project.files = rebuildProjectFilesFromStoryContent(project, editedTitles)
 }
 
 export const projectsSlice = createSlice({
@@ -33,12 +44,13 @@ export const projectsSlice = createSlice({
         cover: undefined,
         coverImageMimeType: null,
         coverImageBase64: null,
+        storyContent: '# Chapter 1\n\n',
         files: [
           {
             title: 'Chapter 1',
             content: '',
             type: 'chapter',
-            sort_order: 0
+            sort_order: 1
           }
         ],
         summary: '',
@@ -57,7 +69,7 @@ export const projectsSlice = createSlice({
       state.activeProject = projectFromFragment(action.payload)
     },
     setActiveProject: (state, action: PayloadAction<Project | null>) => {
-      state.activeProject = action.payload
+      state.activeProject = action.payload ? normalizeProjectStoryContent(action.payload) : null
     },
     setProjectHasLiveEdits: (state, action: PayloadAction<boolean>) => {
       state.projectHasLiveEdits = action.payload
@@ -77,24 +89,49 @@ export const projectsSlice = createSlice({
     },
     updateFile: (state, action: PayloadAction<ProjectFile>) => {
       if (state.activeProject) {
-        //Get position of this file in the files list
-        const chapterIndex = state.activeProject.files.findIndex((file) => file.title === action.payload.title)
-        //If file exists, update it in the store
-        if (chapterIndex !== -1) {
-          state.activeProject.files[chapterIndex].content = action.payload.content
-          state.activeProject.files[chapterIndex].hasEdits = true
+        const payload = action.payload
+        const existingFile = state.activeProject.files.find((file) => file.title === payload.title)
+        const shouldTreatAsChapter =
+          payload.type === 'chapter' || isChapterTitle(payload.title) || isChapterFile(existingFile)
+
+        if (shouldTreatAsChapter) {
+          const chapterFiles = state.activeProject.files.filter((file) => isChapterFile(file))
+          const chapterIndex = chapterFiles.findIndex((file) => file.title === payload.title)
+          if (chapterIndex !== -1) {
+            chapterFiles[chapterIndex].content = payload.content
+            chapterFiles[chapterIndex].hasEdits = true
+          } else {
+            chapterFiles.push({
+              title: payload.title,
+              content: payload.content,
+              type: 'chapter',
+              sort_order: chapterFiles.length + 1,
+              hasEdits: true
+            })
+          }
+
+          state.activeProject.storyContent = serializeChapterFilesToStoryContent(chapterFiles)
+          syncProjectFilesFromStory(state.activeProject, new Set([payload.title]))
           state.projectHasLiveEdits = true
+          return
+        }
+
+        const fileIndex = state.activeProject.files.findIndex((file) => file.title === payload.title)
+
+        if (fileIndex !== -1) {
+          state.activeProject.files[fileIndex].content = payload.content
+          state.activeProject.files[fileIndex].hasEdits = true
         } else {
-          // If file doesn't exist, add it, including type and sort_order if provided
           state.activeProject.files.push({
-            title: action.payload.title,
-            content: action.payload.content,
-            type: action.payload.type ?? 'unknown', // Use provided type or default
-            sort_order: action.payload.sort_order ?? state.activeProject.files.length, // Use provided order or append
+            title: payload.title,
+            content: payload.content,
+            type: payload.type ?? 'unknown',
+            sort_order: payload.sort_order ?? state.activeProject.files.length + 1,
             hasEdits: true
           })
-          state.projectHasLiveEdits = true
         }
+
+        state.projectHasLiveEdits = true
       }
     },
     updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; wordCountTarget: number }>) => {
@@ -110,6 +147,12 @@ export const projectsSlice = createSlice({
     updateMetaProperty: (state, action: PayloadAction<{ property: string; value: any }>) => {
       if (!state.activeProject)
         return // Use type assertion carefully or add type checks if property is specific
+      if (action.payload.property === 'storyContent' && typeof action.payload.value === 'string') {
+        state.activeProject.storyContent = action.payload.value
+        syncProjectFilesFromStory(state.activeProject)
+        state.projectHasLiveEdits = true
+        return
+      }
         // Cast to any to bypass TS error when assigning 'any' value to dynamic property
       ;(state.activeProject as any)[action.payload.property] = action.payload.value
       state.projectHasLiveEdits = true
@@ -133,7 +176,19 @@ export const projectsSlice = createSlice({
         console.warn(`Title conflict detected: ${newTitle} already exists. RenameFile reducer cancelled.`) // Log warning for debugging
         return
       }
-      state.activeProject.files[fileIndex].title = newTitle
+
+      if (isChapterFile(state.activeProject.files[fileIndex])) {
+        const chapterFiles = state.activeProject.files.filter((file) => isChapterFile(file))
+        const chapterIndex = chapterFiles.findIndex((file) => file.title === oldTitle)
+        if (chapterIndex === -1) return
+        chapterFiles[chapterIndex].title = newTitle
+        chapterFiles[chapterIndex].hasEdits = true
+        state.activeProject.storyContent = serializeChapterFilesToStoryContent(chapterFiles)
+        syncProjectFilesFromStory(state.activeProject, new Set([newTitle]))
+      } else {
+        state.activeProject.files[fileIndex].title = newTitle
+      }
+
       state.projectHasLiveEdits = true
     },
     // New reducer for updating cover image data

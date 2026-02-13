@@ -9,6 +9,7 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
 import { updateMetaProperty } from '@/lib/store/projectsSlice'
 import { CoverCard } from '@/components/CoverCard'
+import { isChapterFile } from '@/lib/storyContent'
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
@@ -118,7 +119,7 @@ export default function NovelDashboard() {
                 >
                   <BarChart
                     data={activeProject.files
-                      .filter((file) => file.title.startsWith('Chapter'))
+                      .filter((file) => isChapterFile(file))
                       .map((file, index) => ({
                         index: index,
                         chapter: index + 1,

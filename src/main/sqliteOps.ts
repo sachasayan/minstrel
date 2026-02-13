@@ -11,6 +11,35 @@ const resolvePath = (filePath: string): string => {
   return filePath.replace('~', homedir)
 }
 
+const isChapterTitle = (title: string | null | undefined): boolean => {
+  if (!title) return false
+  return /^chapter\b/i.test(title.trim())
+}
+
+const isChapterFileRecord = (file: { title?: string | null; type?: string | null }): boolean => {
+  return file.type === 'chapter' || isChapterTitle(file.title)
+}
+
+const isStoryFileRecord = (file: { title?: string | null; type?: string | null }): boolean => {
+  return file.type === 'story' || file.title === 'Story'
+}
+
+const serializeChapterRowsToStoryContent = (
+  chapterFiles: Array<{ title?: string | null; content?: string | null }>
+): string => {
+  if (!Array.isArray(chapterFiles) || chapterFiles.length === 0) {
+    return '# Chapter 1\n\n'
+  }
+
+  return chapterFiles
+    .map((chapter, index) => {
+      const title = chapter.title?.trim() || `Chapter ${index + 1}`
+      const content = (chapter.content ?? '').replace(/\r\n/g, '\n').replace(/^\n+/, '').replace(/\n+$/, '')
+      return content.length > 0 ? `# ${title}\n\n${content}` : `# ${title}`
+    })
+    .join('\n\n')
+}
+
 // SQL for creating tables if they don't exist
 const CREATE_TABLES_SQL = `
   -- Metadata table for project information
@@ -134,6 +163,9 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       for (const file of project.files as any[]) {
         // Ensure type and sort_order have default values if missing
         const fileType = file.type ?? 'unknown' // Default type if missing
+        if (isChapterFileRecord({ title: file.title, type: fileType })) {
+          continue
+        }
         const sortOrder = file.sort_order ?? 0 // Default sort order if missing
         insertFile.run(file.title, file.content, fileType, sortOrder)
       }
@@ -183,7 +215,7 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
     db = new Database(resolvedPath, { readonly: true, fileMustExist: true }) // Ensure file exists
 
     // Get all metadata
-    const metadataRows = db.prepare('SELECT key, value FROM metadata').all()
+    const metadataRows = db.prepare("SELECT key, value FROM metadata WHERE key != 'storyContent'").all()
     if (!metadataRows || metadataRows.length === 0) {
       console.warn(`No metadata found for project ${filePath}`)
       return null // Return null if no metadata rows found
@@ -320,6 +352,16 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
 
     // Construct the final Project object, ensuring type compatibility
     // Return type is implicitly 'any' here, but structure should match Project
+    const legacyChapterFiles = projectFiles.filter((file) => isChapterFileRecord(file))
+    const storyFile = projectFiles.find((file) => isStoryFileRecord(file))
+    const nonChapterFiles = projectFiles.filter((file) => !isChapterFileRecord(file) && !isStoryFileRecord(file))
+    const storyContent =
+      typeof storyFile?.content === 'string' && storyFile.content.trim().length > 0
+        ? storyFile.content
+        : typeof projectMetadata.storyContent === 'string' && projectMetadata.storyContent.trim().length > 0
+        ? projectMetadata.storyContent
+        : serializeChapterRowsToStoryContent(legacyChapterFiles)
+
     const loadedProject = {
       // Spread required ProjectFragment fields first
       projectPath: filePath,
@@ -330,7 +372,8 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
       // Spread remaining metadata
       ...projectMetadata,
 
-      files: projectFiles,
+      storyContent,
+      files: nonChapterFiles,
       chatHistory: chatHistory,
       knowledgeGraph: null // Assuming this is still null on load
     }

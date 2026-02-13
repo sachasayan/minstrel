@@ -1,5 +1,11 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 import { loadSqliteProject, saveSqliteProject, initSqliteProject } from './sqliteService'
+import {
+  buildPersistableProject,
+  isChapterFile,
+  normalizeProjectStoryContent,
+  serializeChapterFilesToStoryContent
+} from '@/lib/storyContent'
 
 export function decodeHtmlEntities(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html')
@@ -122,8 +128,8 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
 export const fetchProjectDetails = async (projectFragment: ProjectFragment): Promise<Project> => {
   // Route to appropriate handler based on file extension
   if (isSqliteFormat(projectFragment.projectPath)) {
-    // loadSqliteProject returns the full Project object from backend
-    return await loadSqliteProject(projectFragment)
+    const loadedProject = await loadSqliteProject(projectFragment)
+    return normalizeProjectStoryContent(loadedProject)
   }
 
   // Original Markdown format handler
@@ -141,20 +147,33 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
 
     const projectFiles = [...fileContent.matchAll(/----([\s\S]+?)\n# (.+?)\n([\s\S]+?)(?=----|$)/gi)].map((m) => ({ name: m[2], content: m[3].trim() }))
     // console.log(projectFiles)
-    const chapterList = projectFiles.map((item) => {
+    const parsedFiles = projectFiles.map((item) => {
+      const normalizedName = item.name.trim()
+      const fileType = normalizedName.toLowerCase().includes('outline')
+        ? 'outline'
+        : normalizedName.toLowerCase().includes('chapter')
+          ? 'chapter'
+          : 'unknown'
       return {
-        title: item.name,
+        title: normalizedName,
         content: item.content,
+        type: fileType,
         hasEdits: false
       } as ProjectFile
     })
-    // console.log(chapterList)
+
+    const chapterFiles = parsedFiles.filter((file) => isChapterFile(file))
+    const storyContent =
+      typeof metadata.storyContent === 'string' && metadata.storyContent.trim().length > 0
+        ? metadata.storyContent
+        : serializeChapterFilesToStoryContent(chapterFiles)
 
     // Construct the Project object for MD files (no cover/chat support here)
-    return {
+    const project = {
       ...metadata,
       projectPath: projectFragment.projectPath,
-      files: chapterList,
+      storyContent,
+      files: parsedFiles,
       knowledgeGraph: null,
       chatHistory: [], // Default to empty chat history for MD
       coverImageBase64: null,
@@ -166,6 +185,8 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
       wordCountCurrent: metadata.wordCountCurrent ?? 0,
       cover: '' // No cover for MD
     } as Project
+
+    return normalizeProjectStoryContent(project)
   } catch (error) {
     console.error(`Failed to fetch project details for ${projectFragment.projectPath}:`, error)
     throw new Error(`Could not load project details for ${projectFragment.title}.`)
@@ -180,18 +201,19 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
  * @returns Promise resolving to an object { success: boolean, finalPath: string | null }
  */
 export const saveProject = async (project: Project): Promise<{ success: boolean; finalPath: string | null }> => {
-  if (!project?.projectPath || !project?.files) {
+  if (!project?.projectPath) {
     console.warn('Cannot save project: project details are missing.')
     return { success: false, finalPath: null }
   }
 
+  const persistableProject = buildPersistableProject(project)
   const originalPath = project.projectPath
 
   // Check if it's already SQLite format
   if (isSqliteFormat(originalPath)) {
     console.log('Saving existing SQLite project:', originalPath)
     try {
-      const success = await saveSqliteProject(project)
+      const success = await saveSqliteProject(persistableProject)
       return { success: success, finalPath: success ? originalPath : null }
     } catch (error) {
       console.error(`Error saving existing SQLite project ${originalPath}:`, error)
@@ -202,7 +224,7 @@ export const saveProject = async (project: Project): Promise<{ success: boolean;
     const newPath = originalPath.replace(/\.md$/i, '.mns')
     // Ensure the project object being saved has the *new* path
     const projectToSave = {
-      ...project,
+      ...persistableProject,
       projectPath: newPath // Update path for saving
     }
 
@@ -253,7 +275,7 @@ export const createSqliteProject = async (projectPath: string, project: Project)
 
   // Update the project path
   const projectWithPath = {
-    ...project,
+    ...buildPersistableProject(project),
     projectPath: finalPath
   }
 

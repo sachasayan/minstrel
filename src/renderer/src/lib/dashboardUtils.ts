@@ -2,6 +2,7 @@ import { Project } from '@/types'
 import { remark } from 'remark'
 import { visit } from 'unist-util-visit'
 import { toString } from 'mdast-util-to-string'
+import { isChapterFile } from '@/lib/storyContent'
 
 const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 
@@ -63,7 +64,7 @@ function getCharacterFrequencyData(activeProject: Project): any[] {
   const charactersList = extractCharactersFromOutline(activeProject.files.find((f) => f.title.indexOf('Outline') != -1)?.content || '')
 
   return activeProject.files
-    .filter((file) => file.title.indexOf('Chapter') != -1)
+    .filter((file) => isChapterFile(file))
     .map((file, i) => {
       const chapterData: { [key: string]: number | string } = {
         chapter: i + 1,

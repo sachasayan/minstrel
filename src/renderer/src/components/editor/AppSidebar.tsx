@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
 import { selectProjects } from '@/lib/store/projectsSlice'
+import { isChapterFile } from '@/lib/storyContent'
 
 import { addChatMessage } from '@/lib/store/chatSlice'
 
@@ -30,7 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleUniselect = (slug: string) => {
     console.log(appState.activeFile)
     console.log(slug)
-    if (slug.includes('Chapter') || slug == 'Outline') {
+    if (slug == 'Outline') {
       dispatch(setActiveFile(projectsState.activeProject?.files?.find((item) => item.title.includes(slug))?.title || ''))
       dispatch(setActiveView('project/editor'))
     }
@@ -72,13 +73,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {projectsState.activeProject?.files?.some((item) => item.title.includes('Chapter')) && (
+          {projectsState.activeProject?.files?.some((item) => isChapterFile(item)) && (
             <SidebarGroup key="Chapters">
               <SidebarGroupLabel>Chapters</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {projectsState.activeProject?.files
-                    ?.filter((item) => item.title.includes('Chapter'))
+                    ?.filter((item) => isChapterFile(item))
                     .map((item, i) => {
                       const isActive = appState.activeView === 'project/editor' && appState.activeFile === item.title;
                       const isPending = projectsState.pendingFiles?.includes(item.title);

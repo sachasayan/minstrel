@@ -1,4 +1,5 @@
 import { ProjectFragment, Project } from '@/types'
+import { buildPersistableProject } from '@/lib/storyContent'
 
 /**
  * Initializes a new SQLite project file
@@ -45,14 +46,16 @@ export const initSqliteProject = async (projectPath: string, project: Project): 
 export const saveSqliteProject = async (project: Project): Promise<boolean> => {
   console.log('Saving SQLite project...')
 
-  if (!project?.projectPath || !project?.files) {
+  if (!project?.projectPath) {
     console.warn('Cannot save project: project details are missing.')
     return false
   }
 
+  const persistableProject = buildPersistableProject(project)
+
   try {
     // Pass the full project object, including files, to the backend
-    const result = await window.electron.ipcRenderer.invoke('save-sqlite-project', project.projectPath, project)
+    const result = await window.electron.ipcRenderer.invoke('save-sqlite-project', persistableProject.projectPath, persistableProject)
 
     if (!result.success) {
       console.error('Failed to save SQLite project:', result.error)
