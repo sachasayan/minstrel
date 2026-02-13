@@ -192,53 +192,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup key={'Structure'}>
-            <SidebarGroupLabel>Structure</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {structureItems
-                  .map((item, i) => {
-                    // Ensure activeProject and files exist before finding
-                    const file = projectsState.activeProject?.files?.find((e) => e.title.includes(item.key));
-                    const isActive = appState.activeView === item.activeView && (!!item.activeFile ? (appState.activeFile?.includes(item.activeFile)) : true);
-                    const isPending = projectsState.pendingFiles?.includes(file?.title || '');
-                    const hasEdits = file?.hasEdits;
-
-                    return (
-                      <SidebarMenuItem key={i}>
-                        <SidebarMenuButton asChild isActive={isActive}>
-                          <a onClick={() => handleUniselect(item.key)}>
-                            {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
-                            {hasEdits && <Diff className="float-right text-orange-500" />}
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )
-                  })}
-                {!projectsState.activeProject?.files?.find((item) => item.title.includes('Outline')) && (
-                  <SidebarMenuItem key="Create Outline">
-                    <SidebarMenuButton asChild>
-                      <Button
-                        onClick={() =>
-                          dispatch(
-                            addChatMessage({
-                              sender: 'User',
-                              text: 'Please create an outline.'
-                            })
-                          )
-                        }
-                        variant="outline"
-                        className="w-full"
-                      >
-                        Create Outline
-                      </Button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
           {projectsState.activeProject?.files?.some((item) => item.title.includes('Chapter')) && (
             <SidebarGroup key="Chapters">
               <SidebarGroupLabel>Chapters</SidebarGroupLabel>
@@ -283,6 +236,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarGroupContent>
             </SidebarGroup>
           )}
+
+          <SidebarGroup key={'Artifacts'}>
+            <SidebarGroupLabel>Artifacts</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {structureItems
+                  .map((item, i) => {
+                    // Ensure activeProject and files exist before finding
+                    const file = projectsState.activeProject?.files?.find((e) => e.title.includes(item.key));
+                    const isActive = appState.activeView === item.activeView && (!!item.activeFile ? (appState.activeFile?.includes(item.activeFile)) : true);
+                    const isPending = projectsState.pendingFiles?.includes(file?.title || '');
+                    const hasEdits = file?.hasEdits;
+
+                    return (
+                      <SidebarMenuItem key={i}>
+                        <SidebarMenuButton asChild isActive={isActive}>
+                          <a onClick={() => handleUniselect(item.key)}>
+                            {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
+                            {hasEdits && <Diff className="float-right text-orange-500" />}
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         </SidebarContent>
         <SidebarRail />
       </Sidebar>
