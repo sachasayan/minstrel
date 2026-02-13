@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import ProjectLibrary from '@/components/ProjectLibrary'
 import { useDispatch, useSelector } from 'react-redux'
 import { setProjectList, selectProjectList, setActiveView } from '@/lib/store/appStateSlice' // setActiveView is now used
-import { setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
+import { setActiveProjectFromFragment, startNewProject } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/fileService'
 import { cn } from '@/lib/utils'
@@ -18,8 +18,8 @@ const Intro = (): ReactNode => {
 
   const handleProjectSelect = (projectPath: string) => {
     if (projectPath == 'add') {
-      // dispatch(startNewProject()); // Removed: Wizard now handles creation on completion
-      dispatch(setActiveView('wizard'));
+      dispatch(startNewProject())
+      dispatch(setActiveView('project/dashboard'))
       return
     }
 

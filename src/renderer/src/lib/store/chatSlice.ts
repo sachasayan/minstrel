@@ -10,9 +10,13 @@ interface ChatState {
   actionSuggestions: string[]
 }
 
+const DEFAULT_AGENT_GREETING: ChatMessage = {
+  sender: 'Gemini',
+  text: 'Hey dreamer. Welcome. What should we write about today?'
+}
+
 const initialState: ChatState = {
-  // Update initial message to conform to ChatMessage type (if needed, assuming sender is string)
-  chatHistory: [{ sender: 'Gemini', text: 'Hello there! Ask me anything about your story. I can help you build an outline, write a chapter, and more.' }],
+  chatHistory: [],
   pendingChat: false,
   actionSuggestions: [] // Initialize actionSuggestions as empty array
 }
@@ -24,6 +28,11 @@ const chatSlice = createSlice({
     setChatHistory: (state, action: PayloadAction<ChatMessage[]>) => {
       // Ensure payload conforms to ChatMessage[] from types.ts
       state.chatHistory = action.payload
+    },
+    clearChatHistory: (state) => {
+      state.chatHistory = [DEFAULT_AGENT_GREETING]
+      state.pendingChat = false
+      state.actionSuggestions = []
     },
     resolvePendingChat: (state) => {
       state.pendingChat = false
@@ -46,7 +55,7 @@ const chatSlice = createSlice({
   }
 })
 
-export const { setChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions } = chatSlice.actions
+export const { setChatHistory, clearChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions } = chatSlice.actions
 
 // Selector for the whole chat state
 export const selectChat = (state: RootState): ChatState => state.chat

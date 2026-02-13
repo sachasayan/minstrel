@@ -26,9 +26,9 @@ export const projectsSlice = createSlice({
       // Create a default temporary project object
       const tempProject: Project = {
         projectPath: '', // Use empty string instead of null for path initially
-        title: '',
+        title: 'Untitled Project',
         genre: 'fantasy', // Use a valid Genre string literal as default
-        wordCountTarget: 0,
+        wordCountTarget: 80000,
         wordCountCurrent: 0,
         cover: undefined,
         coverImageMimeType: null,

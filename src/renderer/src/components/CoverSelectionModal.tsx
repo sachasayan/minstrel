@@ -25,7 +25,8 @@ import { toast } from 'sonner'
 
 // Re-use data from BookWizard
 import { bookCovers } from '@/assets/book-covers'
-import { genres } from '@/components/BookWizard/index'
+import { bookGenres } from '@/lib/bookGenres'
+import { convertImagePathToBase64 } from '@/lib/coverImage'
 
 interface CoverSelectionModalProps {
     open: boolean
@@ -56,37 +57,13 @@ const CoverSelectionModal: React.FC<CoverSelectionModalProps> = ({
     // Filter covers logic (ported from CoverStep.tsx)
     const filteredCovers = useMemo(() => {
         if (!selectedGenre) return []
-        const selectedGenreLabel = genres.find(g => g.value === selectedGenre)?.label
+        const selectedGenreLabel = bookGenres.find(g => g.value === selectedGenre)?.label
         if (!selectedGenreLabel) return []
 
         return bookCovers.filter(cover =>
             cover.categoryName.startsWith(selectedGenreLabel)
         )
     }, [selectedGenre])
-
-    // --- Helper to convert gallery path to base64 (ported from SummaryStep) ---
-    const convertImageToBase64 = async (imagePath: string): Promise<{ base64: string | null; mimeType: string | null }> => {
-        try {
-            const response = await fetch(`./${imagePath}`)
-            if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`)
-            const blob = await response.blob()
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader()
-                reader.onloadend = () => {
-                    const dataUrl = reader.result as string
-                    const mimeType = dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'))
-                    const base64 = dataUrl.substring(dataUrl.indexOf(',') + 1)
-                    resolve({ base64, mimeType })
-                }
-                reader.onerror = reject
-                reader.readAsDataURL(blob)
-            })
-        } catch (error) {
-            console.error('Error converting image to base64:', error)
-            toast.error("Failed to load selected gallery image.")
-            return { base64: null, mimeType: null }
-        }
-    }
 
     // --- Upload Handlers ---
     const processImageFile = (file: File) => {
@@ -149,10 +126,15 @@ const CoverSelectionModal: React.FC<CoverSelectionModalProps> = ({
                 return;
             }
             // Convert and send
-            const data = await convertImageToBase64(selectedGalleryImage);
-            if (data.base64) {
-                onSelectCover(data);
-                onOpenChange(false);
+            try {
+                const data = await convertImagePathToBase64(selectedGalleryImage);
+                if (data.base64) {
+                    onSelectCover(data);
+                    onOpenChange(false);
+                }
+            } catch (error) {
+                console.error('Error converting image to base64:', error)
+                toast.error("Failed to load selected gallery image.")
             }
         } else {
             // Upload tab
@@ -194,7 +176,7 @@ const CoverSelectionModal: React.FC<CoverSelectionModalProps> = ({
                                         <SelectValue placeholder="Select genre" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {genres.map(g => (
+                                        {bookGenres.map(g => (
                                             <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
                                         ))}
                                     </SelectContent>

@@ -1,12 +1,14 @@
 import { createListenerMiddleware, isAnyOf, PayloadAction } from '@reduxjs/toolkit' // Re-added PayloadAction
-import { setActiveProject, renameFile, setActiveProjectFromFragment } from '../projectsSlice'
+import { setActiveProject, renameFile, setActiveProjectFromFragment, startNewProject, updateCoverImage } from '../projectsSlice'
 import { fetchProjectDetails } from '@/lib/services/fileService'
 import { setActiveFile } from '../appStateSlice'
-import { setChatHistory } from '../chatSlice'
+import { setChatHistory, clearChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
+import { convertImagePathToBase64 } from '@/lib/coverImage'
 
 export const projectListeners = createListenerMiddleware()
+const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
 
 // Listen for setting active project from fragment - fetch full details and set chat history
 projectListeners.startListening({
@@ -54,6 +56,37 @@ projectListeners.startListening({
 
     if (previousState?.appState?.activeFile === payload?.oldTitle) {
       listenerApi.dispatch(setActiveFile(payload.newTitle))
+    }
+  }
+})
+
+// Apply a default cover for newly started projects.
+projectListeners.startListening({
+  matcher: isAnyOf(startNewProject),
+  effect: async (_action, listenerApi) => {
+    listenerApi.dispatch(clearChatHistory())
+
+    try {
+      const currentState = listenerApi.getState() as RootState
+      const activeProject = currentState.projects.activeProject
+      if (!activeProject) return
+
+      // Only set a default cover when the new unsaved project has no cover yet.
+      if (activeProject.projectPath !== '') return
+      if (activeProject.coverImageBase64 || activeProject.coverImageMimeType) return
+
+      const coverData = await convertImagePathToBase64(DEFAULT_NEW_PROJECT_COVER_PATH)
+      if (!coverData.base64 || !coverData.mimeType) return
+
+      const latestState = listenerApi.getState() as RootState
+      const latestProject = latestState.projects.activeProject
+      if (!latestProject) return
+      if (latestProject.projectPath !== '') return
+      if (latestProject.coverImageBase64 || latestProject.coverImageMimeType) return
+
+      listenerApi.dispatch(updateCoverImage({ base64: coverData.base64, mimeType: coverData.mimeType }))
+    } catch (error) {
+      console.error('Failed to apply default cover for new project:', error)
     }
   }
 })
