@@ -54,26 +54,6 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
   useEffect(() => {
     scrollToBottom()
   }, [chatHistory])
-  useEffect(() => {
-    const container = chatContainerRef.current
-    if (!container) return
-
-    const updateOpacities = () => {
-      const containers = container.querySelectorAll('.chat-message-container')
-      containers.forEach((el) => {
-        const element = el as HTMLElement
-        const messageTop = element.offsetTop - container.scrollTop
-        const opacity = messageTop >= 100 ? 1 : Math.max(0, messageTop / 100)
-        element.style.opacity = opacity.toString()
-      })
-    }
-
-    updateOpacities()
-    container.addEventListener('scroll', updateOpacities)
-    return () => {
-      container.removeEventListener('scroll', updateOpacities)
-    }
-  }, [])
 
   const handleSend = () => {
     if (message.trim() !== '') {
@@ -132,7 +112,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
                     <div
                       key={index}
                       ref={index === chatHistory.length - 1 ? lastMessageRef : null}
-                      className="flex items-start justify-end chat-message-container"
+                      className="flex items-start justify-end"
                     >
                       <div className="mb-2 py-2 px-4  rounded-lg text-sm chat-message outline-1 outline-neutral-600  text-neutral-600 text-left ml-14 relative">
                         {msg.text}
@@ -143,7 +123,7 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
                     <div
                       key={index}
                       ref={index === chatHistory.length - 1 ? lastMessageRef : null}
-                      className="flex items-start justify-end chat-message-container"
+                      className="flex items-start justify-end"
                     >
                       <img src={minstrelIcon} className="size-10 mr-1" alt="" />
                       <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-right mr-8 relative">
