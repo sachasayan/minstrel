@@ -14,32 +14,27 @@ export default function ParameterChecklist(): ReactNode {
     {
       label: 'Story Length',
       stepNumber: 1,
-      completed: currentStep > 1, // Completed if currentStep is past step 1
+      completed: currentStep > 1,
     },
     {
       label: 'Genre',
+      stepNumber: 1,
+      completed: currentStep > 1,
+    },
+    {
+      label: 'Setting',
       stepNumber: 2,
       completed: currentStep > 2,
     },
     {
-      label: 'Setting',
+      label: 'Plot',
       stepNumber: 3,
       completed: currentStep > 3,
     },
     {
-      label: 'Cover',
+      label: 'Title',
       stepNumber: 4,
       completed: currentStep > 4,
-    },
-    {
-      label: 'Title',
-      stepNumber: 5,
-      completed: currentStep > 5,
-    },
-    {
-      label: 'Plot',
-      stepNumber: 6,
-      completed: currentStep > 6,
     },
     // Summary step is usually not shown in the checklist
   ]

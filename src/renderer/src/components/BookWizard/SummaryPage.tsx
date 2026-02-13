@@ -6,7 +6,6 @@ import llmService from '@/lib/services/llmService'
 import { setActiveProject } from '@/lib/store/projectsSlice' // Assuming Project type is implicitly handled by this action
 import { setActiveView } from '@/lib/store/appStateSlice'
 import { useWizard, genres, sanitizeFilename } from '@/components/BookWizard/index'
-import { bookCovers } from '@/assets/book-covers'
 import ReactMarkdown from 'react-markdown'
 import { Loader2 } from 'lucide-react'
 import minstrelIcon from '@/assets/bot/base.png'
@@ -18,29 +17,15 @@ interface SummaryStepProps {
   isActive: boolean
 }
 
+const DEFAULT_WIZARD_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
+
 const SummaryStep = ({ isActive }: SummaryStepProps) => {
   const dispatch = useDispatch()
-  const { formData, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom } = useWizard()
+  const { formData, requestScrollToBottom } = useWizard()
   const [isGenerating, setIsGenerating] = useState(false)
   const [streamedText, setStreamedText] = useState('')
   const [generationError, setGenerationError] = useState<string | null>(null)
   const settingsState = useSelector(selectSettingsState)
-
-  // Auto-select random cover on mount (if not already selected)
-  useEffect(() => {
-    if (isActive && !selectedCoverPath && formData.genre) {
-      // Find label for genre
-      const selectedGenreLabel = genres.find(g => g.value === formData.genre)?.label
-      if (selectedGenreLabel) {
-        const validCovers = bookCovers.filter(cover => cover.categoryName.startsWith(selectedGenreLabel))
-        if (validCovers.length > 0) {
-          const randomCover = validCovers[Math.floor(Math.random() * validCovers.length)]
-          console.log(`Auto-selecting cover: ${randomCover.image}`)
-          setSelectedCoverPath(randomCover.image)
-        }
-      }
-    }
-  }, [isActive, selectedCoverPath, formData.genre, setSelectedCoverPath])
 
   // Helper function to convert image path to base64
   const convertImageToBase64 = async (imagePath: string | null): Promise<{ base64: string | null; mimeType: string | null }> => {
@@ -93,13 +78,11 @@ Please provide the output in Markdown format.`
 
     // --- Convert selected cover image to base64 ---
     let coverData: { base64: string | null; mimeType: string | null } = { base64: null, mimeType: null } // Correct type initialization
-    if (selectedCoverPath) {
-      try {
-        coverData = await convertImageToBase64(selectedCoverPath)
-      } catch (err) {
-        console.error("Failed to process selected cover image:", err)
-        // Optionally set an error state or proceed without cover
-      }
+    try {
+      coverData = await convertImageToBase64(DEFAULT_WIZARD_COVER_PATH)
+    } catch (err) {
+      console.error("Failed to process default cover image:", err)
+      // Optionally set an error state or proceed without cover
     }
     // ---------------------------------------------
 
@@ -187,7 +170,7 @@ Please provide the output in Markdown format.`
         <div className="flex flex-col items-center justify-center p-4 border rounded-lg gap-4">
           <Button
             onClick={handleDream}
-            disabled={isGenerating || !formData.title || !formData.genre || !formData.setting || !formData.plot || !selectedCoverPath /* Ensure cover is selected */}
+            disabled={isGenerating || !formData.title || !formData.genre || !formData.setting || !formData.plot}
           >
             {isGenerating ? 'Generating...' : "Let's Go!"}
             {isGenerating && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}

@@ -32,7 +32,6 @@ const stepVariants = {
 export default function BookOutlineWizard(): ReactNode {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<Record<string, any>>({ length: 80000 })
-  const [selectedCoverPath, setSelectedCoverPath] = useState<string | null>(null)
   const [isAtBottom, setIsAtBottom] = useState(true) // State for sticky scroll
   const dispatch = useDispatch()
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -105,7 +104,7 @@ export default function BookOutlineWizard(): ReactNode {
         <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 6, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
+      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 6, requestScrollToBottom }}>
         {/* Removed old conditional Intro rendering */}
         <div className="flex flex-grow overflow-hidden">
           {/* Conditionally render sidebar */}
@@ -134,10 +133,6 @@ export default function BookOutlineWizard(): ReactNode {
                     handleProceed={handleProceedToStep} // Note: Intro might not use this
                     currentStep={stepInfo.step}
                     isActive={stepInfo.step === currentStep}
-                    selectedGenre={formData.genre || ''}
-                    selectedCoverPath={selectedCoverPath}
-                    // @ts-ignore - Avoiding explicit prop type overhaul for removal task
-                    setSelectedCoverPath={setSelectedCoverPath}
                   />
                 </motion.div>
               ))}

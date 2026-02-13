@@ -8,8 +8,6 @@ interface WizardContextProps {
   setCurrentStep: (step: number) => void
   formData: { [key: string]: any }
   setFormData: (data: { [key: string]: any }) => void
-  selectedCoverPath: string | null
-  setSelectedCoverPath: (path: string | null) => void
   requestScrollToBottom: () => void
 }
 
@@ -19,8 +17,6 @@ const WizardContext = createContext<WizardContextProps>({
   setCurrentStep: () => { },
   formData: {},
   setFormData: () => { },
-  selectedCoverPath: null,
-  setSelectedCoverPath: () => {},
   requestScrollToBottom: () => {}
 })
 
