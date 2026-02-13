@@ -12,6 +12,7 @@ import ChatInterface from '@/components/ChatInterface'
 import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
 import StatusBar from '@/components/StatusBar'
+import ProjectBar from '@/components/ProjectBar'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -25,7 +26,10 @@ const ProjectOverview = (): React.ReactNode => {
 
   return (
     <SidebarProvider>
-      <StatusBar />
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        <ProjectBar />
+        <StatusBar floating={false} />
+      </div>
       <AppSidebar />
       <SidebarInset className={cn(
         "relative",

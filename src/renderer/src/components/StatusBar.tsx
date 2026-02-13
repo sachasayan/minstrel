@@ -3,8 +3,13 @@ import { Sun, Moon, Settings } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
 import { useDispatch } from 'react-redux'
 import { setActiveView } from '@/lib/store/appStateSlice'
+import { cn } from '@/lib/utils'
 
-const StatusBar = () => {
+type StatusBarProps = {
+  floating?: boolean
+}
+
+const StatusBar = ({ floating = true }: StatusBarProps) => {
   const dispatch = useDispatch()
   const { theme, setTheme } = useTheme()
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -24,7 +29,10 @@ const StatusBar = () => {
   }
 
   return (
-    <div className="fixed top-4 right-4 flex items-center gap-2 rounded-full border p-2  z-50">
+    <div className={cn(
+      'flex items-center gap-2 rounded-full border p-2',
+      floating && 'fixed top-4 right-4 z-50'
+    )}>
       <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
 
       <button

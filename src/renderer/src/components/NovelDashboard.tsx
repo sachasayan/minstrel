@@ -9,7 +9,6 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
 import { updateMetaProperty } from '@/lib/store/projectsSlice'
 import { CoverCard } from '@/components/CoverCard'
-import FloatingToolbar from '@/components/FloatingToolbar' // Import the new toolbar
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
@@ -198,7 +197,6 @@ export default function NovelDashboard() {
           </Card>
         </div>
       </div>
-      <FloatingToolbar /> {/* Add the toolbar here */}
     </div >
   )
 }

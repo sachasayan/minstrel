@@ -1,19 +1,13 @@
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
-import { toast } from 'sonner'
+import { selectProjects } from '@/lib/store/projectsSlice'
 
-import { saveProject } from '@/lib/services/fileService'
+import { addChatMessage } from '@/lib/store/chatSlice'
 
-import { setAllFilesAsSaved, setActiveProject, setProjectHasLiveEdits, selectProjects, updateMetaProperty } from '@/lib/store/projectsSlice'
-
-import { selectChatHistory, addChatMessage } from '@/lib/store/chatSlice'
-
-import { Plus, Save, X, Diff, LayoutDashboard, /* FileText, */ ListOrdered, Book } from 'lucide-react'
-import { Square } from 'lucide-react'
+import { Plus, Diff, LayoutDashboard, /* FileText, */ ListOrdered, Book } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
-  useSidebar,
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -26,37 +20,12 @@ import {
   SidebarRail,
   SidebarTrigger
 } from '@/components/ui/sidebar'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog'
 import { selectAppState } from '@/lib/store/appStateSlice'
-
-
-const ChapterIcon = ({ chapterNumber }: { chapterNumber: string | number }) => {
-  return (
-    <div className="relative inline-block">
-      <Square className="w-4 h-4 " />
-      <span className="absolute inset-0 flex items-center justify-center leading-none text-[0.5rem] font-bold">{chapterNumber}</span>
-    </div>
-  )
-}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dispatch = useDispatch()
   const projectsState = useSelector(selectProjects)
   const appState = useSelector(selectAppState)
-  // Get current chat history
-  const currentChatHistory = useSelector(selectChatHistory)
-  const [alertDialogOpen, setAlertDialogOpen] = React.useState(false)
-  const { open: sideBarOpen } = useSidebar()
 
   const handleUniselect = (slug: string) => {
     console.log(appState.activeFile)
@@ -72,70 +41,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     dispatch(setActiveView('project/editor'))
   }
 
-  const handleClose = () => {
-    dispatch(setProjectHasLiveEdits(false))
-    dispatch(setActiveProject(null))
-    dispatch(setActiveView('intro'))
-    // Consider clearing chat history here if desired when closing a project
-    // dispatch(setChatHistory([]));
-  }
-
-
-  const handleSave = async () => {
-    if (projectsState.activeProject) {
-      const currentPath = projectsState.activeProject.projectPath
-
-      // Create the project object to save, including chat history
-      const projectToSave = {
-        ...projectsState.activeProject,
-        chatHistory: currentChatHistory
-      };
-
-      // Call the updated saveProject which returns { success, finalPath }
-      const saveResult = await saveProject(projectToSave) // Pass the object with chat history
-
-      if (saveResult.success && saveResult.finalPath) {
-        toast.success('Project saved successfully!')
-        dispatch(setAllFilesAsSaved()) // Clear edit flags
-
-        // Check if the path changed (due to .md -> .mns conversion)
-        if (currentPath !== saveResult.finalPath) {
-          console.log(`Project path updated from ${currentPath} to ${saveResult.finalPath}`)
-          // Dispatch action to update the project path in Redux state
-          dispatch(updateMetaProperty({ property: 'projectPath', value: saveResult.finalPath }))
-          // Optional: Add a specific toast for conversion
-          toast.info('Project format updated to the latest version.')
-        }
-        return true // Indicate success
-      } else {
-        // Use a more generic error message or potentially use saveResult.error if available
-        toast.error(`Failed to save project.`)
-        console.error('Save project failed:', saveResult) // Log details if needed
-        return false // Indicate failure
-      }
-    }
-    // No active project to save
-    console.warn('handleSave called with no active project.')
-    return false // Indicate failure
-  }
-
-  const saveAndClose = async () => {
-    const result = await handleSave()
-    if (result) {
-      handleClose()
-    }
-    // saveAndClose doesn't need to return a value, or return false if save failed
-  }
-  const handleCloseSafe = async () => {
-    if (projectsState.projectHasLiveEdits) {
-      setAlertDialogOpen(true)
-      // Don't return false here, let the dialog handle the flow
-    } else {
-      handleClose()
-      // Don't need to return true here
-    }
-  }
-
   const structureItems = [
     {
       key: 'Outline',
@@ -146,37 +51,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   ]
 
   return (
-    <>
-      <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
-        <AlertDialogTrigger asChild></AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>You have unsaved changes. Closing will lose your progress.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClose}>Close without Saving</AlertDialogAction>
-            <AlertDialogAction onClick={saveAndClose}>Save and Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <Sidebar variant="sidebar" collapsible="icon" className={` border-none [&_[data-sidebar=sidebar]]:transition-color  [&_[data-slot=sidebar-menu-button]_span]:truncate [&_[data-sidebar=sidebar]]:duration-300`} {...props}>
-        <SidebarHeader className="pt-8">
-          <div className={`flex justify-between ${sideBarOpen ? `max-h-30 flex-row` : `max-h-30 flex-col`}`}>
-            <Button asChild variant="ghost" className="flex-grow transition-all">
-              <SidebarTrigger className="w-8 h-full" />
-            </Button>
-            <Button variant="ghost" className="flex-grow transition-all" onClick={handleCloseSafe}>
-              <X className="" /> {sideBarOpen ? 'Close' : ''}
-            </Button>
-            <Button variant="ghost" className="flex-grow transition-all" onClick={handleSave}>
-              <Save className="" />
-              {sideBarOpen ? 'Save' : ''}
-            </Button>
-          </div>
-        </SidebarHeader>
+    <Sidebar variant="sidebar" collapsible="icon" className={` border-none [&_[data-sidebar=sidebar]]:transition-color  [&_[data-slot=sidebar-menu-button]_span]:truncate [&_[data-sidebar=sidebar]]:duration-300`} {...props}>
+      <SidebarHeader className="pt-8">
+        <Button asChild variant="ghost" className="w-full transition-all">
+          <SidebarTrigger className="w-8 h-full" />
+        </Button>
+      </SidebarHeader>
         <SidebarContent className="gap-0">
           <SidebarGroup key="Dashboard">
             <SidebarGroupContent>
@@ -206,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild isActive={isActive}>
                             <a onClick={() => handleFileSelect(item.title)} className={`flex items-center`}>
-                              {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : !!sideBarOpen ? <Book /> : <ChapterIcon chapterNumber={i + 1} />}
+                              {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : <Book />}
                               <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
                             </a>
                           </SidebarMenuButton>
@@ -217,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                   <SidebarMenuItem key="addChapter">
                     <SidebarMenuButton
-                      className={`w-full flex flex-row ${sideBarOpen ? 'justify-center' : ''}  overflow-hidden h-8 rounded p-1`}
+                      className="w-full flex flex-row overflow-hidden h-8 rounded p-1"
                       onClick={() =>
                         dispatch(
                           addChatMessage({
@@ -264,8 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarRail />
-      </Sidebar>
-    </>
+      <SidebarRail />
+    </Sidebar>
   )
 }
