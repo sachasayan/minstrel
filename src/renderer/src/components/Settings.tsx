@@ -25,7 +25,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from 'sonner'
-import Versions from './Versions'
 import { Folder } from 'lucide-react'
 
 // Define Provider Options
@@ -351,13 +350,10 @@ const Settings = (): ReactNode => {
               Current: {settings.workingRootDirectory || 'Default (determined by system)'}
             </p>
           </div>
-          {/* Versions Component */}
+          {/* Minstrel Version */}
           <div className="pt-4"> {/* Add some spacing */}
-            <Label>App Versions</Label>
-            {/* Removed styling from this div */}
-            <div className="mt-2">
-              <Versions />
-            </div>
+            <Label>Minstrel Version</Label>
+            <p className="text-sm text-muted-foreground mt-2">1.0</p>
           </div>
         </div>
       </div>

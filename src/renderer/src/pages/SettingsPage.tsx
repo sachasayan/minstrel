@@ -16,7 +16,6 @@ import {
 } from '@/lib/store/settingsSlice'
 import { AppDispatch, store } from '@/lib/store/store'
 
-import Versions from '@/components/Versions'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -428,12 +427,10 @@ const SettingsPage = (): ReactNode => {
                   Current: {settings.workingRootDirectory || 'Default (determined by system)'}
                 </p>
               </div>
-              {/* Versions Component */}
+              {/* Minstrel Version */}
               <div className="pt-4">
-                <Label>App Versions</Label>
-                <div className="mt-2">
-                  <Versions />
-                </div>
+                <Label>Minstrel Version</Label>
+                <p className="text-sm text-muted-foreground mt-2">1.0</p>
               </div>
             </div>
           </div>
