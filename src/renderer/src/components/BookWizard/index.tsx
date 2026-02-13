@@ -37,8 +37,6 @@ const cheatData = {
   title: 'The Crimson Nebula',
   setting: 'Alien Planet',
   plot: 'A team of explorers discovers a hidden artifact on a remote alien planet, unleashing an ancient power that threatens the galaxy.',
-  writing_sample:
-    'The red dust swirled around their boots as they trudged across the desolate landscape. The twin suns cast long, eerie shadows, painting the alien world in shades of crimson and ochre.',
   coverPath: 'covers/science-fiction-soft-sci-fi.png'
 }
 

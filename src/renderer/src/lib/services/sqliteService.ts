@@ -15,7 +15,6 @@ export const initSqliteProject = async (projectPath: string, project: Project): 
       summary: project.summary,
       author: 'Sacha',
       year: project.year,
-      writingSample: project.writingSample,
       wordCountTarget: project.wordCountTarget,
       wordCountCurrent: project.wordCountCurrent,
       expertSuggestions: project.expertSuggestions

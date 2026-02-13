@@ -41,13 +41,7 @@ export default function ParameterChecklist(): ReactNode {
       stepNumber: 6,
       completed: currentStep > 6,
     },
-    {
-      label: 'Writing Sample (optional)',
-      stepNumber: 7,
-      completed: currentStep > 7, // Optional step completion still based on passing it
-      optional: true,
-    },
-    // Summary step (step 8) is usually not shown in the checklist
+    // Summary step is usually not shown in the checklist
   ]
 
   return (
@@ -64,8 +58,7 @@ export default function ParameterChecklist(): ReactNode {
             <span
               className={
                 'text-sm ' +
-                (item.completed ? 'text-primary font-medium' : 'text-muted-foreground') +
-                (item.optional ? ' italic' : '')
+                (item.completed ? 'text-primary font-medium' : 'text-muted-foreground')
               }
             >
               {item.label}

@@ -89,7 +89,6 @@ const SummaryStep = ({ isActive }: SummaryStepProps) => {
     const prompt = `Generate a detailed chapter-by-chapter outline for a ${formData.length || 'standard length'} ${formData.genre} story titled "${formData.title}".
 Setting: ${formData.setting}.
 Plot Summary: ${formData.plot}
-${formData.writing_sample ? `Writing Sample/Style Guide:\n${formData.writing_sample}` : ''}
 Please provide the output in Markdown format.`
 
     // --- Convert selected cover image to base64 ---
@@ -112,7 +111,6 @@ Please provide the output in Markdown format.`
       files: [] as ProjectFile[], // Initialize files array
       genre: formData.genre,
       summary: '', // Keep summary separate or remove if outline replaces it
-      writingSample: formData.writing_sample || '',
       year: new Date().getFullYear(),
       wordCountCurrent: 0,
       wordCountTarget: formData.length || 0,

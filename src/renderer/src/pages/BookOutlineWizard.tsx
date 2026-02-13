@@ -16,7 +16,6 @@ import GenreStep from '@/components/BookWizard/GenreStep'
 import SettingStep from '@/components/BookWizard/SettingStep'
 import TitleStep from '@/components/BookWizard/TitleStep'
 import PlotStep from '@/components/BookWizard/PlotPage'
-import WritingSampleStep from '@/components/BookWizard/WritingSamplePage'
 import SummaryStep from '@/components/BookWizard/SummaryPage'
 
 import { WizardContext } from '@/components/BookWizard/index'
@@ -69,8 +68,7 @@ export default function BookOutlineWizard(): ReactNode {
     { step: 2, Component: SettingStep },
     { step: 3, Component: PlotStep },
     { step: 4, Component: TitleStep },
-    { step: 5, Component: WritingSampleStep },
-    { step: 6, Component: SummaryStep }
+    { step: 5, Component: SummaryStep }
   ], [])
 
   // Effect to scroll to bottom if isAtBottom is true when step changes
@@ -107,7 +105,7 @@ export default function BookOutlineWizard(): ReactNode {
         <h1 className="text-xl font-bold">Create New Project Outline</h1>
       </header>
 
-      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 7, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
+      <WizardContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps: 6, selectedCoverPath, setSelectedCoverPath, requestScrollToBottom }}> {/* <-- Pass setSelectedCoverPath */}
         {/* Removed old conditional Intro rendering */}
         <div className="flex flex-grow overflow-hidden">
           {/* Conditionally render sidebar */}

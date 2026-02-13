@@ -36,7 +36,6 @@ export const projectsSlice = createSlice({
         files: [],
         summary: '',
         year: new Date().getFullYear(),
-        writingSample: '',
         expertSuggestions: [],
         knowledgeGraph: null,
         chatHistory: [] // Initialize chat history
@@ -91,14 +90,13 @@ export const projectsSlice = createSlice({
         }
       }
     },
-    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; wordCountTarget: number; writingSample: string }>) => {
+    updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; wordCountTarget: number }>) => {
       if (state.activeProject) {
         state.activeProject.title = action.payload.title
         state.activeProject.genre = action.payload.genre
         state.activeProject.summary = action.payload.summary
         state.activeProject.year = action.payload.year
         state.activeProject.wordCountTarget = action.payload.wordCountTarget
-        state.activeProject.writingSample = action.payload.writingSample
         state.projectHasLiveEdits = true
       }
     },

@@ -27,7 +27,6 @@ export interface Project extends ProjectFragment {
   files: ProjectFile[]
   summary: string // Consider if this is still needed or replaced by outline doc
   year: number
-  writingSample: string
   expertSuggestions: ExpertSuggestion[]
   knowledgeGraph: KnowledgeGraph | null
   chatHistory?: ChatMessage[]

@@ -104,7 +104,6 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       summary: project.summary,
       author: 'Sacha', // Still hardcoded
       year: project.year,
-      writingSample: project.writingSample,
       wordCountTarget: project.wordCountTarget,
       wordCountCurrent: project.wordCountCurrent,
       expertSuggestions: project.expertSuggestions,
@@ -115,6 +114,8 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     }
     const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
     db.exec('DELETE FROM metadata') // Clear existing metadata
+    // Explicitly purge deprecated metadata keys on save for legacy projects.
+    db.prepare('DELETE FROM metadata WHERE key = ?').run('writingSample')
     for (const [key, value] of Object.entries(metadataToSave)) {
       if (value !== undefined) {
         const valueToStore = key === 'coverImageBase64' && value !== null ? value : JSON.stringify(value ?? null)

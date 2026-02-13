@@ -9,7 +9,7 @@ export const getOutlineAgentPrompt = () => `
 * An outline is a fleshed-out overview of the story with focus on world-building and building layers. The outline is written to a file named "Outline".
 
 ## OUTLINE GENERATION
-* Develop a new outline based on the provided Project Parameters (genre, summary, writing sample, etc.) or an existing Outline, incorporating any additional directions from the user message.
+* Develop a new outline based on the provided Project Parameters (genre, summary, etc.) or an existing Outline, incorporating any additional directions from the user message.
 * If generating from parameters, ensure the outline includes detailed character descriptions, environment descriptions, sub-threads, chapter flows (broken down into acts or scenes), and visual descriptions of any key objects mentioned or implied in the parameters.
 * If revising an existing Outline, incorporate user feedback and maintain consistency.
 * Use the <think> tool to plan out your strategy before writing.
@@ -71,4 +71,3 @@ END SYSTEM PROMPT
 BEGIN USER PROMPT
 
 `
-
