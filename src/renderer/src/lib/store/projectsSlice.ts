@@ -33,7 +33,14 @@ export const projectsSlice = createSlice({
         cover: undefined,
         coverImageMimeType: null,
         coverImageBase64: null,
-        files: [],
+        files: [
+          {
+            title: 'Chapter 1',
+            content: '',
+            type: 'chapter',
+            sort_order: 0
+          }
+        ],
         summary: '',
         year: new Date().getFullYear(),
         expertSuggestions: [],

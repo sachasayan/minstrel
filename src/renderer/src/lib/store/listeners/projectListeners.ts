@@ -1,7 +1,7 @@
 import { createListenerMiddleware, isAnyOf, PayloadAction } from '@reduxjs/toolkit' // Re-added PayloadAction
 import { setActiveProject, renameFile, setActiveProjectFromFragment, startNewProject, updateCoverImage } from '../projectsSlice'
 import { fetchProjectDetails } from '@/lib/services/fileService'
-import { setActiveFile } from '../appStateSlice'
+import { setActiveFile, setActiveView } from '../appStateSlice'
 import { setChatHistory, clearChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
@@ -9,6 +9,15 @@ import { convertImagePathToBase64 } from '@/lib/coverImage'
 
 export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
+
+const findChapterOneTitle = (files: Project['files'] | undefined): string => {
+  if (!files || files.length === 0) return 'Chapter 1'
+
+  const exactMatch = files.find((file) => /^chapter[\s_-]*1\b/i.test(file.title))
+  if (exactMatch) return exactMatch.title
+
+  return 'Chapter 1'
+}
 
 // Listen for setting active project from fragment - fetch full details and set chat history
 projectListeners.startListening({
@@ -34,6 +43,8 @@ projectListeners.startListening({
             console.log(`Listener: Dispatching setChatHistory for ${fullProject.title}`)
             // Dispatch action to set the chat history
             listenerApi.dispatch(setChatHistory(fullProject.chatHistory ?? []))
+            listenerApi.dispatch(setActiveFile(findChapterOneTitle(fullProject.files)))
+            listenerApi.dispatch(setActiveView('project/editor'))
         } else {
              console.error(`Listener: Failed to fetch full project details for ${projectFragment.title}`)
              // Optionally dispatch an error state or notification
@@ -65,6 +76,8 @@ projectListeners.startListening({
   matcher: isAnyOf(startNewProject),
   effect: async (_action, listenerApi) => {
     listenerApi.dispatch(clearChatHistory())
+    listenerApi.dispatch(setActiveFile('Chapter 1'))
+    listenerApi.dispatch(setActiveView('project/editor'))
 
     try {
       const currentState = listenerApi.getState() as RootState

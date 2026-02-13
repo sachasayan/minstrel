@@ -239,7 +239,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {projectsState.activeProject?.files?.find((item) => item.title.includes('Outline')) && (
+          {projectsState.activeProject?.files?.some((item) => item.title.includes('Chapter')) && (
             <SidebarGroup key="Chapters">
               <SidebarGroupLabel>Chapters</SidebarGroupLabel>
               <SidebarGroupContent>
