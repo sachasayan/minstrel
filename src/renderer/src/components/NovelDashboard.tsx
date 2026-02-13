@@ -3,23 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
 import { updateMetaProperty } from '@/lib/store/projectsSlice'
-import { ProgressTracker } from '@/components/dashboard/ProgressTracker'
-import { Button } from '@/components/ui/button'
-import { addChatMessage } from '@/lib/store/chatSlice'
 import { CoverCard } from '@/components/CoverCard'
 import FloatingToolbar from '@/components/FloatingToolbar' // Import the new toolbar
 
-
-type NovelStage = 'Writing Outline' | 'Writing Chapters' | 'Editing'; // Define NovelStage type
-
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
-  // const [progressButtonCaption, setProgressButtonCaption] = useState<Array<{ name: string }>>([])
   const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
 
   const dispatch = useDispatch() // Initialize useDispatch
@@ -78,44 +71,6 @@ export default function NovelDashboard() {
     )
   }
 
-  // Function to determine current novel stage
-  const getCurrentStage = useCallback((): NovelStage => { // Explicitly return NovelStage
-    if (!activeProject) return 'Writing Outline' // Default to Outline if no project
-    const hasOutline = activeProject.files.some(file => file.title.toLowerCase().includes('outline'))
-
-
-
-    if (!hasOutline) return 'Writing Outline'
-    return 'Writing Chapters'
-  }, [activeProject])
-
-  const stages: NovelStage[] = ['Writing Outline', 'Writing Chapters', 'Editing'] // Use NovelStage type for stages
-  const currentStage = getCurrentStage()
-
-
-
-  const captions = {
-    'Writing Outline': {
-      caption: 'Add the outline.',
-      instruction: 'Please add the outline.',
-      guidance: `Woohoo! You're on your way! At this stage, you can edit the Outline to your heart's content.`
-    },
-    'Writing Chapters': {
-      caption: 'Write the next chapter.',
-      instruction: 'Please write the next chapter.',
-      guidance: `You've got an outline! That's great! If you have any more tweaks to make you can go ahead and make those changes. Otherwise, let's start our first chapter!`
-    },
-    'Editing': {
-      caption: 'Explore your options. ',
-      instruction: 'Please write a review of the story so far.',
-      guidance: `All the chapters are done! Incredible! Feel free to do more editing, seek counsel from the critics, or start publishing!`
-    }
-  };
-  // Function to handle progress to next stage
-  const handleNextStage = () => {
-    dispatch(addChatMessage({ sender: 'User', text: captions[currentStage].instruction }));
-  }
-
 
 
   return (
@@ -131,31 +86,6 @@ export default function NovelDashboard() {
 
             <CardContent className="p-0 m-0 h-full">
               <CoverCard />
-            </CardContent>
-          </Card>
-
-          {/* Guide */}
-
-          <Card className="@lg:col-span-9 ">
-            <CardHeader>
-              <CardTitle>Current Stage: {currentStage}</CardTitle>
-
-
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p>{captions[currentStage].guidance}</p>
-
-              <Button variant="outline" size="sm" onClick={handleNextStage}>
-                {captions[currentStage].caption}
-              </Button>
-
-              <ProgressTracker stages={stages} currentStage={currentStage} />
-              <div className="flex items-center justify-between">
-
-                {/* {currentStage !== 'Editing' && ( // Now comparison is valid */}
-
-                {/* )} */}
-              </div>
             </CardContent>
           </Card>
 
