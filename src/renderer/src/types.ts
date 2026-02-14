@@ -13,7 +13,7 @@ export interface AppSettings {
 export interface AppState {
   projectList: ProjectFragment[]
   activeView: ActiveView
-  activeFile: string | null
+  activeSection: string | null
 }
 export interface ProjectState {
   projectHasLiveEdits: boolean

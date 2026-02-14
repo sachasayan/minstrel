@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setActiveFile, setActiveView } from '@/lib/store/appStateSlice'
-import { selectProjects } from '@/lib/store/projectsSlice'
-import { isChapterFile } from '@/lib/storyContent'
+import { setActiveSection, setActiveView } from '@/lib/store/appStateSlice'
+import { selectProjects, addChapter } from '@/lib/store/projectsSlice'
+import { isChapterFile, getChaptersFromStoryContent } from '@/lib/storyContent'
 
 import { addChatMessage } from '@/lib/store/chatSlice'
 
@@ -28,17 +28,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const projectsState = useSelector(selectProjects)
   const appState = useSelector(selectAppState)
 
+  const activeProject = projectsState.activeProject
+  const chapters = activeProject ? getChaptersFromStoryContent(activeProject.storyContent) : []
+
   const handleUniselect = (slug: string) => {
-    console.log(appState.activeFile)
-    console.log(slug)
     if (slug == 'Outline') {
-      dispatch(setActiveFile(projectsState.activeProject?.files?.find((item) => item.title.includes(slug))?.title || ''))
+      dispatch(setActiveSection(activeProject?.files?.find((item) => item.title.includes(slug))?.title || ''))
       dispatch(setActiveView('project/editor'))
     }
   }
 
-  const handleFileSelect = (fileName: string) => {
-    dispatch(setActiveFile(fileName))
+  const handleChapterSelect = (title: string, index: number) => {
+    dispatch(setActiveSection(`${title}|||${index}`))
     dispatch(setActiveView('project/editor'))
   }
 
@@ -46,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       key: 'Outline',
       activeView: 'project/editor',
-      activeFile: 'Outline',
+      activeSection: 'Outline',
       icon: <ListOrdered className="mr-2 h-4 w-4" />
     }
   ]
@@ -58,93 +59,84 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarTrigger className="w-8 h-full" />
         </Button>
       </SidebarHeader>
-        <SidebarContent className="gap-0">
-          <SidebarGroup key="Dashboard">
+      <SidebarContent className="gap-0">
+        <SidebarGroup key="Dashboard">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="Dashboard">
+                <SidebarMenuButton asChild isActive={appState.activeView === 'project/dashboard'}>
+                  <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />  Dashboard
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {chapters.length > 0 && (
+          <SidebarGroup key="Chapters">
+            <SidebarGroupLabel>Chapters</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem key="Dashboard">
-                  <SidebarMenuButton asChild isActive={appState.activeView === 'project/dashboard'}>
-                    <a onClick={() => dispatch(setActiveView('project/dashboard'))}>
-                      <LayoutDashboard className="mr-2 h-4 w-4" />  Dashboard
-                    </a>
+                {chapters.map((chapter, i) => {
+                  const isActive = appState.activeView === 'project/editor' && appState.activeSection?.startsWith(`${chapter.title}|||${i}`);
+                  return (
+                    <SidebarMenuItem key={`${chapter.title}-${i}`}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <a onClick={() => handleChapterSelect(chapter.title, i)} className={`flex items-center`}>
+                          <Book />
+                          <span className="flex-grow ml-2">{chapter.title.replace('-', ' ')}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+
+
+                <SidebarMenuItem key="addChapter">
+                  <SidebarMenuButton
+                    className="w-full flex flex-row overflow-hidden h-8 rounded p-1"
+                    onClick={() => dispatch(addChapter())}
+                    variant="outline"
+                  >
+                    <Plus className="mr-2" />
+                    <span className="block overflow-hidden"> Add Chapter</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+        )}
 
-          {projectsState.activeProject?.files?.some((item) => isChapterFile(item)) && (
-            <SidebarGroup key="Chapters">
-              <SidebarGroupLabel>Chapters</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {projectsState.activeProject?.files
-                    ?.filter((item) => isChapterFile(item))
-                    .map((item, i) => {
-                      const isActive = appState.activeView === 'project/editor' && appState.activeFile === item.title;
-                      const isPending = projectsState.pendingFiles?.includes(item.title);
-                      return (
-                        <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild isActive={isActive}>
-                            <a onClick={() => handleFileSelect(item.title)} className={`flex items-center`}>
-                              {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : <Book />}
-                              <span className="flex-grow ml-2">{item.title.replace('-', ' ')}</span> {item.hasEdits && <Diff className="float-right text-orange-500" />}
-                            </a>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      )
-                    })}
+        <SidebarGroup key={'Artifacts'}>
+          <SidebarGroupLabel>Artifacts</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {structureItems
+                .map((item, i) => {
+                  // Ensure activeProject and files exist before finding
+                  const file = projectsState.activeProject?.files?.find((e) => e.title.includes(item.key));
+                  const isActive = appState.activeView === item.activeView && (!!item.activeSection ? (appState.activeSection?.includes(item.activeSection)) : true);
+                  const isPending = projectsState.pendingFiles?.includes(file?.title || '');
+                  const hasEdits = file?.hasEdits;
 
+                  return (
+                    <SidebarMenuItem key={i}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <a onClick={() => handleUniselect(item.key)}>
+                          {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
+                          {hasEdits && <Diff className="float-right text-orange-500" />}
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-                  <SidebarMenuItem key="addChapter">
-                    <SidebarMenuButton
-                      className="w-full flex flex-row overflow-hidden h-8 rounded p-1"
-                      onClick={() =>
-                        dispatch(
-                          addChatMessage({
-                            sender: 'User',
-                            text: 'Please add a new chapter.'
-                          })
-                        )
-                      }
-                      variant="outline"
-                    >
-                      <Plus className="mr-2" />
-                      <span className="block overflow-hidden"> Add Chapter</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
-
-          <SidebarGroup key={'Artifacts'}>
-            <SidebarGroupLabel>Artifacts</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {structureItems
-                  .map((item, i) => {
-                    // Ensure activeProject and files exist before finding
-                    const file = projectsState.activeProject?.files?.find((e) => e.title.includes(item.key));
-                    const isActive = appState.activeView === item.activeView && (!!item.activeFile ? (appState.activeFile?.includes(item.activeFile)) : true);
-                    const isPending = projectsState.pendingFiles?.includes(file?.title || '');
-                    const hasEdits = file?.hasEdits;
-
-                    return (
-                      <SidebarMenuItem key={i}>
-                        <SidebarMenuButton asChild isActive={isActive}>
-                          <a onClick={() => handleUniselect(item.key)}>
-                            {isPending ? <div className="mr-2 h-4 w-4 inline-block"><div className="loader"></div></div> : item.icon}  {item.key}
-                            {hasEdits && <Diff className="float-right text-orange-500" />}
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )
-                  })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+      </SidebarContent>
       <SidebarRail />
     </Sidebar>
   )

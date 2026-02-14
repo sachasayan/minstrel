@@ -92,43 +92,55 @@ const buildVirtualChaptersFromStoryContent = (
   })
 }
 
+export const getChaptersFromStoryContent = (storyContent: string): { title: string; index: number }[] => {
+  const normalized = normalizeLineEndings(storyContent ?? '')
+  const lines = normalized.split('\n')
+  const chapters: { title: string; index: number }[] = []
+
+  lines.forEach((line, index) => {
+    if (/^#\s+\S+/.test(line.trim())) {
+      const title = line.trim().replace(/^#\s+/, '')
+      chapters.push({ title, index })
+    }
+  })
+
+  return chapters
+}
+
+export const calculateWordCount = (content: string): number => {
+  if (!content) return 0
+  return content.trim().split(/\s+/).filter(word => word.length > 0).length
+}
+
 export const normalizeProjectStoryContent = (project: Project): Project => {
   const files = Array.isArray(project.files) ? project.files : []
-  const chapterFiles = files.filter((file) => isChapterFile(file))
   const storyFile = files.find((file) => isStoryFile(file))
-  const nonChapterFiles = files.filter((file) => !isChapterFile(file) && !isStoryFile(file))
+  const nonStoryFiles = files.filter((file) => !isStoryFile(file))
 
   const storyContent =
     typeof storyFile?.content === 'string' && storyFile.content.trim().length > 0
       ? normalizeLineEndings(storyFile.content)
       : typeof project.storyContent === 'string' && project.storyContent.trim().length > 0
       ? normalizeLineEndings(project.storyContent)
-      : serializeChapterFilesToStoryContent(chapterFiles)
-
-  const virtualChapterFiles = buildVirtualChaptersFromStoryContent(storyContent, chapterFiles)
+      : '' // Default to empty if no story content
 
   return {
     ...project,
     storyContent,
-    files: [...nonChapterFiles, ...virtualChapterFiles]
+    files: nonStoryFiles
   }
 }
 
 export const rebuildProjectFilesFromStoryContent = (
-  project: Project,
-  markEditedTitles: Set<string> = new Set()
+  project: Project
 ): ProjectFile[] => {
   const files = Array.isArray(project.files) ? project.files : []
-  const chapterFiles = files.filter((file) => isChapterFile(file))
-  const nonChapterFiles = files.filter((file) => !isChapterFile(file) && !isStoryFile(file))
-  const storyContent = normalizeLineEndings(project.storyContent ?? '')
-
-  return [...nonChapterFiles, ...buildVirtualChaptersFromStoryContent(storyContent, chapterFiles, markEditedTitles)]
+  return files.filter((file) => !isStoryFile(file))
 }
 
 export const buildPersistableProject = (project: Project): Project => {
   const normalizedProject = normalizeProjectStoryContent(project)
-  const nonChapterFiles = normalizedProject.files.filter((file) => !isChapterFile(file) && !isStoryFile(file))
+  const nonStoryFiles = normalizedProject.files.filter((file) => !isStoryFile(file))
   const storyFile: ProjectFile = {
     title: STORY_FILE_TITLE,
     content: normalizedProject.storyContent,
@@ -139,6 +151,6 @@ export const buildPersistableProject = (project: Project): Project => {
 
   return {
     ...normalizedProject,
-    files: [storyFile, ...nonChapterFiles]
+    files: [storyFile, ...nonStoryFiles]
   }
 }

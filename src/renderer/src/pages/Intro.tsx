@@ -3,7 +3,7 @@ import StatusBar from '@/components/StatusBar'
 import { Button } from '@/components/ui/button'
 import ProjectLibrary from '@/components/ProjectLibrary'
 import { useDispatch, useSelector } from 'react-redux'
-import { setProjectList, selectProjectList, setActiveView, setActiveFile } from '@/lib/store/appStateSlice' // setActiveView is now used
+import { setProjectList, selectProjectList, setActiveView, setActiveSection } from '@/lib/store/appStateSlice' // setActiveView and setActiveSection are now used
 import { setActiveProjectFromFragment, startNewProject } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import { fetchProjects } from '@/lib/services/fileService'
@@ -19,16 +19,14 @@ const Intro = (): ReactNode => {
   const handleProjectSelect = (projectPath: string) => {
     if (projectPath == 'add') {
       dispatch(startNewProject())
-      dispatch(setActiveFile('Chapter 1'))
-      dispatch(setActiveView('project/editor'))
+      // dispatch(setActiveSection('Chapter 1|||0')) // Handled by projectListeners
       return
     }
 
     const project = projectList.find((p) => p.projectPath === projectPath)
     if (project) {
       dispatch(setActiveProjectFromFragment(project))
-      dispatch(setActiveFile('Chapter 1'))
-      dispatch(setActiveView('project/editor'))
+      // dispatch(setActiveSection('Chapter 1|||0')) // Handled by projectListeners
     }
   }
 

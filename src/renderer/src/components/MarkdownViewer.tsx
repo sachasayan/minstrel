@@ -4,50 +4,100 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRef, useEffect, JSX, useCallback } from 'react'
 
 import '@mdxeditor/editor/style.css'
-import { setProjectHasLiveEdits, selectProjects, updateFile, renameFile } from '@/lib/store/projectsSlice'
-import EditableHeading from './EditableHeading'
+import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
+import { setActiveSection } from '@/lib/store/appStateSlice'
 
 interface MarkdownViewerProps {
   title: string | null // Allow null
   content: string
 }
 
-export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Element {
+export default function MarkdownViewer({ title, content }: MarkdownViewerProps): JSX.Element {
   const dispatch = useDispatch()
   const projectState = useSelector(selectProjects)
   const ref = useRef<MDXEditorMethods>(null)
+  const isProgrammaticScroll = useRef(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleContentChange = useCallback((content: string) => {
-    if (title) {
-      dispatch(updateFile({ title, content }))
-      if (!projectState.projectHasLiveEdits) {
-        dispatch(setProjectHasLiveEdits(true))
-      }
+  const handleContentChange = useCallback((newContent: string) => {
+    const targetTitle = title?.includes('|||') ? 'Story' : title || 'Story'
+    dispatch(updateFile({ title: targetTitle, content: newContent }))
+    if (!projectState.projectHasLiveEdits) {
+      dispatch(setProjectHasLiveEdits(true))
     }
+  }, [dispatch, projectState.projectHasLiveEdits, title])
 
-  }, [dispatch, projectState.activeProject?.files, projectState.projectHasLiveEdits, title])
-
+  // Initial load
   useEffect(() => {
-    ref.current?.setMarkdown(projectState.activeProject?.files.find((file) => file.title == title)?.content || '')
-  }, [projectState.activeProject?.files, title])
+    ref.current?.setMarkdown(content || '')
+  }, [content])
+
+  // Scroll to section when title changes (e.g. from sidebar)
+  useEffect(() => {
+    if (title && title.includes('|||')) {
+      const [_, indexStr] = title.split('|||')
+      const index = parseInt(indexStr)
+
+      // Find all H1s and navigate to the N-th one
+      setTimeout(() => {
+        const headings = containerRef.current?.querySelectorAll('h1')
+        if (headings && headings[index]) {
+          isProgrammaticScroll.current = true
+          headings[index].scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+          // Release the lock after animation finishes (approx 1s)
+          setTimeout(() => {
+            isProgrammaticScroll.current = false
+          }, 1000)
+        }
+      }, 100)
+    }
+  }, [title])
+
+  // Bi-directional sync: IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // IGNORE if we are mid-programmatic-scroll to avoid feedback loops
+        if (isProgrammaticScroll.current) return
+
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            const heading = entry.target as HTMLElement
+            const headings = Array.from(containerRef.current?.querySelectorAll('h1') || [])
+            const index = headings.indexOf(heading as HTMLHeadingElement)
+            if (index !== -1) {
+              const chapterTitle = heading.innerText.trim()
+              // Only dispatch if it's different to avoid loops
+              const newSection = `${chapterTitle}|||${index}`
+              if (title !== newSection) {
+                dispatch(setActiveSection(newSection))
+              }
+            }
+          }
+        })
+      },
+      {
+        root: null,
+        rootMargin: '-10% 0px -70% 0px', // Focus on the top 20ish percent
+        threshold: [0, 0.5, 1]
+      }
+    )
+
+    const headings = containerRef.current?.querySelectorAll('h1')
+    headings?.forEach((h) => observer.observe(h))
+
+    return () => observer.disconnect()
+  }, [content, dispatch, title])
 
   const handleError = (error: { error: string; source: string }) => {
     console.error('MDXEditor Error:', error.error)
     console.error('Source Markdown:', error.source)
   }
 
-  const handleHeadlineChange = (newHeadline: string) => {
-    if (title) {
-      dispatch(renameFile({ oldTitle: title, newTitle: newHeadline }))
-    }
-  }
-
-
   return (
     <>
-
-
-      <div className="relative container px-2 py-1 mx-auto md:p-24">
+      <div ref={containerRef} className="relative container px-2 py-1 mx-auto md:p-24">
         {projectState.pendingFiles?.includes(title || '') && (
           <div className="absolute z-50 top-0 left-0 inset-0 bg-black opacity-50">
             <div className="loader sticky top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  size-20"></div>
@@ -55,47 +105,34 @@ export default function MarkdownViewer({ title }: MarkdownViewerProps): JSX.Elem
         )}
 
         <div className="flex flex-row gap-6 ">
-          {title ? (
-            <>
-              <div className="flex-grow">
-              </div>
-              <div className=" max-w-2xl">
-                <EditableHeading heading={title} onHeadlineHasChanged={handleHeadlineChange} /> {/* REMOVE onHeadlineHasChanged prop */}
-
-
-
-                <MDXEditor
-                  ref={ref}
-                  className="mdx-theme h-full"
-                  markdown={projectState.activeProject?.files.find((file) => file.title == title)?.content || ''}
-                  onChange={handleContentChange}
-                  onError={handleError}
-                  plugins={[
-                    headingsPlugin(),
-                    listsPlugin(),
-                    thematicBreakPlugin(),
-                    toolbarPlugin({
-                      toolbarClassName: 'mdx-toolbar',
-                      toolbarContents: () => (
-                        <>
-                          <UndoRedo />
-                          <BoldItalicUnderlineToggles />
-                          <BlockTypeSelect />
-                          <ListsToggle options={['number', 'bullet']} />
-
-                        </>
-                      )
-                    })
-                  ]}
-                  contentEditableClassName="prose"
-                />
-              </div>
-              <div className="flex-grow" >
-              </div>
-            </>
-          ) : (
-            <p className="text-center text-gray-500 mt-8">Select a file to view its content</p>
-          )}
+          <div className="flex-grow"></div>
+          <div className=" max-w-2xl w-full">
+            <MDXEditor
+              ref={ref}
+              className="mdx-theme h-full"
+              markdown={content || ''}
+              onChange={handleContentChange}
+              onError={handleError}
+              plugins={[
+                headingsPlugin(),
+                listsPlugin(),
+                thematicBreakPlugin(),
+                toolbarPlugin({
+                  toolbarClassName: 'mdx-toolbar',
+                  toolbarContents: () => (
+                    <>
+                      <UndoRedo />
+                      <BoldItalicUnderlineToggles />
+                      <BlockTypeSelect />
+                      <ListsToggle options={['number', 'bullet']} />
+                    </>
+                  )
+                })
+              ]}
+              contentEditableClassName="prose max-w-none"
+            />
+          </div>
+          <div className="flex-grow"></div>
         </div>
       </div>
     </>

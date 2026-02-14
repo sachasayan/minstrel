@@ -35,9 +35,20 @@ const ProjectOverview = (): React.ReactNode => {
         "relative",
         "animate-in fade-in zoom-in-95 duration-300"
       )}>
-        {appState.activeView == 'project/editor' ? (
-          <MarkdownViewer key={appState.activeFile} title={appState.activeFile} content={activeProject?.files.find((chapter) => chapter.title == appState.activeFile)?.content || ''} />
-        ) : appState.activeView == 'project/dashboard' ? (
+        {appState.activeView == 'project/editor' ? (() => {
+          const isChapter = appState.activeSection?.includes('|||')
+          const content = isChapter
+            ? activeProject?.storyContent
+            : activeProject?.files?.find(f => f.title === appState.activeSection)?.content
+
+          return (
+            <MarkdownViewer
+              key={`${activeProject?.projectPath}-${isChapter ? 'story' : appState.activeSection}`}
+              title={appState.activeSection}
+              content={content || ''}
+            />
+          )
+        })() : appState.activeView == 'project/dashboard' ? (
           <NovelDashboard />
         ) : null}
 

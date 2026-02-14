@@ -1,26 +1,24 @@
 import { createListenerMiddleware, isAnyOf, PayloadAction } from '@reduxjs/toolkit' // Re-added PayloadAction
 import { setActiveProject, renameFile, setActiveProjectFromFragment, startNewProject, updateCoverImage } from '../projectsSlice'
 import { fetchProjectDetails } from '@/lib/services/fileService'
-import { setActiveFile, setActiveView } from '../appStateSlice'
+import { setActiveSection, setActiveView } from '../appStateSlice'
 import { setChatHistory, clearChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
 import { convertImagePathToBase64 } from '@/lib/coverImage'
-import { isChapterFile } from '@/lib/storyContent'
+import { isChapterFile, getChaptersFromStoryContent } from '@/lib/storyContent'
 
 export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
 
-const findChapterOneTitle = (files: Project['files'] | undefined): string => {
-  if (!files || files.length === 0) return 'Chapter 1'
+const findChapterOneTitle = (project: Project | undefined): string => {
+  if (!project || !project.storyContent) return 'Chapter 1'
 
-  const chapterFiles = files.filter((file) => isChapterFile(file))
-  if (chapterFiles.length === 0) return 'Chapter 1'
+  const chapters = getChaptersFromStoryContent(project.storyContent)
+  if (chapters.length === 0) return 'Chapter 1'
 
-  const exactMatch = chapterFiles.find((file) => /^chapter[\s_-]*1\b/i.test(file.title))
-  if (exactMatch) return exactMatch.title
-
-  return chapterFiles[0].title
+  // Return the first chapter found in format Title|||index
+  return `${chapters[0].title}|||0`
 }
 
 // Listen for setting active project from fragment - fetch full details and set chat history
@@ -47,7 +45,7 @@ projectListeners.startListening({
             console.log(`Listener: Dispatching setChatHistory for ${fullProject.title}`)
             // Dispatch action to set the chat history
             listenerApi.dispatch(setChatHistory(fullProject.chatHistory ?? []))
-            listenerApi.dispatch(setActiveFile(findChapterOneTitle(fullProject.files)))
+            listenerApi.dispatch(setActiveSection(findChapterOneTitle(fullProject)))
             listenerApi.dispatch(setActiveView('project/editor'))
         } else {
              console.error(`Listener: Failed to fetch full project details for ${projectFragment.title}`)
@@ -69,8 +67,8 @@ projectListeners.startListening({
     // Cast the state to RootState
     const previousState = listenerApi.getOriginalState() as RootState;
 
-    if (previousState?.appState?.activeFile === payload?.oldTitle) {
-      listenerApi.dispatch(setActiveFile(payload.newTitle))
+    if (previousState?.appState?.activeSection === payload?.oldTitle) {
+      listenerApi.dispatch(setActiveSection(payload.newTitle))
     }
   }
 })
@@ -80,7 +78,7 @@ projectListeners.startListening({
   matcher: isAnyOf(startNewProject),
   effect: async (_action, listenerApi) => {
     listenerApi.dispatch(clearChatHistory())
-    listenerApi.dispatch(setActiveFile('Chapter 1'))
+    listenerApi.dispatch(setActiveSection('Chapter 1|||0'))
     listenerApi.dispatch(setActiveView('project/editor'))
 
     try {

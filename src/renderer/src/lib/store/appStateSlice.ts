@@ -5,7 +5,7 @@ import { RootState } from './store'
 const initialState: AppState = {
   projectList: [],
   activeView: 'intro',
-  activeFile: null
+  activeSection: null
 }
 
 export const appStateSlice = createSlice({
@@ -21,13 +21,13 @@ export const appStateSlice = createSlice({
     setActiveView: (state, action: PayloadAction<ActiveView>) => {
       state.activeView = action.payload
     },
-    setActiveFile: (state, action: PayloadAction<string | null>) => {
-      state.activeFile = action.payload
+    setActiveSection: (state, action: PayloadAction<string | null>) => {
+      state.activeSection = action.payload
     }
   }
 })
 
-export const { setAppState, setActiveView, setActiveFile, setProjectList } = appStateSlice.actions
+export const { setAppState, setActiveView, setActiveSection, setProjectList } = appStateSlice.actions
 
 export const selectProjectList = (state: RootState) => state.appState.projectList
 export const selectActiveView = (state: RootState) => state.appState.activeView
