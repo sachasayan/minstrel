@@ -25,14 +25,14 @@ const ProjectOverview = (): React.ReactNode => {
 
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-screen overflow-hidden">
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
         <ProjectBar />
         <StatusBar floating={false} />
       </div>
       <AppSidebar />
       <SidebarInset className={cn(
-        "relative",
+        "relative flex-1 min-w-0 overflow-hidden",
         "animate-in fade-in zoom-in-95 duration-300"
       )}>
         {appState.activeView == 'project/editor' ? (() => {

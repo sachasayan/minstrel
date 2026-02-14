@@ -116,7 +116,7 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
 
   return (
     <>
-      <div ref={containerRef} className="relative container px-2 py-1 mx-auto h-full overflow-y-auto no-scrollbar md:px-24 md:py-12">
+      <div ref={containerRef} className="relative w-full max-w-7xl mx-auto h-full overflow-y-auto overflow-x-hidden no-scrollbar px-6 py-1 md:px-24 md:py-12">
         <div id="overview-target" className="w-full h-1" />
 
         {projectState.activeProject && (
