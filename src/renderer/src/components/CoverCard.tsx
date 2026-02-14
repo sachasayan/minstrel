@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { selectActiveProjectWithCoverDataUrl, updateCoverImage } from '@/lib/store/projectsSlice'
 import CoverSelectionModal from './CoverSelectionModal'
 
-export function CoverCard() {
+export function CoverCard({ className }: { className?: string }) {
   const dispatch = useDispatch()
   const activeProjectWithCover = useSelector(selectActiveProjectWithCoverDataUrl)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(activeProjectWithCover?.cover || null)
@@ -46,7 +46,8 @@ export function CoverCard() {
         className={cn(
           `group border-2 rounded-xl p-4 transition-colors duration-200 ease-in-out flex flex-col mx-auto h-full relative overflow-hidden`,
           "border-gray-300 hover:border-gray-400",
-          `bg-cover bg-center`
+          `bg-cover bg-center`,
+          className
         )}
         style={{ backgroundImage: `url(${coverPreviewUrl})` }}
       >

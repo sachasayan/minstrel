@@ -6,6 +6,7 @@ import { useRef, useEffect, JSX, useCallback } from 'react'
 import '@mdxeditor/editor/style.css'
 import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
 import { setActiveSection } from '@/lib/store/appStateSlice'
+import { DashboardRibbon } from './editor/DashboardRibbon'
 
 interface MarkdownViewerProps {
   title: string | null // Allow null
@@ -34,6 +35,13 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
 
   // Scroll to section when title changes (e.g. from sidebar)
   useEffect(() => {
+    if (title === 'Overview') {
+      isProgrammaticScroll.current = true
+      containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+      setTimeout(() => { isProgrammaticScroll.current = false }, 1000)
+      return
+    }
+
     if (title && title.includes('|||')) {
       const [_, indexStr] = title.split('|||')
       const index = parseInt(indexStr)
@@ -63,6 +71,13 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
 
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            if (entry.target.id === 'overview-target') {
+              if (title !== 'Overview') {
+                dispatch(setActiveSection('Overview'))
+              }
+              return
+            }
+
             const heading = entry.target as HTMLElement
             const headings = Array.from(containerRef.current?.querySelectorAll('h1') || [])
             const index = headings.indexOf(heading as HTMLHeadingElement)
@@ -84,6 +99,10 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
       }
     )
 
+    // Observe dashboard overview
+    const overview = containerRef.current?.querySelector('#overview-target')
+    if (overview) observer.observe(overview)
+
     const headings = containerRef.current?.querySelectorAll('h1')
     headings?.forEach((h) => observer.observe(h))
 
@@ -97,7 +116,17 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
 
   return (
     <>
-      <div ref={containerRef} className="relative container px-2 py-1 mx-auto md:p-24">
+      <div ref={containerRef} className="relative container px-2 py-1 mx-auto h-full overflow-y-auto no-scrollbar md:px-24 md:py-12">
+        <div id="overview-target" className="w-full h-1" />
+
+        {projectState.activeProject && (
+          <h1 className="text-4xl font-bold mb-8 text-highlight-700">
+            {projectState.activeProject.title}
+          </h1>
+        )}
+
+        <DashboardRibbon />
+
         {projectState.pendingFiles?.includes(title || '') && (
           <div className="absolute z-50 top-0 left-0 inset-0 bg-black opacity-50">
             <div className="loader sticky top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  size-20"></div>
