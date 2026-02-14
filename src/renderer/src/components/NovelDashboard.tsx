@@ -9,7 +9,7 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
 import { updateMetaProperty } from '@/lib/store/projectsSlice'
 import { CoverCard } from '@/components/CoverCard'
-import { isChapterFile } from '@/lib/storyContent'
+import { getChapterWordCounts } from '@/lib/storyContent'
 
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
@@ -118,12 +118,11 @@ export default function NovelDashboard() {
                   className="h-[300px]"
                 >
                   <BarChart
-                    data={activeProject.files
-                      .filter((file) => isChapterFile(file))
-                      .map((file, index) => ({
+                    data={getChapterWordCounts(activeProject.storyContent || '')
+                      .map((chapter, index) => ({
                         index: index,
                         chapter: index + 1,
-                        chapterWordCount: file.content.split(/\s+/).length
+                        chapterWordCount: chapter.wordCount
                       }))}
                   >
                     <CartesianGrid strokeDasharray="3 3" />

@@ -12,21 +12,13 @@ import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/ty
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
 import {
-  isChapterFile,
-  isChapterTitle,
-  normalizeProjectStoryContent,
-  rebuildProjectFilesFromStoryContent,
-  serializeChapterFilesToStoryContent
+  normalizeProjectStoryContent
 } from '@/lib/storyContent'
 
 const initialState: ProjectState = {
   projectHasLiveEdits: false,
   activeProject: null,
   pendingFiles: null
-}
-
-const syncProjectFilesFromStory = (project: Project, editedTitles: Set<string> = new Set()) => {
-  project.files = rebuildProjectFilesFromStoryContent(project, editedTitles)
 }
 
 export const projectsSlice = createSlice({
@@ -143,23 +135,6 @@ export const projectsSlice = createSlice({
       state.activeProject.dialogueAnalysis = action.payload.analysis
       state.projectHasLiveEdits = true
     },
-    renameFile: (state, action: PayloadAction<{ oldTitle: string; newTitle: string }>) => {
-      if (!state.activeProject) return
-      const { oldTitle, newTitle } = action.payload
-      const fileIndex = state.activeProject.files.findIndex((file) => file.title === oldTitle)
-
-      if (fileIndex === -1) return // Do nothing if file with oldTitle not found
-
-      // Case-insensitive title conflict check
-      const titleConflict = state.activeProject.files.some((file) => file.title.toLowerCase() === newTitle.toLowerCase())
-      if (titleConflict) {
-        console.warn(`Title conflict detected: ${newTitle} already exists. RenameFile reducer cancelled.`) // Log warning for debugging
-        return
-      }
-
-      state.activeProject.files[fileIndex].title = newTitle
-      state.projectHasLiveEdits = true
-    },
     // New reducer for updating cover image data
     updateCoverImage: (state, action: PayloadAction<{ base64: string | null; mimeType: string | null }>) => {
       if (state.activeProject) {
@@ -196,7 +171,6 @@ export const {
   updateParameters,
   updateReviews,
   updateMetaProperty,
-  renameFile,
   updateCoverImage,
   addChapter // Export the new action
 } = projectsSlice.actions

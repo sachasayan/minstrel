@@ -2,11 +2,11 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setActiveSection, setActiveView } from '@/lib/store/appStateSlice'
 import { selectProjects, addChapter } from '@/lib/store/projectsSlice'
-import { isChapterFile, getChaptersFromStoryContent } from '@/lib/storyContent'
+import { getChaptersFromStoryContent } from '@/lib/storyContent'
 
 import { addChatMessage } from '@/lib/store/chatSlice'
 
-import { Plus, Diff, LayoutDashboard, /* FileText, */ ListOrdered, Book } from 'lucide-react'
+import { Plus, Diff, LayoutDashboard, ListOrdered, Book } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sidebar,

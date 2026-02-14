@@ -1,12 +1,12 @@
 import { createListenerMiddleware, isAnyOf, PayloadAction } from '@reduxjs/toolkit' // Re-added PayloadAction
-import { setActiveProject, renameFile, setActiveProjectFromFragment, startNewProject, updateCoverImage } from '../projectsSlice'
+import { setActiveProject, setActiveProjectFromFragment, startNewProject, updateCoverImage } from '../projectsSlice'
 import { fetchProjectDetails } from '@/lib/services/fileService'
 import { setActiveSection, setActiveView } from '../appStateSlice'
 import { setChatHistory, clearChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
 import { convertImagePathToBase64 } from '@/lib/coverImage'
-import { isChapterFile, getChaptersFromStoryContent } from '@/lib/storyContent'
+import { getChaptersFromStoryContent } from '@/lib/storyContent'
 
 export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
@@ -54,21 +54,6 @@ projectListeners.startListening({
     } catch (error) {
         console.error(`Listener: Error fetching project details or dispatching actions for ${projectFragment.title}:`, error)
         // Optionally dispatch an error state or notification
-    }
-  }
-})
-
-// Listen for changes to files names. If a file is renamed, change the active file.
-projectListeners.startListening({
-  matcher: isAnyOf(renameFile),
-  // Explicitly type the action parameter
-  effect: async (action: PayloadAction<{ oldTitle: string; newTitle: string }>, listenerApi) => {
-    const payload = action.payload; // Now correctly typed
-    // Cast the state to RootState
-    const previousState = listenerApi.getOriginalState() as RootState;
-
-    if (previousState?.appState?.activeSection === payload?.oldTitle) {
-      listenerApi.dispatch(setActiveSection(payload.newTitle))
     }
   }
 })

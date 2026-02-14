@@ -2,9 +2,7 @@ import { ProjectFragment, Project, ProjectFile } from '@/types'
 import { loadSqliteProject, saveSqliteProject, initSqliteProject } from './sqliteService'
 import {
   buildPersistableProject,
-  isChapterFile,
-  normalizeProjectStoryContent,
-  serializeChapterFilesToStoryContent
+  normalizeProjectStoryContent
 } from '@/lib/storyContent'
 
 export function decodeHtmlEntities(html) {
@@ -162,11 +160,10 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
       } as ProjectFile
     })
 
-    const chapterFiles = parsedFiles.filter((file) => isChapterFile(file))
-    const storyContent =
-      typeof metadata.storyContent === 'string' && metadata.storyContent.trim().length > 0
-        ? metadata.storyContent
-        : serializeChapterFilesToStoryContent(chapterFiles)
+    const storyContent = metadata.storyContent || parsedFiles
+      .filter(f => f.type === 'chapter' || f.title.toLowerCase().startsWith('chapter'))
+      .map(f => `# ${f.title}\n\n${f.content}`)
+      .join('\n\n')
 
     // Construct the Project object for MD files (no cover/chat support here)
     const project = {
