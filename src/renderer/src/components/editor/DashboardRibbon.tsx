@@ -1,9 +1,9 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { selectActiveProject, updateMetaProperty } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
@@ -12,7 +12,6 @@ import { getChapterWordCounts } from '@/lib/storyContent'
 
 export function DashboardRibbon() {
     const activeProject = useSelector(selectActiveProject)
-    const [dialogueCountData, setDialogueCountData] = useState<any[]>([])
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -30,24 +29,31 @@ export function DashboardRibbon() {
                     value: updatedHistory
                 }))
             }
-
-            // Generate dialogue count data
-            const analysis = activeProject.dialogueAnalysis
-            if (analysis && analysis.dialogCounts) {
-                const charNames = Object.keys(analysis.dialogCounts)
-                const chapterCount = Math.max(...charNames.map(name => analysis.dialogCounts[name].length))
-                const transformed: any[] = []
-                for (let chapterIdx = 0; chapterIdx < chapterCount; chapterIdx++) {
-                    const chapterData: any = { chapter: chapterIdx + 1 }
-                    for (const charName of charNames) {
-                        chapterData[charName] = analysis.dialogCounts[charName][chapterIdx] ?? 0
-                    }
-                    transformed.push(chapterData)
-                }
-                setDialogueCountData(transformed)
-            }
         }
     }, [activeProject, dispatch])
+
+    const dialogueCountData = useMemo(() => {
+        if (!activeProject?.dialogueAnalysis?.dialogCounts) return []
+
+        const analysis = activeProject.dialogueAnalysis
+        const charNames = Object.keys(analysis.dialogCounts)
+        if (charNames.length === 0) return []
+
+        const chapterCount = Math.max(...charNames.map(name => analysis.dialogCounts[name].length))
+        const transformed: any[] = []
+        for (let chapterIdx = 0; chapterIdx < chapterCount; chapterIdx++) {
+            const chapterData: any = { chapter: chapterIdx + 1 }
+            for (const charName of charNames) {
+                chapterData[charName] = analysis.dialogCounts[charName][chapterIdx] ?? 0
+            }
+            transformed.push(chapterData)
+        }
+        return transformed
+    }, [activeProject?.dialogueAnalysis])
+
+    const chapterWordCounts = useMemo(() => {
+        return getChapterWordCounts(activeProject?.storyContent || '')
+    }, [activeProject?.storyContent])
 
     if (!activeProject) return null
 
@@ -60,8 +66,6 @@ export function DashboardRibbon() {
             </div>
         )
     }
-
-    const chapterWordCounts = getChapterWordCounts(activeProject.storyContent || '')
 
     return (
         <div className="w-full overflow-hidden mb-12" id="project-overview">

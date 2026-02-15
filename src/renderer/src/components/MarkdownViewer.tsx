@@ -1,7 +1,7 @@
 import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin, thematicBreakPlugin } from '@mdxeditor/editor'
 import { UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, ListsToggle } from '@mdxeditor/editor'
 import { useDispatch, useSelector } from 'react-redux'
-import { useRef, useEffect, JSX, useCallback } from 'react'
+import { useRef, useEffect, JSX, useCallback, useMemo } from 'react'
 
 import '@mdxeditor/editor/style.css'
 import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
@@ -43,7 +43,7 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
     }
 
     if (title && title.includes('|||')) {
-      const [_, indexStr] = title.split('|||')
+      const [, indexStr] = title.split('|||')
       const index = parseInt(indexStr)
 
       // Find all H1s and navigate to the N-th one
@@ -114,6 +114,23 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
     console.error('Source Markdown:', error.source)
   }
 
+  const plugins = useMemo(() => [
+    headingsPlugin(),
+    listsPlugin(),
+    thematicBreakPlugin(),
+    toolbarPlugin({
+      toolbarClassName: 'mdx-toolbar',
+      toolbarContents: () => (
+        <>
+          <UndoRedo />
+          <BoldItalicUnderlineToggles />
+          <BlockTypeSelect />
+          <ListsToggle options={['number', 'bullet']} />
+        </>
+      )
+    })
+  ], [])
+
   return (
     <>
       <div ref={containerRef} className="relative w-full max-w-7xl mx-auto h-full overflow-y-auto overflow-x-hidden no-scrollbar px-6 py-1 md:px-24 md:py-12">
@@ -142,22 +159,7 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
               markdown={content || ''}
               onChange={handleContentChange}
               onError={handleError}
-              plugins={[
-                headingsPlugin(),
-                listsPlugin(),
-                thematicBreakPlugin(),
-                toolbarPlugin({
-                  toolbarClassName: 'mdx-toolbar',
-                  toolbarContents: () => (
-                    <>
-                      <UndoRedo />
-                      <BoldItalicUnderlineToggles />
-                      <BlockTypeSelect />
-                      <ListsToggle options={['number', 'bullet']} />
-                    </>
-                  )
-                })
-              ]}
+              plugins={plugins}
               contentEditableClassName="prose max-w-none"
             />
           </div>
