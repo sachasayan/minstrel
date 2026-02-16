@@ -1,19 +1,6 @@
 import { dialog, ipcMain, OpenDialogOptions } from 'electron'
-import * as os from 'os'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths, handling '~'
-const resolvePath = (filePath: string): string => {
-  if (typeof filePath !== 'string') {
-    console.error('Invalid path provided:', filePath)
-    // Return a value or throw an error as appropriate for your error handling strategy
-    // For now, returning an empty string to avoid crashing, but this should be handled robustly
-    return ''
-  }
-  return filePath.replace('~', homedir)
-}
+import { resolvePath } from './pathUtils'
 
 export const handleReadDirectory = async (_event, dirPath) => {
   const resolvedPath = resolvePath(dirPath)

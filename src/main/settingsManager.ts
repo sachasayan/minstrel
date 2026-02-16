@@ -1,6 +1,6 @@
 import settings from 'electron-settings'
-import * as os from 'os'
 import { ipcMain } from 'electron'
+import { resolvePath } from './pathUtils'
 import {
   DEFAULT_HIGH_PREFERENCE_MODEL_ID,
   DEFAULT_LOW_PREFERENCE_MODEL_ID,
@@ -25,7 +25,7 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
 
   // Expand tilde in workingRootDirectory
   if (typeof appSettings?.workingRootDirectory === 'string') {
-    appSettings.workingRootDirectory = appSettings.workingRootDirectory.replace('~', os.homedir())
+    appSettings.workingRootDirectory = resolvePath(appSettings.workingRootDirectory)
   }
 
   // Set defaults for model IDs if they don't exist

@@ -1,15 +1,8 @@
 import { ipcMain } from 'electron'
-import * as os from 'os'
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths with home directory
-const resolvePath = (filePath: string): string => {
-  return filePath.replace('~', homedir)
-}
+import { resolvePath } from './pathUtils'
 
 const isChapterTitle = (title: string | null | undefined): boolean => {
   if (!title) return false
