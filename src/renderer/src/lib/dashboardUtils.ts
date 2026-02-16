@@ -4,6 +4,17 @@ import { visit } from 'unist-util-visit'
 import { toString } from 'mdast-util-to-string'
 import { getChapterWordCounts } from '@/lib/storyContent'
 
+export interface CharacterFrequencyData {
+  chapter: number
+  chapterWordCount: number
+  [key: string]: number | string
+}
+
+export interface WordCountHistoryEntry {
+  date: string
+  wordCount: number
+}
+
 const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)']
 
 /**
@@ -60,12 +71,12 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
 /**
  * Character mention frequency per chapter.
  */
-function getCharacterFrequencyData(activeProject: Project): any[] {
+function getCharacterFrequencyData(activeProject: Project): CharacterFrequencyData[] {
   const charactersList = extractCharactersFromOutline(activeProject.files.find((f) => f.title.indexOf('Outline') != -1)?.content || '')
 
   return getChapterWordCounts(activeProject.storyContent || '')
     .map((chapter, i) => {
-      const chapterData: { [key: string]: number | string } = {
+      const chapterData: CharacterFrequencyData = {
         chapter: i + 1,
         chapterWordCount: chapter.wordCount
       }
@@ -82,7 +93,7 @@ function getCharacterFrequencyData(activeProject: Project): any[] {
 /**
  * Updates project's rolling 30-day wordCountHistorical array.
  */
-function updateRollingWordCountHistory(project: Project) {
+function updateRollingWordCountHistory(project: Project): WordCountHistoryEntry[] {
   const today = new Date().toISOString().slice(0, 10) // 'YYYY-MM-DD'
   const history = Array.isArray(project.wordCountHistorical) ? [...project.wordCountHistorical] : []
 

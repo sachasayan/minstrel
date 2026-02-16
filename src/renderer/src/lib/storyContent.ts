@@ -2,8 +2,6 @@ import { Project, ProjectFile } from '@/types'
 
 const normalizeLineEndings = (value: string): string => value.replace(/\r\n/g, '\n')
 
-const trimEdgeNewlines = (value: string): string => value.replace(/^\n+/, '').replace(/\n+$/, '')
-
 export const STORY_FILE_TYPE = 'story'
 export const STORY_FILE_TITLE = 'Story'
 

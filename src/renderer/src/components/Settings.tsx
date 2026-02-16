@@ -26,42 +26,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from 'sonner'
 import { Folder } from 'lucide-react'
-
-// Define Provider Options
-const providerOptions = [
-  { value: 'google', label: 'Google (Gemini)' },
-  { value: 'openai', label: 'OpenAI (ChatGPT)' },
-  { value: 'deepseek', label: 'DeepSeek' },
-  { value: 'zai', label: 'Z.AI' }
-];
-
-// Define Model Options by Provider
-const modelOptionsByProvider: Record<string, string[]> = {
-  google: [
-    'gemini-2.5-pro-preview-03-25',
-    'gemini-3-flash-preview',
-    'gemini-2.0-flash-thinking-exp-01-21', // Default High
-    'gemini-2.0-flash',         // Default Low
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro'
-  ],
-  openai: [
-    'gpt-4o',
-    'gpt-4o-mini',
-    'gpt-4-turbo',
-    'gpt-3.5-turbo'
-  ],
-  deepseek: [
-    'deepseek-chat',
-    'deepseek-coder'
-  ],
-  zai: [
-    'zai-model-1', // Placeholder - need actual Z.AI model names
-    'zai-model-2'
-  ]
-};
+import { PROVIDER_OPTIONS, MODEL_OPTIONS_BY_PROVIDER } from '@shared/constants'
 
 const Settings = (): ReactNode => {
   // Get full settings state object
@@ -77,7 +42,9 @@ const Settings = (): ReactNode => {
   const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
 
   // Get current model options based on selected provider
-  const currentModelOptions = modelOptionsByProvider[settings.provider || 'google'] || modelOptionsByProvider.google;
+  const currentModelOptions =
+    MODEL_OPTIONS_BY_PROVIDER[settings.provider || 'google'] ||
+    MODEL_OPTIONS_BY_PROVIDER.google
 
   // Effect to load settings on mount and sync local state
   useEffect(() => {
@@ -220,7 +187,7 @@ const Settings = (): ReactNode => {
                 <SelectValue placeholder="Select AI provider" />
               </SelectTrigger>
               <SelectContent>
-                {providerOptions.map((provider) => (
+                {PROVIDER_OPTIONS.map((provider) => (
                   <SelectItem key={provider.value} value={provider.value}>
                     {provider.label}
                   </SelectItem>
