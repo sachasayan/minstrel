@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect, forwardRef } from 'react'
+import { useState, useRef, useEffect, forwardRef, memo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
 import { RootState } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
 import minstrelIcon from '@/assets/bot/base.png'
-import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { cn } from '@/lib/utils'
+import { ChatMessage } from '@/types'
 
 interface ChatInterfaceProps {
   expanded: boolean
@@ -21,6 +21,38 @@ const ChatLoadingIndicator = () => {
     </div>
   )
 }
+
+interface ChatMessageItemProps {
+  msg: ChatMessage
+  isLast: boolean
+  lastMessageRef: React.RefObject<HTMLDivElement | null>
+}
+
+const ChatMessageItem = memo(({ msg, isLast, lastMessageRef }: ChatMessageItemProps) => {
+  return msg.sender === 'User' ? (
+    <div
+      ref={isLast ? lastMessageRef : null}
+      className="flex items-start justify-end"
+    >
+      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message outline-1 outline-neutral-600 text-neutral-600 text-left ml-14 relative">
+        {msg.text}
+      </div>
+    </div>
+  ) : (
+    <div
+      ref={isLast ? lastMessageRef : null}
+      className="flex items-start justify-end"
+    >
+      <img src={minstrelIcon} className="size-10 mr-1" alt="" />
+      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-right mr-8 relative">
+        <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-200"></div>
+        {msg.text}
+      </div>
+    </div>
+  )
+})
+
+ChatMessageItem.displayName = 'ChatMessageItem'
 
 const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded, setExpanded }, ref) => {
   const { chatHistory, pendingChat } = useSelector((state: RootState) => selectChat(state))
@@ -90,29 +122,12 @@ const ChatInterface = forwardRef<HTMLDivElement, ChatInterfaceProps>(({ expanded
         <div className="relative rounded-lg flex flex-col h-full">
           <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
             {chatHistory.map((msg, index) => (
-              msg.sender === 'User' ? (
-                <div
-                  key={index}
-                  ref={index === chatHistory.length - 1 ? lastMessageRef : null}
-                  className="flex items-start justify-end"
-                >
-                  <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message outline-1 outline-neutral-600 text-neutral-600 text-left ml-14 relative">
-                    {msg.text}
-                  </div>
-                </div>
-              ) : (
-                <div
-                  key={index}
-                  ref={index === chatHistory.length - 1 ? lastMessageRef : null}
-                  className="flex items-start justify-end"
-                >
-                  <img src={minstrelIcon} className="size-10 mr-1" alt="" />
-                  <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-right mr-8 relative">
-                    <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-200"></div>
-                    {msg.text}
-                  </div>
-                </div>
-              )
+              <ChatMessageItem
+                key={index}
+                msg={msg}
+                isLast={index === chatHistory.length - 1}
+                lastMessageRef={lastMessageRef}
+              />
             ))}
 
             {/* Suggestions */}
