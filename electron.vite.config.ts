@@ -19,8 +19,7 @@ export default defineConfig({
         '@/ui': resolve('src/renderer/src/components/ui'),
         '@/lib': resolve('src/renderer/src/lib'),
         '@/pages': resolve('src/renderer/src/pages'),
-        '@/hooks': resolve('src/renderer/src/hooks'),
-        '@shared': resolve('src/shared')
+        '@/hooks': resolve('src/renderer/src/hooks')
       }
     },
     plugins: [react(), tailwindcss()]
