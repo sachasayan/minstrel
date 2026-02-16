@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AppSettings } from '@/types'
 import { RootState } from '@/lib/store/store'
-
-// Default model IDs (match those in settingsManager.ts)
-const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking-exp-01-21'
-const DEFAULT_LOW_PREFERENCE_MODEL_ID = 'gemini-2.0-flash'
-const DEFAULT_PROVIDER = 'google'
+import {
+  DEFAULT_HIGH_PREFERENCE_MODEL_ID,
+  DEFAULT_LOW_PREFERENCE_MODEL_ID,
+  DEFAULT_PROVIDER
+} from '@shared/constants'
 
 const initialState: AppSettings = {
   api: '',

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
@@ -14,6 +14,15 @@ import { getChapterWordCounts } from '@/lib/storyContent'
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
   const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
+
+  const chapterData = useMemo(() => {
+    if (!activeProject) return []
+    return getChapterWordCounts(activeProject.storyContent || '').map((chapter, index) => ({
+      index: index,
+      chapter: index + 1,
+      chapterWordCount: chapter.wordCount
+    }))
+  }, [activeProject?.storyContent])
 
   const dispatch = useDispatch() // Initialize useDispatch
 
@@ -117,14 +126,7 @@ export default function NovelDashboard() {
                   }}
                   className="h-[300px]"
                 >
-                  <BarChart
-                    data={getChapterWordCounts(activeProject.storyContent || '')
-                      .map((chapter, index) => ({
-                        index: index,
-                        chapter: index + 1,
-                        chapterWordCount: chapter.wordCount
-                      }))}
-                  >
+                  <BarChart data={chapterData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="chapter"

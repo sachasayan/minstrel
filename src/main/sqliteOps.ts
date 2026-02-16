@@ -204,9 +204,11 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
   }
 }
 
-// Load project metadata from SQLite database
-// This function now returns the full metadata object needed by the frontend service
-export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
+/**
+ * Internal helper to load project metadata from a SQLite database.
+ * This function returns the full metadata object including the project path.
+ */
+const getProjectMetaInternal = async (filePath: string) => {
   const resolvedPath = resolvePath(filePath)
   let db
   try {
@@ -248,7 +250,10 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
       return null // Return null if essential data is missing
     }
 
-    // Return the full metadata object; frontend service will construct the fragment
+    // Ensure the project path is included in the metadata as expected by the frontend
+    metadata.projectPath = filePath
+
+    // Return the full metadata object
     return metadata
   } catch (error) {
     // Log the error but return null instead of throwing
@@ -259,6 +264,17 @@ export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
       db.close()
     }
   }
+}
+
+// Load project metadata from SQLite database
+export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
+  return getProjectMetaInternal(filePath)
+}
+
+// Load metadata for multiple SQLite projects in bulk
+export const handleGetSqliteProjectsMeta = async (_event, filePaths: string[]) => {
+  // Process all files in parallel
+  return Promise.all(filePaths.map((filePath) => getProjectMetaInternal(filePath)))
 }
 
 // Load full project from SQLite database
@@ -397,5 +413,6 @@ export const registerSqliteOpsHandlers = () => {
   ipcMain.handle('init-sqlite-project', handleInitSqliteProject)
   ipcMain.handle('save-sqlite-project', handleSaveSqliteProject)
   ipcMain.handle('get-sqlite-project-meta', handleGetSqliteProjectMeta)
+  ipcMain.handle('get-sqlite-projects-meta', handleGetSqliteProjectsMeta)
   ipcMain.handle('load-sqlite-project', handleLoadSqliteProject)
 }
