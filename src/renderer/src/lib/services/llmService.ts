@@ -110,67 +110,67 @@ const llmService = {
     }
   },
 
-  // Generate content with selected provider
-  async generateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
+  // Helper to get provider and model based on settings
+  async getProviderAndModel(modelPreference: 'high' | 'low' = 'low') {
     const settings = store.getState().settings
     const provider = settings.provider || 'google'
     const apiKey = await this.getApiKey(provider)
 
     if (!apiKey) {
-      throw new Error(`LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`)
+      throw new Error(
+        `LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`
+      )
     }
 
     const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
     const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
     const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
 
-    console.log(`Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`)
+    const factory = providerFactories[provider]
+    if (!factory) {
+      throw new Error(`Provider ${provider} not supported`)
+    }
+
+    const aiProvider = factory({ apiKey })
+    const model = this.getModel(aiProvider, provider, selectedModelId)
+
+    return { model, provider, selectedModelId }
+  },
+
+  // Generate content with selected provider
+  async generateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+
+    console.log(
+      `Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
+    )
 
     try {
-      const factory = providerFactories[provider]
-      if (!factory) {
-        throw new Error(`Provider ${provider} not supported`)
-      }
-
-      const aiProvider = factory({ apiKey })
-      const model = this.getModel(aiProvider, provider, selectedModelId)
-
       const { text } = await generateText({
         model,
         prompt: prompt
       })
       return text
     } catch (error) {
-      console.error(`Error generating content with provider ${provider} (Model: ${selectedModelId}):`, error)
-      throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : String(error)}`)
+      console.error(
+        `Error generating content with provider ${provider} (Model: ${selectedModelId}):`,
+        error
+      )
+      throw new Error(
+        `Failed to generate content: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   },
 
   // Streaming version of generateContent
   async *streamGenerateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
-    const settings = store.getState().settings
-    const provider = settings.provider || 'google'
-    const apiKey = await this.getApiKey(provider)
+    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
 
-    if (!apiKey) {
-      throw new Error(`LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`)
-    }
-
-    const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
-    const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
-    const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
-
-    console.log(`Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`)
+    console.log(
+      `Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
+    )
 
     try {
-      const factory = providerFactories[provider]
-      if (!factory) {
-        throw new Error(`Provider ${provider} not supported`)
-      }
-
-      const aiProvider = factory({ apiKey })
-      const model = this.getModel(aiProvider, provider, selectedModelId)
-
       const { textStream } = await streamText({
         model,
         prompt: prompt
@@ -181,8 +181,13 @@ const llmService = {
         yield delta
       }
     } catch (error) {
-      console.error(`Error streaming content with provider ${provider} (Model: ${selectedModelId}):`, error)
-      throw new Error(`Failed to stream content: ${error instanceof Error ? error.message : String(error)}`)
+      console.error(
+        `Error streaming content with provider ${provider} (Model: ${selectedModelId}):`,
+        error
+      )
+      throw new Error(
+        `Failed to stream content: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   }
 }
