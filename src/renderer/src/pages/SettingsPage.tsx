@@ -27,45 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from 'sonner'
-import { ArrowLeft, CircleCheck, CircleX, Folder, Loader2 } from 'lucide-react';
+import { ArrowLeft, CircleCheck, CircleX, Folder, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import llmService from '@/lib/services/llmService'
-
-// Define Provider Options
-const providerOptions = [
-  { value: 'google', label: 'Google (Gemini)' },
-  { value: 'openai', label: 'OpenAI (ChatGPT)' },
-  { value: 'deepseek', label: 'DeepSeek' },
-  { value: 'zai', label: 'Z.AI' }
-];
-
-// Define Model Options by Provider
-const modelOptionsByProvider: Record<string, string[]> = {
-  google: [
-    'gemini-2.5-pro-preview-03-25',
-    'gemini-3-flash-preview',
-    'gemini-2.0-flash-thinking-exp-01-21', // Default High
-    'gemini-2.0-flash',         // Default Low
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro'
-  ],
-  openai: [
-    'gpt-4o',
-    'gpt-4o-mini',
-    'gpt-4-turbo',
-    'gpt-3.5-turbo'
-  ],
-  deepseek: [
-    'deepseek-chat',
-    'deepseek-coder'
-  ],
-  zai: [
-    'zai-model-1', // Placeholder - need actual Z.AI model names
-    'zai-model-2'
-  ]
-};
+import { PROVIDER_OPTIONS, MODEL_OPTIONS_BY_PROVIDER } from '@shared/constants'
 
 type KeyValidationStatus = 'idle' | 'checking' | 'valid' | 'invalid'
 
@@ -84,7 +49,9 @@ const SettingsPage = (): ReactNode => {
   const validationRequestIdRef = useRef(0)
 
   // Get current model options based on selected provider
-  const currentModelOptions = modelOptionsByProvider[settings.provider || 'google'] || modelOptionsByProvider.google;
+  const currentModelOptions =
+    MODEL_OPTIONS_BY_PROVIDER[settings.provider || 'google'] ||
+    MODEL_OPTIONS_BY_PROVIDER.google
   const selectedProvider = settings.provider || 'google'
   const selectedProviderApiKey = useMemo(() => {
     switch (selectedProvider) {
@@ -275,7 +242,7 @@ const SettingsPage = (): ReactNode => {
                     <SelectValue placeholder="Select AI provider" />
                   </SelectTrigger>
                   <SelectContent>
-                    {providerOptions.map((provider) => (
+                    {PROVIDER_OPTIONS.map((provider) => (
                       <SelectItem key={provider.value} value={provider.value}>
                         {provider.label}
                       </SelectItem>

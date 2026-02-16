@@ -1,8 +1,8 @@
-import { dialog, ipcMain, OpenDialogOptions } from 'electron'
+import { dialog, ipcMain, IpcMainInvokeEvent, OpenDialogOptions } from 'electron'
 import * as fs from 'fs/promises'
 import { resolvePath } from './pathUtils'
 
-export const handleReadDirectory = async (_event, dirPath) => {
+export const handleReadDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
   const resolvedPath = resolvePath(dirPath)
   if (!resolvedPath) return []
 
@@ -18,7 +18,7 @@ export const handleReadDirectory = async (_event, dirPath) => {
   }
 }
 
-export const handleReadFile = async (_event, filePath) => {
+export const handleReadFile = async (_event: IpcMainInvokeEvent, filePath: string) => {
   const resolvedPath = resolvePath(filePath)
   if (!resolvedPath) return ''
 
@@ -31,7 +31,11 @@ export const handleReadFile = async (_event, filePath) => {
   }
 }
 
-export const handleWriteFile = async (_event, filePath, content) => {
+export const handleWriteFile = async (
+  _event: IpcMainInvokeEvent,
+  filePath: string,
+  content: string
+) => {
   const resolvedPath = resolvePath(filePath)
   if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
 
@@ -45,7 +49,7 @@ export const handleWriteFile = async (_event, filePath, content) => {
   }
 }
 
-export const handleSelectDirectory = async (_event, operation) => {
+export const handleSelectDirectory = async (_event: IpcMainInvokeEvent, operation: string) => {
   // Define the correct type for properties based on OpenDialogOptions['properties']
   const properties: OpenDialogOptions['properties'] = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory']
 
@@ -60,7 +64,7 @@ export const handleSelectDirectory = async (_event, operation) => {
   }
 }
 
-export const handleMakeDirectory = async (_event, dirPath) => {
+export const handleMakeDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
   const resolvedPath = resolvePath(dirPath)
   if (!resolvedPath) return { success: false, error: 'Invalid directory path provided.' }
 
@@ -75,7 +79,7 @@ export const handleMakeDirectory = async (_event, dirPath) => {
 }
 
 // New handler for deleting a file
-export const handleDeleteFile = async (_event, filePath) => {
+export const handleDeleteFile = async (_event: IpcMainInvokeEvent, filePath: string) => {
   const resolvedPath = resolvePath(filePath)
   if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
 
