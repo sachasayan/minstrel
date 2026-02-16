@@ -2,6 +2,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
 import { generateText, streamText } from 'ai'
 import { store } from '@/lib/store/store'
+import { PROVIDER_MODELS } from '@shared/constants'
 
 // Provider factory functions
 const providerFactories: Record<string, any> = {
@@ -84,26 +85,9 @@ const llmService = {
 
   // Get default model ID for a provider
   getDefaultModelId(provider: string, preference: 'high' | 'low'): string {
-    const defaults: Record<string, Record<'high' | 'low', string>> = {
-      google: {
-        high: 'gemini-2.0-flash-thinking-exp-01-21',
-        low: 'gemini-2.0-flash'
-      },
-      openai: {
-        high: 'gpt-4o',
-        low: 'gpt-4o-mini'
-      },
-      deepseek: {
-        high: 'deepseek-chat',
-        low: 'deepseek-chat'
-      },
-      zai: {
-        high: 'zai-model-1',
-        low: 'zai-model-1'
-      }
-    }
-
-    return defaults[provider]?.[preference] || defaults.google[preference]
+    return (
+      (PROVIDER_MODELS as any)[provider]?.[preference] || PROVIDER_MODELS.google[preference]
+    )
   },
 
   // Get model instance
