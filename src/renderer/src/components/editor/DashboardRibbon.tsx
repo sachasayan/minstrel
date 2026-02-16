@@ -1,9 +1,9 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 import { selectActiveProject, updateMetaProperty } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
@@ -14,6 +14,14 @@ export function DashboardRibbon() {
     const activeProject = useSelector(selectActiveProject)
     const [dialogueCountData, setDialogueCountData] = useState<any[]>([])
     const dispatch = useDispatch()
+
+    const chapterData = useMemo(() => {
+        if (!activeProject) return []
+        return getChapterWordCounts(activeProject.storyContent || '').map((c, i) => ({
+            chapter: i + 1,
+            chapterWordCount: c.wordCount
+        }))
+    }, [activeProject?.storyContent])
 
     useEffect(() => {
         if (activeProject) {
@@ -61,8 +69,6 @@ export function DashboardRibbon() {
         )
     }
 
-    const chapterWordCounts = getChapterWordCounts(activeProject.storyContent || '')
-
     return (
         <div className="w-full overflow-hidden mb-12" id="project-overview">
             <div className="flex flex-row gap-4 overflow-x-auto pb-4 no-scrollbar items-stretch">
@@ -98,12 +104,7 @@ export function DashboardRibbon() {
                                 chapterWordCount: { label: 'Words' }
                             }}
                         >
-                            <BarChart
-                                data={chapterWordCounts.map((c, i) => ({
-                                    chapter: i + 1,
-                                    chapterWordCount: c.wordCount
-                                }))}
-                            >
+                            <BarChart data={chapterData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
                                 <XAxis dataKey="chapter" hide />
                                 <YAxis hide />
