@@ -1,8 +1,4 @@
 
-
-
-import { KanbanBoard } from './KanbanBoard'
-
 export default function ProjectOutline() {
   // const appState = useSelector(selectAppState);
   // const activeProject = appState.activeProject; // Access activeProject
@@ -10,7 +6,7 @@ export default function ProjectOutline() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <KanbanBoard />
+
     </div>
   )
 }
