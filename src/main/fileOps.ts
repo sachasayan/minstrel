@@ -98,11 +98,11 @@ export const handleDeleteFile = async (_event, filePath) => {
     console.log('File deleted successfully:', resolvedPath)
     return { success: true }
   } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      console.log('File to delete not found, treating as success:', resolvedPath)
+      return { success: true }
+    }
     console.error('Failed to delete file:', error)
-    // Check for specific errors like file not found (ENOENT) if needed
-    // if (error.code === 'ENOENT') {
-    //   return { success: true }; // Or false depending on desired behavior if file doesn't exist
-    // }
     return { success: false, error: String(error) }
   }
 }
