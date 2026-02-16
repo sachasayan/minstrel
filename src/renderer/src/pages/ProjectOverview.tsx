@@ -37,7 +37,8 @@ const ProjectOverview = (): React.ReactNode => {
       )}>
         {appState.activeView == 'project/editor' ? (() => {
           const isChapter = appState.activeSection?.includes('|||')
-          const content = isChapter
+          const isOverview = appState.activeSection === 'Overview'
+          const content = (isChapter || isOverview)
             ? activeProject?.storyContent
             : activeProject?.files?.find(f => f.title === appState.activeSection)?.content
 
