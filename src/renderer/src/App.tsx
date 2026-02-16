@@ -5,6 +5,9 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 
 import { Toaster } from '@/components/ui/sonner'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { AlertCircle } from 'lucide-react'
 import OnboardingPage from '@/pages/OnboardingPage'
 
 import ProjectOverview from '@/pages/ProjectOverview'
@@ -17,10 +20,12 @@ export default function App(): ReactNode {
 
   const [hasLoaded, setHasLoaded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
 
   const loadSettings = async () => {
     console.log('Loading settings')
+    setLoadError(null)
     try {
       const appSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
       dispatch(setSettingsState(appSettings || {})) // Dispatch loaded settings or empty object
@@ -32,7 +37,9 @@ export default function App(): ReactNode {
       }
     } catch (error) {
       console.error("Failed to load settings in App:", error);
-      // Handle error, maybe show a persistent error message?
+      setLoadError("Failed to load application settings. Please check your configuration and try again.")
+    } finally {
+      setHasLoaded(true)
     }
   }
 
@@ -57,22 +64,37 @@ export default function App(): ReactNode {
   useEffect(() => {
     if (!hasLoaded) {
       loadSettings() // Call the async function
-      setHasLoaded(true)
     }
-  }, [hasLoaded, dispatch])
+  }, [hasLoaded])
 
   // Conditionally render OnboardingPage or the main app router
   return (
-    <>
-      {showOnboarding ? (
-        <OnboardingPage /> // Render the full-page onboarding flow
-      ) : (
-        // Render the main application UI
-        <div className="h-screen">
-          {router(activeView)}
-          <Toaster position="bottom-center" richColors />
+    <div className="h-screen flex flex-col overflow-hidden">
+      {loadError && (
+        <div className="p-4 bg-background border-b border-border shadow-sm">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error Loading Settings</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{loadError}</span>
+              <Button variant="outline" size="sm" onClick={() => loadSettings()} className="ml-4">
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
         </div>
       )}
-    </>
+      <div className="flex-grow overflow-hidden">
+        {showOnboarding ? (
+          <OnboardingPage /> // Render the full-page onboarding flow
+        ) : (
+          // Render the main application UI
+          <div className="h-full">
+            {router(activeView)}
+            <Toaster position="bottom-center" richColors />
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
