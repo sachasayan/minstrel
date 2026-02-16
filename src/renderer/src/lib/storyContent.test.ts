@@ -177,9 +177,42 @@ describe('isStoryFile', () => {
     expect(isStoryFile({ title: STORY_FILE_TITLE, type: 'anything' })).toBe(true)
   })
 
-  it('should return false otherwise', () => {
+  it('should return true if both title and type match', () => {
+    expect(isStoryFile({ title: STORY_FILE_TITLE, type: STORY_FILE_TYPE })).toBe(true)
+  })
+
+  it('should return false if neither match', () => {
     expect(isStoryFile({ title: 'Notes', type: 'note' })).toBe(false)
+  })
+
+  it('should return false for null or undefined', () => {
     expect(isStoryFile(null)).toBe(false)
+    expect(isStoryFile(undefined)).toBe(false)
+  })
+
+  it('should return false for an empty object', () => {
+    // @ts-ignore - testing runtime behavior for empty object
+    expect(isStoryFile({})).toBe(false)
+  })
+
+  it('should return false for partial objects that do not match', () => {
+    // @ts-ignore
+    expect(isStoryFile({ title: 'Not Story' })).toBe(false)
+    // @ts-ignore
+    expect(isStoryFile({ type: 'not-story' })).toBe(false)
+  })
+
+  it('should be case-sensitive for both title and type', () => {
+    expect(isStoryFile({ title: STORY_FILE_TITLE.toLowerCase(), type: 'other' })).toBe(false)
+    expect(isStoryFile({ title: STORY_FILE_TITLE.toUpperCase(), type: 'other' })).toBe(false)
+    expect(isStoryFile({ title: 'Other', type: STORY_FILE_TYPE.toUpperCase() })).toBe(false)
+  })
+
+  it('should ignore extra properties', () => {
+    // @ts-ignore
+    expect(isStoryFile({ title: STORY_FILE_TITLE, type: 'other', extra: 'property' })).toBe(true)
+    // @ts-ignore
+    expect(isStoryFile({ title: 'Other', type: STORY_FILE_TYPE, extra: 'property' })).toBe(true)
   })
 })
 
