@@ -120,6 +120,35 @@ describe('settingsManager encryption helpers', () => {
       expect(loaded.googleApiKey).toBe('secret')
       expect(loaded.openaiApiKey).toBe('secret')
       expect(loaded.api).toBe('https://example.com')
+      // Should NOT call saveAppSettings (settings.set) if already encrypted
+      expect(settings.set).not.toHaveBeenCalled()
+    })
+
+    it('should proactively migrate plaintext fields to encrypted when loading', async () => {
+      vi.mocked(settings.get).mockResolvedValue({
+        googleApiKey: 'plaintext-secret',
+        api: 'https://example.com'
+      })
+
+      const loaded = await loadAppSettings()
+      expect(loaded.googleApiKey).toBe('plaintext-secret')
+
+      // Should call saveAppSettings (settings.set) to encrypt the plaintext key
+      expect(settings.set).toHaveBeenCalled()
+      const savedSettings = vi.mocked(settings.set).mock.calls[0][1] as any
+      expect(savedSettings.googleApiKey).toMatch(/^enc:/)
+    })
+
+    it('should NOT migrate if encryption is not available', async () => {
+      vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(false)
+      vi.mocked(settings.get).mockResolvedValue({
+        googleApiKey: 'plaintext-secret',
+        api: 'https://example.com'
+      })
+
+      const loaded = await loadAppSettings()
+      expect(loaded.googleApiKey).toBe('plaintext-secret')
+      expect(settings.set).not.toHaveBeenCalled()
     })
   })
 

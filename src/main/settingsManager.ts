@@ -89,11 +89,23 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   if (appSettings.zaiApiKey === undefined) appSettings.zaiApiKey = ''
   if (appSettings.openaiApiKey === undefined) appSettings.openaiApiKey = ''
 
-  // Decrypt sensitive fields
+  // Decrypt sensitive fields and check if migration is needed
+  let needsMigration = false
+  const encryptionAvailable = safeStorage.isEncryptionAvailable()
+
   for (const key of SENSITIVE_KEYS) {
-    if (appSettings[key]) {
-      appSettings[key] = decryptValue(appSettings[key])
+    const value = appSettings[key]
+    if (value && typeof value === 'string') {
+      if (encryptionAvailable && !value.startsWith(ENCRYPTION_PREFIX)) {
+        needsMigration = true
+      }
+      appSettings[key] = decryptValue(value)
     }
+  }
+
+  if (needsMigration) {
+    // Proactively encrypt and save plaintext keys
+    await saveAppSettings(appSettings)
   }
 
   return appSettings as AppSettings
