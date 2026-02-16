@@ -8,3 +8,6 @@ out
 .aider.tags.cache.v3/cache.db-wal
 .aider.chat.history.md
 .aider.input.history
+benchmark_projects/
+benchmark.js
+create_dummy_projects.py

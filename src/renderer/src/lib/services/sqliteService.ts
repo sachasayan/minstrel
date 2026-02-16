@@ -140,7 +140,7 @@ export const fetchSqliteProjects = async (rootDir: string | null): Promise<Proje
         .map((item) => `${rootDir}/${item.name}`)
 
       // Call bulk fetch handler in the main process
-      const results: (ProjectFragment | null)[] = await window.electron.ipcRenderer.invoke('get-sqlite-projects-meta', filesList)
+      const results: (ProjectFragment | null)[] = await window.electron.ipcRenderer.invoke('get-projects-meta', filesList)
 
       // Filter out null results to get the valid fragments
       const projectsList = results.filter((meta): meta is ProjectFragment => {

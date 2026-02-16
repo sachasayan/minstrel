@@ -97,20 +97,24 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
       }
 
       // Get list of all potential project files
-      const filesList = directoryItems.filter((item) => item && item.type === 'file' && (item.name.endsWith('.md') || item.name.endsWith('.mns'))).map((item) => item.name)
+      const filesList = directoryItems
+        .filter((item) => item && item.type === 'file' && (item.name.endsWith('.md') || item.name.endsWith('.mns')))
+        .map((item) => `${rootDir}/${item.name}`)
 
-      // Process all files concurrently
-      const results = await Promise.allSettled(filesList.map((file) => getProjectFragmentMeta(`${rootDir}/${file}`)))
+      // Call bulk fetch handler in the main process
+      const results: (ProjectFragment | null)[] = await window.electron.ipcRenderer.invoke('get-projects-meta', filesList)
 
-      // Filter out failed promises and null results
-      const projectsList = results.filter((result) => result.status === 'fulfilled' && result.value !== null).map((result) => (result as PromiseFulfilledResult<ProjectFragment>).value)
+      // Filter out null results to get the valid fragments
+      const projectsList = results.filter((meta): meta is ProjectFragment => {
+        if (meta === null) return false
+        // Basic validation as in getSqliteProjectFragmentMeta
+        return typeof meta === 'object' && 'title' in meta && 'projectPath' in meta
+      })
 
-      // Log errors for rejected promises or null values
+      // Log warnings for null results
       results.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          console.error(`Failed to process project fragment for ${filesList[index]}:`, result.reason)
-        } else if (result.status === 'fulfilled' && result.value === null) {
-          console.warn(`Skipped loading project fragment for ${filesList[index]} due to missing/invalid metadata or load error.`)
+        if (result === null) {
+          console.warn(`Skipped loading project fragment for ${filesList[index]} due to null metadata.`)
         }
       })
 

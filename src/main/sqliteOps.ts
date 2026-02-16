@@ -208,7 +208,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
  * Internal helper to load project metadata from a SQLite database.
  * This function returns the full metadata object including the project path.
  */
-const getProjectMetaInternal = async (filePath: string) => {
+const getSqliteProjectMetaInternal = async (filePath: string) => {
   const resolvedPath = resolvePath(filePath)
   let db
   try {
@@ -266,13 +266,83 @@ const getProjectMetaInternal = async (filePath: string) => {
   }
 }
 
+/**
+ * Internal helper to load project metadata from a Markdown file.
+ */
+const getMarkdownProjectMetaInternal = async (filePath: string) => {
+  const resolvedPath = resolvePath(filePath)
+  try {
+    const fileContent = await fs.readFile(resolvedPath, 'utf-8')
+    const metadataMatch = fileContent?.match(/----Metadata\.json([\s\S]+?)----/i)
+    if (!metadataMatch || !metadataMatch[1]) {
+      console.warn(`Metadata section not found in Markdown file: ${filePath}`)
+      return null
+    }
+    const metadata = JSON.parse(metadataMatch[1])
+
+    if (!metadata?.title) {
+      console.warn(`Essential metadata 'title' missing in Markdown file: ${filePath}`)
+      return null
+    }
+
+    return {
+      title: metadata.title,
+      wordCountCurrent: metadata.wordCountCurrent ?? 0,
+      wordCountTarget: metadata.wordCountTarget ?? 0,
+      projectPath: filePath,
+      genre: metadata?.genre || 'science-fiction',
+      cover: '', // No cover support for MD files here
+      coverImageMimeType: null
+    }
+  } catch (error) {
+    console.error(`Failed to get MD project metadata for ${filePath}:`, error)
+    return null
+  }
+}
+
+/**
+ * Unified helper to load project metadata from either SQLite or Markdown.
+ * Returns a ProjectFragment compatible object.
+ */
+const getProjectMetaInternal = async (filePath: string) => {
+  if (filePath.toLowerCase().endsWith('.mns')) {
+    const fullMetadata = await getSqliteProjectMetaInternal(filePath)
+    if (!fullMetadata) return null
+
+    // Construct cover data URL if possible, just like renderer did
+    let cover = ''
+    if (fullMetadata.coverImageBase64 && fullMetadata.coverImageMimeType) {
+      cover = `data:${fullMetadata.coverImageMimeType};base64,${fullMetadata.coverImageBase64}`
+    }
+
+    return {
+      title: fullMetadata.title,
+      wordCountCurrent: fullMetadata.wordCountCurrent ?? 0,
+      wordCountTarget: fullMetadata.wordCountTarget ?? 0,
+      projectPath: filePath,
+      genre: fullMetadata.genre || 'science-fiction',
+      cover: cover,
+      coverImageMimeType: fullMetadata.coverImageMimeType ?? null
+    }
+  } else if (filePath.toLowerCase().endsWith('.md')) {
+    return getMarkdownProjectMetaInternal(filePath)
+  }
+  return null
+}
+
 // Load project metadata from SQLite database
 export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
-  return getProjectMetaInternal(filePath)
+  return getSqliteProjectMetaInternal(filePath)
 }
 
 // Load metadata for multiple SQLite projects in bulk
 export const handleGetSqliteProjectsMeta = async (_event, filePaths: string[]) => {
+  // Process all files in parallel
+  return Promise.all(filePaths.map((filePath) => getProjectMetaInternal(filePath)))
+}
+
+// Load metadata for multiple projects (SQLite or Markdown) in bulk
+export const handleGetProjectsMeta = async (_event, filePaths: string[]) => {
   // Process all files in parallel
   return Promise.all(filePaths.map((filePath) => getProjectMetaInternal(filePath)))
 }
@@ -414,5 +484,6 @@ export const registerSqliteOpsHandlers = () => {
   ipcMain.handle('save-sqlite-project', handleSaveSqliteProject)
   ipcMain.handle('get-sqlite-project-meta', handleGetSqliteProjectMeta)
   ipcMain.handle('get-sqlite-projects-meta', handleGetSqliteProjectsMeta)
+  ipcMain.handle('get-projects-meta', handleGetProjectsMeta)
   ipcMain.handle('load-sqlite-project', handleLoadSqliteProject)
 }
