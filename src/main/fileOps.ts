@@ -1,23 +1,13 @@
 import { dialog, ipcMain, IpcMainInvokeEvent, OpenDialogOptions } from 'electron'
-import * as os from 'os'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths, handling '~'
-const resolvePath = (filePath: string): string => {
-  if (typeof filePath !== 'string') {
-    console.error('Invalid path provided:', filePath)
-    // Return a value or throw an error as appropriate for your error handling strategy
-    // For now, returning an empty string to avoid crashing, but this should be handled robustly
-    return ''
-  }
-  return filePath.replace('~', homedir)
-}
+import { resolvePath, isPathSafe } from './pathUtils'
 
 export const handleReadDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
   const resolvedPath = resolvePath(dirPath)
-  if (!resolvedPath) return []
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    console.error('Unauthorized or invalid directory path:', resolvedPath || dirPath)
+    return []
+  }
 
   try {
     const entries = await fs.readdir(resolvedPath, { withFileTypes: true })
@@ -33,7 +23,10 @@ export const handleReadDirectory = async (_event: IpcMainInvokeEvent, dirPath: s
 
 export const handleReadFile = async (_event: IpcMainInvokeEvent, filePath: string) => {
   const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return ''
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    console.error('Unauthorized or invalid file path:', resolvedPath || filePath)
+    return ''
+  }
 
   try {
     const content = await fs.readFile(resolvedPath, 'utf-8')
@@ -50,7 +43,9 @@ export const handleWriteFile = async (
   content: string
 ) => {
   const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    return { success: false, error: 'Unauthorized or invalid file path provided.' }
+  }
 
   console.log('Writing file to:', resolvedPath)
   try {
@@ -79,7 +74,9 @@ export const handleSelectDirectory = async (_event: IpcMainInvokeEvent, operatio
 
 export const handleMakeDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
   const resolvedPath = resolvePath(dirPath)
-  if (!resolvedPath) return { success: false, error: 'Invalid directory path provided.' }
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    return { success: false, error: 'Unauthorized or invalid directory path provided.' }
+  }
 
   console.log('Making directory at:', resolvedPath)
   try {
@@ -94,7 +91,9 @@ export const handleMakeDirectory = async (_event: IpcMainInvokeEvent, dirPath: s
 // New handler for deleting a file
 export const handleDeleteFile = async (_event: IpcMainInvokeEvent, filePath: string) => {
   const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    return { success: false, error: 'Unauthorized or invalid file path provided.' }
+  }
 
   console.log('Deleting file at:', resolvedPath)
   try {

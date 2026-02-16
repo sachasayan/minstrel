@@ -1,15 +1,8 @@
-import { ipcMain } from 'electron'
-import * as os from 'os'
+import { ipcMain, IpcMainInvokeEvent } from 'electron'
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths with home directory
-const resolvePath = (filePath: string): string => {
-  return filePath.replace('~', homedir)
-}
+import { resolvePath, isPathSafe } from './pathUtils'
 
 const isChapterTitle = (title: string | null | undefined): boolean => {
   if (!title) return false
@@ -70,8 +63,15 @@ const CREATE_TABLES_SQL = `
 `
 
 // Initialize a new SQLite database for a project
-export const handleInitSqliteProject = async (_event, filePath: string, metadata: any) => {
+export const handleInitSqliteProject = async (
+  _event: IpcMainInvokeEvent,
+  filePath: string,
+  metadata: any
+) => {
   const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    return { success: false, error: 'Unauthorized or invalid file path provided.' }
+  }
   let db
   try {
     // Ensure directory exists
@@ -107,8 +107,15 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
 }
 
 // Save project to SQLite database - Reverted project type to 'any'
-export const handleSaveSqliteProject = async (_event, filePath: string, project: any) => {
+export const handleSaveSqliteProject = async (
+  _event: IpcMainInvokeEvent,
+  filePath: string,
+  project: any
+) => {
   const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    return { success: false, error: 'Unauthorized or invalid file path provided.' }
+  }
 
   let db
   try {
@@ -210,6 +217,10 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
  */
 const getProjectMetaInternal = async (filePath: string) => {
   const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    console.error('Unauthorized or invalid file path:', resolvedPath || filePath)
+    return null
+  }
   let db
   try {
     // Check if file exists before trying to open
@@ -267,19 +278,25 @@ const getProjectMetaInternal = async (filePath: string) => {
 }
 
 // Load project metadata from SQLite database
-export const handleGetSqliteProjectMeta = async (_event, filePath: string) => {
+export const handleGetSqliteProjectMeta = async (_event: IpcMainInvokeEvent, filePath: string) => {
   return getProjectMetaInternal(filePath)
 }
 
 // Load metadata for multiple SQLite projects in bulk
-export const handleGetSqliteProjectsMeta = async (_event, filePaths: string[]) => {
+export const handleGetSqliteProjectsMeta = async (
+  _event: IpcMainInvokeEvent,
+  filePaths: string[]
+) => {
   // Process all files in parallel
   return Promise.all(filePaths.map((filePath) => getProjectMetaInternal(filePath)))
 }
 
 // Load full project from SQLite database
-export const handleLoadSqliteProject = async (_event, filePath: string) => {
+export const handleLoadSqliteProject = async (_event: IpcMainInvokeEvent, filePath: string) => {
   const resolvedPath = resolvePath(filePath)
+  if (!resolvedPath || !isPathSafe(resolvedPath)) {
+    throw new Error('Unauthorized or invalid file path provided.')
+  }
   let db
   try {
     // Check if file exists before trying to open
