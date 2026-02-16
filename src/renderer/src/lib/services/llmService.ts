@@ -1,18 +1,22 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateText, streamText } from 'ai'
+import { generateText, streamText, LanguageModel } from 'ai'
 import { store } from '@/lib/store/store'
 import { PROVIDER_MODELS } from '@shared/constants'
 
+type ProviderName = keyof typeof PROVIDER_MODELS
+type AIProvider = (modelId: string) => LanguageModel
+type ProviderFactory = (options: { apiKey: string }) => AIProvider
+
 // Provider factory functions
-const providerFactories: Record<string, any> = {
-  google: createGoogleGenerativeAI,
-  openai: createOpenAI
+const providerFactories: Partial<Record<ProviderName, ProviderFactory>> = {
+  google: createGoogleGenerativeAI as unknown as ProviderFactory,
+  openai: createOpenAI as unknown as ProviderFactory
   // deepseek and zai need to be implemented when SDKs are available
 }
 
 // Model mapping for each provider
-const providerModelMapping: Record<string, (modelId: string) => string> = {
+const providerModelMapping: Partial<Record<ProviderName, (modelId: string) => string>> = {
   google: (modelId: string) => modelId, // Google uses model IDs directly
   openai: (modelId: string) => modelId, // OpenAI uses model IDs directly
   deepseek: (modelId: string) => modelId, // Placeholder
@@ -85,14 +89,16 @@ const llmService = {
 
   // Get default model ID for a provider
   getDefaultModelId(provider: string, preference: 'high' | 'low'): string {
+    const providerKey = provider as ProviderName
     return (
-      (PROVIDER_MODELS as any)[provider]?.[preference] || PROVIDER_MODELS.google[preference]
+      PROVIDER_MODELS[providerKey]?.[preference] || PROVIDER_MODELS.google[preference]
     )
   },
 
   // Get model instance
-  getModel(aiProvider: any, provider: string, modelId: string) {
-    const mappedModelId = providerModelMapping[provider]?.(modelId) || modelId
+  getModel(aiProvider: AIProvider, provider: string, modelId: string) {
+    const providerKey = provider as ProviderName
+    const mappedModelId = providerModelMapping[providerKey]?.(modelId) || modelId
 
     if (provider === 'google') {
       return aiProvider(mappedModelId)
