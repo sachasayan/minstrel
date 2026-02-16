@@ -2,7 +2,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
 import { generateText, streamText } from 'ai'
 import { store } from '@/lib/store/store'
-import { DEFAULT_MODEL_IDS } from '@shared/constants'
+import { PROVIDER_MODELS } from '@shared/constants'
 
 // Provider factory functions
 const providerFactories: Record<string, any> = {
@@ -86,7 +86,7 @@ const llmService = {
   // Get default model ID for a provider
   getDefaultModelId(provider: string, preference: 'high' | 'low'): string {
     return (
-      DEFAULT_MODEL_IDS[provider]?.[preference] || DEFAULT_MODEL_IDS.google[preference]
+      (PROVIDER_MODELS as any)[provider]?.[preference] || PROVIDER_MODELS.google[preference]
     )
   },
 
