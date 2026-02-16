@@ -122,72 +122,71 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     // Ensure tables exist - crucial for first save/conversion
     db.exec(CREATE_TABLES_SQL)
 
-    // --- Begin Transaction ---
-    db.exec('BEGIN')
-
-    // 1. Update metadata (including cover image data)
-    // Access properties assuming 'project' has the correct structure
-    const metadataToSave = {
-      title: project.title,
-      genre: project.genre,
-      summary: project.summary,
-      author: 'Sacha', // Still hardcoded
-      year: project.year,
-      wordCountTarget: project.wordCountTarget,
-      wordCountCurrent: project.wordCountCurrent,
-      expertSuggestions: project.expertSuggestions,
-      coverImageBase64: project.coverImageBase64,
-      coverImageMimeType: project.coverImageMimeType,
-      dialogueAnalysis: project.dialogueAnalysis,
-      wordCountHistorical: project.wordCountHistorical ?? []
-    }
-    const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
-    db.exec('DELETE FROM metadata') // Clear existing metadata
-    // Explicitly purge deprecated metadata keys on save for legacy projects.
-    db.prepare('DELETE FROM metadata WHERE key = ?').run('writingSample')
-    for (const [key, value] of Object.entries(metadataToSave)) {
-      if (value !== undefined) {
-        const valueToStore = key === 'coverImageBase64' && value !== null ? value : JSON.stringify(value ?? null)
-        insertMetadata.run(key, valueToStore)
+    // --- Define and Execute Transaction ---
+    const saveProject = db.transaction((project: any) => {
+      // 1. Update metadata (including cover image data)
+      const metadataToSave = {
+        title: project.title,
+        genre: project.genre,
+        summary: project.summary,
+        author: 'Sacha', // Still hardcoded
+        year: project.year,
+        wordCountTarget: project.wordCountTarget,
+        wordCountCurrent: project.wordCountCurrent,
+        expertSuggestions: project.expertSuggestions,
+        coverImageBase64: project.coverImageBase64,
+        coverImageMimeType: project.coverImageMimeType,
+        dialogueAnalysis: project.dialogueAnalysis,
+        wordCountHistorical: project.wordCountHistorical ?? []
       }
-    }
-
-    // 2. Clear existing files and insert new ones
-    db.exec('DELETE FROM files')
-    const insertFile = db.prepare(`
-      INSERT INTO files (title, content, type, sort_order)
-      VALUES (?, ?, ?, ?)
-    `)
-    // Use 'any' for file type as ProjectFile type is not available in main process context
-    if (Array.isArray(project.files)) {
-      for (const file of project.files as any[]) {
-        // Ensure type and sort_order have default values if missing
-        const fileType = file.type ?? 'unknown' // Default type if missing
-        if (isChapterFileRecord({ title: file.title, type: fileType })) {
-          continue
+      const insertMetadata = db.prepare('INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)')
+      db.prepare('DELETE FROM metadata').run() // Clear existing metadata
+      // Explicitly purge deprecated metadata keys on save for legacy projects.
+      db.prepare('DELETE FROM metadata WHERE key = ?').run('writingSample')
+      for (const [key, value] of Object.entries(metadataToSave)) {
+        if (value !== undefined) {
+          const valueToStore = key === 'coverImageBase64' && value !== null ? value : JSON.stringify(value ?? null)
+          insertMetadata.run(key, valueToStore)
         }
-        const sortOrder = file.sort_order ?? 0 // Default sort order if missing
-        insertFile.run(file.title, file.content, fileType, sortOrder)
       }
-    }
 
-    // 3. Clear existing chat history and insert new messages
-    db.exec('DELETE FROM chat_history')
-    if (Array.isArray(project.chatHistory)) {
-      const insertChatMessage = db.prepare(`
-        INSERT INTO chat_history (sender, text, timestamp, metadata)
+      // 2. Clear existing files and insert new ones
+      db.prepare('DELETE FROM files').run()
+      const insertFile = db.prepare(`
+        INSERT INTO files (title, content, type, sort_order)
         VALUES (?, ?, ?, ?)
       `)
-      // Use 'any' for message type
-      for (const message of project.chatHistory as any[]) {
-        const timestamp = message.timestamp || null
-        const metadataJson = message.metadata ? JSON.stringify(message.metadata) : null
-        insertChatMessage.run(message.sender, message.text, timestamp, metadataJson)
+      // Use 'any' for file type as ProjectFile type is not available in main process context
+      if (Array.isArray(project.files)) {
+        for (const file of project.files as any[]) {
+          // Ensure type and sort_order have default values if missing
+          const fileType = file.type ?? 'unknown' // Default type if missing
+          if (isChapterFileRecord({ title: file.title, type: fileType })) {
+            continue
+          }
+          const sortOrder = file.sort_order ?? 0 // Default sort order if missing
+          insertFile.run(file.title, file.content, fileType, sortOrder)
+        }
       }
-    }
 
-    // --- Commit Transaction ---
-    db.exec('COMMIT')
+      // 3. Clear existing chat history and insert new messages
+      db.prepare('DELETE FROM chat_history').run()
+      if (Array.isArray(project.chatHistory)) {
+        const insertChatMessage = db.prepare(`
+          INSERT INTO chat_history (sender, text, timestamp, metadata)
+          VALUES (?, ?, ?, ?)
+        `)
+        // Use 'any' for message type
+        for (const message of project.chatHistory as any[]) {
+          const timestamp = message.timestamp || null
+          const metadataJson = message.metadata ? JSON.stringify(message.metadata) : null
+          insertChatMessage.run(message.sender, message.text, timestamp, metadataJson)
+        }
+      }
+    })
+
+    // Execute transaction
+    saveProject(project)
 
     return { success: true }
   } catch (error) {
