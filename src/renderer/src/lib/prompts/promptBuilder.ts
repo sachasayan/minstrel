@@ -16,42 +16,63 @@ import { getWriterAgentPrompt } from './writerAgent'
 import { getCriticAgentPrompt } from './criticAgent'
 import { getToolsPrompt } from './tools'
 
-// --- Helper Functions (Keep existing ones) ---
+import { getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
 
-// Gets all available files
+// Gets all available files (including virtual chapters)
 export const getAvailableFiles = (): string[] => {
-  return store.getState().projects.activeProject?.files.map((f) => f.title) || []
+  const state = store.getState().projects
+  const activeProject = state.activeProject
+  if (!activeProject) return []
+
+  const artifactFiles = activeProject.files.map((f) => f.title)
+  const virtualChapters = getChaptersFromStoryContent(activeProject.storyContent).map((c) => c.title)
+
+  return [...artifactFiles, ...virtualChapters]
 }
 
 export const getProvidedFiles = (dependencies: string[] | undefined): string[] => {
-  const activeProject = store.getState().projects.activeProject
-  // Ensure dependencies is an array before filtering
+  const availableFiles = getAvailableFiles()
   const depsArray = Array.isArray(dependencies) ? dependencies : []
-  const files: string[] = activeProject?.files?.filter((f) => depsArray.includes(f.title))?.map((file) => `${file.title}`) || []
-  return files
+  return availableFiles.filter((f) => depsArray.includes(f))
 }
 
-// Gets contents of all the given files as a string
+// Gets contents of all the given files (including virtual chapters) as a string
 export const getFileContents = (dependencies: string[] | undefined): string => {
   if (!dependencies || !Array.isArray(dependencies) || dependencies.length === 0) {
-    return '' // Return empty string if no valid dependencies
+    return ''
   }
-  // Get each file as a content item
+
   const activeProject = store.getState().projects.activeProject
-  const filesContent: string =
-    activeProject?.files
-      .filter((f) => dependencies.includes(f.title))
-      .map(
-        (file) => `
+  if (!activeProject) return ''
+
+  const filesContent: string[] = []
+
+  dependencies.forEach((title) => {
+    // 1. Check artifact files
+    const artifactFile = activeProject.files.find((f) => f.title === title)
+    if (artifactFile) {
+      filesContent.push(`
 ---
-# ${file.title}
+# ${artifactFile.title}
 
-${file.content || '(File content is empty)'}
-`
-      )
-      .join('\n') || '' // Join with newline, default to empty string
+${artifactFile.content || '(File content is empty)'}
+`)
+      return
+    }
 
-  return filesContent
+    // 2. Check virtual chapters in storyContent
+    const chapterContent = extractChapterContent(activeProject.storyContent, title)
+    if (chapterContent !== null) {
+      filesContent.push(`
+---
+# ${title}
+
+${chapterContent || '(Chapter content is empty)'}
+`)
+    }
+  })
+
+  return filesContent.join('\n')
 }
 
 
@@ -70,56 +91,50 @@ export const buildPrompt = (context: RequestContext): string => {
   const fileContents = getFileContents(context.requestedFiles)
   const userMessage = getLatestUserMessage()
 
+  const commonSections = (p: string) => {
+    let updatedPrompt = p
+    updatedPrompt = addUserPrompt(updatedPrompt, userMessage)
+    updatedPrompt = addAvailableFiles(updatedPrompt, availableFiles)
+    updatedPrompt = addProvidedFiles(updatedPrompt, providedFiles)
+    updatedPrompt = addFileContents(updatedPrompt, fileContents)
+    updatedPrompt = addBeginUserPrompt(updatedPrompt)
+    return updatedPrompt
+  }
+
   switch (context.agent) {
     case 'routingAgent': {
       const tools = ['think', 'read_file', 'action_suggestion', 'message', 'route_to']
       prompt = appendWithSeparator(prompt, getRoutingAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
-      prompt = addUserPrompt(prompt, userMessage)
-      prompt = addAvailableFiles(prompt, availableFiles)
-      prompt = addProvidedFiles(prompt, providedFiles)
-      prompt = addFileContents(prompt, fileContents)
-      prompt = addBeginUserPrompt(prompt)
+      prompt = commonSections(prompt)
       break
     }
     case 'outlineAgent': {
       const tools = ['think', 'write_file', 'message']
       prompt = appendWithSeparator(prompt, getOutlineAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
-      prompt = addUserPrompt(prompt, userMessage)
-
+      
       if (context.carriedContext) {
-         // Scenario: Initial Outline Generation (uses parameters)
          prompt = addParameters(prompt, context.carriedContext)
+         prompt = addUserPrompt(prompt, userMessage)
+         prompt = addBeginUserPrompt(prompt)
       } else {
-        // Scenario: Revising/Continuing Outline (uses standard context)
-        prompt = addAvailableFiles(prompt, availableFiles)
-        prompt = addProvidedFiles(prompt, providedFiles)
-        prompt = addFileContents(prompt, fileContents)
+        prompt = commonSections(prompt)
       }
-      prompt = addBeginUserPrompt(prompt)
       break
     }
     case 'writerAgent': {
       const tools = ['think', 'write_file', 'message']
       prompt = appendWithSeparator(prompt, getWriterAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
-      prompt = addUserPrompt(prompt, userMessage)
-      prompt = addAvailableFiles(prompt, availableFiles)
-      prompt = addProvidedFiles(prompt, providedFiles)
-      prompt = addFileContents(prompt, fileContents)
-      prompt = addBeginUserPrompt(prompt)
+      prompt = commonSections(prompt)
       break
     }
     case 'criticAgent': {
       const tools = ['think', 'critique', 'message']
       prompt = appendWithSeparator(prompt, getCriticAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
-      prompt = addUserPrompt(prompt, userMessage)
-      prompt = addAvailableFiles(prompt, availableFiles)
-      prompt = addProvidedFiles(prompt, providedFiles)
-      prompt = addFileContents(prompt, fileContents)
-      prompt = addBeginUserPrompt(prompt)
+      prompt = commonSections(prompt)
       break
     }
     default: {

@@ -1,7 +1,7 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile, setPendingFiles, updateReviews } from '@/lib/store/projectsSlice'
+import { updateFile, setPendingFiles, updateReviews, updateChapter } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
@@ -75,22 +75,29 @@ const processResponse = (responseString: string): RequestContext | null => {
       if (fileName.toLowerCase().includes('outline')) {
         fileType = 'outline'
         sortOrder = 0 // Outline always comes first
+        
+        store.dispatch(
+          updateFile({
+            title: fileName,
+            content: content,
+            type: fileType,
+            sort_order: sortOrder
+          })
+        )
       } else if (fileName.toLowerCase().includes('chapter')) {
-        fileType = 'chapter'
-        // Assign a default sort order for chapters, relying on DB load order
-        sortOrder = 1 // Outline is 0, chapters start from 1
+        // Chapters are updated surgically in the monolithic storyContent
+        store.dispatch(updateChapter({ title: fileName, content: content }))
+      } else {
+        // Dispatch updateFile for any other file types
+        store.dispatch(
+          updateFile({
+            title: fileName,
+            content: content,
+            type: fileType,
+            sort_order: sortOrder
+          })
+        )
       }
-      // Note: Files not matching 'outline' or 'chapter' will keep sortOrder = 0
-
-      // Dispatch updateFile with inferred type and simplified sort_order
-      store.dispatch(
-        updateFile({
-          title: fileName,
-          content: content,
-          type: fileType,
-          sort_order: sortOrder
-        })
-      )
     }
   }
 

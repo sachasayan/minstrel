@@ -59,7 +59,8 @@ export const getChapterWordCounts = (storyContent: string): { title: string; wor
 export const normalizeProjectStoryContent = (project: Project): Project => {
   const files = Array.isArray(project.files) ? project.files : []
   const storyFile = files.find((file) => isStoryFile(file))
-  const nonStoryFiles = files.filter((file) => !isStoryFile(file))
+  // Filter out the main story file AND any individual chapter files
+  const ancillaryFiles = files.filter((file) => !isStoryFile(file) && file.type !== 'chapter')
 
   const storyContent =
     typeof storyFile?.content === 'string' && storyFile.content.trim().length > 0
@@ -71,7 +72,7 @@ export const normalizeProjectStoryContent = (project: Project): Project => {
   return {
     ...project,
     storyContent,
-    files: nonStoryFiles
+    files: ancillaryFiles
   }
 }
 
@@ -90,4 +91,64 @@ export const buildPersistableProject = (project: Project): Project => {
     ...normalizedProject,
     files: [storyFile, ...nonStoryFiles]
   }
+}
+
+const findChapterStartIndex = (lines: string[], title: string): number => {
+  const normalizedTitle = title.trim().toLowerCase()
+  
+  return lines.findIndex((line) => {
+    const trimmed = line.trim()
+    if (!trimmed.startsWith('# ')) return false
+    
+    const lineTitle = trimmed.replace(/^#\s+/, '').trim().toLowerCase()
+    
+    // Exact match or matches the start with a separator (colon or space)
+    return lineTitle === normalizedTitle || 
+           lineTitle.startsWith(normalizedTitle + ':') ||
+           lineTitle.startsWith(normalizedTitle + ' ')
+  })
+}
+
+export const extractChapterContent = (storyContent: string, chapterTitle: string): string | null => {
+  const normalized = normalizeLineEndings(storyContent ?? '')
+  const lines = normalized.split('\n')
+  
+  const startIndex = findChapterStartIndex(lines, chapterTitle)
+  if (startIndex === -1) return null
+
+  let endIndex = -1
+  for (let i = startIndex + 1; i < lines.length; i++) {
+    if (/^#\s+/.test(lines[i].trim())) {
+      endIndex = i
+      break
+    }
+  }
+
+  const contentLines = lines.slice(startIndex + 1, endIndex === -1 ? lines.length : endIndex)
+  return contentLines.join('\n').trim()
+}
+
+export const replaceChapterContent = (storyContent: string, chapterTitle: string, newContent: string): string => {
+  const normalized = normalizeLineEndings(storyContent ?? '')
+  const lines = normalized.split('\n')
+  
+  const startIndex = findChapterStartIndex(lines, chapterTitle)
+
+  if (startIndex === -1) {
+    // If chapter doesn't exist, append it
+    return `${normalized.trim()}\n\n# ${chapterTitle}\n\n${newContent.trim()}`
+  }
+
+  let endIndex = -1
+  for (let i = startIndex + 1; i < lines.length; i++) {
+    if (/^#\s+/.test(lines[i].trim())) {
+      endIndex = i
+      break
+    }
+  }
+
+  const before = lines.slice(0, startIndex + 1)
+  const after = endIndex === -1 ? [] : lines.slice(endIndex)
+  
+  return [...before, '\n' + newContent.trim() + '\n', ...after].join('\n')
 }

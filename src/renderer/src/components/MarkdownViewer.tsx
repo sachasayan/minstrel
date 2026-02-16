@@ -3,6 +3,7 @@ import { useRef, JSX, useCallback } from 'react'
 
 import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
 import { setActiveSection } from '@/lib/store/appStateSlice'
+import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { DashboardRibbon } from './editor/DashboardRibbon'
 import { LexicalEditor } from './editor/LexicalEditor'
 
@@ -17,8 +18,22 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleContentChange = useCallback((newContent: string) => {
-    const targetTitle = title?.includes('|||') ? 'Story' : title || 'Story'
+    const isChapter = title?.includes('|||')
+    const targetTitle = isChapter ? 'Story' : title || 'Story'
+
     dispatch(updateFile({ title: targetTitle, content: newContent }))
+
+    // If it's a chapter, synchronize the activeSection title if it changed in the text
+    if (isChapter && title) {
+      const [oldTitle, indexStr] = title.split('|||')
+      const index = parseInt(indexStr)
+      const chapters = getChaptersFromStoryContent(newContent)
+
+      if (chapters[index] && chapters[index].title !== oldTitle) {
+        dispatch(setActiveSection(`${chapters[index].title}|||${index}`))
+      }
+    }
+
     if (!projectState.projectHasLiveEdits) {
       dispatch(setProjectHasLiveEdits(true))
     }

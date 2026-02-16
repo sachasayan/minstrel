@@ -1,7 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $convertFromMarkdownString, $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown'
 import { useEffect, useRef } from 'react'
-import { $getRoot, $insertNodes } from 'lexical'
+import { $getRoot } from 'lexical'
 
 interface MarkdownSyncPluginProps {
     initialMarkdown: string
@@ -10,29 +10,42 @@ interface MarkdownSyncPluginProps {
 
 export function MarkdownSyncPlugin({ initialMarkdown, onChange }: MarkdownSyncPluginProps): null {
     const [editor] = useLexicalComposerContext()
-    const isFirstRender = useRef(true)
+    const lastEmittedRead = useRef<string | null>(null)
 
-    // Handle Initial Load
+    // Handle External Changes (from Redux/Agent)
     useEffect(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false
+        if (lastEmittedRead.current === null || initialMarkdown !== lastEmittedRead.current) {
+            lastEmittedRead.current = initialMarkdown
             editor.update(() => {
                 const root = $getRoot()
-                root.clear()
-                $convertFromMarkdownString(initialMarkdown || '', TRANSFORMERS)
+                // Use converter to see if we actually need to update
+                // This prevents cursor loss if whitespace is slightly different
+                const currentMarkdown = $convertToMarkdownString(TRANSFORMERS)
+                if (currentMarkdown !== initialMarkdown) {
+                    root.clear()
+                    $convertFromMarkdownString(initialMarkdown || '', TRANSFORMERS)
+                }
             })
         }
     }, [editor, initialMarkdown])
 
-    // Handle Changes
+    const onChangeRef = useRef(onChange)
+    useEffect(() => {
+        onChangeRef.current = onChange
+    }, [onChange])
+
+    // Handle Local Changes
     useEffect(() => {
         return editor.registerUpdateListener(({ editorState }) => {
             editorState.read(() => {
                 const markdown = $convertToMarkdownString(TRANSFORMERS)
-                onChange(markdown)
+                if (markdown !== lastEmittedRead.current) {
+                    lastEmittedRead.current = markdown
+                    onChangeRef.current(markdown)
+                }
             })
         })
-    }, [editor, onChange])
+    }, [editor])
 
     return null
 }

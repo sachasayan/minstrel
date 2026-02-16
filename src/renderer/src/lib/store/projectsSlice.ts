@@ -12,7 +12,8 @@ import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/ty
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
 import {
-  normalizeProjectStoryContent
+  normalizeProjectStoryContent,
+  replaceChapterContent
 } from '@/lib/storyContent'
 
 const initialState: ProjectState = {
@@ -37,14 +38,7 @@ export const projectsSlice = createSlice({
         coverImageMimeType: null,
         coverImageBase64: null,
         storyContent: '# Chapter 1\n\n',
-        files: [
-          {
-            title: 'Chapter 1',
-            content: '',
-            type: 'chapter',
-            sort_order: 1
-          }
-        ],
+        files: [],
         summary: '',
         year: new Date().getFullYear(),
         expertSuggestions: [],
@@ -84,16 +78,17 @@ export const projectsSlice = createSlice({
         const payload = action.payload
         const fileIndex = state.activeProject.files.findIndex((file) => file.title === payload.title)
 
-        // If it's the "Story" or an H1 chapter, or any other file
+        // Special case: "Story" title always updates the monolith
+        if (payload.title === 'Story') {
+          state.activeProject.storyContent = payload.content
+        }
+
+        // Also update the file in the list if it exists
         if (fileIndex !== -1) {
           state.activeProject.files[fileIndex].content = payload.content
           state.activeProject.files[fileIndex].hasEdits = true
-          
-          // If we are updating the "Story" itself
-          if (state.activeProject.files[fileIndex].title === 'Story') {
-            state.activeProject.storyContent = payload.content
-          }
-        } else {
+        } else if (payload.title !== 'Story') {
+          // Don't duplicate Story in files array if updated via monolith
           state.activeProject.files.push({
             title: payload.title,
             content: payload.content,
@@ -155,6 +150,17 @@ export const projectsSlice = createSlice({
         state.activeProject.storyContent = `${currentContent}${delimiter}# ${newChapterTitle}\n\n`
         state.projectHasLiveEdits = true
       }
+    },
+    updateChapter: (state, action: PayloadAction<{ title: string; content: string }>) => {
+      if (state.activeProject) {
+        const { title, content } = action.payload
+        state.activeProject.storyContent = replaceChapterContent(
+          state.activeProject.storyContent,
+          title,
+          content
+        )
+        state.projectHasLiveEdits = true
+      }
     }
   }
 })
@@ -172,7 +178,8 @@ export const {
   updateReviews,
   updateMetaProperty,
   updateCoverImage,
-  addChapter // Export the new action
+  addChapter, // Export the new action
+  updateChapter
 } = projectsSlice.actions
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject

@@ -21,44 +21,49 @@ export function ScrollSyncPlugin({
     useEffect(() => {
         if (!activeSection) return
 
-        if (activeSection === 'Overview') {
+        // Programmatic scroll for Overview or any section that doesn't have an index
+        if (activeSection === 'Overview' || !activeSection.includes('|||')) {
             isProgrammaticScroll.current = true
             containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-            setTimeout(() => (isProgrammaticScroll.current = false), 1000)
+            setTimeout(() => (isProgrammaticScroll.current = false), 800)
             return
         }
 
-        if (activeSection.includes('|||')) {
-            const [_, indexStr] = activeSection.split('|||')
-            const index = parseInt(indexStr)
+        const [_, indexStr] = activeSection.split('|||')
+        const index = parseInt(indexStr)
 
-            editor.getEditorState().read(() => {
-                const root = $getRoot()
-                const headingNodes = root
-                    .getChildren()
-                    .filter((node): node is HeadingNode => node instanceof HeadingNode && node.getTag() === 'h1')
+        editor.getEditorState().read(() => {
+            const root = $getRoot()
+            const headingNodes = root
+                .getChildren()
+                .filter((node): node is HeadingNode => node instanceof HeadingNode && node.getTag() === 'h1')
 
-                if (headingNodes[index]) {
-                    const domElement = editor.getElementByKey(headingNodes[index].getKey())
-                    if (domElement) {
-                        isProgrammaticScroll.current = true
-                        domElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                        setTimeout(() => (isProgrammaticScroll.current = false), 1000)
-                    }
+            if (headingNodes[index]) {
+                const domElement = editor.getElementByKey(headingNodes[index].getKey())
+                if (domElement) {
+                    isProgrammaticScroll.current = true
+                    domElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    // Wait for scroll to finish before allowing observer to update sidebar
+                    setTimeout(() => (isProgrammaticScroll.current = false), 800)
                 }
-            })
-        }
+            }
+        })
     }, [activeSection, editor, containerRef])
 
     // 2. Handle Scroll Observation (Editor -> Story)
     useEffect(() => {
+        const scrollContainer = containerRef.current
+        if (!scrollContainer) return
+
         const observer = new IntersectionObserver(
             (entries) => {
                 if (isProgrammaticScroll.current) return
 
                 entries.forEach((entry) => {
-                    if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-                        // Handle Overview target specifically if it's passed in or found
+                    // Use a slightly higher threshold or rootMargin to be more precise
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+
+                        // Handle Overview target
                         if (entry.target.id === 'overview-target') {
                             if (activeSection !== 'Overview') {
                                 onSectionChange('Overview')
@@ -66,10 +71,15 @@ export function ScrollSyncPlugin({
                             return
                         }
 
-                        // Find index of this heading
+                        // Find index of this heading ONLY within the editor's editable area
+                        // This avoids counting the project title H1
                         const heading = entry.target as HTMLElement
-                        const allHeadings = Array.from(containerRef.current?.querySelectorAll('h1') || [])
-                        const idx = allHeadings.indexOf(heading)
+                        const editorElement = containerRef.current?.querySelector('[contenteditable="true"]')
+                        if (!editorElement?.contains(heading)) return
+
+                        const allEditorHeadings = Array.from(editorElement.querySelectorAll('h1'))
+                        const idx = allEditorHeadings.indexOf(heading as HTMLHeadingElement)
+
                         if (idx !== -1) {
                             const section = `${heading.innerText.trim()}|||${idx}`
                             if (activeSection !== section) {
@@ -80,9 +90,9 @@ export function ScrollSyncPlugin({
                 })
             },
             {
-                root: null,
-                rootMargin: '-10% 0px -70% 0px',
-                threshold: [0, 0.5, 1]
+                root: scrollContainer,
+                rootMargin: '-5% 0px -85% 0px', // Tight top margin to trigger when heading hits top
+                threshold: [0, 0.1, 0.5]
             }
         )
 
@@ -91,17 +101,16 @@ export function ScrollSyncPlugin({
             const overview = document.getElementById('overview-target')
             if (overview) observer.observe(overview)
 
-            const headings = containerRef.current?.querySelectorAll('h1')
+            // Only observe headings INSIDE the editor
+            const editorElement = containerRef.current?.querySelector('[contenteditable="true"]')
+            const headings = editorElement?.querySelectorAll('h1')
             headings?.forEach((h) => observer.observe(h))
         }
 
-        // Initial and on update
         updateObservation()
 
-        // Lexical update listener to re-observe if headings change
         return editor.registerUpdateListener(() => {
-            // Debounce slightly if needed, but headlines don't change THAT often
-            setTimeout(updateObservation, 100)
+            setTimeout(updateObservation, 200)
         })
     }, [editor, activeSection, onSectionChange, containerRef])
 

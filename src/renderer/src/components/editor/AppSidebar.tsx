@@ -83,13 +83,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {chapters.map((chapter, i) => {
-                  const isActive = appState.activeView === 'project/editor' && appState.activeSection?.startsWith(`${chapter.title}|||${i}`);
+                  const isActive = appState.activeSection?.endsWith(`|||${i}`)
                   return (
-                    <SidebarMenuItem key={`${chapter.title}-${i}`}>
+                    <SidebarMenuItem key={`chapter-${i}`}>
                       <SidebarMenuButton asChild isActive={isActive}>
                         <a onClick={() => handleChapterSelect(chapter.title, i)} className={`flex items-center`}>
                           <Book />
-                          <span className="flex-grow ml-2">{chapter.title.replace('-', ' ')}</span>
+                          <span className="flex-grow ml-2">
+                            {chapter.title.trim() || `Chapter ${i + 1}`}
+                          </span>
                         </a>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
