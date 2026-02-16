@@ -11,12 +11,15 @@ const providerFactories: Record<string, any> = {
   // deepseek and zai need to be implemented when SDKs are available
 }
 
+// Default identity mapping
+const identity = (modelId: string): string => modelId
+
 // Model mapping for each provider
 const providerModelMapping: Record<string, (modelId: string) => string> = {
-  google: (modelId: string) => modelId, // Google uses model IDs directly
-  openai: (modelId: string) => modelId, // OpenAI uses model IDs directly
-  deepseek: (modelId: string) => modelId, // Placeholder
-  zai: (modelId: string) => modelId // Placeholder
+  google: identity, // Google uses model IDs directly
+  openai: identity, // OpenAI uses model IDs directly
+  deepseek: identity, // Placeholder
+  zai: identity // Placeholder
 }
 
 const llmService = {
@@ -94,14 +97,12 @@ const llmService = {
   getModel(aiProvider: any, provider: string, modelId: string) {
     const mappedModelId = providerModelMapping[provider]?.(modelId) || modelId
 
-    if (provider === 'google') {
+    if (provider in providerFactories) {
       return aiProvider(mappedModelId)
-    } else if (provider === 'openai') {
-      return aiProvider(mappedModelId)
-    } else {
-      // For unsupported providers, throw error
-      throw new Error(`Provider ${provider} not yet implemented`)
     }
+
+    // For unsupported providers, throw error
+    throw new Error(`Provider ${provider} not yet implemented`)
   },
 
   // Generate content with selected provider
