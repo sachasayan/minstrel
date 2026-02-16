@@ -13,7 +13,7 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-
+        '@shared': resolve('src/shared'),
         '@/assets': resolve('src/renderer/src/assets'),
         '@/components': resolve('src/renderer/src/components'),
         '@/ui': resolve('src/renderer/src/components/ui'),

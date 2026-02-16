@@ -1,11 +1,11 @@
 import settings from 'electron-settings'
 import * as os from 'os'
 import { ipcMain } from 'electron'
-
-// Default model IDs
-const DEFAULT_HIGH_PREFERENCE_MODEL_ID = 'gemini-2.0-flash-thinking-exp-01-21'
-const DEFAULT_LOW_PREFERENCE_MODEL_ID = 'gemini-2.0-flash'
-const DEFAULT_PROVIDER = 'google'
+import {
+  DEFAULT_HIGH_PREFERENCE_MODEL_ID,
+  DEFAULT_LOW_PREFERENCE_MODEL_ID,
+  DEFAULT_PROVIDER
+} from '../shared/constants'
 
 interface AppSettings {
   api?: string
