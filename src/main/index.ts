@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 import icon from '../../resources/icon.icns?asset'
 import { registerFileOpsHandlers } from './fileOps'
 import { registerSettingsHandlers } from './settingsManager'
@@ -44,8 +45,6 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
-
-import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
