@@ -145,7 +145,7 @@ export const projectsSlice = createSlice({
         const currentContent = state.activeProject.storyContent || ''
         const newChapterNumber = (currentContent.match(/^#\s+/gm) || []).length + 1
         const newChapterTitle = `Chapter ${newChapterNumber}`
-        const delimiter = currentContent.endsWith('\n\n') ? '' : currentContent.endsWith('\n') ? '\n' : '\n\n'
+        const delimiter = currentContent === '' ? '' : currentContent.endsWith('\n\n') ? '' : currentContent.endsWith('\n') ? '\n' : '\n\n'
         
         state.activeProject.storyContent = `${currentContent}${delimiter}# ${newChapterTitle}\n\n`
         state.projectHasLiveEdits = true
