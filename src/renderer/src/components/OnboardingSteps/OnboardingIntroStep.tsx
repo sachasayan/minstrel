@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Folder, WandSparkles } from 'lucide-react'
+import { toast } from 'sonner'
 import { useOnboarding } from './context' // Use the new context hook
 import minstrelIcon from '@/assets/bot/base.png'
 
@@ -22,7 +23,7 @@ const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode 
       }
     } catch (error) {
         console.error("Error selecting directory:", error);
-        // Handle error appropriately, maybe show a toast
+        toast.error("Failed to select directory.");
     }
     return null
   }

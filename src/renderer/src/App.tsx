@@ -70,9 +70,9 @@ export default function App(): ReactNode {
         // Render the main application UI
         <div className="h-screen">
           {router(activeView)}
-          <Toaster position="bottom-center" richColors />
         </div>
       )}
+      <Toaster position="bottom-center" richColors />
     </>
   )
 }
