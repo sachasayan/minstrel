@@ -1,11 +1,7 @@
 import settings from 'electron-settings'
 import * as os from 'os'
-import { ipcMain } from 'electron'
-import {
-  DEFAULT_HIGH_PREFERENCE_MODEL_ID,
-  DEFAULT_LOW_PREFERENCE_MODEL_ID,
-  DEFAULT_PROVIDER
-} from '../shared/constants'
+import { ipcMain, safeStorage } from 'electron'
+import { DEFAULT_HIGH_PREFERENCE_MODEL_ID, DEFAULT_LOW_PREFERENCE_MODEL_ID, DEFAULT_PROVIDER } from '../shared/constants'
 
 interface AppSettings {
   api?: string
@@ -18,6 +14,50 @@ interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+}
+
+const SENSITIVE_KEYS: (keyof AppSettings)[] = ['googleApiKey', 'deepseekApiKey', 'zaiApiKey', 'openaiApiKey']
+
+const ENCRYPTION_PREFIX = 'enc:'
+
+/**
+ * Encrypts a string value using Electron's safeStorage API.
+ * Adds a prefix to identify the value as encrypted.
+ */
+export const encryptValue = (value: string): string => {
+  if (!value || value.startsWith(ENCRYPTION_PREFIX) || !safeStorage.isEncryptionAvailable()) {
+    return value
+  }
+
+  try {
+    const encrypted = safeStorage.encryptString(value)
+    return ENCRYPTION_PREFIX + encrypted.toString('base64')
+  } catch (error) {
+    console.error('Failed to encrypt setting:', error)
+    return value
+  }
+}
+
+/**
+ * Decrypts a string value using Electron's safeStorage API if it has the encryption prefix.
+ */
+export const decryptValue = (value: string): string => {
+  if (!value || !value.startsWith(ENCRYPTION_PREFIX) || !safeStorage.isEncryptionAvailable()) {
+    return value
+  }
+
+  try {
+    const encryptedData = value.substring(ENCRYPTION_PREFIX.length)
+    const buffer = Buffer.from(encryptedData, 'base64')
+    return safeStorage.decryptString(buffer)
+  } catch (error) {
+    console.error('Failed to decrypt setting. It might be corrupted or from another machine:', error)
+    // If decryption fails, we return the original value (with prefix)
+    // or we could return empty string, but returning the original allows
+    // the user to see there's something there, even if it's garbage.
+    // In practice, if it's an API key, garbage won't work anyway.
+    return value
+  }
 }
 
 export const loadAppSettings = async (): Promise<AppSettings> => {
@@ -49,12 +89,19 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   if (appSettings.zaiApiKey === undefined) appSettings.zaiApiKey = ''
   if (appSettings.openaiApiKey === undefined) appSettings.openaiApiKey = ''
 
+  // Decrypt sensitive fields
+  for (const key of SENSITIVE_KEYS) {
+    if (appSettings[key]) {
+      appSettings[key] = decryptValue(appSettings[key])
+    }
+  }
+
   return appSettings as AppSettings
 }
 
 export const saveAppSettings = async (config: AppSettings) => {
   // Provide defaults for potentially undefined values to satisfy electron-settings types
-  const settingsToSave = {
+  const settingsToSave: any = {
     api: config.api ?? '', // Default to empty string if undefined
     workingRootDirectory: config.workingRootDirectory ?? null, // Default to null if undefined
     highPreferenceModelId: config.highPreferenceModelId ?? DEFAULT_HIGH_PREFERENCE_MODEL_ID,
@@ -65,6 +112,13 @@ export const saveAppSettings = async (config: AppSettings) => {
     deepseekApiKey: config.deepseekApiKey ?? '',
     zaiApiKey: config.zaiApiKey ?? '',
     openaiApiKey: config.openaiApiKey ?? ''
+  }
+
+  // Encrypt sensitive fields
+  for (const key of SENSITIVE_KEYS) {
+    if (settingsToSave[key]) {
+      settingsToSave[key] = encryptValue(settingsToSave[key])
+    }
   }
   // Type assertion might be needed if electron-settings types are very strict,
   // but providing defaults should generally work.
