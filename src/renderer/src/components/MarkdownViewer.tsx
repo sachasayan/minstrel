@@ -45,7 +45,9 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
   return (
     <>
       <div ref={containerRef} className="relative w-full max-w-7xl mx-auto h-full overflow-y-auto overflow-x-hidden no-scrollbar px-6 py-1 md:px-24 md:py-12">
-        <div id="overview-target" className="w-full h-1" />
+        {(title === 'Overview' || title?.includes('|||')) && (
+          <div id="overview-target" className="w-full h-1" />
+        )}
 
         {projectState.activeProject && (
           <h1 className="text-4xl font-bold mb-8 text-highlight-700">

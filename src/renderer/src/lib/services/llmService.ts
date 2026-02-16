@@ -1,18 +1,22 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateText, streamText } from 'ai'
+import { generateText, streamText, LanguageModel } from 'ai'
 import { store } from '@/lib/store/store'
 import { PROVIDER_MODELS } from '@shared/constants'
 
+type ProviderName = keyof typeof PROVIDER_MODELS
+type AIProvider = (modelId: string) => LanguageModel
+type ProviderFactory = (options: { apiKey: string }) => AIProvider
+
 // Provider factory functions
-const providerFactories: Record<string, any> = {
-  google: createGoogleGenerativeAI,
-  openai: createOpenAI
+const providerFactories: Partial<Record<ProviderName, ProviderFactory>> = {
+  google: createGoogleGenerativeAI as unknown as ProviderFactory,
+  openai: createOpenAI as unknown as ProviderFactory
   // deepseek and zai need to be implemented when SDKs are available
 }
 
 // Model mapping for each provider
-const providerModelMapping: Record<string, (modelId: string) => string> = {
+const providerModelMapping: Partial<Record<ProviderName, (modelId: string) => string>> = {
   google: (modelId: string) => modelId, // Google uses model IDs directly
   openai: (modelId: string) => modelId, // OpenAI uses model IDs directly
   deepseek: (modelId: string) => modelId, // Placeholder
@@ -85,14 +89,16 @@ const llmService = {
 
   // Get default model ID for a provider
   getDefaultModelId(provider: string, preference: 'high' | 'low'): string {
+    const providerKey = provider as ProviderName
     return (
-      (PROVIDER_MODELS as any)[provider]?.[preference] || PROVIDER_MODELS.google[preference]
+      PROVIDER_MODELS[providerKey]?.[preference] || PROVIDER_MODELS.google[preference]
     )
   },
 
   // Get model instance
-  getModel(aiProvider: any, provider: string, modelId: string) {
-    const mappedModelId = providerModelMapping[provider]?.(modelId) || modelId
+  getModel(aiProvider: AIProvider, provider: string, modelId: string) {
+    const providerKey = provider as ProviderName
+    const mappedModelId = providerModelMapping[providerKey]?.(modelId) || modelId
 
     if (provider === 'google') {
       return aiProvider(mappedModelId)
@@ -104,67 +110,67 @@ const llmService = {
     }
   },
 
-  // Generate content with selected provider
-  async generateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
+  // Helper to get provider and model based on settings
+  async getProviderAndModel(modelPreference: 'high' | 'low' = 'low') {
     const settings = store.getState().settings
     const provider = settings.provider || 'google'
     const apiKey = await this.getApiKey(provider)
 
     if (!apiKey) {
-      throw new Error(`LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`)
+      throw new Error(
+        `LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`
+      )
     }
 
     const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
     const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
     const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
 
-    console.log(`Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`)
+    const factory = providerFactories[provider]
+    if (!factory) {
+      throw new Error(`Provider ${provider} not supported`)
+    }
+
+    const aiProvider = factory({ apiKey })
+    const model = this.getModel(aiProvider, provider, selectedModelId)
+
+    return { model, provider, selectedModelId }
+  },
+
+  // Generate content with selected provider
+  async generateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+
+    console.log(
+      `Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
+    )
 
     try {
-      const factory = providerFactories[provider]
-      if (!factory) {
-        throw new Error(`Provider ${provider} not supported`)
-      }
-
-      const aiProvider = factory({ apiKey })
-      const model = this.getModel(aiProvider, provider, selectedModelId)
-
       const { text } = await generateText({
         model,
         prompt: prompt
       })
       return text
     } catch (error) {
-      console.error(`Error generating content with provider ${provider} (Model: ${selectedModelId}):`, error)
-      throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : String(error)}`)
+      console.error(
+        `Error generating content with provider ${provider} (Model: ${selectedModelId}):`,
+        error
+      )
+      throw new Error(
+        `Failed to generate content: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   },
 
   // Streaming version of generateContent
   async *streamGenerateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
-    const settings = store.getState().settings
-    const provider = settings.provider || 'google'
-    const apiKey = await this.getApiKey(provider)
+    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
 
-    if (!apiKey) {
-      throw new Error(`LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`)
-    }
-
-    const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
-    const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
-    const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
-
-    console.log(`Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`)
+    console.log(
+      `Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
+    )
 
     try {
-      const factory = providerFactories[provider]
-      if (!factory) {
-        throw new Error(`Provider ${provider} not supported`)
-      }
-
-      const aiProvider = factory({ apiKey })
-      const model = this.getModel(aiProvider, provider, selectedModelId)
-
       const { textStream } = await streamText({
         model,
         prompt: prompt
@@ -175,8 +181,13 @@ const llmService = {
         yield delta
       }
     } catch (error) {
-      console.error(`Error streaming content with provider ${provider} (Model: ${selectedModelId}):`, error)
-      throw new Error(`Failed to stream content: ${error instanceof Error ? error.message : String(error)}`)
+      console.error(
+        `Error streaming content with provider ${provider} (Model: ${selectedModelId}):`,
+        error
+      )
+      throw new Error(
+        `Failed to stream content: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   }
 }

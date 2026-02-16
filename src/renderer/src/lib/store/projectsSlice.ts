@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit'
 // Patch Project interface to add dialogueAnalysis property
 declare module '@/types' {
   interface Project {
@@ -185,18 +185,20 @@ export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject
 
 // Add selector for cover data URL (implementation for Step 5)
-// This selector computes the data URL on demand
-export const selectActiveProjectWithCoverDataUrl = (state: RootState): Project | null => {
-  const activeProject = state.projects.activeProject
-  if (activeProject && activeProject.coverImageBase64 && activeProject.coverImageMimeType) {
-    // Return a *copy* of the project with the cover data URL populated
-    return {
-      ...activeProject,
-      cover: `data:${activeProject.coverImageMimeType};base64,${activeProject.coverImageBase64}`
+// This selector computes the data URL on demand and is memoized
+export const selectActiveProjectWithCoverDataUrl = createSelector(
+  [selectActiveProject],
+  (activeProject): Project | null => {
+    if (activeProject && activeProject.coverImageBase64 && activeProject.coverImageMimeType) {
+      // Return a *copy* of the project with the cover data URL populated
+      return {
+        ...activeProject,
+        cover: `data:${activeProject.coverImageMimeType};base64,${activeProject.coverImageBase64}`
+      }
     }
+    // Return the original project if cover data is missing or project is null
+    return activeProject
   }
-  // Return the original project if cover data is missing or project is null
-  return activeProject
-}
+)
 
 export default projectsSlice.reducer
