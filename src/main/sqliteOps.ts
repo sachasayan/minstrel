@@ -1,15 +1,8 @@
 import { ipcMain } from 'electron'
-import * as os from 'os'
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths with home directory
-const resolvePath = (filePath: string): string => {
-  return filePath.replace('~', homedir)
-}
+import { resolvePath, validateProjectPath } from './pathUtils'
 
 const isChapterTitle = (title: string | null | undefined): boolean => {
   if (!title) return false
@@ -71,6 +64,9 @@ const CREATE_TABLES_SQL = `
 
 // Initialize a new SQLite database for a project
 export const handleInitSqliteProject = async (_event, filePath: string, metadata: any) => {
+  if (!(await validateProjectPath(filePath))) {
+    return { success: false, error: 'Unauthorized path' }
+  }
   const resolvedPath = resolvePath(filePath)
   let db
   try {
@@ -108,6 +104,9 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
 
 // Save project to SQLite database - Reverted project type to 'any'
 export const handleSaveSqliteProject = async (_event, filePath: string, project: any) => {
+  if (!(await validateProjectPath(filePath))) {
+    return { success: false, error: 'Unauthorized path' }
+  }
   const resolvedPath = resolvePath(filePath)
 
   let db
@@ -209,6 +208,9 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
  * This function returns the full metadata object including the project path.
  */
 const getProjectMetaInternal = async (filePath: string) => {
+  if (!(await validateProjectPath(filePath))) {
+    return null
+  }
   const resolvedPath = resolvePath(filePath)
   let db
   try {
@@ -279,6 +281,9 @@ export const handleGetSqliteProjectsMeta = async (_event, filePaths: string[]) =
 
 // Load full project from SQLite database
 export const handleLoadSqliteProject = async (_event, filePath: string) => {
+  if (!(await validateProjectPath(filePath))) {
+    throw new Error('Unauthorized path')
+  }
   const resolvedPath = resolvePath(filePath)
   let db
   try {
