@@ -29,5 +29,8 @@ jobs:
       - name: Run typecheck
         run: npm run typecheck
 
+      - name: Rebuild better-sqlite3 for Node
+        run: npm rebuild better-sqlite3
+
       - name: Run tests
         run: npm run test
