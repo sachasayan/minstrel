@@ -4,6 +4,8 @@ import { useTheme } from '@/components/theme-provider'
 import { useDispatch } from 'react-redux'
 import { setActiveView } from '@/lib/store/appStateSlice'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 type StatusBarProps = {
   floating?: boolean
@@ -28,23 +30,51 @@ const StatusBar = ({ floating = true }: StatusBarProps) => {
     dispatch(setActiveView('settings'))
   }
 
+  const themeLabel = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+
   return (
-    <div className={cn(
-      'flex items-center gap-2 rounded-full border p-2',
-      floating && 'fixed top-4 right-4 z-50'
-    )}>
-      <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
+    <div
+      className={cn(
+        'bg-background/80 flex items-center gap-1 rounded-full border p-1 backdrop-blur-sm',
+        floating && 'fixed top-4 right-4 z-50 shadow-sm'
+      )}
+    >
+      <div
+        className={cn('mx-2 h-2.5 w-2.5 rounded-full', isOnline ? 'bg-green-500' : 'bg-red-500')}
+        role="status"
+        aria-label={isOnline ? 'Online' : 'Offline'}
+        title={isOnline ? 'Online' : 'Offline'}
+      />
 
-      <button
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        title={theme === 'dark' ? 'Disable dark mode' : 'Enable dark mode'}
-      >
-        {theme === 'dark' ? <Sun className="size-4" fill="currentColor" />: <Moon className="size-4" />}
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            aria-label={themeLabel}
+            className="h-8 w-8 rounded-full"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{themeLabel}</TooltipContent>
+      </Tooltip>
 
-      <button onClick={openSettings}>
-        <Settings className="w-4 h-4" />
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openSettings}
+            aria-label="Settings"
+            className="h-8 w-8 rounded-full"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">Settings</TooltipContent>
+      </Tooltip>
     </div>
   )
 }

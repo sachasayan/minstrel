@@ -5,6 +5,7 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 
 import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AlertCircle } from 'lucide-react'
@@ -90,8 +91,10 @@ export default function App(): ReactNode {
         ) : (
           // Render the main application UI
           <div className="h-full">
-            {router(activeView)}
-            <Toaster position="bottom-center" richColors />
+            <TooltipProvider>
+              {router(activeView)}
+              <Toaster position="bottom-center" richColors />
+            </TooltipProvider>
           </div>
         )}
       </div>
