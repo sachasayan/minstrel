@@ -31,7 +31,7 @@ export const stringToProjectFile = (markdownString: string): ProjectFile => {
     }
   }
 
-  const wordcount = content.split(/\\s+/).filter((word) => word.length > 0).length
+  const wordcount = content.split(/\s+/).filter((word) => word.length > 0).length
   return {
     title,
     content,
