@@ -19,6 +19,7 @@ export interface ProjectState {
   projectHasLiveEdits: boolean
   activeProject: Project | null
   pendingFiles: string[] | null
+  modifiedChapters: number[] // Track unsaved chapter changes
 }
 
 export interface Project extends ProjectFragment {
@@ -52,6 +53,7 @@ export interface ProjectFile {
   content: string
   wordcount?: number
   hasEdits?: boolean
+  chapterIndex?: number // NEW: Track which chapter is being edited
   type?: string
   sort_order?: number
 }

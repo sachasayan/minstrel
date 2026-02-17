@@ -19,7 +19,8 @@ import {
 const initialState: ProjectState = {
   projectHasLiveEdits: false,
   activeProject: null,
-  pendingFiles: null
+  pendingFiles: null,
+  modifiedChapters: []
 }
 
 export const projectsSlice = createSlice({
@@ -50,12 +51,15 @@ export const projectsSlice = createSlice({
       state.projectHasLiveEdits = true // It's unsaved
       // Clear pending files if any were leftover from a previous project state
       state.pendingFiles = null
+      state.modifiedChapters = []
     },
     setActiveProjectFromFragment: (state, action: PayloadAction<ProjectFragment>) => {
       state.activeProject = projectFromFragment(action.payload)
+      state.modifiedChapters = []
     },
     setActiveProject: (state, action: PayloadAction<Project | null>) => {
       state.activeProject = action.payload ? normalizeProjectStoryContent(action.payload) : null
+      state.modifiedChapters = []
     },
     setProjectHasLiveEdits: (state, action: PayloadAction<boolean>) => {
       state.projectHasLiveEdits = action.payload
@@ -65,6 +69,7 @@ export const projectsSlice = createSlice({
       state.activeProject?.files?.forEach((chapter) => {
         chapter.hasEdits = false
       })
+      state.modifiedChapters = []
       // Also reset cover image edit status implicitly if needed, or add specific flag
     },
     setPendingFiles: (state, action: PayloadAction<string[] | null>) => {
@@ -81,6 +86,11 @@ export const projectsSlice = createSlice({
         // Special case: "Story" title always updates the monolith
         if (payload.title === 'Story') {
           state.activeProject.storyContent = payload.content
+          
+          // If we have a chapter index, track it as modified
+          if (payload.chapterIndex !== undefined && !state.modifiedChapters.includes(payload.chapterIndex)) {
+            state.modifiedChapters.push(payload.chapterIndex)
+          }
         }
 
         // Also update the file in the list if it exists
@@ -149,6 +159,11 @@ export const projectsSlice = createSlice({
         
         state.activeProject.storyContent = `${currentContent}${delimiter}# ${newChapterTitle}\n\n`
         state.projectHasLiveEdits = true
+        
+        // Track the new chapter as modified
+        if (!state.modifiedChapters.includes(newChapterNumber - 1)) {
+          state.modifiedChapters.push(newChapterNumber - 1)
+        }
       }
     },
     updateChapter: (state, action: PayloadAction<{ title: string; content: string }>) => {
@@ -160,6 +175,10 @@ export const projectsSlice = createSlice({
           content
         )
         state.projectHasLiveEdits = true
+        
+        // Note: updateChapter currently doesn't pass index, 
+        // but we might want to find it if we use this reducer for edits.
+        // However, MarkdownViewer uses updateFile for live edits.
       }
     }
   }

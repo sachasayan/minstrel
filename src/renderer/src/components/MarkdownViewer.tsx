@@ -21,7 +21,13 @@ export default function MarkdownViewer({ title, content }: MarkdownViewerProps):
     const isChapter = title?.includes('|||')
     const targetTitle = isChapter ? 'Story' : title || 'Story'
 
-    dispatch(updateFile({ title: targetTitle, content: newContent }))
+    let chapterIndex: number | undefined = undefined
+    if (isChapter && title) {
+      const parts = title.split('|||')
+      chapterIndex = parseInt(parts[parts.length - 1])
+    }
+
+    dispatch(updateFile({ title: targetTitle, content: newContent, chapterIndex }))
 
     // If it's a chapter, synchronize the activeSection title if it changed in the text
     if (isChapter && title) {

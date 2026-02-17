@@ -15,7 +15,8 @@ describe('projectsSlice', () => {
   const initialState: ProjectState = {
     projectHasLiveEdits: false,
     activeProject: null,
-    pendingFiles: null
+    pendingFiles: null,
+    modifiedChapters: []
   }
 
   it('should handle startNewProject', () => {
@@ -30,9 +31,10 @@ describe('projectsSlice', () => {
       ...initialState,
       activeProject: { title: 'P1', files: [], storyContent: '' } as any
     }
-    const actual = reducer(stateWithProject, updateFile({ title: 'Story', content: 'New Content' } as any))
+    const actual = reducer(stateWithProject, updateFile({ title: 'Story', content: 'New Content', chapterIndex: 0 } as any))
     expect(actual.activeProject?.storyContent).toBe('New Content')
     expect(actual.projectHasLiveEdits).toBe(true)
+    expect(actual.modifiedChapters).toContain(0)
     expect(actual.activeProject?.files).toHaveLength(0) // Should not add to files array
   })
 
@@ -63,6 +65,7 @@ describe('projectsSlice', () => {
     }
     const actual = reducer(stateWithProject, addChapter())
     expect(actual.activeProject?.storyContent).toContain('# Chapter 2')
+    expect(actual.modifiedChapters).toContain(1) // Chapter 2 is index 1
   })
 
   it('should handle surgical updateChapter', () => {
@@ -79,11 +82,13 @@ describe('projectsSlice', () => {
     const stateWithEdits = {
       ...initialState,
       projectHasLiveEdits: true,
-      activeProject: { files: [{ title: 'C1', hasEdits: true }] } as any
+      activeProject: { files: [{ title: 'C1', hasEdits: true }] } as any,
+      modifiedChapters: [0, 1]
     }
     const actual = reducer(stateWithEdits, setAllFilesAsSaved())
     expect(actual.projectHasLiveEdits).toBe(false)
     expect(actual.activeProject?.files[0].hasEdits).toBe(false)
+    expect(actual.modifiedChapters).toHaveLength(0)
   })
 
   describe('selectors', () => {

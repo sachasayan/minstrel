@@ -84,6 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {chapters.map((chapter, i) => {
                   const isActive = appState.activeSection?.endsWith(`|||${i}`)
+                  const isModified = projectsState.modifiedChapters?.includes(i)
                   return (
                     <SidebarMenuItem key={`chapter-${i}`}>
                       <SidebarMenuButton asChild isActive={isActive}>
@@ -92,6 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <span className="flex-grow ml-2">
                             {chapter.title.trim() || `Chapter ${i + 1}`}
                           </span>
+                          {isModified && <Diff className="ml-2 h-4 w-4 text-orange-500" />}
                         </a>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
