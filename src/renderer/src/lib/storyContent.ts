@@ -132,9 +132,14 @@ export const replaceChapterContent = (storyContent: string, chapterTitle: string
   
   const startIndex = findChapterStartIndex(lines, chapterTitle)
 
+  // Ensure content starts with a header if it doesn't already have one
+  const contentToInsert = /^#\s+/.test(newContent.trim()) 
+    ? newContent.trim() 
+    : `# ${chapterTitle}\n\n${newContent.trim()}`
+
   if (startIndex === -1) {
     // If chapter doesn't exist, append it
-    return `${normalized.trim()}\n\n# ${chapterTitle}\n\n${newContent.trim()}`
+    return `${normalized.trim()}\n\n${contentToInsert}`
   }
 
   let endIndex = -1
@@ -145,8 +150,19 @@ export const replaceChapterContent = (storyContent: string, chapterTitle: string
     }
   }
 
-  const before = lines.slice(0, startIndex + 1)
+  // Replace everything from startIndex to endIndex (exclusive of endIndex)
+  const before = lines.slice(0, startIndex)
   const after = endIndex === -1 ? [] : lines.slice(endIndex)
   
-  return [...before, '\n' + newContent.trim() + '\n', ...after].join('\n')
+  // Clean up potential double newlines
+  const beforeText = before.join('\n').trim()
+  const afterText = after.join('\n').trim()
+
+  return [
+    beforeText,
+    beforeText ? '\n\n' : '',
+    contentToInsert,
+    afterText ? '\n\n' : '',
+    afterText
+  ].join('')
 }

@@ -166,6 +166,14 @@ describe('replaceChapterContent', () => {
     expect(result).toContain('# C3')
     expect(result).toContain('New 3')
   })
+
+  it('should not duplicate header if new content already has one', () => {
+    const result = replaceChapterContent(content, 'C1', '# C1\nNew Content')
+    const matches = result.match(/# C1/g)
+    expect(matches).toHaveLength(1)
+    expect(result).toContain('New Content')
+    expect(result).not.toContain('Old 1')
+  })
 })
 
 describe('isStoryFile', () => {
