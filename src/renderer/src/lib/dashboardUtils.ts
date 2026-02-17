@@ -74,20 +74,32 @@ function extractCharactersFromOutline(outlineContent: string): { name: string }[
 function getCharacterFrequencyData(activeProject: Project): CharacterFrequencyData[] {
   const charactersList = extractCharactersFromOutline(activeProject.files.find((f) => f.title.indexOf('Outline') != -1)?.content || '')
 
-  return getChapterWordCounts(activeProject.storyContent || '')
-    .map((chapter, i) => {
-      const chapterData: CharacterFrequencyData = {
-        chapter: i + 1,
-        chapterWordCount: chapter.wordCount
-      }
+  // Pre-compile regexes for each character to avoid recompilation in the loop
+  const characterMatchers = charactersList.map((char, index) => ({
+    name: char.name,
+    // Use word boundaries to match exact names
+    regex: new RegExp(`\\b${char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'),
+    color: colors[index % colors.length]
+  }))
 
-      charactersList.forEach((char, index) => {
-        const escapedName = char.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        chapterData[char.name] = (chapter.content.match(new RegExp(`\\b${escapedName}\\b`, 'g')) || []).length
-        chapterData[`${char.name}_color`] = colors[index % colors.length]
-      })
-      return chapterData
-    })
+  return getChapterWordCounts(activeProject.storyContent || '').map((chapter, i) => {
+    const chapterData: CharacterFrequencyData = {
+      chapter: i + 1,
+      chapterWordCount: chapter.wordCount
+    }
+
+    for (const matcher of characterMatchers) {
+      // Optimization: skip regex if the name string isn't present at all
+      if (!chapter.content.includes(matcher.name)) {
+        chapterData[matcher.name] = 0
+        chapterData[`${matcher.name}_color`] = matcher.color
+        continue
+      }
+      chapterData[matcher.name] = (chapter.content.match(matcher.regex) || []).length
+      chapterData[`${matcher.name}_color`] = matcher.color
+    }
+    return chapterData
+  })
 }
 
 /**
