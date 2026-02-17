@@ -4,7 +4,7 @@ import { setActiveSection, setActiveView } from '@/lib/store/appStateSlice'
 import { selectProjects, addChapter } from '@/lib/store/projectsSlice'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
 
-import { addChatMessage } from '@/lib/store/chatSlice'
+
 
 import { Plus, Diff, LayoutDashboard, ListOrdered, Book } from 'lucide-react'
 import { Button } from '@/components/ui/button'

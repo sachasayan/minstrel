@@ -1,7 +1,7 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+
 import { Suspense } from 'react'
 import LetterTorrent from './letterTorrent'
 

@@ -8,10 +8,7 @@ import {
   CommandItem,
 } from '@/components/ui/command'
 
-interface CommandPaletteProps {
-}
-
-const CommandPalette: React.FC<CommandPaletteProps> = () => {
+const CommandPalette: React.FC = () => {
   const [open, setOpen] = useState(false)
   const dispatch = useDispatch()
 

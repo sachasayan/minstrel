@@ -27,7 +27,6 @@ vi.mock('fs/promises', () => ({
 // We'll use a real in-memory database for testing
 // But we need to mock the Database constructor to return our in-memory instance
 vi.mock('better-sqlite3', () => {
-  const ActualDatabase = require('better-sqlite3')
   return {
     default: vi.fn()
   }

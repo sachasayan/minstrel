@@ -33,9 +33,7 @@ export default function OnboardingPage(): ReactNode {
   // Note: No handleGoBack needed as per plan
 
   // Proceed to next step (no delay needed here, animation handles it)
-  const handleProceed = useCallback(() => {
-    setCurrentStep((prev) => Math.min(prev + 1, onboardingSteps.length - 1)) // Prevent going beyond last step
-  }, [])
+
 
   // Function to scroll the main content area to the bottom
   const requestScrollToBottom = useCallback(() => {
@@ -43,10 +41,10 @@ export default function OnboardingPage(): ReactNode {
       // Add a slight delay to ensure content has rendered before scrolling
       setTimeout(() => {
         if (chatContainerRef.current) {
-           chatContainerRef.current.scrollTo({
-             top: chatContainerRef.current.scrollHeight,
-             behavior: 'smooth'
-           });
+          chatContainerRef.current.scrollTo({
+            top: chatContainerRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
         }
       }, 50); // Short delay
     }
@@ -105,7 +103,6 @@ export default function OnboardingPage(): ReactNode {
                   layout // Add layout for smoother transitions if needed
                 >
                   <stepInfo.Component
-                    // Pass isActive. handleProceed is implicitly handled via context/setCurrentStep within components
                     isActive={stepInfo.step === currentStep}
                   />
                 </motion.div>

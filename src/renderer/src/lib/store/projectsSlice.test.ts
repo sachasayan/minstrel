@@ -1,15 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import reducer, {
   startNewProject,
-  setActiveProject,
   updateFile,
-  updateParameters,
   addChapter,
   updateChapter,
   selectActiveProjectWithCoverDataUrl,
   setAllFilesAsSaved
 } from './projectsSlice'
-import { ProjectState, Project } from '@/types'
+import { ProjectState } from '@/types'
 
 describe('projectsSlice', () => {
   const initialState: ProjectState = {

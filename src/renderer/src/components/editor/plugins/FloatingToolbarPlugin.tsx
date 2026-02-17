@@ -3,7 +3,7 @@ import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND, SELECTION_CHANGE
 import { useCallback, useEffect, useRef, useState, JSX } from 'react'
 import { createPortal } from 'react-dom'
 import { Bold, Italic, Link, Heading1, Heading2, Heading3 } from 'lucide-react'
-import { mergeRegister, $getNearestNodeOfType } from '@lexical/utils'
+import { mergeRegister } from '@lexical/utils'
 import { $setBlocksType } from '@lexical/selection'
 import { $createHeadingNode, $isHeadingNode, HeadingTagType } from '@lexical/rich-text'
 

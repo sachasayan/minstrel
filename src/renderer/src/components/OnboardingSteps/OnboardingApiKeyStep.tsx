@@ -7,8 +7,10 @@ import { useOnboarding } from './context'
 import llmService from '@/lib/services/llmService'
 import minstrelIcon from '@/assets/bot/base.png'
 
+
+
 interface OnboardingApiKeyStepProps {
-  isActive: boolean // Prop received from parent map
+  isActive: boolean
 }
 
 const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNode => {
@@ -74,29 +76,30 @@ const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNod
 
           {/* Input Section */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 bg-background/10 p-4 rounded">
-             {/* "Get API Key" Link/Button - Retaining specific style */}
-             <a
-               href="https://aistudio.google.com/"
-               target="_blank"
-               rel="noreferrer"
-               className="block shadow-md flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-full sm:w-fit whitespace-nowrap"
-             >
-               <Key className="mr-2 h-4 w-4" />
-               Get API Key
-             </a>
-             <MoveRight className="h-6 w-6 text-highlight-100 hidden sm:block" /> {/* Arrow visible on larger screens */}
-             <div className="relative w-full sm:w-auto flex-grow">
-                <Input
-                    value={keyValue}
-                    onChange={(e) => setKeyValue(e.target.value)}
-                    className="w-full text-black pr-8"
-                    placeholder="Paste API Key here..."
-                    type="password" // Hide key visually
-                />
-                {keyValidationStatus === 'checking' && (
-                    <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
-                )}
-             </div>
+            {/* "Get API Key" Link/Button - Retaining specific style */}
+            <a
+              href="https://aistudio.google.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="block shadow-md flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 px-4 py-2 bg-[#87a9ff] text-[#1a1c1e] w-full sm:w-fit whitespace-nowrap"
+            >
+              <Key className="mr-2 h-4 w-4" />
+              Get API Key
+            </a>
+            <MoveRight className="h-6 w-6 text-highlight-100 hidden sm:block" /> {/* Arrow visible on larger screens */}
+            <div className="relative w-full sm:w-auto flex-grow">
+              <Input
+                value={keyValue}
+                onChange={(e) => setKeyValue(e.target.value)}
+                className="w-full text-black pr-8"
+                placeholder="Paste API Key here..."
+                type="password" // Hide key visually
+                disabled={!isActive}
+              />
+              {keyValidationStatus === 'checking' && (
+                <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+              )}
+            </div>
           </div>
           {keyValue.trim() && (
             <div className="mt-2 text-center text-sm">

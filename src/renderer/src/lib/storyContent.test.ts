@@ -71,9 +71,9 @@ describe('getChaptersFromStoryContent', () => {
   })
 
   it('should handle null or undefined input', () => {
-    // @ts-ignore
+    // @ts-ignore - testing null input
     expect(getChaptersFromStoryContent(null)).toEqual([])
-    // @ts-ignore
+    // @ts-ignore - testing undefined input
     expect(getChaptersFromStoryContent(undefined)).toEqual([])
   })
 })
@@ -81,7 +81,7 @@ describe('getChaptersFromStoryContent', () => {
 describe('calculateWordCount', () => {
   it('should return 0 for empty content', () => {
     expect(calculateWordCount('')).toBe(0)
-    // @ts-ignore
+    // @ts-ignore - testing null input
     expect(calculateWordCount(null)).toBe(0)
   })
 

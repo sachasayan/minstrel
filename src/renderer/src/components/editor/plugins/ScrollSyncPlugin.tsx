@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect, useRef } from 'react'
-import { $getRoot, LexicalNode } from 'lexical'
+import { $getRoot } from 'lexical'
 import { HeadingNode } from '@lexical/rich-text'
 
 interface ScrollSyncPluginProps {
@@ -29,7 +29,7 @@ export function ScrollSyncPlugin({
             return
         }
 
-        const [_, indexStr] = activeSection.split('|||')
+        const [, indexStr] = activeSection.split('|||')
         const index = parseInt(indexStr)
 
         editor.getEditorState().read(() => {

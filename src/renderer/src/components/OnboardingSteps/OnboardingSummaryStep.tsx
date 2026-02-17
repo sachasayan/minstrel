@@ -6,8 +6,9 @@ import { setSettingsState } from '@/lib/store/settingsSlice'
 import minstrelIcon from '@/assets/bot/base.png'
 import { AppDispatch } from '@/lib/store/store'
 
+
 interface OnboardingSummaryStepProps {
-  isActive: boolean // Prop received from parent map
+  isActive: boolean
 }
 const OnboardingSummaryStep = ({ isActive }: OnboardingSummaryStepProps): ReactNode => {
   const { formData } = useOnboarding()
@@ -47,8 +48,8 @@ const OnboardingSummaryStep = ({ isActive }: OnboardingSummaryStepProps): ReactN
 
           {/* Button inside the bubble */}
           <div className="flex flex-row items-center justify-center mt-4">
-            <Button variant="secondary" size="sm" onClick={handleSaveSettings}>
-                I&apos;m ready!
+            <Button variant="secondary" size="sm" onClick={handleSaveSettings} disabled={!isActive}>
+              I&apos;m ready!
             </Button>
           </div>
         </div>

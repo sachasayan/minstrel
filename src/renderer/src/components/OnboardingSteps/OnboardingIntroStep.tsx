@@ -4,8 +4,10 @@ import { Folder, WandSparkles } from 'lucide-react'
 import { useOnboarding } from './context' // Use the new context hook
 import minstrelIcon from '@/assets/bot/base.png'
 
+
+
 interface OnboardingIntroStepProps {
-  isActive: boolean // Prop received from parent map
+  isActive: boolean
 }
 
 const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode => {
@@ -21,8 +23,8 @@ const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode 
         return exportPath // Return path for potential immediate use if needed
       }
     } catch (error) {
-        console.error("Error selecting directory:", error);
-        // Handle error appropriately, maybe show a toast
+      console.error("Error selecting directory:", error);
+      // Handle error appropriately, maybe show a toast
     }
     return null
   }
@@ -30,7 +32,7 @@ const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode 
   const handleChooseDirectory = async () => {
     const pathSelected = await selectFolder()
     if (pathSelected) {
-        setCurrentStep(1) // Proceed only if a path was selected
+      setCurrentStep(1) // Proceed only if a path was selected
     }
   }
 
@@ -45,29 +47,29 @@ const OnboardingIntroStep = ({ isActive }: OnboardingIntroStepProps): ReactNode 
 
   return (
     // Restyled to match chat bubble format
-     <div className="space-y-4"> {/* Outer container */}
-       <div className="flex items-start gap-3"> {/* Icon + Bubble container */}
-         <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
-         <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Bubble */}
-           <h2 className="text-lg font-semibold mb-1">Welcome to Minstrel</h2>
-           <p className="text-sm mb-4">
-             Looks like you&apos;re new here! It&apos;s nice to meet you. Before we get started, let&apos;s set up a couple things. First, where should Minstrel save your project files?
-             <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.
-           </p>
+    <div className="space-y-4"> {/* Outer container */}
+      <div className="flex items-start gap-3"> {/* Icon + Bubble container */}
+        <img src={minstrelIcon} alt="Assistant" className="size-8 shrink-0 mt-1" />
+        <div className="bg-highlight-600 text-highlight-100 p-4 rounded-lg flex-grow"> {/* Bubble */}
+          <h2 className="text-lg font-semibold mb-1">Welcome to Minstrel</h2>
+          <p className="text-sm mb-4">
+            Looks like you&apos;re new here! It&apos;s nice to meet you. Before we get started, let&apos;s set up a couple things. First, where should Minstrel save your project files?
+            <br /> We suggest <b>~/Documents/Minstrel</b>, but it&apos;s your choice.
+          </p>
 
-           {/* Buttons moved inside the bubble */}
-           <div className="flex flex-row gap-2 justify-end mt-4">
-             <Button variant="secondary" size="sm" onClick={handleChooseDirectory}>
-               <Folder className="mr-2 h-4 w-4" /> Choose Directory
-             </Button>
-             <Button variant="secondary" size="sm" onClick={handleUseDefault}>
-                <WandSparkles className="mr-2 h-4 w-4" /> Use Default
-             </Button>
-           </div>
-         </div>
-       </div>
-       {/* No separate "Next" button needed for this step */}
-     </div>
+          {/* Buttons moved inside the bubble */}
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <Button variant="secondary" size="sm" onClick={handleChooseDirectory} disabled={!isActive}>
+              <Folder className="mr-2 h-4 w-4" /> Choose Directory
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleUseDefault} disabled={!isActive}>
+              <WandSparkles className="mr-2 h-4 w-4" /> Use Default
+            </Button>
+          </div>
+        </div>
+      </div>
+      {/* No separate "Next" button needed for this step */}
+    </div>
   )
 }
 
