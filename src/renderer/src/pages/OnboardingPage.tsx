@@ -3,7 +3,7 @@
 import type { ReactNode, UIEvent } from 'react'
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import { OnboardingContext } from '@/components/OnboardingSteps/context'
 
 // Import actual step components
@@ -17,7 +17,7 @@ import OnboardingSummaryStep from '@/components/OnboardingSteps/OnboardingSummar
 const SCROLL_THRESHOLD = 50 // Pixels from bottom to consider "at bottom"
 
 // Animation variants (copied from BookOutlineWizard)
-const stepVariants = {
+const stepVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut", delay: 0.5 } }
 };
