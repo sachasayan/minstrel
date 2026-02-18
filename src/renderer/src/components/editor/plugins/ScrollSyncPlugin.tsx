@@ -16,10 +16,22 @@ export function ScrollSyncPlugin({
 }: ScrollSyncPluginProps): null {
     const [editor] = useLexicalComposerContext()
     const isProgrammaticScroll = useRef(false)
+    const lastObserverSection = useRef<string | null>(null)
 
     // 1. Handle External Scroll Requests (Story -> Editor)
     useEffect(() => {
         if (!activeSection) return
+
+        // If the activeSection change was triggered by the observer itself,
+        // don't perform a programmatic scroll (it would fight the user's manual scroll).
+        if (activeSection === lastObserverSection.current) {
+            lastObserverSection.current = null
+            return
+        }
+
+        // Reset the observer tracker so that a future external change back to this
+        // SAME section (e.g. clicking the same sidebar item) will still scroll.
+        lastObserverSection.current = null
 
         // Programmatic scroll for Overview or any section that doesn't have an index
         if (activeSection === 'Overview' || !activeSection.includes('|||')) {
@@ -66,6 +78,7 @@ export function ScrollSyncPlugin({
                         // Handle Overview target
                         if (entry.target.id === 'overview-target') {
                             if (activeSection !== 'Overview') {
+                                lastObserverSection.current = 'Overview'
                                 onSectionChange('Overview')
                             }
                             return
@@ -83,6 +96,7 @@ export function ScrollSyncPlugin({
                         if (idx !== -1) {
                             const section = `${heading.innerText.trim()}|||${idx}`
                             if (activeSection !== section) {
+                                lastObserverSection.current = section
                                 onSectionChange(section)
                             }
                         }
