@@ -45,7 +45,6 @@ export const projectsSlice = createSlice({
         expertSuggestions: [],
         knowledgeGraph: null,
         chatHistory: [] // Initialize chat history
-        // isNew: true
       }
       state.activeProject = tempProject
       state.projectHasLiveEdits = true // It's unsaved
@@ -126,7 +125,6 @@ export const projectsSlice = createSlice({
         return // Use type assertion carefully or add type checks if property is specific
       if (action.payload.property === 'storyContent' && typeof action.payload.value === 'string') {
         state.activeProject.storyContent = action.payload.value
-        // REMOVED syncProjectFilesFromStory call
         state.projectHasLiveEdits = true
         return
       }
