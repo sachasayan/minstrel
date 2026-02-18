@@ -6,12 +6,12 @@ import { setActiveSection } from '@/lib/store/appStateSlice'
 import { selectChat } from '@/lib/store/chatSlice'
 import { LexicalEditor } from './LexicalEditor'
 
-interface ArticleViewerProps {
+interface ArtifactViewerProps {
     title: string | null
     content: string
 }
 
-export function ArticleViewer({ title, content }: ArticleViewerProps): JSX.Element {
+export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Element {
     const dispatch = useDispatch()
     const projectState = useSelector(selectProjects)
     const chatState = useSelector(selectChat)

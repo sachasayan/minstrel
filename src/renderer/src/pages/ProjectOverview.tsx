@@ -6,7 +6,7 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import { StoryViewer } from '@/components/editor/StoryViewer'
-import { ArticleViewer } from '@/components/editor/ArticleViewer'
+import { ArtifactViewer } from '@/components/editor/ArtifactViewer'
 import NovelDashboard from '@/components/NovelDashboard'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import ChatInterface from '@/components/ChatInterface'
@@ -60,7 +60,7 @@ const ProjectOverview = (): React.ReactNode => {
               content={editorContent.content}
             />
           ) : (
-            <ArticleViewer
+            <ArtifactViewer
               key={`${activeProject?.projectPath}-${appState.activeSection}`}
               title={appState.activeSection}
               content={editorContent.content}
