@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
-// import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Key, MoveRight, Loader2, CircleCheck, CircleX } from 'lucide-react'
 import { useOnboarding } from './context'
