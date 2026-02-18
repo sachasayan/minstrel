@@ -1,5 +1,9 @@
 appId: com.electron.app
 productName: minstrel
+fileAssociations:
+  - ext: mns
+    name: Minstrel Project
+    role: Editor
 directories:
   buildResources: build
 files:
