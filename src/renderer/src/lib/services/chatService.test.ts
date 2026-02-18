@@ -54,28 +54,32 @@ describe('chatService', () => {
   })
 
   describe('sendMessage', () => {
-    const mockStreamingResult = async (text: string, toolCalls: any[] = [], tools: any) => {
+    const mockStreamingResult = (text: string, toolCalls: any[] = [], tools: any) => {
       // Simulate tool execution
       for (const call of toolCalls) {
         if (tools[call.toolName] && tools[call.toolName].execute) {
-          await tools[call.toolName].execute(call.args)
+          tools[call.toolName].execute(call.args)
         }
       }
 
-      return {
+      const result = {
         text,
         toolCalls: Promise.resolve(toolCalls),
         textStream: (async function* () {
           yield text
         })(),
+      }
+
+      return {
+        ...result,
         then(onfulfilled: any) {
-          return Promise.resolve({ text, toolCalls }).then(onfulfilled)
+          return Promise.resolve(result).then(onfulfilled)
         }
       }
     }
 
     it('should iterate and call tool-triggered side-effects', async () => {
-      const context = { agent: 'routingAgent', currentStep: 0 } as any
+      const context = { agent: 'writerAgent', currentStep: 0 } as any
       
       vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_p, tools: any) => {
         return mockStreamingResult('AI reasoning', [

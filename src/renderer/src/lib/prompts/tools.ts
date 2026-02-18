@@ -11,7 +11,7 @@ You have access to structured tools. When you need to perform an action, use the
 You can use multiple tools in a single response.
 
 ${
-  (tools.includes('think') || tools.includes('reasoning'))
+  (tools.includes('reasoning'))
     ? `
 ## reasoning
 * Use this tool to think out your actions. Break the current task down, decide which files you will need, and which tools you plan to use.
@@ -21,7 +21,7 @@ ${
 }
 
 ${
-  (tools.includes('write_file') || tools.includes('writeFile'))
+  (tools.includes('writeFile'))
     ? `
 ## writeFile
 * Writes content to the specified file.
@@ -32,7 +32,7 @@ ${
 }
 
 ${
-  (tools.includes('read_file') || tools.includes('readFile'))
+  (tools.includes('readFile'))
     ? `
 ## readFile
 * Requests the full contents of the specified files.
@@ -42,7 +42,7 @@ ${
 }
 
 ${
-  (tools.includes('route_to') || tools.includes('routeTo'))
+  (tools.includes('routeTo'))
     ? `
 ## routeTo
 * Routes the user to a specialist agent (outlineAgent, writerAgent, criticAgent).
@@ -51,7 +51,7 @@ ${
 }
 
 ${
-  (tools.includes('action_suggestion') || tools.includes('actionSuggestion'))
+  (tools.includes('actionSuggestion'))
     ? `
 ## actionSuggestion
 * Suggests up to 3 possible next steps for the user.
@@ -60,7 +60,7 @@ ${
 }
 
 ${
-  (tools.includes('message') || tools.includes('showMessage'))
+  (tools.includes('showMessage'))
     ? `
 ## showMessage
 * A short 1-2 sentence message to the user explaining your actions.
@@ -69,7 +69,7 @@ ${
 }
 
 ${
-  (tools.includes('critique') || tools.includes('addCritique'))
+  (tools.includes('addCritique'))
     ? `
 ## addCritique
 * Submits a JSON-formatted critique of the story.

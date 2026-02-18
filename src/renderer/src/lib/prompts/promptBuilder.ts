@@ -1,4 +1,3 @@
-import { store } from '@/lib/store/store'
 import { RequestContext } from '@/types'
 import {
   basePrompt,
@@ -17,11 +16,11 @@ import { getCriticAgentPrompt } from './criticAgent'
 import { getToolsPrompt } from './tools'
 
 import { getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
+import { PromptData, BuildPromptResult } from './types'
 
 // Gets all available files (including virtual chapters)
-export const getAvailableFiles = (): string[] => {
-  const state = store.getState().projects
-  const activeProject = state.activeProject
+export const getAvailableFiles = (data: PromptData): string[] => {
+  const activeProject = data.activeProject
   if (!activeProject) return []
 
   const artifactFiles = activeProject.files.map((f) => f.title)
@@ -30,19 +29,19 @@ export const getAvailableFiles = (): string[] => {
   return [...artifactFiles, ...virtualChapters]
 }
 
-export const getProvidedFiles = (dependencies: string[] | undefined): string[] => {
-  const availableFiles = getAvailableFiles()
+export const getProvidedFiles = (data: PromptData, dependencies: string[] | undefined): string[] => {
+  const availableFiles = getAvailableFiles(data)
   const depsArray = Array.isArray(dependencies) ? dependencies : []
   return availableFiles.filter((f) => depsArray.includes(f))
 }
 
 // Gets contents of all the given files (including virtual chapters) as a string
-export const getFileContents = (dependencies: string[] | undefined): string => {
+export const getFileContents = (data: PromptData, dependencies: string[] | undefined): string => {
   if (!dependencies || !Array.isArray(dependencies) || dependencies.length === 0) {
     return ''
   }
 
-  const activeProject = store.getState().projects.activeProject
+  const activeProject = data.activeProject
   if (!activeProject) return ''
 
   const filesContent: string[] = []
@@ -75,21 +74,20 @@ ${chapterContent || '(Chapter content is empty)'}
   return filesContent.join('\n')
 }
 
-
-export const getLatestUserMessage = (): string => {
+export const getLatestUserMessage = (data: PromptData): string => {
   // Ensure text exists and trim whitespace
-  return store.getState().chat.chatHistory.findLast((message) => message.sender === 'User')?.text?.trim() || '(No user message found)'
+  return data.chatHistory.findLast((message) => message.sender === 'User')?.text?.trim() || '(No user message found)'
 }
 
 // --- Refactored buildPrompt ---
 
-export const buildPrompt = (context: RequestContext): string => {
+export const buildPrompt = (context: RequestContext, data: PromptData): BuildPromptResult => {
   let prompt = basePrompt
 
-  const availableFiles = getAvailableFiles()
-  const providedFiles = getProvidedFiles(context.requestedFiles)
-  const fileContents = getFileContents(context.requestedFiles)
-  const userMessage = getLatestUserMessage()
+  const availableFiles = getAvailableFiles(data)
+  const providedFiles = getProvidedFiles(data, context.requestedFiles)
+  const fileContents = getFileContents(data, context.requestedFiles)
+  const userMessage = getLatestUserMessage(data)
 
   const commonSections = (p: string) => {
     let updatedPrompt = p
@@ -101,18 +99,20 @@ export const buildPrompt = (context: RequestContext): string => {
     return updatedPrompt
   }
 
+  let allowedTools: string[] = []
+
   switch (context.agent) {
     case 'routingAgent': {
-      const tools = ['think', 'read_file', 'action_suggestion', 'message', 'route_to']
+      allowedTools = ['reasoning', 'readFile', 'actionSuggestion', 'showMessage', 'routeTo']
       prompt = appendWithSeparator(prompt, getRoutingAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
+      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       prompt = commonSections(prompt)
       break
     }
     case 'outlineAgent': {
-      const tools = ['think', 'write_file', 'message']
+      allowedTools = ['reasoning', 'writeFile', 'showMessage']
       prompt = appendWithSeparator(prompt, getOutlineAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
+      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       
       if (context.carriedContext) {
          prompt = addParameters(prompt, context.carriedContext)
@@ -124,16 +124,16 @@ export const buildPrompt = (context: RequestContext): string => {
       break
     }
     case 'writerAgent': {
-      const tools = ['think', 'write_file', 'message']
+      allowedTools = ['reasoning', 'writeFile', 'showMessage']
       prompt = appendWithSeparator(prompt, getWriterAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
+      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       prompt = commonSections(prompt)
       break
     }
     case 'criticAgent': {
-      const tools = ['think', 'critique', 'message']
+      allowedTools = ['reasoning', 'addCritique', 'showMessage']
       prompt = appendWithSeparator(prompt, getCriticAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(tools))
+      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       prompt = commonSections(prompt)
       break
     }
@@ -142,5 +142,6 @@ export const buildPrompt = (context: RequestContext): string => {
       throw new Error(`Invalid agent type received: ${exhaustiveCheck}.`)
     }
   }
-  return prompt
+
+  return { prompt, allowedTools }
 }

@@ -3,16 +3,13 @@ import { store } from '@/lib/store/store'
 import { resolvePendingChat } from '@/lib/store/chatSlice'
 import { setPendingFiles } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
+import { PromptData } from '@/lib/prompts/types'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
 import {
-  handleWriteFile,
-  handleCritique,
   handleMessage,
-  handleActionSuggestions
 } from './toolHandlers'
-import * as schemas from './toolSchemas'
-import { tool } from 'ai'
+import { createTools } from './toolRegistry'
 import { streamingService } from './streamingService'
 
 const DEBOUNCE_TIME = 5000 // 5 seconds
@@ -51,10 +48,18 @@ export const sendMessage = async (initialContext: RequestContext) => {
     while (context.currentStep < MAX_STEPS) {
       if (signal.aborted) break
 
-      const prompt = buildPrompt(context)
+      // Extract state for the prompt builder
+      const state = store.getState()
+      const promptData: PromptData = {
+        activeProject: state.projects.activeProject,
+        chatHistory: state.chat.chatHistory
+      }
+
+      const { prompt, allowedTools } = buildPrompt(context, promptData)
       
       console.groupCollapsed(`Agent Loop - Step ${context.currentStep}: ${context.agent}`)
       console.log('Prompt:', prompt)
+      console.log('Allowed Tools:', allowedTools)
       console.groupEnd()
 
       // Inform Redux about pending files AI might be reading
@@ -68,73 +73,26 @@ export const sendMessage = async (initialContext: RequestContext) => {
       let nextAgent: string | null = null
       let nextRequestedFiles: string[] | undefined = undefined
 
-      // Tools definition for AI SDK
-      const tools = {
-        reasoning: tool({
-          description: 'Think out your actions and plan the current step.',
-          parameters: schemas.reasoningSchema,
-          execute: async ({ thought }: any) => {
-            console.log('AI Reasoning:', thought)
-            return { status: 'success' }
-          }
-        } as any),
-        writeFile: tool({
-          description: 'Write content to a file.',
-          parameters: schemas.writeFileSchema,
-          execute: async ({ file_name, content }: any) => {
-            handleWriteFile(file_name, content)
-            return { status: 'success', file: file_name }
-          }
-        } as any),
-        readFile: tool({
-          description: 'Read the contents of specified files.',
-          parameters: schemas.readFileSchema,
-          execute: async ({ file_names }: any) => {
-            nextRequestedFiles = file_names
-            return { status: 'success', requested: file_names }
-          }
-        } as any),
-        routeTo: tool({
-          description: 'Route to a specialist agent.',
-          parameters: schemas.routeToSchema,
-          execute: async ({ agent }: any) => {
-            nextAgent = agent
-            return { status: 'success', target: agent }
-          }
-        } as any),
-        actionSuggestion: tool({
-          description: 'Provide suggestions for the user.',
-          parameters: schemas.actionSuggestionSchema,
-          execute: async ({ suggestions }: any) => {
-            handleActionSuggestions(suggestions)
-            return { status: 'success' }
-          }
-        } as any),
-        showMessage: tool({
-          description: 'Show a message to the user.',
-          parameters: schemas.showMessageSchema,
-          execute: async ({ message }: any) => {
-            handleMessage(message)
-            return { status: 'success' }
-          }
-        } as any),
-        addCritique: tool({
-          description: 'Submit a story critique.',
-          parameters: schemas.addCritiqueSchema,
-          execute: async ({ critique }: any) => {
-            handleCritique(critique)
-            return { status: 'success' }
-          }
-        } as any)
-      }
+      // Tools definition using the registry
+      const toolkit = createTools({
+        onReadFile: (fileNames) => {
+          nextRequestedFiles = fileNames
+        },
+        onRouteTo: (agent) => {
+          nextAgent = agent
+        }
+      })
+
+      // Filter tools to only include those allowed for the current agent
+      const activeTools = Object.fromEntries(
+        Object.entries(toolkit).filter(([name]) => allowedTools.includes(name))
+      )
 
       let result: any
       try {
-        const stream = await geminiService.streamTextWithTools(prompt, tools, modelPreference)
+        const stream = await geminiService.streamTextWithTools(prompt, activeTools, modelPreference)
         
         // Handle tool calls as they are being identified
-        // Note: AI SDK processes 'execute' automatically when the full call is received
-        // We can listen for them to update the "thinking" status
         const toolCallsPromise = stream.toolCalls
         if (toolCallsPromise) {
           toolCallsPromise.then(calls => {
@@ -162,7 +120,7 @@ export const sendMessage = async (initialContext: RequestContext) => {
         // Wait for all tool executions to finish
         result = await stream
 
-        // Update context based on tool calls (redundant but robust for testing/clarity)
+        // Update context based on tool calls
         const calls = await (result.toolCalls || Promise.resolve([]))
         calls?.forEach((call: any) => {
           if (call.toolName === 'routeTo') nextAgent = call.args.agent
@@ -187,18 +145,14 @@ export const sendMessage = async (initialContext: RequestContext) => {
       console.log('Tool Calls:', result.toolCalls)
       console.groupEnd()
 
-      // Clear streaming state after each step (it will be repopulated if the next step has text)
+      // Clear streaming state after each step
       streamingService.clear()
-
-      // The SDK's 'execute' functions already processed the tools. 
-      // We just need to update our context for the next iteration.
 
       // Prepare context for next iteration
       const nextContext: RequestContext = {
         currentStep: context.currentStep + 1,
         agent: (nextAgent as any) || context.agent,
         requestedFiles: nextRequestedFiles || context.requestedFiles,
-        // Carry over sequence info if present (though we might phase this out)
         sequenceInfo: context.sequenceInfo
       }
 
@@ -271,13 +225,9 @@ Return the suggestions as action suggestions.
 
   try {
     // For title suggestions, we typically want a quick single-turn response.
-    // We'll use generateTextWithTools but expected a specific tool use.
+    const toolkit = createTools()
     const tools = {
-      actionSuggestion: tool({
-        description: 'Provide suggestions for titles.',
-        parameters: schemas.actionSuggestionSchema,
-        execute: async () => ({ status: 'success' })
-      } as any)
+      actionSuggestion: toolkit.actionSuggestion
     }
 
     const result = await geminiService.generateTextWithTools(prompt, tools, 'low')
