@@ -18,8 +18,6 @@ import ProjectBar from '@/components/ProjectBar'
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
   const activeProject = useSelector(selectActiveProject)
-  const [expanded, setExpanded] = useState(true)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const isStorySection = useMemo(() => {
     return appState.activeSection === 'Overview' || appState.activeSection?.includes('|||')
@@ -74,7 +72,7 @@ const ProjectOverview = (): React.ReactNode => {
 
         {/* Chat Interface */}
       </SidebarInset>
-      <ChatInterface ref={chatContainerRef} expanded={expanded} setExpanded={setExpanded} />
+      <ChatInterface />
       <CommandPalette />
       {/* Removed conditional rendering of BookOutlineWizard dialog */}
     </SidebarProvider>
