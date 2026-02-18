@@ -21,8 +21,9 @@
     "build:linux": "electron-vite build && electron-builder --linux",
     "prepare": "husky",
     "rebuild:node": "npm rebuild better-sqlite3",
-    "rebuild:electron": "npx @electron/rebuild -v 40.4.1 --force",
-    "test": "npm run rebuild:node && vitest run"
+    "rebuild:electron": "electron-builder install-app-deps",
+    "test": "npm run rebuild:node && vitest run",
+    "posttest": "npm run rebuild:electron"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.29",
