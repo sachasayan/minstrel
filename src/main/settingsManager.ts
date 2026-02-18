@@ -134,11 +134,31 @@ export const saveAppSettings = async (config: AppSettings) => {
   }
   // Type assertion might be needed if electron-settings types are very strict,
   // but providing defaults should generally work.
+  await settings.get('settings') // Keep for side effect if necessary, but actually we probably don't need it before set
   await settings.set('settings', settingsToSave as any) // Using 'as any' temporarily if strict typing persists as an issue
+}
+
+/**
+ * Explicitly triggers the system safe storage prompt by performing a test encryption.
+ */
+export const triggerSafeStoragePrompt = async (): Promise<boolean> => {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return false
+  }
+  try {
+    const dummy = 'test'
+    const encrypted = safeStorage.encryptString(dummy)
+    safeStorage.decryptString(encrypted)
+    return true
+  } catch (error) {
+    console.error('Safe storage prompt failed or was declined:', error)
+    return false
+  }
 }
 
 export const registerSettingsHandlers = () => {
   ipcMain.handle('get-app-settings', loadAppSettings)
   // Pass only the config argument from the event handler
   ipcMain.handle('save-app-settings', (_event, config) => saveAppSettings(config))
+  ipcMain.handle('trigger-safe-storage-prompt', triggerSafeStoragePrompt)
 }

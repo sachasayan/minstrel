@@ -8,6 +8,7 @@ import { OnboardingContext } from '@/components/OnboardingSteps/context'
 
 // Import actual step components
 import OnboardingIntroStep from '@/components/OnboardingSteps/OnboardingIntroStep'
+import OnboardingSecureStorageStep from '@/components/OnboardingSteps/OnboardingSecureStorageStep'
 import OnboardingApiKeyStep from '@/components/OnboardingSteps/OnboardingApiKeyStep'
 import OnboardingSummaryStep from '@/components/OnboardingSteps/OnboardingSummaryStep'
 
@@ -52,8 +53,9 @@ export default function OnboardingPage(): ReactNode {
   // Use imported components in the steps array
   const onboardingSteps = useMemo(() => [
     { step: 0, Component: OnboardingIntroStep },
-    { step: 1, Component: OnboardingApiKeyStep },
-    { step: 2, Component: OnboardingSummaryStep }
+    { step: 1, Component: OnboardingSecureStorageStep },
+    { step: 2, Component: OnboardingApiKeyStep },
+    { step: 3, Component: OnboardingSummaryStep }
   ], [])
 
   const totalSteps = onboardingSteps.length;

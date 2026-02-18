@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
@@ -53,6 +53,23 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   if (is.dev) {
+    // Monkey-patch session for electron-devtools-installer compatibility with Electron 40
+    // This silences deprecation warnings until the library is officially updated.
+    // @ts-ignore
+    if (session.defaultSession && !session.defaultSession.getAllExtensions) {
+      // @ts-ignore
+      session.defaultSession.getAllExtensions = (): any[] => {
+        return session.defaultSession.extensions.getAllExtensions()
+      }
+    }
+    // @ts-ignore
+    if (session.defaultSession && !session.defaultSession.loadExtension) {
+      // @ts-ignore
+      session.defaultSession.loadExtension = (path: string, options: any): Promise<any> => {
+        return session.defaultSession.extensions.loadExtension(path, options)
+      }
+    }
+
     // Conditionally install Redux DevTools in development
     installExtension(REDUX_DEVTOOLS)
       .then((ext) => console.log(`Added Extension:  ${ext.name}`))
