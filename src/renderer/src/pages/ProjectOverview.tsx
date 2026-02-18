@@ -5,7 +5,8 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 
 
 import { AppSidebar } from '@/components/editor/AppSidebar'
-import MarkdownViewer from '@/components/MarkdownViewer'
+import { StoryViewer } from '@/components/editor/StoryViewer'
+import { ArticleViewer } from '@/components/editor/ArticleViewer'
 import NovelDashboard from '@/components/NovelDashboard'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import ChatInterface from '@/components/ChatInterface'
@@ -20,22 +21,24 @@ const ProjectOverview = (): React.ReactNode => {
   const [expanded, setExpanded] = useState(true)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
+  const isStorySection = useMemo(() => {
+    return appState.activeSection === 'Overview' || appState.activeSection?.includes('|||')
+  }, [appState.activeSection])
+
   const editorContent = useMemo(() => {
     if (appState.activeView !== 'project/editor') return null
 
-    const isChapter = appState.activeSection?.includes('|||')
-    const isOverview = appState.activeSection === 'Overview'
-    const content = (isChapter || isOverview)
+    const content = isStorySection
       ? activeProject?.storyContent
       : activeProject?.files?.find((f) => f.title === appState.activeSection)?.content
 
     return {
-      isChapter,
       content: content || ''
     }
   }, [
     appState.activeView,
     appState.activeSection,
+    isStorySection,
     activeProject?.storyContent,
     activeProject?.files
   ])
@@ -52,11 +55,19 @@ const ProjectOverview = (): React.ReactNode => {
         "animate-in fade-in zoom-in-95 duration-300"
       )}>
         {appState.activeView == 'project/editor' && editorContent ? (
-          <MarkdownViewer
-            key={`${activeProject?.projectPath}-${editorContent.isChapter ? 'story' : appState.activeSection}`}
-            title={appState.activeSection}
-            content={editorContent.content}
-          />
+          isStorySection ? (
+            <StoryViewer
+              key={`${activeProject?.projectPath}-story`}
+              title={appState.activeSection}
+              content={editorContent.content}
+            />
+          ) : (
+            <ArticleViewer
+              key={`${activeProject?.projectPath}-${appState.activeSection}`}
+              title={appState.activeSection}
+              content={editorContent.content}
+            />
+          )
         ) : appState.activeView == 'project/dashboard' ? (
           <NovelDashboard />
         ) : null}
