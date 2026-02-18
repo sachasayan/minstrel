@@ -4,7 +4,6 @@ import type { ReactNode, UIEvent } from 'react'
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import Torrent from '@/components/visuals/torrent'
 import { OnboardingContext } from '@/components/OnboardingSteps/context'
 
 // Import actual step components
@@ -85,10 +84,6 @@ export default function OnboardingPage(): ReactNode {
       <OnboardingContext.Provider value={{ currentStep, setCurrentStep, formData, setFormData, totalSteps }}>
         <div className="flex flex-grow overflow-hidden gap-8"> {/* Added gap */}
 
-          {/* Left Sidebar */}
-          <aside className="w-[300px] hidden md:flex flex-col items-center justify-center shrink-0"> {/* Adjust width as needed, hide on small screens */}
-            <Torrent />
-          </aside>
 
           {/* Right Main Area (Chat Flow) */}
           <main ref={chatContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto space-y-6 pr-4"> {/* Added padding-right */}
