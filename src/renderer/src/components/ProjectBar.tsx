@@ -13,6 +13,7 @@ import {
 import pdfService from '@/lib/services/pdfService'
 import PdfExportConfigModal, { PdfExportConfig } from '@/components/PdfExportConfigModal'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { selectChatHistory } from '@/lib/store/chatSlice'
 import { saveProject } from '@/lib/services/fileService'
 import { setActiveView } from '@/lib/store/appStateSlice'
@@ -124,29 +125,42 @@ const ProjectBar = () => {
       </AlertDialog>
 
       <div className="flex items-center gap-2 rounded-full border p-2">
-        <Button
-          variant="outline"
-          size="icon"
-          title="Save Project"
-          onClick={handleSave}
-          className="h-7 w-7 rounded-full"
-        >
-          <Save className="h-3 w-3" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          title="Close Project"
-          onClick={handleCloseSafe}
-          className="h-7 w-7 rounded-full"
-        >
-          <X className="h-3 w-3" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Save Project"
+              onClick={handleSave}
+              className="h-7 w-7 rounded-full"
+            >
+              <Save className="h-3 w-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Save Project</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Close Project"
+              onClick={handleCloseSafe}
+              className="h-7 w-7 rounded-full"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Close Project</TooltipContent>
+        </Tooltip>
+
         <PdfExportConfigModal onExport={handleExportConfigured}>
           <Button
             variant="outline"
             size="icon"
             title="Export Project to PDF"
+            aria-label="Export Project to PDF"
             disabled={isExporting}
             className="h-7 w-7 rounded-full"
           >
