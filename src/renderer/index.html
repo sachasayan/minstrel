@@ -1,19 +1,19 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Electron</title>
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.deepseek.com blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; object-src 'none';"
-    />
-  </head>
 
-  <body>
-    <div class="titlebar"></div>
-    <div id="root"></div>
-    <link rel="stylesheet" href="./src/assets/main.css" />
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Electron</title>
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'self'; worker-src 'self' blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.deepseek.com blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none';" />
+</head>
+
+<body>
+  <div class="titlebar"></div>
+  <div id="root"></div>
+  <link rel="stylesheet" href="./src/assets/main.css" />
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

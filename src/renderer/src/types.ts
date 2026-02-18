@@ -20,6 +20,11 @@ export interface ProjectState {
   activeProject: Project | null
   pendingFiles: string[] | null
   modifiedChapters: number[] // Track unsaved chapter changes
+  lastEdit?: {
+    fileTitle: string
+    oldContent: string
+    newContent: string
+  } | null
 }
 
 export interface Project extends ProjectFragment {

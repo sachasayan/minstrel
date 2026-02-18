@@ -11,6 +11,7 @@ import { ListItemNode, ListNode } from '@lexical/list'
 import { CodeNode, CodeHighlightNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import Prism from 'prismjs'
+import { MarkNode } from '@lexical/mark'
 
 // @lexical/code depends on Prism being available globally
 if (typeof window !== 'undefined') {
@@ -21,6 +22,7 @@ import { theme } from './EditorTheme'
 import { MarkdownSyncPlugin } from './plugins/MarkdownSyncPlugin'
 import { ScrollSyncPlugin } from './plugins/ScrollSyncPlugin'
 import { FloatingToolbarPlugin } from './plugins/FloatingToolbarPlugin'
+import { HighlightPlugin } from './plugins/HighlightPlugin'
 import { JSX } from 'react'
 
 const editorConfig = {
@@ -40,7 +42,8 @@ const editorConfig = {
         TableCellNode,
         TableRowNode,
         AutoLinkNode,
-        LinkNode
+        LinkNode,
+        MarkNode
     ]
 }
 
@@ -89,6 +92,7 @@ export function LexicalEditor({
                     onSectionChange={onSectionChange}
                     containerRef={containerRef}
                 />
+                <HighlightPlugin activeSection={activeSection} />
                 <FloatingToolbarPlugin />
             </div>
         </LexicalComposer>

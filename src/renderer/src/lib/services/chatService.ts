@@ -1,8 +1,9 @@
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { addChatMessage, resolvePendingChat, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile, setPendingFiles, updateReviews, updateChapter } from '@/lib/store/projectsSlice'
+import { updateFile, setPendingFiles, updateReviews, updateChapter, setLastEdit } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
+import { getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
 import { XMLParser } from 'fast-xml-parser'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
@@ -68,6 +69,24 @@ const processResponse = (responseString: string): RequestContext | null => {
     const fileName = response.write_file.file_name
     const content = response.write_file.content
     if (fileName && content) {
+      const activeProject = store.getState().projects.activeProject
+      let oldContent = ''
+
+      if (fileName.toLowerCase().includes('chapter')) {
+        // Find chapter content in monolithic storyContent
+        oldContent = extractChapterContent(activeProject?.storyContent || '', fileName) || ''
+      } else {
+        const file = activeProject?.files.find(f => f.title === fileName)
+        oldContent = file?.content || ''
+      }
+
+      // Record the edit for highlighting
+      store.dispatch(setLastEdit({
+        fileTitle: fileName,
+        oldContent: oldContent,
+        newContent: content
+      }))
+
       let fileType: string = 'unknown'
       let sortOrder: number = 0 // Default sort order
 

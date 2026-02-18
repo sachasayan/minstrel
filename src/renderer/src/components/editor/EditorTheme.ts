@@ -24,6 +24,7 @@ export const theme: EditorThemeClasses = {
   },
   image: 'editor-image',
   link: 'text-blue-600 underline cursor-pointer',
+  mark: 'bg-yellow-200 dark:bg-yellow-900/50 rounded-sm px-0.5',
   text: {
     bold: 'font-bold',
     italic: 'italic',

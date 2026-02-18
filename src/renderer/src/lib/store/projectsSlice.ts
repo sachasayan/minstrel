@@ -20,7 +20,8 @@ const initialState: ProjectState = {
   projectHasLiveEdits: false,
   activeProject: null,
   pendingFiles: null,
-  modifiedChapters: []
+  modifiedChapters: [],
+  lastEdit: null
 }
 
 export const projectsSlice = createSlice({
@@ -55,10 +56,12 @@ export const projectsSlice = createSlice({
     setActiveProjectFromFragment: (state, action: PayloadAction<ProjectFragment>) => {
       state.activeProject = projectFromFragment(action.payload)
       state.modifiedChapters = []
+      state.lastEdit = null
     },
     setActiveProject: (state, action: PayloadAction<Project | null>) => {
       state.activeProject = action.payload ? normalizeProjectStoryContent(action.payload) : null
       state.modifiedChapters = []
+      state.lastEdit = null
     },
     setProjectHasLiveEdits: (state, action: PayloadAction<boolean>) => {
       state.projectHasLiveEdits = action.payload
@@ -109,6 +112,12 @@ export const projectsSlice = createSlice({
 
         state.projectHasLiveEdits = true
       }
+    },
+    setLastEdit: (state, action: PayloadAction<{ fileTitle: string; oldContent: string; newContent: string } | null>) => {
+      state.lastEdit = action.payload
+    },
+    clearLastEdit: (state) => {
+      state.lastEdit = null
     },
     updateParameters: (state, action: PayloadAction<{ title: string; genre: Genre; summary: string; year: number; wordCountTarget: number }>) => {
       if (state.activeProject) {
@@ -196,7 +205,9 @@ export const {
   updateMetaProperty,
   updateCoverImage,
   addChapter, // Export the new action
-  updateChapter
+  updateChapter,
+  setLastEdit,
+  clearLastEdit
 } = projectsSlice.actions
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject
