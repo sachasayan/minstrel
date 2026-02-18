@@ -29,7 +29,7 @@ BEGIN SYSTEM PROMPT
 
 `
 
-const separator = '\n\n---\n\n'
+export const separator = '\n\n---\n\n'
 
 // --- Pure Utility Functions ---
 
