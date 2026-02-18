@@ -9,6 +9,14 @@ declare module '@/types' {
 }
 
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
+
+/**
+ * Type-safe payload for updating project meta properties.
+ * Using a discriminated union ensures that the 'value' matches the 'property' being updated.
+ */
+export type ProjectMetaUpdate = {
+  [K in keyof Project]: { property: K; value: Project[K] }
+}[keyof Project]
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
 import {
@@ -121,18 +129,93 @@ export const projectsSlice = createSlice({
         state.projectHasLiveEdits = true
       }
     },
-    updateMetaProperty: (state, action: PayloadAction<{ property: string; value: any }>) => {
-      if (!state.activeProject)
-        return // Use type assertion carefully or add type checks if property is specific
-      if (action.payload.property === 'storyContent' && typeof action.payload.value === 'string') {
-        state.activeProject.storyContent = action.payload.value
-        // REMOVED syncProjectFilesFromStory call
-        state.projectHasLiveEdits = true
-        return
+    updateMetaProperty: (state, action: PayloadAction<ProjectMetaUpdate>) => {
+      if (!state.activeProject || !action.payload) return
+
+      const payload = action.payload
+      let updated = false
+
+      // Using a switch statement to narrow the type of 'payload' members.
+      // This provides full type safety for handled properties while avoiding 'as any'.
+      switch (payload.property) {
+        case 'storyContent':
+          state.activeProject.storyContent = payload.value
+          updated = true
+          break
+        case 'projectPath':
+          state.activeProject.projectPath = payload.value
+          updated = true
+          break
+        case 'wordCountCurrent':
+          state.activeProject.wordCountCurrent = payload.value
+          updated = true
+          break
+        case 'wordCountHistorical':
+          state.activeProject.wordCountHistorical = payload.value
+          updated = true
+          break
+        case 'title':
+          state.activeProject.title = payload.value
+          updated = true
+          break
+        case 'genre':
+          state.activeProject.genre = payload.value
+          updated = true
+          break
+        case 'summary':
+          state.activeProject.summary = payload.value
+          updated = true
+          break
+        case 'year':
+          state.activeProject.year = payload.value
+          updated = true
+          break
+        case 'wordCountTarget':
+          state.activeProject.wordCountTarget = payload.value
+          updated = true
+          break
+        case 'cover':
+          state.activeProject.cover = payload.value
+          updated = true
+          break
+        case 'coverImageMimeType':
+          state.activeProject.coverImageMimeType = payload.value
+          updated = true
+          break
+        case 'coverImageBase64':
+          state.activeProject.coverImageBase64 = payload.value
+          updated = true
+          break
+        case 'dialogueAnalysis':
+          state.activeProject.dialogueAnalysis = payload.value
+          updated = true
+          break
+        case 'expertSuggestions':
+          state.activeProject.expertSuggestions = payload.value
+          updated = true
+          break
+        case 'knowledgeGraph':
+          state.activeProject.knowledgeGraph = payload.value
+          updated = true
+          break
+        case 'chatHistory':
+          state.activeProject.chatHistory = payload.value
+          updated = true
+          break
+        case 'files':
+          state.activeProject.files = payload.value
+          updated = true
+          break
+        default:
+          // Fallback for any properties not explicitly handled to maintain future-proofing.
+          // Since ProjectMetaUpdate is a union of Project keys, this is safe to cast.
+          ;(state.activeProject as any)[payload.property] = payload.value
+          updated = true
       }
-        // Cast to any to bypass TS error when assigning 'any' value to dynamic property
-      ;(state.activeProject as any)[action.payload.property] = action.payload.value
-      state.projectHasLiveEdits = true
+
+      if (updated) {
+        state.projectHasLiveEdits = true
+      }
     },
     updateReviews: (state, action: PayloadAction<{ critique: any[]; analysis: { dialogCounts: Record<string, number[]> } }>) => {
       if (!state.activeProject) return
