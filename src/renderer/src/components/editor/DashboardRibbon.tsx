@@ -10,6 +10,16 @@ import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
 import { CoverCard } from '@/components/CoverCard'
 import { getChapterWordCounts } from '@/lib/storyContent'
 
+function StarRating({ rating }: { rating: number }) {
+    return (
+        <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className={`w-3 h-3 ${star <= rating ? 'text-highlight-500 fill-current' : 'text-gray-300'}`} />
+            ))}
+        </div>
+    )
+}
+
 export function DashboardRibbon() {
     const activeProject = useSelector(selectActiveProject)
     const [dialogueCountData, setDialogueCountData] = useState<any[]>([])
@@ -59,15 +69,6 @@ export function DashboardRibbon() {
 
     if (!activeProject) return null
 
-    function StarRating({ rating }: { rating: number }) {
-        return (
-            <div className="flex items-center">
-                {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className={`w-3 h-3 ${star <= rating ? 'text-highlight-500 fill-current' : 'text-gray-300'}`} />
-                ))}
-            </div>
-        )
-    }
 
     return (
         <div className="w-full overflow-hidden mb-12" id="project-overview">

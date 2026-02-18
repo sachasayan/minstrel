@@ -10,6 +10,17 @@ import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
 import { CoverCard } from '@/components/CoverCard'
 import { getChapterWordCounts } from '@/lib/storyContent'
 
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star key={star} className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+      ))}
+      <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
+    </div>
+  )
+}
+
 export default function NovelDashboard() {
   const activeProject = useSelector(selectActiveProject)
   const [dialogueCountData, setDialogueCountData] = useState<any[]>([]);
@@ -68,16 +79,6 @@ export default function NovelDashboard() {
     }
   }, [activeProject]);
 
-  function StarRating({ rating }: { rating: number }) {
-    return (
-      <div className="flex items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star key={star} className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-        ))}
-        <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
-      </div>
-    )
-  }
 
 
 
