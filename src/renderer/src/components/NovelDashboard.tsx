@@ -5,9 +5,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Star } from 'lucide-react'
 import { useEffect, useState, useMemo } from 'react'
 
-import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils' // Removed extractCharactersFromOutline, getCharacterFrequencyData
-import { updateMetaProperty } from '@/lib/store/projectsSlice'
+import { selectActiveProject, updateMetaProperty } from '@/lib/store/projectsSlice'
+import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
 import { CoverCard } from '@/components/CoverCard'
 import { getChapterWordCounts } from '@/lib/storyContent'
 
