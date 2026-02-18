@@ -78,15 +78,6 @@ export interface ChatMessage {
   metadata?: any
 }
 
-// interface SceneOutline {
-//   description: string
-// }
-
-// export interface ChapterOutline {
-//   title: string
-//   scenes: SceneOutline[]
-// }
-
 export interface AppListenerApi {
   dispatch: () => any
   getState: () => any

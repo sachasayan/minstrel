@@ -1,7 +1,7 @@
-import { ReactNode, useState, version } from 'react'
+import { ReactNode, version } from 'react'
 
 function Versions(): ReactNode {
-  const [versions] = useState(window?.electron?.process?.versions)
+  const versions = window?.electron?.process?.versions
 
   return (
     <ul className="versions">

@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
 export interface OnboardingContextProps {
   totalSteps: number
   currentStep: number
-  setCurrentStep: (step: number) => void
+  setCurrentStep: React.Dispatch<React.SetStateAction<number>>
   formData: { [key: string]: any }
   // Use a more specific type if possible, e.g., Partial<SettingsState>
   setFormData: React.Dispatch<React.SetStateAction<Record<string, any>>>

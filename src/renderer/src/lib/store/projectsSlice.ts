@@ -53,7 +53,6 @@ export const projectsSlice = createSlice({
         expertSuggestions: [],
         knowledgeGraph: null,
         chatHistory: [] // Initialize chat history
-        // isNew: true
       }
       state.activeProject = tempProject
       state.projectHasLiveEdits = true // It's unsaved
@@ -70,7 +69,6 @@ export const projectsSlice = createSlice({
       state.modifiedChapters = []
     },
     setProjectHasLiveEdits: (state, action: PayloadAction<boolean>) => {
-      action.payload
       state.projectHasLiveEdits = action.payload
     },
     setAllFilesAsSaved: (state) => {

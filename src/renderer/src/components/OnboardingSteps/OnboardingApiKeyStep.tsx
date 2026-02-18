@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
-// import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Key, MoveRight, Loader2, CircleCheck, CircleX } from 'lucide-react'
 import { useOnboarding } from './context'
@@ -45,7 +44,7 @@ const OnboardingApiKeyStep = ({ isActive }: OnboardingApiKeyStepProps): ReactNod
         if (isValid) {
           setKeyValidationStatus('valid')
           setFormData(prev => ({ ...prev, googleApiKey: apiKey }))
-          setCurrentStep(2) // Proceed to next step (Summary)
+          setCurrentStep(3) // Proceed to next step (Summary)
         } else {
           console.error('API key validation failed for provider: google')
           setKeyValidationStatus('invalid')
