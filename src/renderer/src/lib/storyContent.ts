@@ -27,14 +27,21 @@ export const getChaptersFromStoryContent = (storyContent: string): { title: stri
 
 export const calculateWordCount = (content: string): number => {
   if (!content) return 0
-  return content.trim().split(/\s+/).filter(word => word.length > 0).length
+
+  // Optimized word count using regex exec to avoid creating large arrays of strings
+  const regex = /\S+/g
+  let count = 0
+  while (regex.exec(content) !== null) {
+    count++
+  }
+  return count
 }
 
 export const getChapterWordCounts = (storyContent: string): { title: string; wordCount: number; content: string }[] => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
   const chapters: { title: string; contentLines: string[] }[] = []
-  
+
   let currentChapter: { title: string; contentLines: string[] } | null = null
 
   lines.forEach((line) => {
@@ -47,7 +54,7 @@ export const getChapterWordCounts = (storyContent: string): { title: string; wor
     }
   })
 
-  return chapters.map(c => ({
+  return chapters.map((c) => ({
     title: c.title,
     content: c.contentLines.join('\n'),
     wordCount: calculateWordCount(c.contentLines.join('\n'))
@@ -64,8 +71,8 @@ export const normalizeProjectStoryContent = (project: Project): Project => {
     typeof storyFile?.content === 'string' && storyFile.content.trim().length > 0
       ? normalizeLineEndings(storyFile.content)
       : typeof project.storyContent === 'string' && project.storyContent.trim().length > 0
-      ? normalizeLineEndings(project.storyContent)
-      : '' // Default to empty if no story content
+        ? normalizeLineEndings(project.storyContent)
+        : '' // Default to empty if no story content
 
   return {
     ...project,
@@ -93,24 +100,22 @@ export const buildPersistableProject = (project: Project): Project => {
 
 const findChapterStartIndex = (lines: string[], title: string): number => {
   const normalizedTitle = title.trim().toLowerCase()
-  
+
   return lines.findIndex((line) => {
     const trimmed = line.trim()
     if (!trimmed.startsWith('# ')) return false
-    
+
     const lineTitle = trimmed.replace(/^#\s+/, '').trim().toLowerCase()
-    
+
     // Exact match or matches the start with a separator (colon or space)
-    return lineTitle === normalizedTitle || 
-           lineTitle.startsWith(normalizedTitle + ':') ||
-           lineTitle.startsWith(normalizedTitle + ' ')
+    return lineTitle === normalizedTitle || lineTitle.startsWith(normalizedTitle + ':') || lineTitle.startsWith(normalizedTitle + ' ')
   })
 }
 
 export const extractChapterContent = (storyContent: string, chapterTitle: string): string | null => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
-  
+
   const startIndex = findChapterStartIndex(lines, chapterTitle)
   if (startIndex === -1) return null
 
@@ -129,13 +134,11 @@ export const extractChapterContent = (storyContent: string, chapterTitle: string
 export const replaceChapterContent = (storyContent: string, chapterTitle: string, newContent: string): string => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
-  
+
   const startIndex = findChapterStartIndex(lines, chapterTitle)
 
   // Ensure content starts with a header if it doesn't already have one
-  const contentToInsert = /^#\s+/.test(newContent.trim()) 
-    ? newContent.trim() 
-    : `# ${chapterTitle}\n\n${newContent.trim()}`
+  const contentToInsert = /^#\s+/.test(newContent.trim()) ? newContent.trim() : `# ${chapterTitle}\n\n${newContent.trim()}`
 
   if (startIndex === -1) {
     // If chapter doesn't exist, append it
@@ -153,16 +156,10 @@ export const replaceChapterContent = (storyContent: string, chapterTitle: string
   // Replace everything from startIndex to endIndex (exclusive of endIndex)
   const before = lines.slice(0, startIndex)
   const after = endIndex === -1 ? [] : lines.slice(endIndex)
-  
+
   // Clean up potential double newlines
   const beforeText = before.join('\n').trim()
   const afterText = after.join('\n').trim()
 
-  return [
-    beforeText,
-    beforeText ? '\n\n' : '',
-    contentToInsert,
-    afterText ? '\n\n' : '',
-    afterText
-  ].join('')
+  return [beforeText, beforeText ? '\n\n' : '', contentToInsert, afterText ? '\n\n' : '', afterText].join('')
 }
