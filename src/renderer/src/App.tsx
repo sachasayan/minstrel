@@ -1,8 +1,9 @@
 import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectActiveView } from '@/lib/store/appStateSlice'
-import { selectActiveProject } from '@/lib/store/projectsSlice'
+import { selectActiveProject, setActiveProjectFromFragment } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
+import { getProjectFragmentMeta } from '@/lib/services/fileService'
 
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -23,7 +24,6 @@ export default function App(): ReactNode {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-
   const loadSettings = async () => {
     console.log('Loading settings')
     setLoadError(null)
@@ -37,8 +37,8 @@ export default function App(): ReactNode {
         setShowOnboarding(true)
       }
     } catch (error) {
-      console.error("Failed to load settings in App:", error);
-      setLoadError("Failed to load application settings. Please check your configuration and try again.")
+      console.error('Failed to load settings in App:', error)
+      setLoadError('Failed to load application settings. Please check your configuration and try again.')
     } finally {
       setHasLoaded(true)
     }
@@ -53,7 +53,7 @@ export default function App(): ReactNode {
       case 'project/dashboard':
       case 'project/editor':
         // Ensure activeProject exists before rendering ProjectOverview
-        return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro />; // Fallback to Intro if no project
+        return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro /> // Fallback to Intro if no project
       case 'settings':
         return <SettingsPage />
       default:
@@ -67,6 +67,40 @@ export default function App(): ReactNode {
       loadSettings() // Call the async function
     }
   }, [hasLoaded])
+
+  // Handle file opening from OS
+  useEffect(() => {
+    const handleOpenFile = async (path: string) => {
+      console.log('Opening project from file:', path)
+      try {
+        const fragment = await getProjectFragmentMeta(path)
+        if (fragment) {
+          dispatch(setActiveProjectFromFragment(fragment))
+        } else {
+          console.error('Failed to get metadata for project:', path)
+        }
+      } catch (error) {
+        console.error('Error opening project from file:', error)
+      }
+    }
+
+    // Check for initial file
+    window.electron.ipcRenderer.invoke('get-initial-file').then((path) => {
+      if (path) {
+        handleOpenFile(path)
+      }
+    })
+
+    // Listen for future open-project events
+    let unsubscribe: (() => void) | undefined
+    if (window.api && window.api.onOpenProject) {
+      unsubscribe = window.api.onOpenProject(handleOpenFile)
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe()
+    }
+  }, [dispatch])
 
   // Conditionally render OnboardingPage or the main app router
   return (

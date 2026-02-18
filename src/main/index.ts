@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
@@ -7,8 +7,55 @@ import { registerFileOpsHandlers } from './fileOps'
 import { registerSettingsHandlers } from './settingsManager'
 import { registerSqliteOpsHandlers } from './sqliteOps'
 
+let mainWindow: BrowserWindow | null = null
+let fileToOpen: string | null = null
+
+// Single instance lock
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (_event, commandLine) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+
+      // Handle file opening from second instance
+      const filePath = getFilePathFromArgs(commandLine)
+      if (filePath) {
+        sendOpenFileToRenderer(filePath)
+      }
+    }
+  })
+}
+
+function getFilePathFromArgs(argv: string[]): string | null {
+  const filePath = argv.find((arg) => arg.endsWith('.mns'))
+  return filePath || null
+}
+
+function sendOpenFileToRenderer(filePath: string): void {
+  if (mainWindow) {
+    mainWindow.webContents.send('open-project', filePath)
+  }
+}
+
+// Handle macOS open-file event
+app.on('open-file', (event, path) => {
+  event.preventDefault()
+  if (path.endsWith('.mns')) {
+    if (app.isReady() && mainWindow) {
+      sendOpenFileToRenderer(path)
+    } else {
+      fileToOpen = path
+    }
+  }
+})
+
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     show: false,
@@ -31,7 +78,7 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow?.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -52,6 +99,16 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  if (!fileToOpen) {
+    fileToOpen = getFilePathFromArgs(process.argv)
+  }
+
+  ipcMain.handle('get-initial-file', () => {
+    const path = fileToOpen
+    fileToOpen = null // Clear it after it's been requested once
+    return path
+  })
+
   if (is.dev) {
     // Conditionally install Redux DevTools in development
     installExtension(REDUX_DEVTOOLS)
