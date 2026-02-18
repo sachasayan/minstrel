@@ -50,6 +50,7 @@ interface LexicalEditorProps {
     activeSection: string | null
     onSectionChange: (section: string) => void
     containerRef: React.RefObject<HTMLDivElement | null>
+    editable?: boolean
 }
 
 export function LexicalEditor({
@@ -57,11 +58,18 @@ export function LexicalEditor({
     onChange,
     activeSection,
     onSectionChange,
-    containerRef
+    containerRef,
+    editable = true
 }: LexicalEditorProps): JSX.Element {
+    const config = {
+        ...editorConfig,
+        editable
+    }
+
     return (
-        <LexicalComposer initialConfig={editorConfig}>
+        <LexicalComposer initialConfig={config}>
             <div className="editor-container relative">
+                <EditablePlugin editable={editable} />
                 <RichTextPlugin
                     contentEditable={
                         <ContentEditable className="outline-none py-4 min-h-[500px]" />
@@ -85,4 +93,17 @@ export function LexicalEditor({
             </div>
         </LexicalComposer>
     )
+}
+
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useEffect } from 'react'
+
+function EditablePlugin({ editable }: { editable: boolean }) {
+    const [editor] = useLexicalComposerContext()
+
+    useEffect(() => {
+        editor.setEditable(editable)
+    }, [editor, editable])
+
+    return null
 }
