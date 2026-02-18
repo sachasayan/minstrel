@@ -1,4 +1,5 @@
 import { ProjectFile } from '../types'
+import { calculateWordCount } from './storyContent'
 
 export const getBoldAsKey = (markdownString: string): string => {
   const match = markdownString.match(/^[*-]\s+\*\*([\p{L}\s]+)[-:]\*\*/iu) || []
@@ -31,7 +32,7 @@ export const stringToProjectFile = (markdownString: string): ProjectFile => {
     }
   }
 
-  const wordcount = content.split(/\s+/).filter((word) => word.length > 0).length
+  const wordcount = calculateWordCount(content)
   return {
     title,
     content,
