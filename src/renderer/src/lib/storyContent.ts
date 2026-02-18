@@ -10,14 +10,21 @@ export const isStoryFile = (file: Pick<ProjectFile, 'title' | 'type'> | null | u
   return file.type === STORY_FILE_TYPE || file.title === STORY_FILE_TITLE
 }
 
+const getChapterTitleFromLine = (line: string): string | null => {
+  const trimmed = line.trim()
+  // Matches H1 header: '#' followed by at least one space and then some content
+  const match = trimmed.match(/^#\s+(\S.*)$/)
+  return match ? match[1].trim() : null
+}
+
 export const getChaptersFromStoryContent = (storyContent: string): { title: string; index: number }[] => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
   const chapters: { title: string; index: number }[] = []
 
   lines.forEach((line, index) => {
-    if (/^#\s+\S+/.test(line.trim())) {
-      const title = line.trim().replace(/^#\s+/, '')
+    const title = getChapterTitleFromLine(line)
+    if (title !== null) {
       chapters.push({ title, index })
     }
   })
@@ -38,8 +45,8 @@ export const getChapterWordCounts = (storyContent: string): { title: string; wor
   let currentChapter: { title: string; contentLines: string[] } | null = null
 
   lines.forEach((line) => {
-    if (/^#\s+\S+/.test(line.trim())) {
-      const title = line.trim().replace(/^#\s+/, '')
+    const title = getChapterTitleFromLine(line)
+    if (title !== null) {
       currentChapter = { title, contentLines: [] }
       chapters.push(currentChapter)
     } else if (currentChapter) {
@@ -93,30 +100,32 @@ export const buildPersistableProject = (project: Project): Project => {
 
 const findChapterStartIndex = (lines: string[], title: string): number => {
   const normalizedTitle = title.trim().toLowerCase()
-  
+
   return lines.findIndex((line) => {
-    const trimmed = line.trim()
-    if (!trimmed.startsWith('# ')) return false
-    
-    const lineTitle = trimmed.replace(/^#\s+/, '').trim().toLowerCase()
-    
+    const lineTitle = getChapterTitleFromLine(line)
+    if (lineTitle === null) return false
+
+    const normalizedLineTitle = lineTitle.toLowerCase()
+
     // Exact match or matches the start with a separator (colon or space)
-    return lineTitle === normalizedTitle || 
-           lineTitle.startsWith(normalizedTitle + ':') ||
-           lineTitle.startsWith(normalizedTitle + ' ')
+    return (
+      normalizedLineTitle === normalizedTitle ||
+      normalizedLineTitle.startsWith(normalizedTitle + ':') ||
+      normalizedLineTitle.startsWith(normalizedTitle + ' ')
+    )
   })
 }
 
 export const extractChapterContent = (storyContent: string, chapterTitle: string): string | null => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
-  
+
   const startIndex = findChapterStartIndex(lines, chapterTitle)
   if (startIndex === -1) return null
 
   let endIndex = -1
   for (let i = startIndex + 1; i < lines.length; i++) {
-    if (/^#\s+/.test(lines[i].trim())) {
+    if (getChapterTitleFromLine(lines[i]) !== null) {
       endIndex = i
       break
     }
@@ -129,13 +138,15 @@ export const extractChapterContent = (storyContent: string, chapterTitle: string
 export const replaceChapterContent = (storyContent: string, chapterTitle: string, newContent: string): string => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
-  
+
   const startIndex = findChapterStartIndex(lines, chapterTitle)
 
   // Ensure content starts with a header if it doesn't already have one
-  const contentToInsert = /^#\s+/.test(newContent.trim()) 
-    ? newContent.trim() 
-    : `# ${chapterTitle}\n\n${newContent.trim()}`
+  const firstLine = newContent.trim().split('\n')[0]
+  const contentToInsert =
+    getChapterTitleFromLine(firstLine) !== null
+      ? newContent.trim()
+      : `# ${chapterTitle}\n\n${newContent.trim()}`
 
   if (startIndex === -1) {
     // If chapter doesn't exist, append it
@@ -144,7 +155,7 @@ export const replaceChapterContent = (storyContent: string, chapterTitle: string
 
   let endIndex = -1
   for (let i = startIndex + 1; i < lines.length; i++) {
-    if (/^#\s+/.test(lines[i].trim())) {
+    if (getChapterTitleFromLine(lines[i]) !== null) {
       endIndex = i
       break
     }
