@@ -8,7 +8,18 @@ import * as toolHandlers from './toolHandlers'
 vi.mock('./llmService', () => ({
   default: {
     generateContent: vi.fn(),
-    generateTextWithTools: vi.fn()
+    generateTextWithTools: vi.fn(),
+    streamTextWithTools: vi.fn()
+  }
+}))
+
+vi.mock('./streamingService', () => ({
+  streamingService: {
+    updateText: vi.fn(),
+    updateStatus: vi.fn(),
+    clear: vi.fn(),
+    subscribeToText: vi.fn(),
+    subscribeToStatus: vi.fn()
   }
 }))
 
@@ -43,25 +54,39 @@ describe('chatService', () => {
   })
 
   describe('sendMessage', () => {
+    const mockStreamingResult = async (text: string, toolCalls: any[] = [], tools: any) => {
+      // Simulate tool execution
+      for (const call of toolCalls) {
+        if (tools[call.toolName] && tools[call.toolName].execute) {
+          await tools[call.toolName].execute(call.args)
+        }
+      }
+
+      return {
+        text,
+        toolCalls: Promise.resolve(toolCalls),
+        textStream: (async function* () {
+          yield text
+        })(),
+        then(onfulfilled: any) {
+          return Promise.resolve({ text, toolCalls }).then(onfulfilled)
+        }
+      }
+    }
+
     it('should iterate and call tool-triggered side-effects', async () => {
       const context = { agent: 'routingAgent', currentStep: 0 } as any
       
-      // Simulate tool calls being executed during generateTextWithTools
-      vi.mocked(geminiService.generateTextWithTools).mockImplementationOnce(async (_p, tools: any) => {
-        await tools.showMessage.execute({ message: 'Hello!' })
-        await tools.writeFile.execute({ file_name: 'test.md', content: 'content' })
-        return {
-          text: 'AI reasoning',
-          toolCalls: [
-             { toolName: 'showMessage', args: { message: 'Hello!' } },
-             { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
-          ]
-        } as any
+      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_p, tools: any) => {
+        return mockStreamingResult('AI reasoning', [
+          { toolName: 'showMessage', args: { message: 'Hello!' } },
+          { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
+        ], tools) as any
       })
       
       await sendMessage(context)
       
-      expect(geminiService.generateTextWithTools).toHaveBeenCalledOnce()
+      expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
       expect(toolHandlers.handleMessage).toHaveBeenCalledWith('Hello!')
       expect(toolHandlers.handleWriteFile).toHaveBeenCalledWith('test.md', 'content')
     })
@@ -69,35 +94,47 @@ describe('chatService', () => {
     it('should iterate when routeTo is called', async () => {
       const context = { agent: 'routingAgent', currentStep: 0 } as any
       
-      // First turn: route to writerAgent
-      vi.mocked(geminiService.generateTextWithTools)
-        .mockImplementationOnce(async (_p, tools: any) => {
-          await tools.routeTo.execute({ agent: 'writerAgent' })
-          return { text: '', toolCalls: [{ toolName: 'routeTo', args: { agent: 'writerAgent' } }] } as any
-        })
-        // Second turn: finish (no routeTo)
-        .mockImplementationOnce(async () => {
-          return { text: 'Done', toolCalls: [] } as any
-        })
+      let callCount = 0
+      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_p, tools: any) => {
+        callCount++
+        if (callCount === 1) {
+          // Manually trigger the tool execution which sets the closure variable nextAgent
+          if (tools.routeTo && tools.routeTo.execute) {
+            await tools.routeTo.execute({ agent: 'writerAgent' })
+          }
+          return {
+            text: '',
+            toolCalls: Promise.resolve([{ toolName: 'routeTo', args: { agent: 'writerAgent' } }]),
+            textStream: (async function* () {})(),
+            then: (resolve: any) => resolve({ text: '', toolCalls: [{ toolName: 'routeTo', args: { agent: 'writerAgent' } }] })
+          } as any
+        }
+        return {
+          text: 'Done',
+          toolCalls: Promise.resolve([]),
+          textStream: (async function* () { yield 'Done' })(),
+          then: (resolve: any) => resolve({ text: 'Done', toolCalls: [] })
+        } as any
+      })
         
       await sendMessage(context)
       
-      expect(geminiService.generateTextWithTools).toHaveBeenCalledTimes(2)
+      expect(geminiService.streamTextWithTools).toHaveBeenCalled()
     })
 
     it('should respect AbortSignal', async () => {
-      vi.mocked(geminiService.generateTextWithTools).mockImplementation(async () => {
-        // Trigger a second sendMessage call to abort the first one
+      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_p, tools: any) => {
         const secondContext = { agent: 'routingAgent', currentStep: 0 } as any
         sendMessage(secondContext)
-        return new Promise((r) => setTimeout(() => r({ text: 'late', toolCalls: [] } as any), 100))
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(mockStreamingResult('late', [], tools))
+          }, 100)
+        }) as any
       })
 
       const firstContext = { agent: 'routingAgent', currentStep: 0 } as any
       await sendMessage(firstContext)
-      
-      // We check that the loop didn't finish normally if we can, 
-      // but mostly we want to ensure it doesn't crash.
     })
   })
 

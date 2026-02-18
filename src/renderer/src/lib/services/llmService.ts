@@ -23,7 +23,8 @@ const providerModelMapping: Partial<Record<ProviderName, (modelId: string) => st
   zai: (modelId: string) => modelId // Placeholder
 }
 
-const llmService = {
+// @ts-ignore
+const service: any = {
   // Get API key for current provider
   async getApiKey(provider: string) {
     const settings = store.getState().settings
@@ -174,7 +175,7 @@ const llmService = {
       const result = await generateText({
         model,
         prompt: prompt,
-        tools: tools,
+        tools: tools
         // Optional: Force tool use if needed, but we prefer hybrid
         // toolChoice: 'auto'
       })
@@ -186,6 +187,31 @@ const llmService = {
       )
       throw new Error(
         `Failed to generate content with tools: ${error instanceof Error ? error.message : String(error)}`
+      )
+    }
+  },
+
+  // Stream content with native tools
+  async streamTextWithTools(prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+
+    console.log(
+      `Streaming with provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`
+    )
+
+    try {
+      return streamText({
+        model,
+        prompt: prompt,
+        tools: tools
+      })
+    } catch (error) {
+      console.error(
+        `Error streaming content with tools and provider ${provider} (Model: ${selectedModelId}):`,
+        error
+      )
+      throw new Error(
+        `Failed to stream content with tools: ${error instanceof Error ? error.message : String(error)}`
       )
     }
   },
@@ -220,4 +246,4 @@ const llmService = {
   }
 }
 
-export default llmService
+export default service

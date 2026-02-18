@@ -13,6 +13,7 @@ import {
 } from './toolHandlers'
 import * as schemas from './toolSchemas'
 import { tool } from 'ai'
+import { streamingService } from './streamingService'
 
 const DEBOUNCE_TIME = 5000 // 5 seconds
 const MAX_STEPS = 6
@@ -129,7 +130,45 @@ export const sendMessage = async (initialContext: RequestContext) => {
 
       let result: any
       try {
-        result = await geminiService.generateTextWithTools(prompt, tools, modelPreference)
+        const stream = await geminiService.streamTextWithTools(prompt, tools, modelPreference)
+        
+        // Handle tool calls as they are being identified
+        // Note: AI SDK processes 'execute' automatically when the full call is received
+        // We can listen for them to update the "thinking" status
+        const toolCallsPromise = stream.toolCalls
+        if (toolCallsPromise) {
+          toolCallsPromise.then(calls => {
+             calls.forEach(call => {
+                if (call.toolName === 'writeFile') {
+                  streamingService.updateStatus(`Writing ${(call as any).args.file_name}...`)
+                } else if (call.toolName === 'reasoning') {
+                  streamingService.updateStatus('Minstrel is thinking...')
+                }
+             })
+          })
+        }
+
+        // Stream the actual text content if it's a message
+        let fullText = ''
+        for await (const textPart of stream.textStream) {
+          if (signal.aborted) {
+            streamingService.clear()
+            break
+          }
+          fullText += textPart
+          streamingService.updateText(fullText)
+        }
+
+        // Wait for all tool executions to finish
+        result = await stream
+
+        // Update context based on tool calls (redundant but robust for testing/clarity)
+        const calls = await (result.toolCalls || Promise.resolve([]))
+        calls?.forEach((call: any) => {
+          if (call.toolName === 'routeTo') nextAgent = call.args.agent
+          if (call.toolName === 'readFile') nextRequestedFiles = call.args.file_names
+        })
+        
       } catch (error: any) {
         if (signal.aborted) break
 
@@ -147,6 +186,9 @@ export const sendMessage = async (initialContext: RequestContext) => {
       console.log('Text:', result.text)
       console.log('Tool Calls:', result.toolCalls)
       console.groupEnd()
+
+      // Clear streaming state after each step (it will be repopulated if the next step has text)
+      streamingService.clear()
 
       // The SDK's 'execute' functions already processed the tools. 
       // We just need to update our context for the next iteration.

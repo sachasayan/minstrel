@@ -5,19 +5,27 @@ import { RootState } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
 import minstrelIcon from '@/assets/bot/base.png'
 import { ChatMessage } from '@/types'
+import { streamingService } from '@/lib/services/streamingService'
 
-const ChatLoadingIndicator = () => {
+const ChatLoadingIndicator = ({ status }: { status: string }) => {
+  const [dots, setDots] = useState('')
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? '' : prev + '.'))
+    }, 500)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
-    <div className="flex items-center justify-center p-2">
-      <div className="animate-ping h-2 w-2 bg-neutral-400 rounded-full mx-1"></div>
-      <div className="animate-ping h-2 w-2 bg-neutral-400 rounded-full mx-1 delay-75"></div>
-      <div className="animate-ping h-2 w-2 bg-neutral-400 rounded-full mx-1 delay-150"></div>
+    <div className="flex items-center p-2 text-neutral-400 text-xs italic">
+      {status || 'Minstrel is thinking'}{dots}
     </div>
   )
 }
 
 interface ChatMessageItemProps {
-  msg: ChatMessage
+  msg: ChatMessage | { sender: 'Gemini'; text: string; isStreaming?: boolean }
   isLast: boolean
   lastMessageRef: React.RefObject<HTMLDivElement | null>
 }
@@ -28,18 +36,18 @@ const ChatMessageItem = memo(({ msg, isLast, lastMessageRef }: ChatMessageItemPr
       ref={isLast ? lastMessageRef : null}
       className="flex items-start justify-end"
     >
-      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message outline-1 outline-neutral-600 text-neutral-600 text-left ml-14 relative">
+      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message outline-1 outline-neutral-600 text-neutral-600 text-left ml-14 relative font-medium">
         {msg.text}
       </div>
     </div>
   ) : (
     <div
       ref={isLast ? lastMessageRef : null}
-      className="flex items-start justify-end"
+      className="flex items-start"
     >
       <img src={minstrelIcon} className="size-10 mr-1" alt="" />
-      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-right mr-8 relative">
-        <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-200"></div>
+      <div className={`mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-left mr-8 relative ${(msg as any).isStreaming ? 'opacity-90' : ''}`}>
+        <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-600"></div>
         {msg.text}
       </div>
     </div>
@@ -51,20 +59,31 @@ ChatMessageItem.displayName = 'ChatMessageItem'
 const ChatInterface = () => {
   const { chatHistory, pendingChat } = useSelector((state: RootState) => selectChat(state))
   const [message, setMessage] = useState('')
+  const [streamingText, setStreamingText] = useState('')
+  const [streamingStatus, setStreamingStatus] = useState('')
   const dispatch = useDispatch()
   const inputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const lastMessageRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' })
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
     }
   }
 
   useEffect(() => {
+    const unsubText = streamingService.subscribeToText(setStreamingText)
+    const unsubStatus = streamingService.subscribeToStatus(setStreamingStatus)
+    return () => {
+      unsubText()
+      unsubStatus()
+    }
+  }, [])
+
+  useEffect(() => {
     scrollToBottom()
-  }, [chatHistory])
+  }, [chatHistory, streamingText, streamingStatus])
 
   const handleSend = () => {
     if (message.trim() !== '') {
@@ -87,10 +106,18 @@ const ChatInterface = () => {
             <ChatMessageItem
               key={index}
               msg={msg}
-              isLast={index === chatHistory.length - 1}
+              isLast={index === chatHistory.length - 1 && !streamingText && !pendingChat}
               lastMessageRef={lastMessageRef}
             />
           ))}
+
+          {streamingText && (
+            <ChatMessageItem
+              msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
+              isLast={!pendingChat || (pendingChat && !streamingStatus)}
+              lastMessageRef={lastMessageRef}
+            />
+          )}
 
           {/* Suggestions */}
           {actionSuggestions.slice(0, 3).map((suggestion, index) => (
@@ -99,7 +126,11 @@ const ChatInterface = () => {
             </Button>
           ))}
 
-          {pendingChat && <ChatLoadingIndicator />}
+          {pendingChat && (
+            <div ref={lastMessageRef}>
+              <ChatLoadingIndicator status={streamingStatus} />
+            </div>
+          )}
         </div>
         <div className="border-t p-2 flex items-center bg-background">
           <input
