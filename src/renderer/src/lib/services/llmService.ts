@@ -162,6 +162,34 @@ const llmService = {
     }
   },
 
+  // Generate content with native tools
+  async generateTextWithTools(prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+
+    console.log(
+      `Using provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`
+    )
+
+    try {
+      const result = await generateText({
+        model,
+        prompt: prompt,
+        tools: tools,
+        // Optional: Force tool use if needed, but we prefer hybrid
+        // toolChoice: 'auto'
+      })
+      return result
+    } catch (error) {
+      console.error(
+        `Error generating content with tools and provider ${provider} (Model: ${selectedModelId}):`,
+        error
+      )
+      throw new Error(
+        `Failed to generate content with tools: ${error instanceof Error ? error.message : String(error)}`
+      )
+    }
+  },
+
   // Streaming version of generateContent
   async *streamGenerateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)

@@ -5,7 +5,7 @@ export const getCriticAgentPrompt = () => `
 ## CURRENT TASK: CRITIQUE THE STORY
 
 * The user is asking you to critique the story. They have provided the outline, and every available chapter of the story.
-* Use the <think> tool to pick three experts with professional relevance to this story.
+* Use the reasoning tool to pick three experts with professional relevance to this story.
 * They may be a literary critic, historian, politician, doctor, artist, musician, linguist, scientist, politician etc.
 * Each expert should have unique perspective on the book.
 * The critiques should analyze the story's strengths and weaknesses and suggest areas for improvement. They should be harsh, but fair.
@@ -16,9 +16,8 @@ export const getCriticAgentPrompt = () => `
 
 # CREATING A STRUCTURED RESPONSE
 
-* This task provides output in JSON format via the <critique> tool and does not ever involve a <write_file> tool.
-* Only one critique tag pair is used.
-* The JSON output must be a single object with exactly two properties, in this order:
+* This task provides output in JSON format via the addCritique tool and does not ever involve a writeFile tool.
+* The JSON output must be a single stringified JSON object with exactly two properties, in this order:
 * "critique": an array of three expert objects. Each object contains:
   - "name": the expert's name. (string)
   - "expertise": their field of focus. (string)
@@ -33,48 +32,8 @@ export const getCriticAgentPrompt = () => `
   - Do NOT include minor or side characters.
   - Ignore unattributed dialogue entirely.
 * The experts' critiques should NOT reference the analysis data — it is included purely for the user's review.
-* If you cannot complete the task for any reason, do not output the <critique> tag. Apologize and explain why the task couldn't be completed using <message>.
-* Use the <summary> tool to let the user know the critiques have been written.
-
-## SAMPLE INTERACTION:
-
-User: "Please write a critique."
-
-
-<think>The user wants to critique of the storyline. It looks like I have all the required files.</think>
-<critique>
-{
-  "critique": [
-    {
-      "name": "Alice Johnson",
-      "expertise": "Fantasy Writer",
-      "rating": 3,
-      "critique": "A captivating tale with engaging themes and solid pacing."
-    },
-    {
-      "name": "Michael Chen",
-      "expertise": "Character Consultant",
-      "rating": 4,
-      "critique": "Well-executed world-building; character motivations could be clearer."
-    },
-    {
-      "name": "Sophia Rodriguez",
-      "expertise": "Literary Critic",
-      "rating": 4,
-      "critique": "Balances action and introspection effectively. Prose is vivid."
-    }
-  ],
-  "analysis": {
-    "dialogCounts": {
-      "Alice": [12, 8, 15],
-      "Bob": [3, 0, 9],
-      "Eve": [0, 0, 4]
-    }
-  }
-}
-</critique>
-<message>The critics have weighed in.</message>
-
+* If you cannot complete the task for any reason, do not use the addCritique tool. Apologize and explain why the task couldn't be completed using showMessage.
+* Use the showMessage tool to let the user know the critiques have been written.
 
 ---
 
@@ -83,4 +42,3 @@ BEGIN USER PROMPT
 
 * The user may also provide you with the contents of any files needed for the current task.
 `
-

@@ -5,13 +5,14 @@ import { setPendingFiles } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { toast } from 'sonner'
 import { RequestContext } from '@/types'
-import { parseLLMResponse } from './llmParser'
 import {
   handleWriteFile,
   handleCritique,
   handleMessage,
   handleActionSuggestions
 } from './toolHandlers'
+import * as schemas from './toolSchemas'
+import { tool } from 'ai'
 
 const DEBOUNCE_TIME = 5000 // 5 seconds
 const MAX_STEPS = 6
@@ -62,9 +63,73 @@ export const sendMessage = async (initialContext: RequestContext) => {
       const modelPreference: 'high' | 'low' = 
         (context.agent === 'outlineAgent' || context.agent === 'writerAgent') ? 'high' : 'low'
 
-      let response: string
+      // Define local variables to capture state changes from tools
+      let nextAgent: string | null = null
+      let nextRequestedFiles: string[] | undefined = undefined
+
+      // Tools definition for AI SDK
+      const tools = {
+        reasoning: tool({
+          description: 'Think out your actions and plan the current step.',
+          parameters: schemas.reasoningSchema,
+          execute: async ({ thought }: any) => {
+            console.log('AI Reasoning:', thought)
+            return { status: 'success' }
+          }
+        } as any),
+        writeFile: tool({
+          description: 'Write content to a file.',
+          parameters: schemas.writeFileSchema,
+          execute: async ({ file_name, content }: any) => {
+            handleWriteFile(file_name, content)
+            return { status: 'success', file: file_name }
+          }
+        } as any),
+        readFile: tool({
+          description: 'Read the contents of specified files.',
+          parameters: schemas.readFileSchema,
+          execute: async ({ file_names }: any) => {
+            nextRequestedFiles = file_names
+            return { status: 'success', requested: file_names }
+          }
+        } as any),
+        routeTo: tool({
+          description: 'Route to a specialist agent.',
+          parameters: schemas.routeToSchema,
+          execute: async ({ agent }: any) => {
+            nextAgent = agent
+            return { status: 'success', target: agent }
+          }
+        } as any),
+        actionSuggestion: tool({
+          description: 'Provide suggestions for the user.',
+          parameters: schemas.actionSuggestionSchema,
+          execute: async ({ suggestions }: any) => {
+            handleActionSuggestions(suggestions)
+            return { status: 'success' }
+          }
+        } as any),
+        showMessage: tool({
+          description: 'Show a message to the user.',
+          parameters: schemas.showMessageSchema,
+          execute: async ({ message }: any) => {
+            handleMessage(message)
+            return { status: 'success' }
+          }
+        } as any),
+        addCritique: tool({
+          description: 'Submit a story critique.',
+          parameters: schemas.addCritiqueSchema,
+          execute: async ({ critique }: any) => {
+            handleCritique(critique)
+            return { status: 'success' }
+          }
+        } as any)
+      }
+
+      let result: any
       try {
-        response = await geminiService.generateContent(prompt, modelPreference)
+        result = await geminiService.generateTextWithTools(prompt, tools, modelPreference)
       } catch (error: any) {
         if (signal.aborted) break
 
@@ -79,36 +144,25 @@ export const sendMessage = async (initialContext: RequestContext) => {
       if (signal.aborted) break
 
       console.groupCollapsed(`AI Response - Step ${context.currentStep}`)
-      console.log(response)
+      console.log('Text:', result.text)
+      console.log('Tool Calls:', result.toolCalls)
       console.groupEnd()
 
-      const parsed = parseLLMResponse(response)
-      if (!parsed) {
-        throw new Error('Failed to parse AI response into expected XML format.')
-      }
-
-      // Execute side-effects (Tools)
-      if (parsed.tools.writeFile) {
-        handleWriteFile(parsed.tools.writeFile.file_name, parsed.tools.writeFile.content)
-      }
-      if (parsed.tools.critique) {
-        handleCritique(parsed.tools.critique)
-      }
-      if (parsed.tools.message) {
-        handleMessage(parsed.tools.message)
-      }
-      handleActionSuggestions(parsed.tools.actionSuggestions)
+      // The SDK's 'execute' functions already processed the tools. 
+      // We just need to update our context for the next iteration.
 
       // Prepare context for next iteration
       const nextContext: RequestContext = {
-        ...parsed.context,
         currentStep: context.currentStep + 1,
-        // Carry over sequence info if present
-        sequenceInfo: parsed.context.sequenceInfo || context.sequenceInfo
+        agent: (nextAgent as any) || context.agent,
+        requestedFiles: nextRequestedFiles || context.requestedFiles,
+        // Carry over sequence info if present (though we might phase this out)
+        sequenceInfo: context.sequenceInfo
       }
 
-      // Terminal condition: if the AI routes back to the routingAgent, it has finished its current task chain
-      if (parsed.context.agent === 'routingAgent') {
+      // Terminal condition: if no routing tool was used, we assume the task chain is finished 
+      // OR if the agent routes specifically to routingAgent.
+      if (!nextAgent || nextAgent === 'routingAgent') {
         break
       }
 
@@ -149,7 +203,6 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
   }
 
   try {
-    // We reuse sendMessage for the orchestration loop
     await sendMessage(context)
   } catch (error) {
     console.error('Failed to generate initial outline:', error)
@@ -161,7 +214,6 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
 
 /**
  * Generates book title suggestions. 
- * Note: This uses a simplified direct path as it's a UI-blocking synchronous-feeling operation.
  */
 export const generateTitleSuggestions = async (plotSummary: string, genre: string, setting: string): Promise<string[]> => {
   const prompt = `
@@ -172,20 +224,24 @@ Setting: ${setting || 'Not specified'}
 Plot Summary:
 ${plotSummary}
 
-Return the suggestions ONLY within the following XML structure:
-<titles>
-  <title>Suggestion 1</title>
-  <title>Suggestion 2</title>
-  ...
-</titles>
-Do not include any other text or explanation outside the <titles> tag.
+Return the suggestions as action suggestions.
   `.trim()
 
   try {
-    const responseString = await geminiService.generateContent(prompt, 'low')
-    const parsed = parseLLMResponse(responseString)
+    // For title suggestions, we typically want a quick single-turn response.
+    // We'll use generateTextWithTools but expected a specific tool use.
+    const tools = {
+      actionSuggestion: tool({
+        description: 'Provide suggestions for titles.',
+        parameters: schemas.actionSuggestionSchema,
+        execute: async () => ({ status: 'success' })
+      } as any)
+    }
+
+    const result = await geminiService.generateTextWithTools(prompt, tools, 'low')
+    const suggestionCall = (result.toolCalls as any[]).find(tc => tc.toolName === 'actionSuggestion')
     
-    return parsed?.tools.actionSuggestions || []
+    return (suggestionCall?.args as any)?.suggestions || []
   } catch (error) {
     console.error('Failed to generate title suggestions:', error)
     toast.error('Failed to generate title suggestions. Please try entering one manually.')
