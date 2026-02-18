@@ -31,7 +31,7 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                     const sectionTitle = activeSection?.split('|||')[0] || activeSection || ''
                     const isMonolithic = activeSection?.includes('|||')
 
-                    let targetTextNodes: Array<{ node: TextNode, offset: number }> = []
+                    const targetTextNodes: Array<{ node: TextNode, offset: number }> = []
                     let accumulatedText = ''
 
                     const rootChildren = root.getChildren()
@@ -95,7 +95,7 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                                         const splitNodes = item.node.splitText(relativeStart, relativeEnd)
                                         const targetNode = relativeStart > 0 ? splitNodes[1] : splitNodes[0]
                                         if (targetNode) nodesToWrap.push(targetNode)
-                                    } catch (e) {
+                                    } catch {
                                         // Ignore splitting errors on already modified nodes
                                     }
                                 } else {

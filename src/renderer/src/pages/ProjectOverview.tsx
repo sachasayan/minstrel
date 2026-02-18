@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { selectAppState } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
