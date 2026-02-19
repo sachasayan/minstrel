@@ -110,7 +110,7 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
       break
     }
     case 'outlineAgent': {
-      allowedTools = ['reasoning', 'writeFile', 'showMessage']
+      allowedTools = ['reasoning', 'writeFile']
       prompt = appendWithSeparator(prompt, getOutlineAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       
@@ -124,7 +124,7 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
       break
     }
     case 'writerAgent': {
-      allowedTools = ['reasoning', 'writeFile', 'showMessage']
+      allowedTools = ['reasoning', 'writeFile']
       prompt = appendWithSeparator(prompt, getWriterAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       prompt = commonSections(prompt)

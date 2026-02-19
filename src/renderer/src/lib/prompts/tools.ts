@@ -61,15 +61,6 @@ ${
 }
 
 ${
-  (tools.includes('showMessage'))
-    ? `
-## showMessage
-* A short 1-2 sentence message to the user explaining your actions.
-`
-    : ''
-}
-
-${
   (tools.includes('addCritique'))
     ? `
 ## addCritique
