@@ -6,7 +6,7 @@
   <title>Electron</title>
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'none'; script-src 'self'; worker-src 'self' blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.deepseek.com blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none';" />
+    content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'self' 'unsafe-inline' 'unsafe-eval'; connect-src * 'self' data: blob:; img-src * 'self' data: blob:; style-src * 'self' 'unsafe-inline'; frame-src *; font-src * 'self' data:; worker-src * 'self' blob:; object-src 'none';" />
 </head>
 
 <body>
