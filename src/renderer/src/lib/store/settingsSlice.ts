@@ -17,7 +17,8 @@ const initialState: AppSettings = {
   googleApiKey: '',
   deepseekApiKey: '',
   zaiApiKey: '',
-  openaiApiKey: ''
+  openaiApiKey: '',
+  nvidiaApiKey: ''
 }
 
 export const settingsSlice = createSlice({
@@ -37,6 +38,7 @@ export const settingsSlice = createSlice({
       state.deepseekApiKey = loadedSettings.deepseekApiKey ?? initialState.deepseekApiKey
       state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
       state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
+      state.nvidiaApiKey = loadedSettings.nvidiaApiKey ?? initialState.nvidiaApiKey
     },
     setApi: (state, action: PayloadAction<string>) => {
       state.api = action.payload
@@ -67,6 +69,9 @@ export const settingsSlice = createSlice({
     },
     setOpenaiApiKey: (state, action: PayloadAction<string>) => {
       state.openaiApiKey = action.payload
+    },
+    setNvidiaApiKey: (state, action: PayloadAction<string>) => {
+      state.nvidiaApiKey = action.payload
     }
   }
 })
@@ -82,7 +87,8 @@ export const {
   setGoogleApiKey,
   setDeepseekApiKey,
   setZaiApiKey,
-  setOpenaiApiKey
+  setOpenaiApiKey,
+  setNvidiaApiKey
 } = settingsSlice.actions
 
 export const selectSettingsState = (state: RootState) => state.settings

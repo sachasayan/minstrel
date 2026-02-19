@@ -14,9 +14,10 @@ interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+  nvidiaApiKey?: string
 }
 
-const SENSITIVE_KEYS: (keyof AppSettings)[] = ['googleApiKey', 'deepseekApiKey', 'zaiApiKey', 'openaiApiKey']
+const SENSITIVE_KEYS: (keyof AppSettings)[] = ['googleApiKey', 'deepseekApiKey', 'zaiApiKey', 'openaiApiKey', 'nvidiaApiKey']
 
 const ENCRYPTION_PREFIX = 'enc:'
 
@@ -88,6 +89,7 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   if (appSettings.deepseekApiKey === undefined) appSettings.deepseekApiKey = ''
   if (appSettings.zaiApiKey === undefined) appSettings.zaiApiKey = ''
   if (appSettings.openaiApiKey === undefined) appSettings.openaiApiKey = ''
+  if (appSettings.nvidiaApiKey === undefined) appSettings.nvidiaApiKey = ''
 
   // Decrypt sensitive fields and check if migration is needed
   let needsMigration = false
@@ -123,7 +125,8 @@ export const saveAppSettings = async (config: AppSettings) => {
     googleApiKey: config.googleApiKey ?? '',
     deepseekApiKey: config.deepseekApiKey ?? '',
     zaiApiKey: config.zaiApiKey ?? '',
-    openaiApiKey: config.openaiApiKey ?? ''
+    openaiApiKey: config.openaiApiKey ?? '',
+    nvidiaApiKey: config.nvidiaApiKey ?? ''
   }
 
   // Encrypt sensitive fields

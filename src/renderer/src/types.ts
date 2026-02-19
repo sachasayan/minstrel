@@ -9,6 +9,7 @@ export interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+  nvidiaApiKey?: string
 }
 export interface AppState {
   projectList: ProjectFragment[]

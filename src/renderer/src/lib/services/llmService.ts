@@ -11,7 +11,12 @@ type ProviderFactory = (options: { apiKey: string }) => AIProvider
 // Provider factory functions
 const providerFactories: Partial<Record<ProviderName, ProviderFactory>> = {
   google: createGoogleGenerativeAI as unknown as ProviderFactory,
-  openai: createOpenAI as unknown as ProviderFactory
+  openai: createOpenAI as unknown as ProviderFactory,
+  nvidia: (options) =>
+    createOpenAI({
+      apiKey: options.apiKey,
+      baseURL: 'https://integrate.api.nvidia.com/v1'
+    }) as unknown as AIProvider
   // deepseek and zai need to be implemented when SDKs are available
 }
 
@@ -20,7 +25,8 @@ const providerModelMapping: Partial<Record<ProviderName, (modelId: string) => st
   google: (modelId: string) => modelId, // Google uses model IDs directly
   openai: (modelId: string) => modelId, // OpenAI uses model IDs directly
   deepseek: (modelId: string) => modelId, // Placeholder
-  zai: (modelId: string) => modelId // Placeholder
+  zai: (modelId: string) => modelId, // Placeholder
+  nvidia: (modelId: string) => modelId
 }
 
 // @ts-ignore
@@ -38,6 +44,8 @@ const service: any = {
         return settings.deepseekApiKey || null
       case 'zai':
         return settings.zaiApiKey || null
+      case 'nvidia':
+        return settings.nvidiaApiKey || null
       default:
         return null
     }
@@ -104,6 +112,8 @@ const service: any = {
     if (provider === 'google') {
       return aiProvider(mappedModelId)
     } else if (provider === 'openai') {
+      return aiProvider(mappedModelId)
+    } else if (provider === 'nvidia') {
       return aiProvider(mappedModelId)
     } else {
       // For unsupported providers, throw error

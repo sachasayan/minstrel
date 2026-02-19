@@ -11,6 +11,7 @@ import {
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
+  setNvidiaApiKey,
   selectSettingsState
 } from '@/lib/store/settingsSlice'
 import { AppDispatch, store } from '@/lib/store/store'
@@ -40,6 +41,7 @@ const Settings = (): ReactNode => {
   const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
   const [deepseekApiKeyValue, setDeepseekApiKeyValue] = useState<string>('')
   const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
+  const [nvidiaApiKeyValue, setNvidiaApiKeyValue] = useState<string>('')
 
   // Get current model options based on selected provider
   const currentModelOptions =
@@ -58,6 +60,7 @@ const Settings = (): ReactNode => {
         setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
         setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
         setZaiApiKeyValue(loadedSettings?.zaiApiKey || '')
+        setNvidiaApiKeyValue(loadedSettings?.nvidiaApiKey || '')
 
       } catch (error) {
         console.error("Failed to load settings:", error);
@@ -74,12 +77,14 @@ const Settings = (): ReactNode => {
     setOpenaiApiKeyValue(settings.openaiApiKey || '');
     setDeepseekApiKeyValue(settings.deepseekApiKey || '');
     setZaiApiKeyValue(settings.zaiApiKey || '');
+    setNvidiaApiKeyValue(settings.nvidiaApiKey || '');
   }, [
     settings.api,
     settings.googleApiKey,
     settings.openaiApiKey,
     settings.deepseekApiKey,
-    settings.zaiApiKey
+    settings.zaiApiKey,
+    settings.nvidiaApiKey
   ]);
 
 
@@ -123,6 +128,11 @@ const Settings = (): ReactNode => {
     dispatch(setZaiApiKey(value));
   };
 
+  const handleNvidiaApiKeyChange = (value: string) => {
+    setNvidiaApiKeyValue(value);
+    dispatch(setNvidiaApiKey(value));
+  };
+
   // Handler for the Save button (saves API text inputs AND current Redux state)
   const handleSaveButton = () => {
     // Dispatch actions for text inputs first to update Redux state
@@ -132,6 +142,7 @@ const Settings = (): ReactNode => {
     dispatch(setOpenaiApiKey(openaiApiKeyValue));
     dispatch(setDeepseekApiKey(deepseekApiKeyValue));
     dispatch(setZaiApiKey(zaiApiKeyValue));
+    dispatch(setNvidiaApiKey(nvidiaApiKeyValue));
     // The workingRootDirectory is already updated in Redux state by selectFolder
     // Then save the entire current state via IPC
     saveCurrentSettings();
@@ -201,7 +212,7 @@ const Settings = (): ReactNode => {
             <div>
               <Label htmlFor="googleApiKey">Google API Key</Label>
               <Input
-                type="password"
+                type="text"
                 id="googleApiKey"
                 value={googleApiKeyValue}
                 onChange={(e) => handleGoogleApiKeyChange(e.target.value)}
@@ -214,7 +225,7 @@ const Settings = (): ReactNode => {
             <div>
               <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
               <Input
-                type="password"
+                type="text"
                 id="openaiApiKey"
                 value={openaiApiKeyValue}
                 onChange={(e) => handleOpenaiApiKeyChange(e.target.value)}
@@ -227,7 +238,7 @@ const Settings = (): ReactNode => {
             <div>
               <Label htmlFor="deepseekApiKey">DeepSeek API Key</Label>
               <Input
-                type="password"
+                type="text"
                 id="deepseekApiKey"
                 value={deepseekApiKeyValue}
                 onChange={(e) => handleDeepseekApiKeyChange(e.target.value)}
@@ -240,11 +251,24 @@ const Settings = (): ReactNode => {
             <div>
               <Label htmlFor="zaiApiKey">Z.AI API Key</Label>
               <Input
-                type="password"
+                type="text"
                 id="zaiApiKey"
                 value={zaiApiKeyValue}
                 onChange={(e) => handleZaiApiKeyChange(e.target.value)}
                 placeholder="Enter your Z.AI API Key"
+              />
+            </div>
+          )}
+
+          {settings.provider === 'nvidia' && (
+            <div>
+              <Label htmlFor="nvidiaApiKey">NVIDIA API Key</Label>
+              <Input
+                type="text"
+                id="nvidiaApiKey"
+                value={nvidiaApiKeyValue}
+                onChange={(e) => handleNvidiaApiKeyChange(e.target.value)}
+                placeholder="Enter your NVIDIA API Key"
               />
             </div>
           )}
