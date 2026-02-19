@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setActiveView } from '@/lib/store/appStateSlice'
 import {
   setSettingsState,
-  setApi,
   setWorkingRootDirectory,
   setHighPreferenceModelId,
   setLowPreferenceModelId,
@@ -12,6 +11,7 @@ import {
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
+  setNvidiaApiKey,
   selectSettingsState
 } from '@/lib/store/settingsSlice'
 import { AppDispatch, store } from '@/lib/store/store'
@@ -38,13 +38,12 @@ const SettingsPage = (): ReactNode => {
   const settings = useSelector(selectSettingsState);
   const dispatch = useDispatch<AppDispatch>()
 
-  // Local state for text inputs
-  const [apiValue, setApiValue] = useState<string>('')
   // Provider-specific API key states
   const [googleApiKeyValue, setGoogleApiKeyValue] = useState<string>('')
   const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
   const [deepseekApiKeyValue, setDeepseekApiKeyValue] = useState<string>('')
   const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
+  const [nvidiaApiKeyValue, setNvidiaApiKeyValue] = useState<string>('')
   const [keyValidationStatus, setKeyValidationStatus] = useState<KeyValidationStatus>('idle')
   const validationRequestIdRef = useRef(0)
 
@@ -63,10 +62,12 @@ const SettingsPage = (): ReactNode => {
         return deepseekApiKeyValue
       case 'zai':
         return zaiApiKeyValue
+      case 'nvidia':
+        return nvidiaApiKeyValue
       default:
         return ''
     }
-  }, [selectedProvider, googleApiKeyValue, openaiApiKeyValue, deepseekApiKeyValue, zaiApiKeyValue])
+  }, [selectedProvider, googleApiKeyValue, openaiApiKeyValue, deepseekApiKeyValue, zaiApiKeyValue, nvidiaApiKeyValue])
 
   // Effect to load settings on mount and sync local state
   useEffect(() => {
@@ -75,11 +76,11 @@ const SettingsPage = (): ReactNode => {
         const loadedSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
         dispatch(setSettingsState(loadedSettings || {}))
         // Sync local state
-        setApiValue(loadedSettings?.api || '')
         setGoogleApiKeyValue(loadedSettings?.googleApiKey || '')
         setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
         setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
         setZaiApiKeyValue(loadedSettings?.zaiApiKey || '')
+        setNvidiaApiKeyValue(loadedSettings?.nvidiaApiKey || '')
 
       } catch (error) {
         console.error("Failed to load settings:", error);
@@ -91,17 +92,15 @@ const SettingsPage = (): ReactNode => {
 
   // Effect to update local state when Redux state changes
   useEffect(() => {
-    setApiValue(settings.api || '');
-    setGoogleApiKeyValue(settings.googleApiKey || '');
-    setOpenaiApiKeyValue(settings.openaiApiKey || '');
     setDeepseekApiKeyValue(settings.deepseekApiKey || '');
     setZaiApiKeyValue(settings.zaiApiKey || '');
+    setNvidiaApiKeyValue(settings.nvidiaApiKey || '');
   }, [
-    settings.api,
     settings.googleApiKey,
     settings.openaiApiKey,
     settings.deepseekApiKey,
-    settings.zaiApiKey
+    settings.zaiApiKey,
+    settings.nvidiaApiKey
   ]);
 
   useEffect(() => {
@@ -174,13 +173,18 @@ const SettingsPage = (): ReactNode => {
     dispatch(setZaiApiKey(value));
   };
 
+  const handleNvidiaApiKeyChange = (value: string) => {
+    setNvidiaApiKeyValue(value);
+    dispatch(setNvidiaApiKey(value));
+  };
+
   // Handler for the Save button
   const handleSaveButton = () => {
-    dispatch(setApi(apiValue));
     dispatch(setGoogleApiKey(googleApiKeyValue));
     dispatch(setOpenaiApiKey(openaiApiKeyValue));
     dispatch(setDeepseekApiKey(deepseekApiKeyValue));
     dispatch(setZaiApiKey(zaiApiKeyValue));
+    dispatch(setNvidiaApiKey(nvidiaApiKeyValue));
     saveCurrentSettings();
   }
 
@@ -256,7 +260,7 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="googleApiKey">Google API Key</Label>
                   <Input
-                    type="password"
+                    type="text"
                     id="googleApiKey"
                     value={googleApiKeyValue}
                     onChange={(e) => handleGoogleApiKeyChange(e.target.value)}
@@ -269,7 +273,7 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
                   <Input
-                    type="password"
+                    type="text"
                     id="openaiApiKey"
                     value={openaiApiKeyValue}
                     onChange={(e) => handleOpenaiApiKeyChange(e.target.value)}
@@ -282,7 +286,7 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="deepseekApiKey">DeepSeek API Key</Label>
                   <Input
-                    type="password"
+                    type="text"
                     id="deepseekApiKey"
                     value={deepseekApiKeyValue}
                     onChange={(e) => handleDeepseekApiKeyChange(e.target.value)}
@@ -295,11 +299,23 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="zaiApiKey">Z.AI API Key</Label>
                   <Input
-                    type="password"
+                    type="text"
                     id="zaiApiKey"
                     value={zaiApiKeyValue}
                     onChange={(e) => handleZaiApiKeyChange(e.target.value)}
                     placeholder="Enter your Z.AI API Key"
+                  />
+                </div>
+              )}
+              {settings.provider === 'nvidia' && (
+                <div>
+                  <Label htmlFor="nvidiaApiKey">NVIDIA API Key</Label>
+                  <Input
+                    type="text"
+                    id="nvidiaApiKey"
+                    value={nvidiaApiKeyValue}
+                    onChange={(e) => handleNvidiaApiKeyChange(e.target.value)}
+                    placeholder="Enter your NVIDIA API Key"
                   />
                 </div>
               )}
@@ -325,18 +341,6 @@ const SettingsPage = (): ReactNode => {
                   )}
                 </div>
               )}
-
-              {/* API Endpoint */}
-              <div>
-                <Label htmlFor="api">API Endpoint (Optional)</Label>
-                <Input
-                  type="text"
-                  id="api"
-                  value={apiValue}
-                  onChange={(e) => setApiValue(e.target.value)}
-                  placeholder="Optional API Endpoint"
-                />
-              </div>
 
               {/* High Preference Model Select */}
               <div>

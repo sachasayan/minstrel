@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import reducer, {
   setSettingsState,
-  setApi,
   setWorkingRootDirectory,
   setHighPreferenceModelId,
   setLowPreferenceModelId,
   setProvider,
-  setGoogleApiKey
+  setGoogleApiKey,
+  setNvidiaApiKey
 } from './settingsSlice'
 import { AppSettings } from '@/types'
 import {
@@ -17,7 +17,6 @@ import {
 
 describe('settingsSlice', () => {
   const initialState: AppSettings = {
-    api: '',
     workingRootDirectory: null,
     highPreferenceModelId: DEFAULT_HIGH_PREFERENCE_MODEL_ID,
     lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID,
@@ -25,7 +24,8 @@ describe('settingsSlice', () => {
     googleApiKey: '',
     deepseekApiKey: '',
     zaiApiKey: '',
-    openaiApiKey: ''
+    openaiApiKey: '',
+    nvidiaApiKey: ''
   }
 
   it('should return the initial state', () => {
@@ -34,23 +34,18 @@ describe('settingsSlice', () => {
 
   it('should handle setSettingsState and apply defaults for missing fields', () => {
     const loadedSettings = {
-      api: 'https://new-api.com',
       workingRootDirectory: '/new/root'
     } as any
     
     const actual = reducer(initialState, setSettingsState(loadedSettings))
     
-    expect(actual.api).toBe('https://new-api.com')
     expect(actual.workingRootDirectory).toBe('/new/root')
     // Defaults should be preserved
     expect(actual.highPreferenceModelId).toBe(DEFAULT_HIGH_PREFERENCE_MODEL_ID)
     expect(actual.provider).toBe(DEFAULT_PROVIDER)
   })
 
-  it('should handle setApi', () => {
-    const actual = reducer(initialState, setApi('https://api.test'))
-    expect(actual.api).toBe('https://api.test')
-  })
+  // Removed setApi test as field is now deprecated (always using default endpoints)
 
   it('should handle setWorkingRootDirectory', () => {
     const actual = reducer(initialState, setWorkingRootDirectory('/test/dir'))
@@ -78,5 +73,10 @@ describe('settingsSlice', () => {
   it('should handle setGoogleApiKey', () => {
     const actual = reducer(initialState, setGoogleApiKey('google-key-123'))
     expect(actual.googleApiKey).toBe('google-key-123')
+  })
+
+  it('should handle setNvidiaApiKey', () => {
+    const actual = reducer(initialState, setNvidiaApiKey('nv-key-456'))
+    expect(actual.nvidiaApiKey).toBe('nv-key-456')
   })
 })

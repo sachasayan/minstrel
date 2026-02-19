@@ -8,7 +8,6 @@ import {
 } from '@shared/constants'
 
 const initialState: AppSettings = {
-  api: '',
   workingRootDirectory: null, // Match default type in settingsManager
   highPreferenceModelId: DEFAULT_HIGH_PREFERENCE_MODEL_ID,
   lowPreferenceModelId: DEFAULT_LOW_PREFERENCE_MODEL_ID,
@@ -28,7 +27,6 @@ export const settingsSlice = createSlice({
     setSettingsState: (state, action: PayloadAction<AppSettings>) => {
       // Ensure defaults are applied if loaded settings are missing the new fields
       const loadedSettings = action.payload
-      state.api = loadedSettings.api ?? initialState.api
       state.workingRootDirectory = loadedSettings.workingRootDirectory ?? initialState.workingRootDirectory
       state.highPreferenceModelId = loadedSettings.highPreferenceModelId ?? initialState.highPreferenceModelId
       state.lowPreferenceModelId = loadedSettings.lowPreferenceModelId ?? initialState.lowPreferenceModelId
@@ -39,9 +37,6 @@ export const settingsSlice = createSlice({
       state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
       state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
       state.nvidiaApiKey = loadedSettings.nvidiaApiKey ?? initialState.nvidiaApiKey
-    },
-    setApi: (state, action: PayloadAction<string>) => {
-      state.api = action.payload
     },
     // Ensure payload type allows null for working directory
     setWorkingRootDirectory: (state, action: PayloadAction<string | null>) => {
@@ -78,7 +73,6 @@ export const settingsSlice = createSlice({
 
 // Export new actions
 export const {
-  setApi,
   setWorkingRootDirectory,
   setSettingsState,
   setHighPreferenceModelId,

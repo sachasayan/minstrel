@@ -1,5 +1,4 @@
 export interface AppSettings {
-  api?: string
   workingRootDirectory?: string | null
   highPreferenceModelId?: string
   lowPreferenceModelId?: string

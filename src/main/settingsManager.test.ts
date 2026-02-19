@@ -112,22 +112,19 @@ describe('settingsManager encryption helpers', () => {
       const encryptedKey = 'enc:' + Buffer.from('encrypted-secret').toString('base64')
       vi.mocked(settings.get).mockResolvedValue({
         googleApiKey: encryptedKey,
-        openaiApiKey: encryptedKey,
-        api: 'https://example.com'
+        openaiApiKey: encryptedKey
       })
 
       const loaded = await loadAppSettings()
       expect(loaded.googleApiKey).toBe('secret')
       expect(loaded.openaiApiKey).toBe('secret')
-      expect(loaded.api).toBe('https://example.com')
       // Should NOT call saveAppSettings (settings.set) if already encrypted
       expect(settings.set).not.toHaveBeenCalled()
     })
 
     it('should proactively migrate plaintext fields to encrypted when loading', async () => {
       vi.mocked(settings.get).mockResolvedValue({
-        googleApiKey: 'plaintext-secret',
-        api: 'https://example.com'
+        googleApiKey: 'plaintext-secret'
       })
 
       const loaded = await loadAppSettings()
@@ -142,8 +139,7 @@ describe('settingsManager encryption helpers', () => {
     it('should NOT migrate if encryption is not available', async () => {
       vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(false)
       vi.mocked(settings.get).mockResolvedValue({
-        googleApiKey: 'plaintext-secret',
-        api: 'https://example.com'
+        googleApiKey: 'plaintext-secret'
       })
 
       const loaded = await loadAppSettings()
@@ -157,7 +153,7 @@ describe('settingsManager encryption helpers', () => {
       await saveAppSettings({
         googleApiKey: 'secret',
         openaiApiKey: 'secret',
-        api: 'https://example.com'
+        nvidiaApiKey: 'secret'
       } as any)
 
       const savedSettings = vi.mocked(settings.set).mock.calls[0][1] as any
@@ -165,7 +161,7 @@ describe('settingsManager encryption helpers', () => {
 
       expect(savedSettings.googleApiKey).toBe(expectedEncrypted)
       expect(savedSettings.openaiApiKey).toBe(expectedEncrypted)
-      expect(savedSettings.api).toBe('https://example.com')
+      expect(savedSettings.nvidiaApiKey).toBe(expectedEncrypted)
     })
   })
 })

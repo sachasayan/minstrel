@@ -4,7 +4,6 @@ import { ipcMain, safeStorage } from 'electron'
 import { DEFAULT_HIGH_PREFERENCE_MODEL_ID, DEFAULT_LOW_PREFERENCE_MODEL_ID, DEFAULT_PROVIDER } from '../shared/constants'
 
 interface AppSettings {
-  api?: string
   workingRootDirectory?: string | null
   highPreferenceModelId?: string
   lowPreferenceModelId?: string
@@ -83,7 +82,6 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   }
 
   // Ensure other fields have defaults if missing (to match expected type on load)
-  if (appSettings.api === undefined) appSettings.api = ''
   if (appSettings.workingRootDirectory === undefined) appSettings.workingRootDirectory = null
   if (appSettings.googleApiKey === undefined) appSettings.googleApiKey = ''
   if (appSettings.deepseekApiKey === undefined) appSettings.deepseekApiKey = ''
@@ -116,7 +114,6 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
 export const saveAppSettings = async (config: AppSettings) => {
   // Provide defaults for potentially undefined values to satisfy electron-settings types
   const settingsToSave: any = {
-    api: config.api ?? '', // Default to empty string if undefined
     workingRootDirectory: config.workingRootDirectory ?? null, // Default to null if undefined
     highPreferenceModelId: config.highPreferenceModelId ?? DEFAULT_HIGH_PREFERENCE_MODEL_ID,
     lowPreferenceModelId: config.lowPreferenceModelId ?? DEFAULT_LOW_PREFERENCE_MODEL_ID,

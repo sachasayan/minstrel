@@ -2,7 +2,6 @@ import { ReactNode, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   setSettingsState,
-  setApi,
   setWorkingRootDirectory,
   setHighPreferenceModelId,
   setLowPreferenceModelId,
@@ -34,8 +33,6 @@ const Settings = (): ReactNode => {
   const settings = useSelector(selectSettingsState);
   const dispatch = useDispatch<AppDispatch>()
 
-  // Local state for text inputs
-  const [apiValue, setApiValue] = useState<string>('')
   // Provider-specific API key states
   const [googleApiKeyValue, setGoogleApiKeyValue] = useState<string>('')
   const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
@@ -55,7 +52,6 @@ const Settings = (): ReactNode => {
         const loadedSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
         dispatch(setSettingsState(loadedSettings || {}))
         // Sync local state
-        setApiValue(loadedSettings?.api || '')
         setGoogleApiKeyValue(loadedSettings?.googleApiKey || '')
         setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
         setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
@@ -72,14 +68,12 @@ const Settings = (): ReactNode => {
 
   // Effect to update local state when Redux state changes
   useEffect(() => {
-    setApiValue(settings.api || '');
     setGoogleApiKeyValue(settings.googleApiKey || '');
     setOpenaiApiKeyValue(settings.openaiApiKey || '');
     setDeepseekApiKeyValue(settings.deepseekApiKey || '');
     setZaiApiKeyValue(settings.zaiApiKey || '');
     setNvidiaApiKeyValue(settings.nvidiaApiKey || '');
   }, [
-    settings.api,
     settings.googleApiKey,
     settings.openaiApiKey,
     settings.deepseekApiKey,
@@ -135,8 +129,6 @@ const Settings = (): ReactNode => {
 
   // Handler for the Save button (saves API text inputs AND current Redux state)
   const handleSaveButton = () => {
-    // Dispatch actions for text inputs first to update Redux state
-    dispatch(setApi(apiValue));
     // Dispatch provider API keys
     dispatch(setGoogleApiKey(googleApiKeyValue));
     dispatch(setOpenaiApiKey(openaiApiKeyValue));
@@ -272,92 +264,81 @@ const Settings = (): ReactNode => {
               />
             </div>
           )}
-
-          {/* API Endpoint */}
-          <div>
-            <Label htmlFor="api">API Endpoint (Optional)</Label>
-            <Input
-              type="text"
-              id="api"
-              value={apiValue}
-              onChange={(e) => setApiValue(e.target.value)}
-              placeholder="Optional API Endpoint"
-            />
-          </div>
-
-          {/* High Preference Model Select */}
-          <div>
-            <Label htmlFor="highModel">High Preference Model</Label>
-            <Select
-              value={settings.highPreferenceModelId || ''}
-              onValueChange={handleHighModelChange}
-            >
-              <SelectTrigger id="highModel" className="w-full">
-                <SelectValue placeholder="Select high preference model" />
-              </SelectTrigger>
-              <SelectContent>
-                {currentModelOptions.map((model) => (
-                  <SelectItem key={`high-${model}`} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground pt-1">Model used for complex tasks like outlining and writing.</p>
-          </div>
-
-          {/* Low Preference Model Select */}
-          <div>
-            <Label htmlFor="lowModel">Low Preference Model</Label>
-            <Select
-              value={settings.lowPreferenceModelId || ''}
-              onValueChange={handleLowModelChange}
-            >
-              <SelectTrigger id="lowModel" className="w-full">
-                <SelectValue placeholder="Select low preference model" />
-              </SelectTrigger>
-              <SelectContent>
-                {currentModelOptions.map((model) => (
-                  <SelectItem key={`low-${model}`} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground pt-1">Model used for simpler tasks like routing and critique.</p>
-          </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-4">
-          {/* Project Path Selector */}
-          <div>
-            <Label>Project Path</Label>
-            <Button variant="outline" onClick={selectFolder} className="w-full justify-start mt-1">
-              <Folder className="mr-2 h-4 w-4" />
-              Select Project Directory
-            </Button>
-            <p className="text-sm text-muted-foreground pt-2 truncate"> {/* Added truncate */}
-              Current: {settings.workingRootDirectory || 'Default (determined by system)'}
-            </p>
-          </div>
-          {/* Minstrel Version */}
-          <div className="pt-4"> {/* Add some spacing */}
-            <Label>Minstrel Version</Label>
-            <p className="text-sm text-muted-foreground mt-2">1.0</p>
-          </div>
+        {/* High Preference Model Select */}
+        <div>
+          <Label htmlFor="highModel">High Preference Model</Label>
+          <Select
+            value={settings.highPreferenceModelId || ''}
+            onValueChange={handleHighModelChange}
+          >
+            <SelectTrigger id="highModel" className="w-full">
+              <SelectValue placeholder="Select high preference model" />
+            </SelectTrigger>
+            <SelectContent>
+              {currentModelOptions.map((model) => (
+                <SelectItem key={`high-${model}`} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground pt-1">Model used for complex tasks like outlining and writing.</p>
+        </div>
+
+        {/* Low Preference Model Select */}
+        <div>
+          <Label htmlFor="lowModel">Low Preference Model</Label>
+          <Select
+            value={settings.lowPreferenceModelId || ''}
+            onValueChange={handleLowModelChange}
+          >
+            <SelectTrigger id="lowModel" className="w-full">
+              <SelectValue placeholder="Select low preference model" />
+            </SelectTrigger>
+            <SelectContent>
+              {currentModelOptions.map((model) => (
+                <SelectItem key={`low-${model}`} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground pt-1">Model used for simpler tasks like routing and critique.</p>
         </div>
       </div>
 
-      {/* Save Button - Saves ALL settings */}
-      <div className="flex justify-end space-x-2 px-4 pb-4"> {/* Added padding */}
-        <Button onClick={handleSaveButton}>
-          Save Settings {/* Changed button text back */}
-        </Button>
-        {/* Assuming there's a way to close the settings dialog/modal */}
-        {/* <Button variant="outline">Close</Button> */}
+      {/* Right Column */}
+      <div className="space-y-4">
+        {/* Project Path Selector */}
+        <div>
+          <Label>Project Path</Label>
+          <Button variant="outline" onClick={selectFolder} className="w-full justify-start mt-1">
+            <Folder className="mr-2 h-4 w-4" />
+            Select Project Directory
+          </Button>
+          <p className="text-sm text-muted-foreground pt-2 truncate"> {/* Added truncate */}
+            Current: {settings.workingRootDirectory || 'Default (determined by system)'}
+          </p>
+        </div>
+        {/* Minstrel Version */}
+        <div className="pt-4"> {/* Add some spacing */}
+          <Label>Minstrel Version</Label>
+          <p className="text-sm text-muted-foreground mt-2">1.0</p>
+        </div>
       </div>
     </div>
+
+      {/* Save Button - Saves ALL settings */ }
+  <div className="flex justify-end space-x-2 px-4 pb-4"> {/* Added padding */}
+    <Button onClick={handleSaveButton}>
+      Save Settings {/* Changed button text back */}
+    </Button>
+    {/* Assuming there's a way to close the settings dialog/modal */}
+    {/* <Button variant="outline">Close</Button> */}
+  </div>
+    </div >
   )
 }
 
