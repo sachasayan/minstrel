@@ -5,7 +5,7 @@ export const getCriticAgentPrompt = () => `
 ## CURRENT TASK: CRITIQUE THE STORY
 
 * The user is asking you to critique the story. They have provided the outline, and every available chapter of the story.
-* Use the reasoning tool to pick three experts with professional relevance to this story.
+* Pick three experts with professional relevance to this story.
 * They may be a literary critic, historian, politician, doctor, artist, musician, linguist, scientist, politician etc.
 * Each expert should have unique perspective on the book.
 * The critiques should analyze the story's strengths and weaknesses and suggest areas for improvement. They should be harsh, but fair.

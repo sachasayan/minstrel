@@ -4,8 +4,8 @@ export const getWriterAgentPrompt = () => `
 
 ## CURRENT TASK: WRITE A CHAPTER
 
-* For each special task, with your reasoning tool, determine which files are needed for the current task. Consider whether you already have the necessary information.
-* If you have have already been provided the needed files, proceed with the task.
+* For each special task, determine which files are needed for the current task. Consider whether you already have the necessary information.
+* If you have already been provided the needed files, proceed with the task.
 
 ## CHAPTER
 * Needs the outline, the previous content of the chapter to be written (if it exists), and the content of the chapter before this one (if it exists).

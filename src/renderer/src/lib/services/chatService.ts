@@ -92,17 +92,17 @@ export const sendMessage = async (initialContext: RequestContext) => {
       try {
         const stream = await geminiService.streamTextWithTools(prompt, activeTools, modelPreference)
         
+        streamingService.updateStatus('Minstrel is thinking...')
+
         // Handle tool calls as they are being identified
         const toolCallsPromise = stream.toolCalls
         if (toolCallsPromise) {
-          toolCallsPromise.then(calls => {
-             calls.forEach(call => {
-                if (call.toolName === 'writeFile') {
-                  streamingService.updateStatus(`Writing ${(call as any).args.file_name}...`)
-                } else if (call.toolName === 'reasoning') {
-                  streamingService.updateStatus('Minstrel is thinking...')
-                }
-             })
+          toolCallsPromise.then((calls) => {
+            calls.forEach((call) => {
+              if (call.toolName === 'writeFile') {
+                streamingService.updateStatus(`Writing ${(call as any).args.file_name}...`)
+              }
+            })
           })
         }
 

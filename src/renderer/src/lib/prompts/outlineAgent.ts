@@ -12,7 +12,6 @@ export const getOutlineAgentPrompt = () => `
 * Develop a new outline based on the provided Project Parameters (genre, summary, etc.) or an existing Outline, incorporating any additional directions from the user message.
 * If generating from parameters, ensure the outline includes detailed character descriptions, environment descriptions, sub-threads, chapter flows (broken down into acts or scenes), and visual descriptions of any key objects mentioned or implied in the parameters.
 * If revising an existing Outline, incorporate user feedback and maintain consistency.
-* Use the reasoning tool to plan out your strategy before writing.
 * Characters should be visually described, and given personalities, motivations, and rich histories relevant to the story parameters.
 * Chapters should be broken down into acts or scenes. Estimate word counts per chapter if a target word count was provided in the parameters.
 * The outline may also include notes on planned twists, storytelling devices, character developments, and more.

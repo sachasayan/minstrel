@@ -12,16 +12,6 @@ Tools are called natively via the model's tool-calling capabilities. Do not use 
 You can use multiple tools in a single response.
 
 ${
-  (tools.includes('reasoning'))
-    ? `
-## reasoning
-* Use this tool to think out your actions. Break the current task down, decide which files you will need, and which tools you plan to use.
-* Required. Must be included in every response.
-`
-    : ''
-}
-
-${
   (tools.includes('writeFile'))
     ? `
 ## writeFile

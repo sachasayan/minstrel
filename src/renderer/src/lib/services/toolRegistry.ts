@@ -17,15 +17,6 @@ export interface ToolCallbacks {
  */
 export const createTools = (callbacks: ToolCallbacks = {}) => {
   return {
-    reasoning: tool({
-      description: 'Think out your actions and plan the current step.',
-      parameters: schemas.reasoningSchema,
-      execute: async ({ thought }: any) => {
-        console.log('AI Reasoning:', thought)
-        return { status: 'success' }
-      }
-    } as any),
-
     writeFile: tool({
       description: 'Write content to a file. Only Markdown files supported.',
       parameters: schemas.writeFileSchema,

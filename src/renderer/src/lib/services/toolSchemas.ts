@@ -26,10 +26,6 @@ export const actionSuggestionSchema = z.object({
 })
 
 
-export const reasoningSchema = z.object({
-  thought: z.string().describe('The AI reasoning/plan for the current step.')
-})
-
 export const planSequenceSchema = z.object({
   sequence: z.string().describe('A markdown-numbered list of future actions.')
 })
