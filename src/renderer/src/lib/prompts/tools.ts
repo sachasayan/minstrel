@@ -8,6 +8,7 @@ ${tools.map((t) => `* ${t}`).join('\n')}
 
 # TOOL USE:
 You have access to structured tools. When you need to perform an action, use the corresponding tool.
+Tools are called natively via the model's tool-calling capabilities. Do not use XML-style tags.
 You can use multiple tools in a single response.
 
 ${

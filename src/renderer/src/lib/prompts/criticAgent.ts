@@ -16,7 +16,7 @@ export const getCriticAgentPrompt = () => `
 
 # CREATING A STRUCTURED RESPONSE
 
-* This task provides output in JSON format via the addCritique tool and does not ever involve a writeFile tool.
+* This task provides output via the addCritique tool and does not ever involve a writeFile tool.
 * The JSON output must be a single stringified JSON object with exactly two properties, in this order:
 * "critique": an array of three expert objects. Each object contains:
   - "name": the expert's name. (string)
@@ -32,8 +32,8 @@ export const getCriticAgentPrompt = () => `
   - Do NOT include minor or side characters.
   - Ignore unattributed dialogue entirely.
 * The experts' critiques should NOT reference the analysis data — it is included purely for the user's review.
-* If you cannot complete the task for any reason, do not use the addCritique tool. Apologize and explain why the task couldn't be completed using showMessage.
-* Use the showMessage tool to let the user know the critiques have been written.
+* If you cannot complete the task for any reason, do not use the addCritique tool. Apologize and explain why the task couldn't be completed in your response.
+* Let the user know the critiques have been written in your conversational text.
 
 ---
 

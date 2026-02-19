@@ -83,7 +83,6 @@ describe('chatService', () => {
       
       vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_p, tools: any) => {
         return mockStreamingResult('AI reasoning', [
-          { toolName: 'showMessage', args: { message: 'Hello!' } },
           { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
         ], tools) as any
       })
@@ -91,7 +90,6 @@ describe('chatService', () => {
       await sendMessage(context)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
-      expect(toolHandlers.handleMessage).toHaveBeenCalledWith('Hello!')
       expect(toolHandlers.handleWriteFile).toHaveBeenCalledWith('test.md', 'content')
     })
 
@@ -127,14 +125,19 @@ describe('chatService', () => {
     })
 
     it('should respect AbortSignal', async () => {
+      let firstCall = true
       vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_p, tools: any) => {
-        const secondContext = { agent: 'routingAgent', currentStep: 0 } as any
-        sendMessage(secondContext)
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(mockStreamingResult('late', [], tools))
-          }, 100)
-        }) as any
+        if (firstCall) {
+          firstCall = false
+          const secondContext = { agent: 'routingAgent', currentStep: 0 } as any
+          sendMessage(secondContext)
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(mockStreamingResult('late', [], tools))
+            }, 100)
+          }) as any
+        }
+        return mockStreamingResult('second', [], tools) as any
       })
 
       const firstContext = { agent: 'routingAgent', currentStep: 0 } as any

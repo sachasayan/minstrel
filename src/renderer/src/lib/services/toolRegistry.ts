@@ -66,14 +66,6 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       }
     } as any),
 
-    showMessage: tool({
-      description: 'Show a message to the user.',
-      parameters: schemas.showMessageSchema,
-      execute: async ({ message }: any) => {
-        handleMessage(message)
-        return { status: 'success' }
-      }
-    } as any),
 
     addCritique: tool({
       description: 'Submit a story critique.',

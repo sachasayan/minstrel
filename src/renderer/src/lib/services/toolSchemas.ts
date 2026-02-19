@@ -25,9 +25,6 @@ export const actionSuggestionSchema = z.object({
   suggestions: z.array(z.string().max(30)).max(3).describe('A list of up to 3 short suggestions for the user.')
 })
 
-export const showMessageSchema = z.object({
-  message: z.string().describe('A short 1-2 sentence message to the user.')
-})
 
 export const reasoningSchema = z.object({
   thought: z.string().describe('The AI reasoning/plan for the current step.')

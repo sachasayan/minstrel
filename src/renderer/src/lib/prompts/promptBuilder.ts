@@ -103,7 +103,7 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
 
   switch (context.agent) {
     case 'routingAgent': {
-      allowedTools = ['reasoning', 'readFile', 'actionSuggestion', 'showMessage', 'routeTo']
+      allowedTools = ['reasoning', 'readFile', 'actionSuggestion', 'routeTo']
       prompt = appendWithSeparator(prompt, getRoutingAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       prompt = commonSections(prompt)
@@ -131,7 +131,7 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
       break
     }
     case 'criticAgent': {
-      allowedTools = ['reasoning', 'addCritique', 'showMessage']
+      allowedTools = ['reasoning', 'addCritique']
       prompt = appendWithSeparator(prompt, getCriticAgentPrompt())
       prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
       prompt = commonSections(prompt)
