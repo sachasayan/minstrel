@@ -67,39 +67,21 @@ export const getChapterWordCounts = (storyContent: string): { title: string; wor
 
 export const normalizeProjectStoryContent = (project: Project): Project => {
   const files = Array.isArray(project.files) ? project.files : []
-  const storyFile = files.find((file) => isStoryFile(file))
-  // Filter out the main story file AND any individual chapter files
+  // Filter out any individual chapter files OR the legacy "Story" file from the files list.
+  // They should not be managed as separate files anymore.
   const ancillaryFiles = files.filter((file) => !isStoryFile(file) && file.type !== 'chapter')
-
-  const storyContent =
-    typeof storyFile?.content === 'string' && storyFile.content.trim().length > 0
-      ? normalizeLineEndings(storyFile.content)
-      : typeof project.storyContent === 'string' && project.storyContent.trim().length > 0
-        ? normalizeLineEndings(project.storyContent)
-        : '' // Default to empty if no story content
 
   return {
     ...project,
-    storyContent,
+    storyContent: normalizeLineEndings(project.storyContent || ''),
     files: ancillaryFiles
   }
 }
 
 export const buildPersistableProject = (project: Project): Project => {
-  const normalizedProject = normalizeProjectStoryContent(project)
-  const nonStoryFiles = normalizedProject.files.filter((file) => !isStoryFile(file))
-  const storyFile: ProjectFile = {
-    title: STORY_FILE_TITLE,
-    content: normalizedProject.storyContent,
-    type: STORY_FILE_TYPE,
-    sort_order: 0,
-    hasEdits: false
-  }
-
-  return {
-    ...normalizedProject,
-    files: [storyFile, ...nonStoryFiles]
-  }
+  // We no longer need to reconstruct a "Story" file in the files array.
+  // The persistence layer (sqliteOps) handles the project object directly.
+  return normalizeProjectStoryContent(project)
 }
 
 const findChapterStartIndex = (lines: string[], title: string): number => {

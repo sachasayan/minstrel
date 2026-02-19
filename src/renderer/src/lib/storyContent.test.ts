@@ -192,21 +192,7 @@ describe('isStoryFile', () => {
 })
 
 describe('normalizeProjectStoryContent', () => {
-  it('should normalize story content from story file', () => {
-    const project = {
-      title: 'Test',
-      files: [
-        { title: STORY_FILE_TITLE, content: 'File Content', type: STORY_FILE_TYPE }
-      ],
-      storyContent: 'Old Content'
-    } as unknown as Project
-
-    const normalized = normalizeProjectStoryContent(project)
-    expect(normalized.storyContent).toBe('File Content')
-    expect(normalized.files).toHaveLength(0) // Story file should be filtered out
-  })
-
-  it('should fallback to project.storyContent if no story file', () => {
+  it('should normalize story content from project.storyContent', () => {
     const project = {
       title: 'Test',
       files: [],
@@ -215,5 +201,22 @@ describe('normalizeProjectStoryContent', () => {
 
     const normalized = normalizeProjectStoryContent(project)
     expect(normalized.storyContent).toBe('Project Content')
+  })
+
+  it('should filter out individual chapter files from ancillary files', () => {
+    const project = {
+      title: 'Test',
+      files: [
+        { title: 'Chapter 1', content: '...', type: 'chapter' },
+        { title: 'Story', content: '...', type: 'story' },
+        { title: 'Outline', content: '...', type: 'note' }
+      ],
+      storyContent: 'Monolith'
+    } as unknown as Project
+
+    const normalized = normalizeProjectStoryContent(project)
+    expect(normalized.storyContent).toBe('Monolith')
+    expect(normalized.files).toHaveLength(1)
+    expect(normalized.files[0].title).toBe('Outline')
   })
 })

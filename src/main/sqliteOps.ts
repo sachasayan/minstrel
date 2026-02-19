@@ -24,7 +24,7 @@ const isStoryFileRecord = (file: { title?: string | null; type?: string | null }
   return file.type === 'story' || file.title === 'Story'
 }
 
-const serializeChapterRowsToStoryContent = (
+const serializeLegacyChapters = (
   chapterFiles: Array<{ title?: string | null; content?: string | null }>
 ): string => {
   if (!Array.isArray(chapterFiles) || chapterFiles.length === 0) {
@@ -152,7 +152,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
       }
     }
 
-    // 2. Clear existing files and insert new ones
+    // 2. Clear existing files and insert new ones (Ancillary files only)
     db.exec('DELETE FROM files')
     const insertFile = db.prepare(`
       INSERT INTO files (title, content, type, sort_order)
@@ -161,12 +161,13 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
     // Use 'any' for file type as ProjectFile type is not available in main process context
     if (Array.isArray(project.files)) {
       for (const file of project.files as any[]) {
-        // Ensure type and sort_order have default values if missing
-        const fileType = file.type ?? 'unknown' // Default type if missing
-        if (isChapterFileRecord({ title: file.title, type: fileType })) {
+        const fileType = file.type ?? 'unknown'
+        // NEVER save Chapters or "Story" blocks as individual file rows anymore.
+        // They are already contained in the storyContent metadata.
+        if (isChapterFileRecord(file) || isStoryFileRecord(file)) {
           continue
         }
-        const sortOrder = file.sort_order ?? 0 // Default sort order if missing
+        const sortOrder = file.sort_order ?? 0
         insertFile.run(file.title, file.content, fileType, sortOrder)
       }
     }
@@ -367,16 +368,18 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
     })
 
     // Construct the final Project object, ensuring type compatibility
-    // Return type is implicitly 'any' here, but structure should match Project
+    // The monolith storyContent from metadata is now the absolute source of truth.
+    // However, for legacy projects, we fallback to reconstructing from chapter rows if needed.
     const legacyChapterFiles = projectFiles.filter((file) => isChapterFileRecord(file))
     const storyFile = projectFiles.find((file) => isStoryFileRecord(file))
     const nonChapterFiles = projectFiles.filter((file) => !isChapterFileRecord(file) && !isStoryFileRecord(file))
-    const storyContent =
-      typeof storyFile?.content === 'string' && storyFile.content.trim().length > 0
-        ? storyFile.content
-        : typeof projectMetadata.storyContent === 'string' && projectMetadata.storyContent.trim().length > 0
-        ? projectMetadata.storyContent
-        : serializeChapterRowsToStoryContent(legacyChapterFiles)
+    
+    const storyContent = 
+       (projectMetadata.storyContent && projectMetadata.storyContent.trim().length > 0)
+       ? projectMetadata.storyContent
+       : (storyFile?.content && storyFile.content.trim().length > 0)
+         ? storyFile.content
+         : serializeLegacyChapters(legacyChapterFiles)
 
     const loadedProject = {
       // Spread required ProjectFragment fields first

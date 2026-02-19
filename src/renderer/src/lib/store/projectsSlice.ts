@@ -89,25 +89,22 @@ export const projectsSlice = createSlice({
         if (payload.title === 'Story') {
           state.activeProject.storyContent = payload.content
           
-          // If we have a chapter index, track it as modified
-          if (payload.chapterIndex !== undefined && !state.modifiedChapters.includes(payload.chapterIndex)) {
-            state.modifiedChapters.push(payload.chapterIndex)
+          // Reset modifiedChapters if the whole monolith is overwritten or handle indexing
+          // For now, if monolith is saved, we assume it's the latest.
+        } else {
+          // Update ancillary files (Outline, etc.)
+          if (fileIndex !== -1) {
+            state.activeProject.files[fileIndex].content = payload.content
+            state.activeProject.files[fileIndex].hasEdits = true
+          } else {
+            state.activeProject.files.push({
+              title: payload.title,
+              content: payload.content,
+              type: payload.type ?? 'unknown',
+              sort_order: payload.sort_order ?? state.activeProject.files.length + 1,
+              hasEdits: true
+            })
           }
-        }
-
-        // Also update the file in the list if it exists
-        if (fileIndex !== -1) {
-          state.activeProject.files[fileIndex].content = payload.content
-          state.activeProject.files[fileIndex].hasEdits = true
-        } else if (payload.title !== 'Story') {
-          // Don't duplicate Story in files array if updated via monolith
-          state.activeProject.files.push({
-            title: payload.title,
-            content: payload.content,
-            type: payload.type ?? 'unknown',
-            sort_order: payload.sort_order ?? state.activeProject.files.length + 1,
-            hasEdits: true
-          })
         }
 
         state.projectHasLiveEdits = true
