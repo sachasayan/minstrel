@@ -1,7 +1,5 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { createOpenAI } from '@ai-sdk/openai'
 import { generateText, streamText, LanguageModel } from 'ai'
-import { store } from '@/lib/store/store'
+import { AppSettings } from '@/types'
 import { PROVIDER_MODELS } from '@shared/constants'
 
 type ProviderName = keyof typeof PROVIDER_MODELS
@@ -44,10 +42,8 @@ const providerModelMapping: Partial<Record<ProviderName, (modelId: string) => st
 
 // @ts-ignore
 const service: any = {
-  // Get API key for current provider
-  async getApiKey(provider: string) {
-    const settings = store.getState().settings
-
+  // Get API key for from settings
+  getApiKey(settings: AppSettings, provider: string) {
     switch (provider) {
       case 'google':
         return settings.googleApiKey || null
@@ -103,8 +99,7 @@ const service: any = {
     }
 
     try {
-      const settings = store.getState().settings
-      const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
+      const lowModelId = this.getDefaultModelId(provider, 'low')
 
       // Get the provider factory
       const factory = providerFactories[provider]
@@ -168,10 +163,9 @@ const service: any = {
   },
 
   // Helper to get provider and model based on settings
-  async getProviderAndModel(modelPreference: 'high' | 'low' = 'low') {
-    const settings = store.getState().settings
+  getProviderAndModel(settings: AppSettings, modelPreference: 'high' | 'low' = 'low') {
     const provider = settings.provider || 'google'
-    const apiKey = await this.getApiKey(provider)
+    const apiKey = this.getApiKey(settings, provider)
 
     if (!apiKey) {
       throw new Error(
@@ -201,8 +195,8 @@ const service: any = {
   },
 
   // Generate content with selected provider
-  async generateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
-    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+  async generateContent(settings: AppSettings, prompt: string, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
       `Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
@@ -226,8 +220,8 @@ const service: any = {
   },
 
   // Generate content with native tools
-  async generateTextWithTools(prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
-    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+  async generateTextWithTools(settings: AppSettings, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
       `Using provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`
@@ -254,8 +248,8 @@ const service: any = {
   },
 
   // Stream content with native tools
-  async streamTextWithTools(prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
-    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+  async streamTextWithTools(settings: AppSettings, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
       `Streaming with provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`
@@ -279,8 +273,8 @@ const service: any = {
   },
 
   // Streaming version of generateContent
-  async *streamGenerateContent(prompt: string, modelPreference: 'high' | 'low' = 'low') {
-    const { model, provider, selectedModelId } = await this.getProviderAndModel(modelPreference)
+  async *streamGenerateContent(settings: AppSettings, prompt: string, modelPreference: 'high' | 'low' = 'low') {
+    const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
       `Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`

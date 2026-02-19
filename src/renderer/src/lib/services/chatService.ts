@@ -1,11 +1,11 @@
 import geminiService from './llmService'
-import { store } from '@/lib/store/store'
 import { resolvePendingChat } from '@/lib/store/chatSlice'
 import { setPendingFiles } from '@/lib/store/projectsSlice'
 import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { PromptData } from '@/lib/prompts/types'
 import { toast } from 'sonner'
-import { RequestContext } from '@/types'
+import { RequestContext, AppSettings } from '@/types'
+import { store } from '@/lib/store/store' // Kept only for dispatching, will move to UI later
 import {
   handleMessage,
 } from './toolHandlers'
@@ -29,7 +29,7 @@ export const initializeGeminiService = () => {
  * Main entry point for sending a chat message.
  * Orchestrates multiple agents in an iterative loop.
  */
-export const sendMessage = async (initialContext: RequestContext) => {
+export const sendMessage = async (initialContext: RequestContext, promptData: PromptData, settings: AppSettings) => {
   // Cancel any existing loop if a new message arrives
   if (currentAbortController) {
     console.log('Aborting previous agent loop...')
@@ -47,13 +47,6 @@ export const sendMessage = async (initialContext: RequestContext) => {
   try {
     while (context.currentStep < MAX_STEPS) {
       if (signal.aborted) break
-
-      // Extract state for the prompt builder
-      const state = store.getState()
-      const promptData: PromptData = {
-        activeProject: state.projects.activeProject,
-        chatHistory: state.chat.chatHistory
-      }
 
       const { prompt, allowedTools } = buildPrompt(context, promptData)
       
@@ -90,7 +83,7 @@ export const sendMessage = async (initialContext: RequestContext) => {
 
       let result: any
       try {
-        const stream = await geminiService.streamTextWithTools(prompt, activeTools, modelPreference)
+        const stream = await geminiService.streamTextWithTools(settings, prompt, activeTools, modelPreference)
         
         streamingService.updateStatus('Minstrel is thinking...')
 
@@ -199,7 +192,12 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
   }
 
   try {
-    await sendMessage(context)
+    const state = store.getState()
+    const promptData: PromptData = {
+      activeProject: state.projects.activeProject,
+      chatHistory: state.chat.chatHistory
+    }
+    await sendMessage(context, promptData, state.settings)
   } catch (error) {
     console.error('Failed to generate initial outline:', error)
     handleMessage(`Sorry, I encountered an error trying to generate the initial outline.`)
@@ -230,7 +228,8 @@ Return the suggestions as action suggestions.
       actionSuggestion: toolkit.actionSuggestion
     }
 
-    const result = await geminiService.generateTextWithTools(prompt, tools, 'low')
+    const state = store.getState()
+    const result = await geminiService.generateTextWithTools(state.settings, prompt, tools, 'low')
     const suggestionCall = (result.toolCalls as any[]).find(tc => tc.toolName === 'actionSuggestion')
     
     return (suggestionCall?.args as any)?.suggestions || []

@@ -44,13 +44,15 @@ vi.mock('sonner', () => ({
 }))
 
 describe('chatService', () => {
+  const mockState = {
+    projects: { activeProject: { title: 'Test', files: [], storyContent: '' } },
+    settings: { googleApiKey: 'key', provider: 'google', highPreferenceModelId: 'h', lowPreferenceModelId: 'l' },
+    chat: { chatHistory: [] }
+  } as any
+
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(store.getState).mockReturnValue({
-      projects: { activeProject: { title: 'Test', files: [], storyContent: '' } },
-      settings: { googleApiKey: 'key', provider: 'google', highPreferenceModelId: 'h', lowPreferenceModelId: 'l' },
-      chat: { chatHistory: [] }
-    } as any)
+    vi.mocked(store.getState).mockReturnValue(mockState)
   })
 
   describe('sendMessage', () => {
@@ -81,13 +83,17 @@ describe('chatService', () => {
     it('should iterate and call tool-triggered side-effects', async () => {
       const context = { agent: 'writerAgent', currentStep: 0 } as any
       
-      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_p, tools: any) => {
+      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _p, tools: any) => {
         return mockStreamingResult('AI reasoning', [
           { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
         ], tools) as any
       })
       
-      await sendMessage(context)
+      const promptData = {
+        activeProject: mockState.projects.activeProject,
+        chatHistory: mockState.chat.chatHistory
+      }
+      await sendMessage(context, promptData, mockState.settings)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
       expect(toolHandlers.handleWriteFile).toHaveBeenCalledWith('test.md', 'content')
@@ -97,7 +103,7 @@ describe('chatService', () => {
       const context = { agent: 'routingAgent', currentStep: 0 } as any
       
       let callCount = 0
-      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_p, tools: any) => {
+      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_s, _p, tools: any) => {
         callCount++
         if (callCount === 1) {
           // Manually trigger the tool execution which sets the closure variable nextAgent
@@ -119,18 +125,26 @@ describe('chatService', () => {
         } as any
       })
         
-      await sendMessage(context)
+      const promptData = {
+        activeProject: mockState.projects.activeProject,
+        chatHistory: mockState.chat.chatHistory
+      }
+      await sendMessage(context, promptData, mockState.settings)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalled()
     })
 
     it('should respect AbortSignal', async () => {
       let firstCall = true
-      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_p, tools: any) => {
+      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_s, _p, tools: any) => {
         if (firstCall) {
           firstCall = false
           const secondContext = { agent: 'routingAgent', currentStep: 0 } as any
-          sendMessage(secondContext)
+          const promptData = {
+            activeProject: mockState.projects.activeProject,
+            chatHistory: mockState.chat.chatHistory
+          }
+          sendMessage(secondContext, promptData, mockState.settings)
           return new Promise((resolve) => {
             setTimeout(() => {
               resolve(mockStreamingResult('late', [], tools))
@@ -141,7 +155,11 @@ describe('chatService', () => {
       })
 
       const firstContext = { agent: 'routingAgent', currentStep: 0 } as any
-      await sendMessage(firstContext)
+      const promptData = {
+        activeProject: mockState.projects.activeProject,
+        chatHistory: mockState.chat.chatHistory
+      }
+      await sendMessage(firstContext, promptData, mockState.settings)
     })
   })
 
