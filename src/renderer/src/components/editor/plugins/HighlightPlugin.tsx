@@ -110,7 +110,7 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                             const parent = node.getParent()
                             if (parent instanceof MarkNode) continue
 
-                            const markNode = $createMarkNode('agent-edit')
+                            const markNode = $createMarkNode(['agent-edit'])
                             node.replace(markNode)
                             markNode.append(node)
                         }
@@ -123,6 +123,8 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
 
             return () => clearTimeout(timeoutId)
         }
+
+        return undefined
     }, [editor, lastEdit, activeSection, dispatch])
 
     return null
