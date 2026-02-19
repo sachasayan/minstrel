@@ -323,22 +323,23 @@ const Settings = (): ReactNode => {
           </p>
         </div>
         {/* Minstrel Version */}
-        <div className="pt-4"> {/* Add some spacing */}
+        <div className="pt-4">
+          {/* Add some spacing */}
           <Label>Minstrel Version</Label>
           <p className="text-sm text-muted-foreground mt-2">1.0</p>
         </div>
       </div>
-    </div>
 
-      {/* Save Button - Saves ALL settings */ }
-  <div className="flex justify-end space-x-2 px-4 pb-4"> {/* Added padding */}
-    <Button onClick={handleSaveButton}>
-      Save Settings {/* Changed button text back */}
-    </Button>
-    {/* Assuming there's a way to close the settings dialog/modal */}
-    {/* <Button variant="outline">Close</Button> */}
-  </div>
-    </div >
+      {/* Save Button - Saves ALL settings */}
+      <div className="flex justify-end space-x-2 px-4 pb-4">
+        {/* Added padding */}
+        <Button onClick={handleSaveButton}>
+          Save Settings {/* Changed button text back */}
+        </Button>
+        {/* Assuming there's a way to close the settings dialog/modal */}
+        {/* <Button variant="outline">Close</Button> */}
+      </div>
+    </div>
   )
 }
 

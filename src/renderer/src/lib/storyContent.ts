@@ -16,9 +16,13 @@ export const getChaptersFromStoryContent = (storyContent: string): { title: stri
   const chapters: { title: string; index: number }[] = []
 
   lines.forEach((line, index) => {
-    if (/^#\s+\S+/.test(line.trim())) {
-      const title = line.trim().replace(/^#\s+/, '')
-      chapters.push({ title, index })
+    // Relaxed regex: just look for H1 headers. 
+    // We don't strictly require non-whitespace immediately following the space.
+    if (/^#\s+/.test(line.trim())) {
+      const title = line.trim().replace(/^#\s+/, '').trim()
+      if (title) {
+        chapters.push({ title, index })
+      }
     }
   })
 
@@ -100,16 +104,14 @@ export const buildPersistableProject = (project: Project): Project => {
 
 const findChapterStartIndex = (lines: string[], title: string): number => {
   const normalizedTitle = title.trim().toLowerCase()
+  // Escape potential regex special characters in the title
+  const escapedTitle = normalizedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  
+  // Pattern matches the title at the start of an H1,
+  // optionally followed by a separator (colon, dash, dot, space) or end of line.
+  const pattern = new RegExp(`^#\\s+${escapedTitle}(\\s*[:\\-.—\\s]|$)`, 'i')
 
-  return lines.findIndex((line) => {
-    const trimmed = line.trim()
-    if (!trimmed.startsWith('# ')) return false
-
-    const lineTitle = trimmed.replace(/^#\s+/, '').trim().toLowerCase()
-
-    // Exact match or matches the start with a separator (colon or space)
-    return lineTitle === normalizedTitle || lineTitle.startsWith(normalizedTitle + ':') || lineTitle.startsWith(normalizedTitle + ' ')
-  })
+  return lines.findIndex((line) => pattern.test(line.trim()))
 }
 
 export const extractChapterContent = (storyContent: string, chapterTitle: string): string | null => {

@@ -174,18 +174,35 @@ export const projectsSlice = createSlice({
       }
     },
     updateChapter: (state, action: PayloadAction<{ title: string; content: string }>) => {
-      if (state.activeProject) {
+      const activeProject = state.activeProject
+      if (activeProject) {
         const { title, content } = action.payload
-        state.activeProject.storyContent = replaceChapterContent(
-          state.activeProject.storyContent,
-          title,
-          content
-        )
+        const storyContent = activeProject.storyContent || ''
+
+        // Find which chapter index we are updating
+        const lines = storyContent.split('\n')
+        const chapterIdx = lines.findIndex((line) => {
+          const normalizedTitle = title.trim().toLowerCase()
+          const trimmedLine = line.trim().toLowerCase()
+          return (
+            trimmedLine.startsWith('# ') &&
+            (trimmedLine.includes(normalizedTitle + ':') ||
+              trimmedLine.includes(normalizedTitle + ' ') ||
+              trimmedLine.includes(normalizedTitle + '-') ||
+              trimmedLine === '# ' + normalizedTitle)
+          )
+        })
+
+        if (chapterIdx !== -1) {
+          const linesBefore = lines.slice(0, chapterIdx)
+          const index = linesBefore.filter((l) => l.trim().startsWith('# ')).length
+          if (!state.modifiedChapters.includes(index)) {
+            state.modifiedChapters.push(index)
+          }
+        }
+
+        activeProject.storyContent = replaceChapterContent(storyContent, title, content)
         state.projectHasLiveEdits = true
-        
-        // Note: updateChapter currently doesn't pass index, 
-        // but we might want to find it if we use this reducer for edits.
-        // However, MarkdownViewer uses updateFile for live edits.
       }
     }
   }

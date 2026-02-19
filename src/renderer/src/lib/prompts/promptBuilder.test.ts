@@ -62,8 +62,8 @@ describe('promptBuilder', () => {
     }
     const result = pb.buildPrompt(context, mockData)
     expect(result.prompt).toBeDefined()
+    expect(result.allowedTools).toHaveLength(1)
     expect(result.allowedTools).toContain('writeFile')
-    expect(result.allowedTools).toContain('reasoning')
     expect(result.allowedTools).not.toContain('routeTo')
   })
 
