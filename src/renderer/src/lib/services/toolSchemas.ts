@@ -26,6 +26,3 @@ export const actionSuggestionSchema = z.object({
 })
 
 
-export const planSequenceSchema = z.object({
-  sequence: z.string().describe('A markdown-numbered list of future actions.')
-})
