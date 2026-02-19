@@ -12,15 +12,35 @@ export const isStoryFile = (file: Pick<ProjectFile, 'title' | 'type'> | null | u
 
 export const getChaptersFromStoryContent = (storyContent: string): { title: string; index: number }[] => {
   const normalized = normalizeLineEndings(storyContent ?? '')
-  const lines = normalized.split('\n')
+  // Match lines starting with optional whitespace, then #, then whitespace, then content
+  // Use [ \t] instead of \s to avoid matching newlines
+  const regex = /^[ \t]*#[ \t]+(.+)$/gm
   const chapters: { title: string; index: number }[] = []
+  let match
 
-  lines.forEach((line, index) => {
-    if (/^#\s+\S+/.test(line.trim())) {
-      const title = line.trim().replace(/^#\s+/, '')
-      chapters.push({ title, index })
+  let lineIndex = 0
+  let searchPos = 0
+
+  while ((match = regex.exec(normalized)) !== null) {
+    // Count newlines from current searchPos up to the match start
+    while (true) {
+      const nextNewline = normalized.indexOf('\n', searchPos)
+      if (nextNewline !== -1 && nextNewline < match.index) {
+        lineIndex++
+        searchPos = nextNewline + 1
+      } else {
+        break
+      }
     }
-  })
+
+    // Ensure we don't recount the same area in next iteration
+    searchPos = match.index
+
+    const title = match[1].trim()
+    if (title) {
+      chapters.push({ title, index: lineIndex })
+    }
+  }
 
   return chapters
 }
