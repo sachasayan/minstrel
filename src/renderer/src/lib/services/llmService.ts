@@ -15,7 +15,20 @@ const providerFactories: Partial<Record<ProviderName, ProviderFactory>> = {
   nvidia: (options) =>
     createOpenAI({
       apiKey: options.apiKey,
-      baseURL: 'https://integrate.api.nvidia.com/v1'
+      baseURL: 'https://integrate.api.nvidia.com/v1',
+      headers: {
+        Accept: 'application/json'
+      },
+      fetch: async (url, fetchOptions) => {
+        // Force the use of the chat/completions endpoint for NVIDIA NIM
+        // this handles cases where the SDK might incorrectly append /responses
+        const urlObj = new URL(url)
+        if (!urlObj.pathname.endsWith('/chat/completions') && !urlObj.pathname.endsWith('/completions')) {
+           urlObj.pathname = '/v1/chat/completions'
+        }
+        console.log(`NVIDIA NIM Request URL: ${urlObj.toString()}`)
+        return fetch(urlObj.toString(), fetchOptions)
+      }
     }) as unknown as AIProvider
   // deepseek and zai need to be implemented when SDKs are available
 }
@@ -56,6 +69,37 @@ const service: any = {
     if (!apiKey) {
       console.error('No API key provided for verification.')
       return false
+    }
+
+    // Special case for NVIDIA verification using /v1/models (tokens-free)
+    if (provider === 'nvidia') {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+        const response = await fetch('https://integrate.api.nvidia.com/v1/models', {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            Accept: 'application/json'
+          },
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        
+        if (response.ok) {
+          console.log('NVIDIA NIM API key verification passed.')
+          return true
+        }
+        console.error('NVIDIA NIM verification failed with status:', response.status)
+        return false
+      } catch (error) {
+        if ((error as any).name === 'AbortError') {
+          console.error('NVIDIA NIM verification timed out.')
+        } else {
+          console.error('NVIDIA NIM verification request failed:', error)
+        }
+        return false
+      }
     }
 
     try {
@@ -114,7 +158,9 @@ const service: any = {
     } else if (provider === 'openai') {
       return aiProvider(mappedModelId)
     } else if (provider === 'nvidia') {
-      return aiProvider(mappedModelId)
+      // Force Chat protocol for NVIDIA NIM to avoid "Field messages required" 400 errors
+      const p = aiProvider as any
+      return typeof p.chat === 'function' ? p.chat(mappedModelId) : aiProvider(mappedModelId)
     } else {
       // For unsupported providers, throw error
       throw new Error(`Provider ${provider} not yet implemented`)
@@ -135,7 +181,13 @@ const service: any = {
 
     const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
     const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
-    const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
+    let selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
+
+    // Migration/Fix for legacy/invalid model IDs in settings
+    if (provider === 'nvidia' && selectedModelId === 'meta/llama-3.1-70b-instruct') {
+      console.warn(`Legacy model ID detected: ${selectedModelId}. Migrating to meta/llama3-70b-instruct`)
+      selectedModelId = 'meta/llama3-70b-instruct'
+    }
 
     const factory = providerFactories[provider]
     if (!factory) {

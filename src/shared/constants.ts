@@ -18,8 +18,8 @@ export const PROVIDER_MODELS = {
     low: 'zai-model-1'
   },
   nvidia: {
-    high: 'zai-org/GLM-5',
-    low: 'nvidia/llama-3.1-8b-instruct'
+    high: 'z-ai/glm5',
+    low: 'meta/llama3-8b-instruct'
   }
 } as const
 
@@ -44,11 +44,13 @@ export const MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
     'zai-model-2'
   ],
   nvidia: [
-    'zai-org/GLM-5',
-    'moonshotai/kimi-k2.5',
-    'meta/llama-3.1-70b-instruct',
-    'mistralai/mistral-large-2-instruct',
-    'nvidia/llama-3.1-8b-instruct'
+    'z-ai/glm5',
+    'z-ai/glm4.7',
+    'meta/llama3-8b-instruct',
+    'meta/llama3-70b-instruct',
+    'nvidia/llama-3.1-nemotron-70b-instruct',
+    'nvidia/llama-3.1-nemotron-51b-instruct',
+    'mistralai/mistral-large-2-instruct'
   ]
 }
 
