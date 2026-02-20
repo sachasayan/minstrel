@@ -38,10 +38,6 @@ const SettingsPage = (): ReactNode => {
   const dispatch = useDispatch<AppDispatch>()
 
   // Provider-specific API key states
-  const [googleApiKeyValue, setGoogleApiKeyValue] = useState<string>('')
-  const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
-  const [deepseekApiKeyValue, setDeepseekApiKeyValue] = useState<string>('')
-  const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
   const [keyValidationStatus, setKeyValidationStatus] = useState<KeyValidationStatus>('idle')
   const validationRequestIdRef = useRef(0)
 
@@ -53,29 +49,24 @@ const SettingsPage = (): ReactNode => {
   const selectedProviderApiKey = useMemo(() => {
     switch (selectedProvider) {
       case 'google':
-        return googleApiKeyValue
+        return settings.googleApiKey || ''
       case 'openai':
-        return openaiApiKeyValue
+        return settings.openaiApiKey || ''
       case 'deepseek':
-        return deepseekApiKeyValue
+        return settings.deepseekApiKey || ''
       case 'zai':
-        return zaiApiKeyValue
+        return settings.zaiApiKey || ''
       default:
         return ''
     }
-  }, [selectedProvider, googleApiKeyValue, openaiApiKeyValue, deepseekApiKeyValue, zaiApiKeyValue])
+  }, [selectedProvider, settings.googleApiKey, settings.openaiApiKey, settings.deepseekApiKey, settings.zaiApiKey])
 
-  // Effect to load settings on mount and sync local state
+  // Effect to load settings on mount
   useEffect(() => {
     const loadAndSetSettings = async () => {
       try {
         const loadedSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
         dispatch(setSettingsState(loadedSettings || {}))
-        // Sync local state
-        setGoogleApiKeyValue(loadedSettings?.googleApiKey || '')
-        setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
-        setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
-        setZaiApiKeyValue(loadedSettings?.zaiApiKey || '')
       } catch (error) {
         console.error("Failed to load settings:", error);
         toast.error("Failed to load settings.");
@@ -84,16 +75,22 @@ const SettingsPage = (): ReactNode => {
     loadAndSetSettings()
   }, [dispatch])
 
-  // Effect to update local state when Redux state changes
+  // Effect to auto-save settings when they change
   useEffect(() => {
-    setDeepseekApiKeyValue(settings.deepseekApiKey || '');
-    setZaiApiKeyValue(settings.zaiApiKey || '');
-  }, [
-    settings.googleApiKey,
-    settings.openaiApiKey,
-    settings.deepseekApiKey,
-    settings.zaiApiKey
-  ]);
+    // Skip saving if settings are completely empty (e.g. initial load state before getting from disk)
+    if (!settings.provider && !settings.workingRootDirectory && !settings.highPreferenceModelId) return;
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        await window.electron.ipcRenderer.invoke('save-app-settings', settings);
+        console.log("Settings auto-saved via IPC.");
+      } catch (error) {
+        console.error("Failed to auto-save settings:", error);
+      }
+    }, 1000); // 1 second debounce for saves
+
+    return () => clearTimeout(timeoutId);
+  }, [settings]);
 
   useEffect(() => {
     const apiKey = selectedProviderApiKey.trim()
@@ -126,53 +123,34 @@ const SettingsPage = (): ReactNode => {
     return () => window.clearTimeout(timeoutId)
   }, [selectedProvider, selectedProviderApiKey])
 
-  // Function to save the current FULL settings state from Redux via IPC
-  const saveCurrentSettings = async () => {
-    try {
-      const currentSettings = store.getState().settings;
-      await window.electron.ipcRenderer.invoke('save-app-settings', currentSettings);
-      console.log("Settings saved via IPC.");
-      toast.success("Settings Saved!");
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-      toast.error("Failed to save settings.");
-    }
-  };
-
   // Handler for provider change
   const handleProviderChange = (value: string) => {
     dispatch(setProvider(value));
+
+    // Auto-update to default models for the new provider
+    const newHighModel = PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS]?.high || PROVIDER_MODELS.google.high;
+    const newLowModel = PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS]?.low || PROVIDER_MODELS.google.low;
+
+    dispatch(setHighPreferenceModelId(newHighModel));
+    dispatch(setLowPreferenceModelId(newLowModel));
   };
 
   // Handler for provider API key changes
   const handleGoogleApiKeyChange = (value: string) => {
-    setGoogleApiKeyValue(value);
     dispatch(setGoogleApiKey(value));
   };
 
   const handleOpenaiApiKeyChange = (value: string) => {
-    setOpenaiApiKeyValue(value);
     dispatch(setOpenaiApiKey(value));
   };
 
   const handleDeepseekApiKeyChange = (value: string) => {
-    setDeepseekApiKeyValue(value);
     dispatch(setDeepseekApiKey(value));
   };
 
   const handleZaiApiKeyChange = (value: string) => {
-    setZaiApiKeyValue(value);
     dispatch(setZaiApiKey(value));
   };
-
-  // Handler for the Save button
-  const handleSaveButton = () => {
-    dispatch(setGoogleApiKey(googleApiKeyValue));
-    dispatch(setOpenaiApiKey(openaiApiKeyValue));
-    dispatch(setDeepseekApiKey(deepseekApiKeyValue));
-    dispatch(setZaiApiKey(zaiApiKeyValue));
-    saveCurrentSettings();
-  }
 
   // Handler for High Preference Model Select change
   const handleHighModelChange = (value: string) => {
@@ -246,9 +224,9 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="googleApiKey">Google API Key</Label>
                   <Input
-                    type="text"
+                    type="password"
                     id="googleApiKey"
-                    value={googleApiKeyValue}
+                    value={settings.googleApiKey || ''}
                     onChange={(e) => handleGoogleApiKeyChange(e.target.value)}
                     placeholder="Enter your Google API Key"
                   />
@@ -259,9 +237,9 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
                   <Input
-                    type="text"
+                    type="password"
                     id="openaiApiKey"
-                    value={openaiApiKeyValue}
+                    value={settings.openaiApiKey || ''}
                     onChange={(e) => handleOpenaiApiKeyChange(e.target.value)}
                     placeholder="Enter your OpenAI API Key"
                   />
@@ -272,9 +250,9 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="deepseekApiKey">DeepSeek API Key</Label>
                   <Input
-                    type="text"
+                    type="password"
                     id="deepseekApiKey"
-                    value={deepseekApiKeyValue}
+                    value={settings.deepseekApiKey || ''}
                     onChange={(e) => handleDeepseekApiKeyChange(e.target.value)}
                     placeholder="Enter your DeepSeek API Key"
                   />
@@ -285,9 +263,9 @@ const SettingsPage = (): ReactNode => {
                 <div>
                   <Label htmlFor="zaiApiKey">Z.AI API Key</Label>
                   <Input
-                    type="text"
+                    type="password"
                     id="zaiApiKey"
-                    value={zaiApiKeyValue}
+                    value={settings.zaiApiKey || ''}
                     onChange={(e) => handleZaiApiKeyChange(e.target.value)}
                     placeholder="Enter your Z.AI API Key"
                   />
@@ -381,12 +359,7 @@ const SettingsPage = (): ReactNode => {
             </div>
           </div>
 
-          {/* Save Button */}
-          <div className="flex justify-end space-x-2">
-            <Button onClick={handleSaveButton}>
-              Save Settings
-            </Button>
-          </div>
+          {/* Save Button is removed, handled by auto-save */}
         </div>
       </main>
     </div>

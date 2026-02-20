@@ -138,6 +138,10 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
       console.log('Tool Calls:', result.toolCalls)
       console.groupEnd()
 
+      if (result.text && result.text.trim().length > 0) {
+        handleMessage(result.text.trim())
+      }
+
       // Clear streaming state after each step
       streamingService.clear()
 
