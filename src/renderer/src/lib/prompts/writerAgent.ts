@@ -17,6 +17,7 @@ export const getWriterAgentPrompt = () => `
 * If editing an existing chapter, you MUST use the existing title as the header.
 * If creating a new chapter, you follow the outline guidance for the title if possible.
 * Otherwise, you may use whichever title you like for the header.
+* When you are finished, you MUST use the "writeFile" tool to save the chapter, passing the chapter's title as the "file_name" parameter, and the markdown content as the "content" parameter.
 
 ## WRITING STYLE
 * All chapters are written in markdown.
@@ -28,10 +29,6 @@ export const getWriterAgentPrompt = () => `
 
 
 ===
-
-END SYSTEM PROMPT
-BEGIN USER PROMPT
-
 
 * The user will provide you with the contents of the files needed for the current task.
 

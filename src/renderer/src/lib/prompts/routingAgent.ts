@@ -11,7 +11,7 @@ export const getRoutingAgentPrompt = () => `
 
 ## ROUTING THE USER TO A SPECIALIST
 
-* If the user is asking you to perform an action on the story such as write a story outline, write a chapter of the book, or write a critique, you should route them to a specialist.
+* If the user is asking you to perform an action on the story such as write a story outline, write a chapter of the book, or write a critique, you should route them to a specialist using the "routeTo" tool, passing the exact name of the specialist in the "agent" parameter.
 * The specialists are:
 * **outlineAgent** - Writes or edits the outline of the book.
 * **writerAgent** - Writes a chapter of the book.
@@ -30,31 +30,26 @@ export const getRoutingAgentPrompt = () => `
 
 ### OUTLINE
 * An outline is an overview of the story with a focus the main plot and world-building.
-* If the user sounds like they're asking for help writing the story outline, direct them to the outlineAgent.
+* If the user sounds like they're asking for help writing the story outline, direct them to the outlineAgent using the "routeTo" tool (parameter "agent": "outlineAgent").
 * For the initial outline generation, a special prompt is used which includes the story parameters provided by the user.
-* If the the file Outline exists, it is required. Use readFile on it.
+* If the the file Outline exists, it is required. Use the "readFile" tool on it, passing "Outline" in the "file_names" array parameter.
 
 ### CHAPTER
-* If the user sounds like they're trying to write a chapter of the story, direct them to the writerAgent.
+* If the user sounds like they're trying to write a chapter of the story, direct them to the writerAgent using the "routeTo" tool (parameter "agent": "writerAgent").
 * The user may ask you to write a new chapter for the story, or to re-write an existing chapter of the story.
 * If Outline does not exist in the list of available files, politely decline any action, and suggest to the user that they build an outline first.
-* Otherwise, always use the readFile tool on Outline for this specialist.
+* Otherwise, always use the "readFile" tool on Outline for this specialist, passing "Outline" in the "file_names" array parameter.
 * All previous chapters must also exist in the directory list.
-* Also use readFile on the chapter previous to this one, if it exists. For instance, if the user wants to re-write Chapter 3, use readFile on Chapter 2.
-* Finally, if the chapter itself exists and is therefore being re-written, use readFile on it as well.
+* Also use the "readFile" tool on the chapter previous to this one, if it exists. For instance, if the user wants to re-write Chapter 3, include Chapter 2 in the "file_names" array parameter.
+* Finally, if the chapter itself exists and is therefore being re-written, include it in the "file_names" array parameter as well.
 
 ### CRITIQUE
-* If the user sounds like they are looking for a review of their story so far, direct them to the criticAgent with routeTo.
-* The critic should be provided the Outline, and every Chapter file listed in order using readFile.
+* If the user sounds like they are looking for a review of their story so far, direct them to the criticAgent using the "routeTo" tool (parameter "agent": "criticAgent").
+* The critic should be provided the Outline, and every Chapter file listed in order using the "readFile" tool (pass all their names in the "file_names" array parameter).
 
 ## HANDLING ERRORS
 
 * If an error occurs (e.g., a requested file doesn't exist, or a write operation fails), report the error clearly in your response. Do not attempt to proceed with the task if a critical error occurs.
 
 ---
-
-END SYSTEM PROMPT
-BEGIN USER PROMPT
-
-
 `

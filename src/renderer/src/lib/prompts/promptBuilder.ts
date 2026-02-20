@@ -4,9 +4,7 @@ import {
   addAvailableFiles,
   addProvidedFiles,
   addFileContents,
-  addUserPrompt,
   addParameters,
-  addBeginUserPrompt,
   appendWithSeparator
 } from './promptsUtils'
 import { getRoutingAgentPrompt } from './routingAgent'
@@ -82,21 +80,19 @@ export const getLatestUserMessage = (data: PromptData): string => {
 // --- Refactored buildPrompt ---
 
 export const buildPrompt = (context: RequestContext, data: PromptData): BuildPromptResult => {
-  let prompt = basePrompt
+  let system = basePrompt
 
   const availableFiles = getAvailableFiles(data)
   const providedFiles = getProvidedFiles(data, context.requestedFiles)
   const fileContents = getFileContents(data, context.requestedFiles)
   const userMessage = getLatestUserMessage(data)
 
-  const commonSections = (p: string) => {
-    let updatedPrompt = p
-    updatedPrompt = addUserPrompt(updatedPrompt, userMessage)
-    updatedPrompt = addAvailableFiles(updatedPrompt, availableFiles)
-    updatedPrompt = addProvidedFiles(updatedPrompt, providedFiles)
-    updatedPrompt = addFileContents(updatedPrompt, fileContents)
-    updatedPrompt = addBeginUserPrompt(updatedPrompt)
-    return updatedPrompt
+  const applyContext = (p: string) => {
+    let s = p
+    s = addAvailableFiles(s, availableFiles)
+    s = addProvidedFiles(s, providedFiles)
+    s = addFileContents(s, fileContents)
+    return s
   }
 
   let allowedTools: string[] = []
@@ -104,37 +100,35 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
   switch (context.agent) {
     case 'routingAgent': {
       allowedTools = ['readFile', 'actionSuggestion', 'routeTo']
-      prompt = appendWithSeparator(prompt, getRoutingAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
-      prompt = commonSections(prompt)
+      system = appendWithSeparator(system, getRoutingAgentPrompt())
+      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
+      system = applyContext(system)
       break
     }
     case 'outlineAgent': {
       allowedTools = ['writeFile']
-      prompt = appendWithSeparator(prompt, getOutlineAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
+      system = appendWithSeparator(system, getOutlineAgentPrompt())
+      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
       
       if (context.carriedContext) {
-         prompt = addParameters(prompt, context.carriedContext)
-         prompt = addUserPrompt(prompt, userMessage)
-         prompt = addBeginUserPrompt(prompt)
+         system = addParameters(system, context.carriedContext)
       } else {
-        prompt = commonSections(prompt)
+        system = applyContext(system)
       }
       break
     }
     case 'writerAgent': {
       allowedTools = ['writeFile']
-      prompt = appendWithSeparator(prompt, getWriterAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
-      prompt = commonSections(prompt)
+      system = appendWithSeparator(system, getWriterAgentPrompt())
+      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
+      system = applyContext(system)
       break
     }
     case 'criticAgent': {
       allowedTools = ['addCritique']
-      prompt = appendWithSeparator(prompt, getCriticAgentPrompt())
-      prompt = appendWithSeparator(prompt, getToolsPrompt(allowedTools))
-      prompt = commonSections(prompt)
+      system = appendWithSeparator(system, getCriticAgentPrompt())
+      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
+      system = applyContext(system)
       break
     }
     default: {
@@ -143,5 +137,5 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
     }
   }
 
-  return { prompt, allowedTools }
+  return { system, userPrompt: userMessage, allowedTools }
 }

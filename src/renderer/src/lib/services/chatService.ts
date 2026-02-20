@@ -48,10 +48,11 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
     while (context.currentStep < MAX_STEPS) {
       if (signal.aborted) break
 
-      const { prompt, allowedTools } = buildPrompt(context, promptData)
+      const { system, userPrompt, allowedTools } = buildPrompt(context, promptData)
       
       console.groupCollapsed(`Agent Loop - Step ${context.currentStep}: ${context.agent}`)
-      console.log('Prompt:', prompt)
+      console.log('System:', system)
+      console.log('Prompt:', userPrompt)
       console.log('Allowed Tools:', allowedTools)
       console.groupEnd()
 
@@ -84,7 +85,7 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
       let finalText = ''
       let finalCalls: any[] = []
       try {
-        const stream = await geminiService.streamTextWithTools(settings, prompt, activeTools, modelPreference)
+        const stream = await geminiService.streamTextWithTools(settings, system, userPrompt, activeTools, modelPreference)
         
         streamingService.updateStatus('Minstrel is thinking...')
 
@@ -236,7 +237,7 @@ Return the suggestions as action suggestions.
     }
 
     const state = store.getState()
-    const result = await geminiService.generateTextWithTools(state.settings, prompt, tools, 'low')
+    const result = await geminiService.generateTextWithTools(state.settings, prompt, '', tools, 'low')
     const suggestionCall = (result.toolCalls as any[]).find(tc => tc.toolName === 'actionSuggestion')
     
     return (suggestionCall?.args as any)?.suggestions || []

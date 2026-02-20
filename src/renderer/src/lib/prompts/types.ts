@@ -6,6 +6,7 @@ export interface PromptData {
 }
 
 export interface BuildPromptResult {
-  prompt: string
+  system: string
+  userPrompt: string
   allowedTools: string[]
 }

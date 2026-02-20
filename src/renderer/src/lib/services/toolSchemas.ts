@@ -10,11 +10,11 @@ export const writeFileSchema = z.object({
 })
 
 export const readFileSchema = z.object({
-  file_names: z.array(z.string()).describe('The list of file names to read.')
+  file_names: z.array(z.string()).describe('List of file names to read. Required.')
 })
 
 export const routeToSchema = z.object({
-  agent: z.enum(['routingAgent', 'criticAgent', 'outlineAgent', 'writerAgent']).describe('The specialist agent to route the request to.')
+  agent: z.string().describe('The name of the specialist agent to route the request to. MUST be one of: "routingAgent", "criticAgent", "outlineAgent", "writerAgent".')
 })
 
 export const addCritiqueSchema = z.object({

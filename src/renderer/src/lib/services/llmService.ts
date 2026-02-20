@@ -159,7 +159,7 @@ const service: any = {
   },
 
   // Generate content with native tools
-  async generateTextWithTools(settings: AppSettings, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+  async generateTextWithTools(settings: AppSettings, system: string, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
@@ -169,6 +169,7 @@ const service: any = {
     try {
       const result = await generateText({
         model,
+        system: system,
         prompt: prompt,
         tools: tools
         // Optional: Force tool use if needed, but we prefer hybrid
@@ -187,7 +188,7 @@ const service: any = {
   },
 
   // Stream content with native tools
-  async streamTextWithTools(settings: AppSettings, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+  async streamTextWithTools(settings: AppSettings, system: string, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
@@ -197,6 +198,7 @@ const service: any = {
     try {
       return streamText({
         model,
+        system: system,
         prompt: prompt,
         tools: tools
       })

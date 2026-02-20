@@ -102,7 +102,3 @@ export function addCurrentSequence(prompt: string, currentSequence: string | und
   const content = currentSequence
   return addFormattedSection(prompt, 'A SEQUENCE IS ACTIVE', content)
 }
-
-export function addBeginUserPrompt(prompt: string): string {
-  return `${prompt}${separator}END SYSTEM PROMPT\nBEGIN USER PROMPT`
-}

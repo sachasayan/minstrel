@@ -16,7 +16,7 @@ export const getOutlineAgentPrompt = () => `
 * Chapters should be broken down into acts or scenes. Estimate word counts per chapter if a target word count was provided in the parameters.
 * The outline may also include notes on planned twists, storytelling devices, character developments, and more.
 * Maintain consistency. If there are any storyline consistency problems based on the provided context or parameters, mention them to the user.
-* The outline should always be written in Markdown and saved in a file called "Outline" using the writeFile tool.
+* The outline should always be written in Markdown and saved using the "writeFile" tool, passing "Outline" in the "file_name" parameter and the markdown content in the "content" parameter.
 
 ## WRITING STYLE
 * All files are written in markdown.
@@ -28,9 +28,4 @@ export const getOutlineAgentPrompt = () => `
 
 
 ---
-
-END SYSTEM PROMPT
-BEGIN USER PROMPT
-
-
 `

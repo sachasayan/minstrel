@@ -20,6 +20,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       description: 'Write content to a file. Only Markdown files supported.',
       parameters: schemas.writeFileSchema,
       execute: async ({ file_name, content }: any) => {
+        console.log(`[TOOL EXECUTION] writeFile called for file: ${file_name}`)
         handleWriteFile(file_name, content)
         return { status: 'success', file: file_name }
       }
@@ -29,6 +30,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       description: 'Read the contents of specified files.',
       parameters: schemas.readFileSchema,
       execute: async ({ file_names }: any) => {
+        console.log(`[TOOL EXECUTION] readFile called for files: ${file_names.join(', ')}`)
         if (callbacks.onReadFile) {
           callbacks.onReadFile(file_names)
         }
@@ -40,6 +42,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       description: 'Route to a specialist agent.',
       parameters: schemas.routeToSchema,
       execute: async ({ agent }: any) => {
+        console.log(`[TOOL EXECUTION] routeTo called for agent: ${agent}`)
         if (callbacks.onRouteTo) {
           callbacks.onRouteTo(agent)
         }
@@ -51,6 +54,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       description: 'Provide suggestions for the user.',
       parameters: schemas.actionSuggestionSchema,
       execute: async ({ suggestions }: any) => {
+        console.log(`[TOOL EXECUTION] actionSuggestion called with suggestions:`, suggestions)
         handleActionSuggestions(suggestions)
         return { status: 'success' }
       }
@@ -61,6 +65,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       description: 'Submit a story critique.',
       parameters: schemas.addCritiqueSchema,
       execute: async ({ critique }: any) => {
+        console.log(`[TOOL EXECUTION] addCritique called`)
         handleCritique(critique)
         return { status: 'success' }
       }
