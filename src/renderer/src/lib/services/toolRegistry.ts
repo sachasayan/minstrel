@@ -3,7 +3,6 @@ import * as schemas from './toolSchemas'
 import {
   handleWriteFile,
   handleCritique,
-  handleMessage,
   handleActionSuggestions
 } from './toolHandlers'
 

@@ -93,7 +93,7 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
           toolCallsPromise.then((calls) => {
             calls.forEach((call) => {
               if (call.toolName === 'writeFile') {
-                streamingService.updateStatus(`Writing ${(call as any).args.file_name}...`)
+                streamingService.updateStatus(`Writing ${(call as any).args?.file_name}...`)
               }
             })
           })
@@ -116,8 +116,8 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
         // Update context based on tool calls
         const calls = await (result.toolCalls || Promise.resolve([]))
         calls?.forEach((call: any) => {
-          if (call.toolName === 'routeTo') nextAgent = call.args.agent
-          if (call.toolName === 'readFile') nextRequestedFiles = call.args.file_names
+          if (call.toolName === 'routeTo') nextAgent = call.args?.agent
+          if (call.toolName === 'readFile') nextRequestedFiles = call.args?.file_names
         })
         
       } catch (error: any) {

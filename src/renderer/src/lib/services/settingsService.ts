@@ -1,5 +1,4 @@
 import { AppSettings } from '@/types'
-import { DEFAULT_LOW_PREFERENCE_MODEL_ID } from '@shared/constants'
 
 export const defaultSettings: AppSettings = {
   workingRootDirectory: '~/Documents/minstrel'
