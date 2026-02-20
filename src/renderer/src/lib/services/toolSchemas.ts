@@ -10,7 +10,7 @@ export const writeFileSchema = z.object({
 })
 
 export const readFileSchema = z.object({
-  file_names: z.array(z.string()).describe('List of file names to read. Required.')
+  file_names: z.string().describe('List of file names to read, separated by commas. For example: "Chapter 1, Outline"')
 })
 
 export const routeToSchema = z.object({
@@ -22,7 +22,7 @@ export const addCritiqueSchema = z.object({
 })
 
 export const actionSuggestionSchema = z.object({
-  suggestions: z.array(z.string().max(30)).max(3).describe('A list of up to 3 short suggestions for the user.')
+  suggestions: z.string().describe('A list of short suggestions for the user, separated by completely commas. For example: "Write a new chapter, Add more details"')
 })
 
 

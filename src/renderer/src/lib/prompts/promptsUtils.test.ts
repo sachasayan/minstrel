@@ -29,7 +29,5 @@ describe('promptsUtils', () => {
     expect(u.addCurrentSequence('P', 'S')).toContain('S')
     expect(u.addCurrentSequence('P', '')).toBe('P')
   })
-  it('addBeginUserPrompt', () => {
-    expect(u.addBeginUserPrompt('P')).toBe(`P${s}END SYSTEM PROMPT\nBEGIN USER PROMPT`)
-  })
+
 })

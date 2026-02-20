@@ -111,19 +111,22 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
           streamingService.updateText(finalText)
         }
 
-        // Use the resolved text if possible
+        // Wait for the text stream to finish
         try {
           finalText = (await stream.text) || finalText
         } catch {
           // Fallback to accumulated finalText
         }
 
-        // Update context based on tool calls
-        finalCalls = await (stream.toolCalls || Promise.resolve([]))
-        finalCalls?.forEach((call: any) => {
-          if (call.toolName === 'routeTo') nextAgent = call.args?.agent
-          if (call.toolName === 'readFile') nextRequestedFiles = call.args?.file_names
-        })
+        // Wait for tool calls to resolve
+        try {
+          finalCalls = (await stream.toolCalls) || []
+        } catch {
+          finalCalls = []
+        }
+        
+        // Tool state (nextAgent, nextRequestedFiles) is managed
+        // by the internal execute() callbacks provided via createTools.
       } catch (error: any) {
         if (signal.aborted) break
 

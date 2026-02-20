@@ -1,4 +1,5 @@
 import { tool } from 'ai'
+import { z } from 'zod'
 import * as schemas from './toolSchemas'
 import {
   handleWriteFile,
@@ -19,57 +20,64 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
     writeFile: tool({
       description: 'Write content to a file. Only Markdown files supported.',
       parameters: schemas.writeFileSchema,
-      execute: async ({ file_name, content }: any) => {
-        console.log(`[TOOL EXECUTION] writeFile called for file: ${file_name}`)
-        handleWriteFile(file_name, content)
-        return { status: 'success', file: file_name }
+      // @ts-expect-error
+      execute: async (args: z.infer<typeof schemas.writeFileSchema>) => {
+        console.log(`[TOOL EXECUTION] writeFile called with raw args:`, JSON.stringify(args))
+        handleWriteFile(args.file_name, args.content)
+        return { status: 'success', file: args.file_name }
       }
-    } as any),
+    }),
 
     readFile: tool({
       description: 'Read the contents of specified files.',
       parameters: schemas.readFileSchema,
-      execute: async ({ file_names }: any) => {
-        console.log(`[TOOL EXECUTION] readFile called for files: ${file_names.join(', ')}`)
+      // @ts-expect-error
+      execute: async (args: z.infer<typeof schemas.readFileSchema>) => {
+        console.log(`[TOOL EXECUTION] readFile called with raw args:`, JSON.stringify(args))
+        const fileNames = args.file_names.split(',').map(f => f.trim()).filter(Boolean)
         if (callbacks.onReadFile) {
-          callbacks.onReadFile(file_names)
+          callbacks.onReadFile(fileNames)
         }
-        return { status: 'success', requested: file_names }
+        return { status: 'success', requested: fileNames }
       }
-    } as any),
+    }),
 
     routeTo: tool({
       description: 'Route to a specialist agent.',
       parameters: schemas.routeToSchema,
-      execute: async ({ agent }: any) => {
-        console.log(`[TOOL EXECUTION] routeTo called for agent: ${agent}`)
+      // @ts-expect-error
+      execute: async (args: z.infer<typeof schemas.routeToSchema>) => {
+        console.log(`[TOOL EXECUTION] routeTo called with raw args:`, JSON.stringify(args))
         if (callbacks.onRouteTo) {
-          callbacks.onRouteTo(agent)
+          callbacks.onRouteTo(args.agent)
         }
-        return { status: 'success', target: agent }
+        return { status: 'success', target: args.agent }
       }
-    } as any),
+    }),
 
     actionSuggestion: tool({
       description: 'Provide suggestions for the user.',
       parameters: schemas.actionSuggestionSchema,
-      execute: async ({ suggestions }: any) => {
-        console.log(`[TOOL EXECUTION] actionSuggestion called with suggestions:`, suggestions)
+      // @ts-expect-error
+      execute: async (args: z.infer<typeof schemas.actionSuggestionSchema>) => {
+        console.log(`[TOOL EXECUTION] actionSuggestion called with raw args:`, JSON.stringify(args))
+        const suggestions = args.suggestions.split(',').map(s => s.trim()).filter(Boolean)
         handleActionSuggestions(suggestions)
         return { status: 'success' }
       }
-    } as any),
+    }),
 
 
     addCritique: tool({
       description: 'Submit a story critique.',
       parameters: schemas.addCritiqueSchema,
-      execute: async ({ critique }: any) => {
-        console.log(`[TOOL EXECUTION] addCritique called`)
-        handleCritique(critique)
+      // @ts-expect-error
+      execute: async (args: z.infer<typeof schemas.addCritiqueSchema>) => {
+        console.log(`[TOOL EXECUTION] addCritique called with raw args:`, JSON.stringify(args))
+        handleCritique(args.critique)
         return { status: 'success' }
       }
-    } as any)
+    })
   }
 }
 

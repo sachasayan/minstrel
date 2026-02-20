@@ -61,7 +61,7 @@ describe('promptBuilder', () => {
       currentStep: 0
     }
     const result = pb.buildPrompt(context, mockData)
-    expect(result.prompt).toBeDefined()
+    expect(result.userPrompt).toBeDefined()
     expect(result.allowedTools).toHaveLength(1)
     expect(result.allowedTools).toContain('writeFile')
     expect(result.allowedTools).not.toContain('routeTo')
