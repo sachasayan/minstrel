@@ -29,7 +29,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, CircleCheck, CircleX, Folder, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import llmService from '@/lib/services/llmService'
-import { PROVIDER_OPTIONS, MODEL_OPTIONS_BY_PROVIDER } from '@shared/constants'
+import { PROVIDER_OPTIONS, MODEL_OPTIONS_BY_PROVIDER, PROVIDER_MODELS } from '@shared/constants'
 
 type KeyValidationStatus = 'idle' | 'checking' | 'valid' | 'invalid'
 
