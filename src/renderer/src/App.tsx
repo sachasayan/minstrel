@@ -9,7 +9,6 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AlertCircle } from 'lucide-react'
-import OnboardingPage from '@/pages/OnboardingPage'
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
@@ -20,7 +19,6 @@ export default function App(): ReactNode {
   const activeView = useSelector(selectActiveView)
 
   const [hasLoaded, setHasLoaded] = useState(false)
-  const [showOnboarding, setShowOnboarding] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
 
 
@@ -30,12 +28,6 @@ export default function App(): ReactNode {
     try {
       const appSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
       dispatch(setSettingsState(appSettings || {})) // Dispatch loaded settings or empty object
-
-      // Check if onboarding is needed *after* settings are loaded into state
-      if (!appSettings?.workingRootDirectory || !appSettings?.googleApiKey) {
-        console.log('Onboarding needed based on loaded settings:', appSettings)
-        setShowOnboarding(true)
-      }
     } catch (error) {
       console.error("Failed to load settings in App:", error);
       setLoadError("Failed to load application settings. Please check your configuration and try again.")
@@ -86,17 +78,12 @@ export default function App(): ReactNode {
         </div>
       )}
       <div className="flex-grow overflow-hidden">
-        {showOnboarding ? (
-          <OnboardingPage /> // Render the full-page onboarding flow
-        ) : (
-          // Render the main application UI
-          <div className="h-full">
-            <TooltipProvider>
-              {router(activeView)}
-              <Toaster position="bottom-center" richColors />
-            </TooltipProvider>
-          </div>
-        )}
+        <div className="h-full">
+          <TooltipProvider>
+            {router(activeView)}
+            <Toaster position="bottom-center" richColors />
+          </TooltipProvider>
+        </div>
       </div>
     </div>
   )
