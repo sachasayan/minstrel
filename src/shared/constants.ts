@@ -2,8 +2,8 @@ export const DEFAULT_PROVIDER = 'google'
 
 export const PROVIDER_MODELS = {
   google: {
-    high: 'gemini-2.0-flash-thinking-exp-01-21',
-    low: 'gemini-2.0-flash'
+    high: 'gemini-3-flash-preview',
+    low: 'gemini-3-flash-preview'
   },
   openai: {
     high: 'gpt-4o',
