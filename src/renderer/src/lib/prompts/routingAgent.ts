@@ -16,7 +16,7 @@ export const getRoutingAgentPrompt = () => `
 * **outlineAgent** - Writes or edits the outline of the book.
 * **writerAgent** - Writes a chapter of the book.
 * **criticAgent** — Writes a critique of the user's story so far.
-* Provide a brief message to the user recognizing the task and letting them know you are looking at the relevant files.
+* CRITICAL: You MUST output a conversational text response BEFORE calling any tool. Provide a brief message to the user recognizing their task and letting them know you are looking at the relevant files.
 
 ## ANSWERING THE USER'S QUESTION
 

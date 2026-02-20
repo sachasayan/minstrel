@@ -81,7 +81,8 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
         Object.entries(toolkit).filter(([name]) => allowedTools.includes(name))
       )
 
-      let result: any
+      let finalText = ''
+      let finalCalls: any[] = []
       try {
         const stream = await geminiService.streamTextWithTools(settings, prompt, activeTools, modelPreference)
         
@@ -100,26 +101,28 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
         }
 
         // Stream the actual text content if it's a message
-        let fullText = ''
         for await (const textPart of stream.textStream) {
           if (signal.aborted) {
             streamingService.clear()
             break
           }
-          fullText += textPart
-          streamingService.updateText(fullText)
+          finalText += textPart
+          streamingService.updateText(finalText)
         }
 
-        // Wait for all tool executions to finish
-        result = await stream
+        // Use the resolved text if possible
+        try {
+          finalText = (await stream.text) || finalText
+        } catch {
+          // Fallback to accumulated finalText
+        }
 
         // Update context based on tool calls
-        const calls = await (result.toolCalls || Promise.resolve([]))
-        calls?.forEach((call: any) => {
+        finalCalls = await (stream.toolCalls || Promise.resolve([]))
+        finalCalls?.forEach((call: any) => {
           if (call.toolName === 'routeTo') nextAgent = call.args?.agent
           if (call.toolName === 'readFile') nextRequestedFiles = call.args?.file_names
         })
-        
       } catch (error: any) {
         if (signal.aborted) break
 
@@ -134,12 +137,12 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
       if (signal.aborted) break
 
       console.groupCollapsed(`AI Response - Step ${context.currentStep}`)
-      console.log('Text:', result.text)
-      console.log('Tool Calls:', result.toolCalls)
+      console.log('Text:', finalText)
+      console.log('Tool Calls:', finalCalls)
       console.groupEnd()
 
-      if (result.text && result.text.trim().length > 0) {
-        handleMessage(result.text.trim())
+      if (finalText && finalText.trim().length > 0) {
+        handleMessage(finalText.trim())
       }
 
       // Clear streaming state after each step

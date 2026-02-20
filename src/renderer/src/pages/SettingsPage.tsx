@@ -13,7 +13,7 @@ import {
   setOpenaiApiKey,
   selectSettingsState
 } from '@/lib/store/settingsSlice'
-import { AppDispatch, store } from '@/lib/store/store'
+import { AppDispatch } from '@/lib/store/store'
 
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
