@@ -5,8 +5,7 @@ import reducer, {
   setHighPreferenceModelId,
   setLowPreferenceModelId,
   setProvider,
-  setGoogleApiKey,
-  setNvidiaApiKey
+  setGoogleApiKey
 } from './settingsSlice'
 import { AppSettings } from '@/types'
 import {
@@ -24,8 +23,7 @@ describe('settingsSlice', () => {
     googleApiKey: '',
     deepseekApiKey: '',
     zaiApiKey: '',
-    openaiApiKey: '',
-    nvidiaApiKey: ''
+    openaiApiKey: ''
   }
 
   it('should return the initial state', () => {
@@ -75,8 +73,4 @@ describe('settingsSlice', () => {
     expect(actual.googleApiKey).toBe('google-key-123')
   })
 
-  it('should handle setNvidiaApiKey', () => {
-    const actual = reducer(initialState, setNvidiaApiKey('nv-key-456'))
-    expect(actual.nvidiaApiKey).toBe('nv-key-456')
-  })
 })

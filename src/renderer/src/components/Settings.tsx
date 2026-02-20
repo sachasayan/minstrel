@@ -10,7 +10,6 @@ import {
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
-  setNvidiaApiKey,
   selectSettingsState
 } from '@/lib/store/settingsSlice'
 import { AppDispatch, store } from '@/lib/store/store'
@@ -38,7 +37,6 @@ const Settings = (): ReactNode => {
   const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
   const [deepseekApiKeyValue, setDeepseekApiKeyValue] = useState<string>('')
   const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
-  const [nvidiaApiKeyValue, setNvidiaApiKeyValue] = useState<string>('')
 
   // Get current model options based on selected provider
   const currentModelOptions =
@@ -56,8 +54,6 @@ const Settings = (): ReactNode => {
         setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
         setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
         setZaiApiKeyValue(loadedSettings?.zaiApiKey || '')
-        setNvidiaApiKeyValue(loadedSettings?.nvidiaApiKey || '')
-
       } catch (error) {
         console.error("Failed to load settings:", error);
         toast.error("Failed to load settings.");
@@ -72,13 +68,12 @@ const Settings = (): ReactNode => {
     setOpenaiApiKeyValue(settings.openaiApiKey || '');
     setDeepseekApiKeyValue(settings.deepseekApiKey || '');
     setZaiApiKeyValue(settings.zaiApiKey || '');
-    setNvidiaApiKeyValue(settings.nvidiaApiKey || '');
+    setZaiApiKeyValue(settings.zaiApiKey || '');
   }, [
     settings.googleApiKey,
     settings.openaiApiKey,
     settings.deepseekApiKey,
-    settings.zaiApiKey,
-    settings.nvidiaApiKey
+    settings.zaiApiKey
   ]);
 
 
@@ -122,11 +117,6 @@ const Settings = (): ReactNode => {
     dispatch(setZaiApiKey(value));
   };
 
-  const handleNvidiaApiKeyChange = (value: string) => {
-    setNvidiaApiKeyValue(value);
-    dispatch(setNvidiaApiKey(value));
-  };
-
   // Handler for the Save button (saves API text inputs AND current Redux state)
   const handleSaveButton = () => {
     // Dispatch provider API keys
@@ -134,7 +124,6 @@ const Settings = (): ReactNode => {
     dispatch(setOpenaiApiKey(openaiApiKeyValue));
     dispatch(setDeepseekApiKey(deepseekApiKeyValue));
     dispatch(setZaiApiKey(zaiApiKeyValue));
-    dispatch(setNvidiaApiKey(nvidiaApiKeyValue));
     // The workingRootDirectory is already updated in Redux state by selectFolder
     // Then save the entire current state via IPC
     saveCurrentSettings();
@@ -252,18 +241,6 @@ const Settings = (): ReactNode => {
             </div>
           )}
 
-          {settings.provider === 'nvidia' && (
-            <div>
-              <Label htmlFor="nvidiaApiKey">NVIDIA API Key</Label>
-              <Input
-                type="text"
-                id="nvidiaApiKey"
-                value={nvidiaApiKeyValue}
-                onChange={(e) => handleNvidiaApiKeyChange(e.target.value)}
-                placeholder="Enter your NVIDIA API Key"
-              />
-            </div>
-          )}
         </div>
 
         {/* High Preference Model Select */}
@@ -318,13 +295,12 @@ const Settings = (): ReactNode => {
             <Folder className="mr-2 h-4 w-4" />
             Select Project Directory
           </Button>
-          <p className="text-sm text-muted-foreground pt-2 truncate"> {/* Added truncate */}
+          <p className="text-sm text-muted-foreground pt-2 truncate">
             Current: {settings.workingRootDirectory || 'Default (determined by system)'}
           </p>
         </div>
         {/* Minstrel Version */}
         <div className="pt-4">
-          {/* Add some spacing */}
           <Label>Minstrel Version</Label>
           <p className="text-sm text-muted-foreground mt-2">1.0</p>
         </div>
@@ -332,12 +308,9 @@ const Settings = (): ReactNode => {
 
       {/* Save Button - Saves ALL settings */}
       <div className="flex justify-end space-x-2 px-4 pb-4">
-        {/* Added padding */}
         <Button onClick={handleSaveButton}>
-          Save Settings {/* Changed button text back */}
+          Save Settings
         </Button>
-        {/* Assuming there's a way to close the settings dialog/modal */}
-        {/* <Button variant="outline">Close</Button> */}
       </div>
     </div>
   )

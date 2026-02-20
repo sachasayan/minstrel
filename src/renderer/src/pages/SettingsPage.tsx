@@ -11,7 +11,6 @@ import {
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
-  setNvidiaApiKey,
   selectSettingsState
 } from '@/lib/store/settingsSlice'
 import { AppDispatch, store } from '@/lib/store/store'
@@ -43,7 +42,6 @@ const SettingsPage = (): ReactNode => {
   const [openaiApiKeyValue, setOpenaiApiKeyValue] = useState<string>('')
   const [deepseekApiKeyValue, setDeepseekApiKeyValue] = useState<string>('')
   const [zaiApiKeyValue, setZaiApiKeyValue] = useState<string>('')
-  const [nvidiaApiKeyValue, setNvidiaApiKeyValue] = useState<string>('')
   const [keyValidationStatus, setKeyValidationStatus] = useState<KeyValidationStatus>('idle')
   const validationRequestIdRef = useRef(0)
 
@@ -62,12 +60,10 @@ const SettingsPage = (): ReactNode => {
         return deepseekApiKeyValue
       case 'zai':
         return zaiApiKeyValue
-      case 'nvidia':
-        return nvidiaApiKeyValue
       default:
         return ''
     }
-  }, [selectedProvider, googleApiKeyValue, openaiApiKeyValue, deepseekApiKeyValue, zaiApiKeyValue, nvidiaApiKeyValue])
+  }, [selectedProvider, googleApiKeyValue, openaiApiKeyValue, deepseekApiKeyValue, zaiApiKeyValue])
 
   // Effect to load settings on mount and sync local state
   useEffect(() => {
@@ -80,8 +76,6 @@ const SettingsPage = (): ReactNode => {
         setOpenaiApiKeyValue(loadedSettings?.openaiApiKey || '')
         setDeepseekApiKeyValue(loadedSettings?.deepseekApiKey || '')
         setZaiApiKeyValue(loadedSettings?.zaiApiKey || '')
-        setNvidiaApiKeyValue(loadedSettings?.nvidiaApiKey || '')
-
       } catch (error) {
         console.error("Failed to load settings:", error);
         toast.error("Failed to load settings.");
@@ -94,13 +88,11 @@ const SettingsPage = (): ReactNode => {
   useEffect(() => {
     setDeepseekApiKeyValue(settings.deepseekApiKey || '');
     setZaiApiKeyValue(settings.zaiApiKey || '');
-    setNvidiaApiKeyValue(settings.nvidiaApiKey || '');
   }, [
     settings.googleApiKey,
     settings.openaiApiKey,
     settings.deepseekApiKey,
-    settings.zaiApiKey,
-    settings.nvidiaApiKey
+    settings.zaiApiKey
   ]);
 
   useEffect(() => {
@@ -173,18 +165,12 @@ const SettingsPage = (): ReactNode => {
     dispatch(setZaiApiKey(value));
   };
 
-  const handleNvidiaApiKeyChange = (value: string) => {
-    setNvidiaApiKeyValue(value);
-    dispatch(setNvidiaApiKey(value));
-  };
-
   // Handler for the Save button
   const handleSaveButton = () => {
     dispatch(setGoogleApiKey(googleApiKeyValue));
     dispatch(setOpenaiApiKey(openaiApiKeyValue));
     dispatch(setDeepseekApiKey(deepseekApiKeyValue));
     dispatch(setZaiApiKey(zaiApiKeyValue));
-    dispatch(setNvidiaApiKey(nvidiaApiKeyValue));
     saveCurrentSettings();
   }
 
@@ -307,18 +293,7 @@ const SettingsPage = (): ReactNode => {
                   />
                 </div>
               )}
-              {settings.provider === 'nvidia' && (
-                <div>
-                  <Label htmlFor="nvidiaApiKey">NVIDIA API Key</Label>
-                  <Input
-                    type="text"
-                    id="nvidiaApiKey"
-                    value={nvidiaApiKeyValue}
-                    onChange={(e) => handleNvidiaApiKeyChange(e.target.value)}
-                    placeholder="Enter your NVIDIA API Key"
-                  />
-                </div>
-              )}
+
               {selectedProviderApiKey.trim() && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   {keyValidationStatus === 'checking' && (

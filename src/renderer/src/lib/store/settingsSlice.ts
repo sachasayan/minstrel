@@ -16,8 +16,7 @@ const initialState: AppSettings = {
   googleApiKey: '',
   deepseekApiKey: '',
   zaiApiKey: '',
-  openaiApiKey: '',
-  nvidiaApiKey: ''
+  openaiApiKey: ''
 }
 
 export const settingsSlice = createSlice({
@@ -36,7 +35,6 @@ export const settingsSlice = createSlice({
       state.deepseekApiKey = loadedSettings.deepseekApiKey ?? initialState.deepseekApiKey
       state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
       state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
-      state.nvidiaApiKey = loadedSettings.nvidiaApiKey ?? initialState.nvidiaApiKey
     },
     // Ensure payload type allows null for working directory
     setWorkingRootDirectory: (state, action: PayloadAction<string | null>) => {
@@ -64,9 +62,6 @@ export const settingsSlice = createSlice({
     },
     setOpenaiApiKey: (state, action: PayloadAction<string>) => {
       state.openaiApiKey = action.payload
-    },
-    setNvidiaApiKey: (state, action: PayloadAction<string>) => {
-      state.nvidiaApiKey = action.payload
     }
   }
 })
@@ -81,8 +76,7 @@ export const {
   setGoogleApiKey,
   setDeepseekApiKey,
   setZaiApiKey,
-  setOpenaiApiKey,
-  setNvidiaApiKey
+  setOpenaiApiKey
 } = settingsSlice.actions
 
 export const selectSettingsState = (state: RootState) => state.settings

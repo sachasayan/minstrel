@@ -1,4 +1,6 @@
 import { generateText, streamText, LanguageModel } from 'ai'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createOpenAI } from '@ai-sdk/openai'
 import { AppSettings } from '@/types'
 import { PROVIDER_MODELS } from '@shared/constants'
 
@@ -9,25 +11,7 @@ type ProviderFactory = (options: { apiKey: string }) => AIProvider
 // Provider factory functions
 const providerFactories: Partial<Record<ProviderName, ProviderFactory>> = {
   google: createGoogleGenerativeAI as unknown as ProviderFactory,
-  openai: createOpenAI as unknown as ProviderFactory,
-  nvidia: (options) =>
-    createOpenAI({
-      apiKey: options.apiKey,
-      baseURL: 'https://integrate.api.nvidia.com/v1',
-      headers: {
-        Accept: 'application/json'
-      },
-      fetch: async (url, fetchOptions) => {
-        // Force the use of the chat/completions endpoint for NVIDIA NIM
-        // this handles cases where the SDK might incorrectly append /responses
-        const urlObj = new URL(url)
-        if (!urlObj.pathname.endsWith('/chat/completions') && !urlObj.pathname.endsWith('/completions')) {
-           urlObj.pathname = '/v1/chat/completions'
-        }
-        console.log(`NVIDIA NIM Request URL: ${urlObj.toString()}`)
-        return fetch(urlObj.toString(), fetchOptions)
-      }
-    }) as unknown as AIProvider
+  openai: createOpenAI as unknown as ProviderFactory
   // deepseek and zai need to be implemented when SDKs are available
 }
 
@@ -35,9 +19,7 @@ const providerFactories: Partial<Record<ProviderName, ProviderFactory>> = {
 const providerModelMapping: Partial<Record<ProviderName, (modelId: string) => string>> = {
   google: (modelId: string) => modelId, // Google uses model IDs directly
   openai: (modelId: string) => modelId, // OpenAI uses model IDs directly
-  deepseek: (modelId: string) => modelId, // Placeholder
-  zai: (modelId: string) => modelId, // Placeholder
-  nvidia: (modelId: string) => modelId
+  zai: (modelId: string) => modelId // Placeholder
 }
 
 // @ts-ignore
@@ -53,8 +35,6 @@ const service: any = {
         return settings.deepseekApiKey || null
       case 'zai':
         return settings.zaiApiKey || null
-      case 'nvidia':
-        return settings.nvidiaApiKey || null
       default:
         return null
     }
@@ -65,37 +45,6 @@ const service: any = {
     if (!apiKey) {
       console.error('No API key provided for verification.')
       return false
-    }
-
-    // Special case for NVIDIA verification using /v1/models (tokens-free)
-    if (provider === 'nvidia') {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 10000)
-
-        const response = await fetch('https://integrate.api.nvidia.com/v1/models', {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            Accept: 'application/json'
-          },
-          signal: controller.signal
-        })
-        clearTimeout(timeoutId)
-        
-        if (response.ok) {
-          console.log('NVIDIA NIM API key verification passed.')
-          return true
-        }
-        console.error('NVIDIA NIM verification failed with status:', response.status)
-        return false
-      } catch (error) {
-        if ((error as any).name === 'AbortError') {
-          console.error('NVIDIA NIM verification timed out.')
-        } else {
-          console.error('NVIDIA NIM verification request failed:', error)
-        }
-        return false
-      }
     }
 
     try {
@@ -152,10 +101,6 @@ const service: any = {
       return aiProvider(mappedModelId)
     } else if (provider === 'openai') {
       return aiProvider(mappedModelId)
-    } else if (provider === 'nvidia') {
-      // Force Chat protocol for NVIDIA NIM to avoid "Field messages required" 400 errors
-      const p = aiProvider as any
-      return typeof p.chat === 'function' ? p.chat(mappedModelId) : aiProvider(mappedModelId)
     } else {
       // For unsupported providers, throw error
       throw new Error(`Provider ${provider} not yet implemented`)
@@ -175,13 +120,7 @@ const service: any = {
 
     const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
     const lowModelId = settings.lowPreferenceModelId || this.getDefaultModelId(provider, 'low')
-    let selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
-
-    // Migration/Fix for legacy/invalid model IDs in settings
-    if (provider === 'nvidia' && selectedModelId === 'meta/llama-3.1-70b-instruct') {
-      console.warn(`Legacy model ID detected: ${selectedModelId}. Migrating to meta/llama3-70b-instruct`)
-      selectedModelId = 'meta/llama3-70b-instruct'
-    }
+    const selectedModelId = modelPreference === 'high' ? highModelId : lowModelId
 
     const factory = providerFactories[provider]
     if (!factory) {

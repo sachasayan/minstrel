@@ -152,8 +152,7 @@ describe('settingsManager encryption helpers', () => {
     it('should encrypt sensitive fields when saving', async () => {
       await saveAppSettings({
         googleApiKey: 'secret',
-        openaiApiKey: 'secret',
-        nvidiaApiKey: 'secret'
+        openaiApiKey: 'secret'
       } as any)
 
       const savedSettings = vi.mocked(settings.set).mock.calls[0][1] as any
@@ -161,7 +160,6 @@ describe('settingsManager encryption helpers', () => {
 
       expect(savedSettings.googleApiKey).toBe(expectedEncrypted)
       expect(savedSettings.openaiApiKey).toBe(expectedEncrypted)
-      expect(savedSettings.nvidiaApiKey).toBe(expectedEncrypted)
     })
   })
 })

@@ -16,10 +16,6 @@ export const PROVIDER_MODELS = {
   zai: {
     high: 'zai-model-1',
     low: 'zai-model-1'
-  },
-  nvidia: {
-    high: 'z-ai/glm5',
-    low: 'meta/llama3-8b-instruct'
   }
 } as const
 
@@ -42,15 +38,6 @@ export const MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
   zai: [
     'zai-model-1', // Placeholder - need actual Z.AI model names
     'zai-model-2'
-  ],
-  nvidia: [
-    'z-ai/glm5',
-    'z-ai/glm4.7',
-    'meta/llama3-8b-instruct',
-    'meta/llama3-70b-instruct',
-    'nvidia/llama-3.1-nemotron-70b-instruct',
-    'nvidia/llama-3.1-nemotron-51b-instruct',
-    'mistralai/mistral-large-2-instruct'
   ]
 }
 
@@ -58,6 +45,5 @@ export const PROVIDER_OPTIONS = [
   { value: 'google', label: 'Google (Gemini)' },
   { value: 'openai', label: 'OpenAI (ChatGPT)' },
   { value: 'deepseek', label: 'DeepSeek' },
-  { value: 'zai', label: 'Z.AI' },
-  { value: 'nvidia', label: 'NVIDIA NIM' }
+  { value: 'zai', label: 'Z.AI' }
 ]
