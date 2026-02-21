@@ -108,7 +108,16 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
             break
           }
           finalText += textPart
-          streamingService.updateText(finalText)
+          
+          // Heuristic: if we already see a large content that looks like a file write, stop streaming text to UI
+          const isWritingLargeContent = finalText.length > 500 && (finalText.includes('# Chapter') || finalText.includes('## Synopsis'));
+          const isLikelyInternalTask = context.agent === 'writerAgent' || context.agent === 'outlineAgent';
+          
+          if (isWritingLargeContent && isLikelyInternalTask) {
+             streamingService.updateText("Writing changes to story...")
+          } else {
+             streamingService.updateText(finalText)
+          }
         }
 
         // Wait for the text stream to finish
@@ -146,7 +155,16 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
       console.groupEnd()
 
       if (finalText && finalText.trim().length > 0) {
-        handleMessage(finalText.trim())
+        // Prevent leaking giant edits into chat if a tool call already handled it
+        const wasWriteAction = finalCalls.some(c => c.toolName === 'writeFile' || c.toolName === 'updateChapter');
+        const isVeryLarge = finalText.length > 1000;
+        
+        if (wasWriteAction && isVeryLarge) {
+           console.log('Skipping chat message addition as it looks like a redundant large file write.');
+           handleMessage("I've updated the content as requested.");
+        } else {
+           handleMessage(finalText.trim());
+        }
       }
 
       // Clear streaming state after each step

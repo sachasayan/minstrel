@@ -12,7 +12,8 @@ export const getWriterAgentPrompt = () => `
 * Write a chapter of the story, respecting the Outline description of that chapter, any described scenes, and the target word length.
 * If no chapter was specified by the user, write the earliest chapter of the story which hasn't been written yet, but which is listed in the Outline.
 * If the user requests a chapter rewrite for a chapter in the case where a previous chapter has not yet been written, politely decline and ask them to write the previous chapter.
-* When writing a chapter, your response should include a brief description of the chapter events or any changes made.
+* When writing a chapter, your response MUST ONLY include a brief description of the chapter events or any changes made.
+* CRITICAL: DO NOT output the chapter content in your text response. ONLY provide it via the "writeFile" tool.
 * Each chapter should be written in Markdown. The output should ALWAYS start with the chapter title as a Markdown H1 header (e.g., # Chapter 1: The Beginning).
 * If editing an existing chapter, you MUST use the existing title as the header.
 * If creating a new chapter, you follow the outline guidance for the title if possible.

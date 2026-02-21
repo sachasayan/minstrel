@@ -23,6 +23,7 @@ export interface ProjectState {
     fileTitle: string
     oldContent: string
     newContent: string
+    chapterIndex?: number
   } | null
 }
 

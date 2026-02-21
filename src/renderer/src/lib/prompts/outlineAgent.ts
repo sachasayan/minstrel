@@ -17,6 +17,7 @@ export const getOutlineAgentPrompt = () => `
 * The outline may also include notes on planned twists, storytelling devices, character developments, and more.
 * Maintain consistency. If there are any storyline consistency problems based on the provided context or parameters, mention them to the user.
 * The outline should always be written in Markdown and saved using the "writeFile" tool, passing "Outline" in the "file_name" parameter and the markdown content in the "content" parameter.
+* CRITICAL: DO NOT output the outline content in your text response. ONLY provide it via the "writeFile" tool. Output only a brief summary in text.
 
 ## WRITING STYLE
 * All files are written in markdown.

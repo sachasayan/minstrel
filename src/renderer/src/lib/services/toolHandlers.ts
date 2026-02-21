@@ -7,9 +7,22 @@ export const handleWriteFile = (fileName: string, content: string) => {
   const activeProject = store.getState().projects.activeProject
   let oldContent = ''
 
+  let chapterIndex: number | undefined = undefined
   if (fileName.toLowerCase().includes('chapter')) {
     // Find chapter content in monolithic storyContent
     oldContent = extractChapterContent(activeProject?.storyContent || '', fileName) || ''
+    
+    // Find which index this chapter has
+    const storyContent = activeProject?.storyContent || ''
+    const lines = storyContent.split('\n')
+    const matchIndex = lines.findIndex(line => {
+       const normalizedTitle = fileName.trim().toLowerCase()
+       const trimmedLine = line.trim().toLowerCase()
+       return trimmedLine.startsWith('# ') && (trimmedLine.includes(normalizedTitle) || normalizedTitle.includes(trimmedLine.replace(/^#\s+/, '')))
+    })
+    if (matchIndex !== -1) {
+       chapterIndex = lines.slice(0, matchIndex).filter(l => l.trim().startsWith('# ')).length
+    }
   } else {
     const file = activeProject?.files.find((f) => f.title === fileName)
     oldContent = file?.content || ''
@@ -20,7 +33,8 @@ export const handleWriteFile = (fileName: string, content: string) => {
     setLastEdit({
       fileTitle: fileName,
       oldContent: oldContent,
-      newContent: content
+      newContent: content,
+      chapterIndex
     })
   )
 

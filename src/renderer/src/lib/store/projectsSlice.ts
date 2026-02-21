@@ -89,8 +89,10 @@ export const projectsSlice = createSlice({
         if (payload.title === 'Story') {
           state.activeProject.storyContent = payload.content
           
-          // Reset modifiedChapters if the whole monolith is overwritten or handle indexing
-          // For now, if monolith is saved, we assume it's the latest.
+          // Track modified chapter if index is provided
+          if (payload.chapterIndex !== undefined && !state.modifiedChapters.includes(payload.chapterIndex)) {
+            state.modifiedChapters.push(payload.chapterIndex)
+          }
         } else {
           // Update ancillary files (Outline, etc.)
           if (fileIndex !== -1) {
@@ -110,7 +112,7 @@ export const projectsSlice = createSlice({
         state.projectHasLiveEdits = true
       }
     },
-    setLastEdit: (state, action: PayloadAction<{ fileTitle: string; oldContent: string; newContent: string } | null>) => {
+    setLastEdit: (state, action: PayloadAction<{ fileTitle: string; oldContent: string; newContent: string; chapterIndex?: number } | null>) => {
       state.lastEdit = action.payload
     },
     clearLastEdit: (state) => {

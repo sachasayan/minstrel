@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { sendMessage, generateTitleSuggestions } from './chatService'
-import geminiService from './llmService'
-import { store } from '@/lib/store/store'
-import * as toolHandlers from './toolHandlers'
 
-// Mock dependencies
+// Mock dependencies BEFORE importing chatService
 vi.mock('./llmService', () => ({
   default: {
     generateContent: vi.fn(),
@@ -43,6 +39,11 @@ vi.mock('sonner', () => ({
   }
 }))
 
+import { sendMessage, generateTitleSuggestions } from './chatService'
+import geminiService from './llmService'
+import { store } from '@/lib/store/store'
+import { handleWriteFile } from './toolHandlers'
+
 describe('chatService', () => {
   const mockState = {
     projects: { activeProject: { title: 'Test', files: [], storyContent: '' } },
@@ -56,11 +57,11 @@ describe('chatService', () => {
   })
 
   describe('sendMessage', () => {
-    const mockStreamingResult = (text: string, toolCalls: any[] = [], tools: any) => {
+    const mockStreamingResult = async (text: string, toolCalls: any[] = [], tools: any) => {
       // Simulate tool execution
       for (const call of toolCalls) {
         if (tools[call.toolName] && tools[call.toolName].execute) {
-          tools[call.toolName].execute(call.args)
+          await tools[call.toolName].execute(call.args)
         }
       }
 
@@ -72,18 +73,13 @@ describe('chatService', () => {
         })(),
       }
 
-      return {
-        ...result,
-        then(onfulfilled: any) {
-          return Promise.resolve(result).then(onfulfilled)
-        }
-      }
+      return result as any
     }
 
     it('should iterate and call tool-triggered side-effects', async () => {
       const context = { agent: 'writerAgent', currentStep: 0 } as any
       
-      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _p, tools: any) => {
+      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _sy, _p, tools: any) => {
         return mockStreamingResult('AI reasoning', [
           { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
         ], tools) as any
@@ -96,7 +92,7 @@ describe('chatService', () => {
       await sendMessage(context, promptData, mockState.settings)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
-      expect(toolHandlers.handleWriteFile).toHaveBeenCalledWith('test.md', 'content')
+      expect(handleWriteFile).toHaveBeenCalledWith('test.md', 'content')
     })
 
     it('should iterate when routeTo is called', async () => {
