@@ -3,8 +3,10 @@ import { useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectProjects, clearLastEdit } from '@/lib/store/projectsSlice'
 import { getAddedRanges, stripMarkdown } from '@/lib/utils/diffUtils'
+import { extractChapterId } from '@/lib/storyContent'
 import { $getRoot, $isElementNode, TextNode } from 'lexical'
 import { $createMarkNode, MarkNode } from '@lexical/mark'
+import { $isChapterHeadingNode } from '../nodes/ChapterHeadingNode'
 
 interface HighlightPluginProps {
     activeSection: string | null
@@ -24,7 +26,10 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
         const sectionIndexParts = activeSection?.split('|||')
         const activeIdx = sectionIndexParts && sectionIndexParts.length > 1 ? parseInt(sectionIndexParts[1]) : undefined
 
-        const isMatch = (lastEdit.chapterIndex !== undefined && lastEdit.chapterIndex === activeIdx) ||
+        const activeId = sectionIndexParts && sectionIndexParts.length > 2 ? sectionIndexParts[2] : undefined
+
+        const isMatch = (lastEdit.chapterId !== undefined && activeId === lastEdit.chapterId) ||
+            (lastEdit.chapterIndex !== undefined && lastEdit.chapterIndex === activeIdx) ||
             normalizedSection.includes(normalizedFile) ||
             normalizedFile.includes(normalizedSection)
 
@@ -59,10 +64,25 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
 
                         for (const child of rootChildren) {
                             const childText = child.getTextContent()
-                            const isHeading = child.getType() === 'heading'
+                            const childType = child.getType()
+                            const isHeading = childType === 'heading' || childType === 'chapter-heading'
 
                             if (isMonolithic && isHeading) {
-                                if (currentChapterCount === lastEdit.chapterIndex) {
+                                let currentId: string | undefined = undefined
+                                if ($isChapterHeadingNode(child)) {
+                                    currentId = child.getChapterId()
+                                } else {
+                                    currentId = extractChapterId(childText) || undefined
+                                }
+
+                                let isTarget = false
+                                if (lastEdit.chapterId && currentId) {
+                                    isTarget = currentId === lastEdit.chapterId
+                                } else if (lastEdit.chapterIndex !== undefined) {
+                                    isTarget = currentChapterCount === lastEdit.chapterIndex
+                                }
+
+                                if (isTarget) {
                                     inSection = true
                                 } else if (inSection) {
                                     break // Next section reached

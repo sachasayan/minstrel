@@ -8,11 +8,12 @@ export const handleWriteFile = (fileName: string, content: string) => {
   let oldContent = ''
 
   let chapterIndex: number | undefined = undefined
+  let chapterId: string | undefined = undefined
   if (fileName.toLowerCase().includes('chapter')) {
     // Find chapter content in monolithic storyContent
     oldContent = extractChapterContent(activeProject?.storyContent || '', fileName) || ''
     
-    // Find which index this chapter has
+    // Find which index and ID this chapter has
     const storyContent = activeProject?.storyContent || ''
     const lines = storyContent.split('\n')
     const matchIndex = lines.findIndex(line => {
@@ -20,9 +21,19 @@ export const handleWriteFile = (fileName: string, content: string) => {
        const trimmedLine = line.trim().toLowerCase()
        return trimmedLine.startsWith('# ') && (trimmedLine.includes(normalizedTitle) || normalizedTitle.includes(trimmedLine.replace(/^#\s+/, '')))
     })
+    
     if (matchIndex !== -1) {
        chapterIndex = lines.slice(0, matchIndex).filter(l => l.trim().startsWith('# ')).length
+       
+       // Try to extract ID from the header line
+       const idMatch = lines[matchIndex].match(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
+       if (idMatch) {
+         chapterId = idMatch[1]
+       }
     }
+
+    // Surgical extraction using ID if possible
+    oldContent = extractChapterContent(storyContent, fileName, chapterId) || ''
   } else {
     const file = activeProject?.files.find((f) => f.title === fileName)
     oldContent = file?.content || ''
@@ -34,7 +45,8 @@ export const handleWriteFile = (fileName: string, content: string) => {
       fileTitle: fileName,
       oldContent: oldContent,
       newContent: content,
-      chapterIndex
+      chapterIndex,
+      chapterId
     })
   )
 
@@ -74,7 +86,6 @@ export const handleCritique = (critiqueString: string) => {
   try {
     const payload = JSON.parse(critiqueString)
     store.dispatch(updateReviews(payload))
-    console.log('Critique content dispatched to store:', payload)
   } catch (error) {
     console.error('Error parsing critique JSON:', error)
     store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing critique from AI response.' }))

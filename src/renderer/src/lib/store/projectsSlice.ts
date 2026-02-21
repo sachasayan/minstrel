@@ -13,7 +13,8 @@ import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
 import {
   normalizeProjectStoryContent,
-  replaceChapterContent
+  replaceChapterContent,
+  ensureAllChaptersHaveIds
 } from '@/lib/storyContent'
 
 const initialState: ProjectState = {
@@ -112,7 +113,7 @@ export const projectsSlice = createSlice({
         state.projectHasLiveEdits = true
       }
     },
-    setLastEdit: (state, action: PayloadAction<{ fileTitle: string; oldContent: string; newContent: string; chapterIndex?: number } | null>) => {
+    setLastEdit: (state, action: PayloadAction<{ fileTitle: string; oldContent: string; newContent: string; chapterIndex?: number; chapterId?: string } | null>) => {
       state.lastEdit = action.payload
     },
     clearLastEdit: (state) => {
@@ -192,7 +193,14 @@ export const projectsSlice = createSlice({
           )
         })
 
+        let chapterId: string | undefined = undefined
         if (chapterIdx !== -1) {
+          const headerLine = lines[chapterIdx]
+          const idMatch = headerLine.match(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
+          if (idMatch) {
+            chapterId = idMatch[1]
+          }
+
           const linesBefore = lines.slice(0, chapterIdx)
           const index = linesBefore.filter((l) => l.trim().startsWith('# ')).length
           if (!state.modifiedChapters.includes(index)) {
@@ -200,7 +208,11 @@ export const projectsSlice = createSlice({
           }
         }
 
-        activeProject.storyContent = replaceChapterContent(storyContent, title, content)
+        activeProject.storyContent = replaceChapterContent(storyContent, title, content, chapterId)
+        // Run global ID insurance but ONLY if needed to keep performance high
+        if (activeProject.storyContent.includes('# ') && !activeProject.storyContent.includes('<!-- id:')) {
+           activeProject.storyContent = ensureAllChaptersHaveIds(activeProject.storyContent)
+        }
         state.projectHasLiveEdits = true
       }
     }

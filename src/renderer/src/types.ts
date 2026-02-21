@@ -24,6 +24,7 @@ export interface ProjectState {
     oldContent: string
     newContent: string
     chapterIndex?: number
+    chapterId?: string
   } | null
 }
 

@@ -6,9 +6,10 @@ import { $getRoot } from 'lexical'
 interface MarkdownSyncPluginProps {
     initialMarkdown: string
     onChange: (markdown: string) => void
+    transformers?: typeof TRANSFORMERS
 }
 
-export function MarkdownSyncPlugin({ initialMarkdown, onChange }: MarkdownSyncPluginProps): null {
+export function MarkdownSyncPlugin({ initialMarkdown, onChange, transformers = TRANSFORMERS }: MarkdownSyncPluginProps): null {
     const [editor] = useLexicalComposerContext()
     const lastEmittedRead = useRef<string | null>(null)
 
@@ -20,14 +21,15 @@ export function MarkdownSyncPlugin({ initialMarkdown, onChange }: MarkdownSyncPl
                 const root = $getRoot()
                 // Use converter to see if we actually need to update
                 // This prevents cursor loss if whitespace is slightly different
-                const currentMarkdown = $convertToMarkdownString(TRANSFORMERS)
+                const currentMarkdown = $convertToMarkdownString(transformers)
+
                 if (currentMarkdown !== initialMarkdown) {
                     root.clear()
-                    $convertFromMarkdownString(initialMarkdown || '', TRANSFORMERS)
+                    $convertFromMarkdownString(initialMarkdown || '', transformers)
                 }
             })
         }
-    }, [editor, initialMarkdown])
+    }, [editor, initialMarkdown, transformers])
 
     const onChangeRef = useRef(onChange)
     useEffect(() => {
@@ -38,14 +40,15 @@ export function MarkdownSyncPlugin({ initialMarkdown, onChange }: MarkdownSyncPl
     useEffect(() => {
         return editor.registerUpdateListener(({ editorState }) => {
             editorState.read(() => {
-                const markdown = $convertToMarkdownString(TRANSFORMERS)
+                const markdown = $convertToMarkdownString(transformers)
+
                 if (markdown !== lastEmittedRead.current) {
                     lastEmittedRead.current = markdown
                     onChangeRef.current(markdown)
                 }
             })
         })
-    }, [editor])
+    }, [editor, transformers])
 
     return null
 }

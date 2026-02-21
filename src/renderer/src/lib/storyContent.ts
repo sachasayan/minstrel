@@ -10,19 +10,21 @@ export const isStoryFile = (file: Pick<ProjectFile, 'title' | 'type'> | null | u
   return file.type === STORY_FILE_TYPE || file.title === STORY_FILE_TITLE
 }
 
-export const getChaptersFromStoryContent = (storyContent: string): { title: string; index: number }[] => {
+export const stripChapterId = (title: string): string => {
+  return title.replace(/<!--\s*id:.*-->/, '').trim()
+}
+
+export const getChaptersFromStoryContent = (storyContent: string): { title: string; index: number; id?: string }[] => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
-  const chapters: { title: string; index: number }[] = []
+  const chapters: { title: string; index: number; id?: string }[] = []
 
   lines.forEach((line, index) => {
-    // Relaxed regex: just look for H1 headers. 
-    // We don't strictly require non-whitespace immediately following the space.
     if (/^#\s+/.test(line.trim())) {
-      const title = line.trim().replace(/^#\s+/, '').trim()
-      if (title) {
-        chapters.push({ title, index })
-      }
+      const fullHeader = line.trim().replace(/^#\s+/, '').trim()
+      const title = stripChapterId(fullHeader) || `Untitled Chapter ${chapters.length + 1}`
+      const id = extractChapterId(fullHeader) || undefined
+      chapters.push({ title, index, id })
     }
   })
 
@@ -41,17 +43,19 @@ export const calculateWordCount = (content: string): number => {
   return count
 }
 
-export const getChapterWordCounts = (storyContent: string): { title: string; wordCount: number; content: string }[] => {
+export const getChapterWordCounts = (storyContent: string): { title: string; wordCount: number; content: string; id?: string }[] => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
-  const chapters: { title: string; contentLines: string[] }[] = []
+  const chapters: { title: string; contentLines: string[]; id?: string }[] = []
 
-  let currentChapter: { title: string; contentLines: string[] } | null = null
+  let currentChapter: { title: string; contentLines: string[]; id?: string } | null = null
 
   lines.forEach((line) => {
-    if (/^#\s+\S+/.test(line.trim())) {
-      const title = line.trim().replace(/^#\s+/, '')
-      currentChapter = { title, contentLines: [] }
+    if (/^#\s+/.test(line.trim())) {
+      const fullHeader = line.trim().replace(/^#\s+/, '')
+      const title = stripChapterId(fullHeader) || `Untitled Chapter ${chapters.length + 1}`
+      const id = extractChapterId(fullHeader) || undefined
+      currentChapter = { title, contentLines: [], id }
       chapters.push(currentChapter)
     } else if (currentChapter) {
       currentChapter.contentLines.push(line)
@@ -61,7 +65,8 @@ export const getChapterWordCounts = (storyContent: string): { title: string; wor
   return chapters.map((c) => ({
     title: c.title,
     content: c.contentLines.join('\n'),
-    wordCount: calculateWordCount(c.contentLines.join('\n'))
+    wordCount: calculateWordCount(c.contentLines.join('\n')),
+    id: c.id
   }))
 }
 
@@ -96,11 +101,24 @@ const findChapterStartIndex = (lines: string[], title: string): number => {
   return lines.findIndex((line) => pattern.test(line.trim()))
 }
 
-export const extractChapterContent = (storyContent: string, chapterTitle: string): string | null => {
+export const extractChapterId = (line: string): string | null => {
+  const match = line.match(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
+  return match ? match[1] : null
+}
+
+export const extractChapterContent = (storyContent: string, chapterTitle: string, chapterId?: string): string | null => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
 
-  const startIndex = findChapterStartIndex(lines, chapterTitle)
+  let startIndex = -1
+  if (chapterId) {
+    startIndex = lines.findIndex(line => line.trim().startsWith('# ') && line.includes(`id: ${chapterId}`))
+  }
+  
+  if (startIndex === -1) {
+    startIndex = findChapterStartIndex(lines, chapterTitle)
+  }
+
   if (startIndex === -1) return null
 
   let endIndex = -1
@@ -115,17 +133,29 @@ export const extractChapterContent = (storyContent: string, chapterTitle: string
   return contentLines.join('\n').trim()
 }
 
-export const replaceChapterContent = (storyContent: string, chapterTitle: string, newContent: string): string => {
+export const replaceChapterContent = (storyContent: string, chapterTitle: string, newContent: string, chapterId?: string): string => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
 
-  const startIndex = findChapterStartIndex(lines, chapterTitle)
+  let startIndex = -1
+  if (chapterId) {
+    startIndex = lines.findIndex(line => line.trim().startsWith('# ') && line.includes(`id: ${chapterId}`))
+  }
+  
+  if (startIndex === -1) {
+    startIndex = findChapterStartIndex(lines, chapterTitle)
+  }
 
   // Ensure content starts with a header if it doesn't already have one
-  const contentToInsert = /^#\s+/.test(newContent.trim()) ? newContent.trim() : `# ${chapterTitle}\n\n${newContent.trim()}`
+  let contentToInsert = /^#\s+/.test(newContent.trim()) ? newContent.trim() : `# ${chapterTitle}\n\n${newContent.trim()}`
+  
+  // If we have an ID but it's not in the new content's header, inject it
+  if (chapterId && !contentToInsert.includes(`id: ${chapterId}`)) {
+    contentToInsert = contentToInsert.replace(/^(#\s+[^\n]+)/, `$1 <!-- id: ${chapterId} -->`)
+  }
 
   if (startIndex === -1) {
-    // If chapter doesn't exist, append it
+    // If chapter doesn't exist, append it. If no ID, generate one if we typically want to.
     return `${normalized.trim()}\n\n${contentToInsert}`
   }
 
@@ -146,4 +176,21 @@ export const replaceChapterContent = (storyContent: string, chapterTitle: string
   const afterText = after.join('\n').trim()
 
   return [beforeText, beforeText ? '\n\n' : '', contentToInsert, afterText ? '\n\n' : '', afterText].join('')
+}
+
+export const ensureAllChaptersHaveIds = (storyContent: string): string => {
+  const normalized = normalizeLineEndings(storyContent ?? '')
+  const lines = normalized.split('\n')
+  let changed = false
+
+  const newLines = lines.map(line => {
+    if (line.trim().startsWith('# ') && !line.includes('<!-- id:')) {
+      const id = Math.random().toString(36).substring(2, 11) // Simple short ID
+      changed = true
+      return `${line.trim()} <!-- id: ${id} -->`
+    }
+    return line
+  })
+
+  return changed ? newLines.join('\n') : normalized
 }

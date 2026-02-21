@@ -50,11 +50,7 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
 
       const { system, userPrompt, allowedTools } = buildPrompt(context, promptData)
       
-      console.groupCollapsed(`Agent Loop - Step ${context.currentStep}: ${context.agent}`)
-      console.log('System:', system)
-      console.log('Prompt:', userPrompt)
-      console.log('Allowed Tools:', allowedTools)
-      console.groupEnd()
+
 
       // Inform Redux about pending files AI might be reading
       store.dispatch(setPendingFiles(context.requestedFiles || null))
@@ -101,24 +97,26 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
           })
         }
 
-        // Stream the actual text content if it's a message
-        for await (const textPart of stream.textStream) {
-          if (signal.aborted) {
-            streamingService.clear()
-            break
+          // Stream the actual text content if it's a message
+          for await (const textPart of stream.textStream) {
+            if (signal.aborted) {
+              streamingService.clear()
+              break
+            }
+            finalText += textPart
+            
+            // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
+            // Relaxed regex to catch headers even with ID comments or different spacing
+            const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
+            const isWritingLargeContent = (finalText.length > 500 && hasHeading);
+            const isLikelyInternalTask = context.agent === 'writerAgent' || context.agent === 'outlineAgent';
+            
+            if (isWritingLargeContent && isLikelyInternalTask) {
+               streamingService.updateText("Writing changes to story...")
+            } else {
+               streamingService.updateText(finalText)
+            }
           }
-          finalText += textPart
-          
-          // Heuristic: if we already see a large content that looks like a file write, stop streaming text to UI
-          const isWritingLargeContent = finalText.length > 500 && (finalText.includes('# Chapter') || finalText.includes('## Synopsis'));
-          const isLikelyInternalTask = context.agent === 'writerAgent' || context.agent === 'outlineAgent';
-          
-          if (isWritingLargeContent && isLikelyInternalTask) {
-             streamingService.updateText("Writing changes to story...")
-          } else {
-             streamingService.updateText(finalText)
-          }
-        }
 
         // Wait for the text stream to finish
         try {
@@ -148,11 +146,6 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
       }
 
       if (signal.aborted) break
-
-      console.groupCollapsed(`AI Response - Step ${context.currentStep}`)
-      console.log('Text:', finalText)
-      console.log('Tool Calls:', finalCalls)
-      console.groupEnd()
 
       if (finalText && finalText.trim().length > 0) {
         // Prevent leaking giant edits into chat if a tool call already handled it

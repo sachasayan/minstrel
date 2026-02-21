@@ -39,8 +39,9 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
             const index = parseInt(parts[parts.length - 1])
             const chapters = getChaptersFromStoryContent(newContent)
 
-            if (chapters[index] && chapters[index].title !== parts[0]) {
-                dispatch(setActiveSection(`${chapters[index].title}|||${index}`))
+            if (chapters[index] && (chapters[index].title !== parts[0] || chapters[index].id !== parts[2])) {
+                const newSection = `${chapters[index].title}|||${index}${chapters[index].id ? `|||${chapters[index].id}` : ''}`
+                dispatch(setActiveSection(newSection))
             }
         }
 

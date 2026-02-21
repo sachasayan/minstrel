@@ -44,8 +44,6 @@ export const initSqliteProject = async (projectPath: string, project: Project): 
  * @returns Promise resolving to success status
  */
 export const saveSqliteProject = async (project: Project): Promise<boolean> => {
-  console.log('Saving SQLite project...')
-
   if (!project?.projectPath) {
     console.warn('Cannot save project: project details are missing.')
     return false
@@ -62,7 +60,6 @@ export const saveSqliteProject = async (project: Project): Promise<boolean> => {
       return false
     }
 
-    console.log('SQLite project saved successfully:', project.title)
     return true
   } catch (error) {
     console.error('Failed to save SQLite project:', error)

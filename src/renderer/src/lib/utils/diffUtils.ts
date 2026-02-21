@@ -12,6 +12,7 @@ export interface HighlightRange {
 export function stripMarkdown(md: string): string {
   if (!md) return ''
   return md
+    .replace(/<!--\s*id:.*-->/g, '') // Remove chapter IDs
     .replace(/^#+\s+/gm, '') // Headings
     .replace(/\*\*(.*?)\*\*/g, '$1') // Bold **
     .replace(/\*(.*?)\*/g, '$1') // Italic *
