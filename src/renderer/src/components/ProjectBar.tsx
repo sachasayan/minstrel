@@ -10,11 +10,12 @@ import {
   setProjectHasLiveEdits,
   updateMetaProperty
 } from '@/lib/store/projectsSlice'
+import { selectSettingsState } from '@/lib/store/settingsSlice'
 import pdfService from '@/lib/services/pdfService'
 import PdfExportConfigModal, { PdfExportConfig } from '@/components/PdfExportConfigModal'
 import { Button } from '@/components/ui/button'
 import { selectChatHistory } from '@/lib/store/chatSlice'
-import { saveProject } from '@/lib/services/fileService'
+import { saveProject, createSqliteProject } from '@/lib/services/fileService'
 import { setActiveView } from '@/lib/store/appStateSlice'
 import {
   AlertDialog,
@@ -27,10 +28,22 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 
+/** Converts a project title into a safe file-system base name. */
+const sanitizeFilename = (title: string): string =>
+  title
+    .trim()
+    .replace(/[^a-zA-Z0-9 _-]/g, '')
+    .replace(/\s+/g, '_')
+    .toLowerCase()
+    .slice(0, 80) || 'untitled_project'
+
+const PLACEHOLDER_TITLE = 'Untitled Project'
+
 const ProjectBar = () => {
   const dispatch = useDispatch()
   const activeProject = useSelector(selectActiveProject)
   const projectsState = useSelector(selectProjects)
+  const settings = useSelector(selectSettingsState)
   const currentChatHistory = useSelector(selectChatHistory)
   const [isExporting, setIsExporting] = useState(false)
   const [alertDialogOpen, setAlertDialogOpen] = useState(false)
@@ -69,28 +82,66 @@ const ProjectBar = () => {
   }
 
   const handleSave = async () => {
-    if (projectsState.activeProject) {
-      const currentPath = projectsState.activeProject.projectPath
-      const projectToSave = {
-        ...projectsState.activeProject,
-        chatHistory: currentChatHistory
-      }
-      const saveResult = await saveProject(projectToSave)
+    if (!projectsState.activeProject) return false
 
-      if (saveResult.success && saveResult.finalPath) {
-        toast.success('Project saved successfully!')
-        dispatch(setAllFilesAsSaved())
-
-        if (currentPath !== saveResult.finalPath) {
-          dispatch(updateMetaProperty({ property: 'projectPath', value: saveResult.finalPath }))
-          toast.info('Project format updated to the latest version.')
-        }
-        return true
-      }
-
-      toast.error('Failed to save project.')
-      return false
+    const currentPath = projectsState.activeProject.projectPath
+    const projectToSave = {
+      ...projectsState.activeProject,
+      chatHistory: currentChatHistory
     }
+
+    // ─── First-time save: no path yet ────────────────────────────────────────
+    if (!currentPath) {
+      // 1. Validate title
+      if (!projectToSave.title || projectToSave.title === PLACEHOLDER_TITLE) {
+        toast.error('Please give your story a title before saving.', {
+          description: 'Click the title at the top of the editor to rename it.'
+        })
+        return false
+      }
+
+      // 2. Resolve the save directory
+      let saveDir = settings.workingRootDirectory
+      if (!saveDir) {
+        saveDir = await window.electron.ipcRenderer.invoke('select-directory', 'save')
+        if (!saveDir) {
+          toast.info('Save cancelled — no folder selected.')
+          return false
+        }
+      }
+
+      // 3. Build the full path and create the project file
+      const filename = sanitizeFilename(projectToSave.title)
+      const newPath = `${saveDir}/${filename}.mns`
+      const created = await createSqliteProject(newPath, projectToSave)
+
+      if (!created) {
+        toast.error('Failed to create project file.')
+        return false
+      }
+
+      // 4. Persist the new path to Redux so subsequent saves work normally
+      dispatch(updateMetaProperty({ property: 'projectPath', value: newPath }))
+      dispatch(setAllFilesAsSaved())
+      toast.success('Project saved!')
+      return true
+    }
+
+    // ─── Regular save ─────────────────────────────────────────────────────────
+    const saveResult = await saveProject(projectToSave)
+
+    if (saveResult.success && saveResult.finalPath) {
+      toast.success('Project saved successfully!')
+      dispatch(setAllFilesAsSaved())
+
+      if (currentPath !== saveResult.finalPath) {
+        dispatch(updateMetaProperty({ property: 'projectPath', value: saveResult.finalPath }))
+        toast.info('Project format updated to the latest version.')
+      }
+      return true
+    }
+
+    toast.error('Failed to save project.')
     return false
   }
 

@@ -63,16 +63,25 @@ export const handleWriteFile = async (
 }
 
 export const handleSelectDirectory = async (_event: IpcMainInvokeEvent, operation: string) => {
-  // Define the correct type for properties based on OpenDialogOptions['properties']
-  const properties: OpenDialogOptions['properties'] = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory']
+  const isExport = operation === 'export'
+  const isSave = operation === 'save'
+
+  const properties: OpenDialogOptions['properties'] =
+    isExport || isSave ? ['openDirectory', 'createDirectory'] : ['openDirectory']
+
+  const title = isExport
+    ? 'Choose export folder'
+    : isSave
+      ? 'Choose where to save your project'
+      : 'Select folder'
 
   const result = await dialog.showOpenDialog({
-    properties: properties // Now correctly typed
+    title,
+    properties
   })
   if (result.canceled) {
     return null
   } else {
-    // Ensure filePaths exists and has elements before accessing
     return result.filePaths && result.filePaths.length > 0 ? result.filePaths[0] : null
   }
 }
