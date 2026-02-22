@@ -12,7 +12,6 @@ import { AlertCircle } from 'lucide-react'
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
-import SettingsPage from '@/pages/SettingsPage'
 export default function App(): ReactNode {
   const dispatch = useDispatch()
   const activeProject = useSelector(selectActiveProject)
@@ -46,8 +45,7 @@ export default function App(): ReactNode {
       case 'project/editor':
         // Ensure activeProject exists before rendering ProjectOverview
         return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro />; // Fallback to Intro if no project
-      case 'settings':
-        return <SettingsPage />
+
       default:
         return <Intro />
     }

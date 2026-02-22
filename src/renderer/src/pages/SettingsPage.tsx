@@ -1,6 +1,5 @@
 import { ReactNode, useState, useEffect, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setActiveView } from '@/lib/store/appStateSlice'
 import {
   setSettingsState,
   setWorkingRootDirectory,
@@ -25,345 +24,331 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { toast } from 'sonner'
-import { ArrowLeft, CircleCheck, CircleX, Folder, Loader2 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+import { Bot, CircleCheck, CircleX, FolderOpen, Loader2, Sparkles, FolderCog } from 'lucide-react'
 import llmService from '@/lib/services/llmService'
 import { PROVIDER_OPTIONS, MODEL_OPTIONS_BY_PROVIDER, PROVIDER_MODELS } from '@shared/constants'
 
 type KeyValidationStatus = 'idle' | 'checking' | 'valid' | 'invalid'
+type SettingsTab = 'ai' | 'workspace'
 
-const SettingsPage = (): ReactNode => {
-  const settings = useSelector(selectSettingsState);
-  const dispatch = useDispatch<AppDispatch>()
+type SettingsModalProps = {
+  open: boolean
+  onClose: () => void
+}
 
-  // Provider-specific API key states
-  const [keyValidationStatus, setKeyValidationStatus] = useState<KeyValidationStatus>('idle')
-  const validationRequestIdRef = useRef(0)
-
-  // Get current model options based on selected provider
-  const currentModelOptions =
-    MODEL_OPTIONS_BY_PROVIDER[settings.provider || 'google'] ||
-    MODEL_OPTIONS_BY_PROVIDER.google
-  const selectedProvider = settings.provider || 'google'
-  const selectedProviderApiKey = useMemo(() => {
-    switch (selectedProvider) {
-      case 'google':
-        return settings.googleApiKey || ''
-      case 'openai':
-        return settings.openaiApiKey || ''
-      case 'deepseek':
-        return settings.deepseekApiKey || ''
-      case 'zai':
-        return settings.zaiApiKey || ''
-      default:
-        return ''
-    }
-  }, [selectedProvider, settings.googleApiKey, settings.openaiApiKey, settings.deepseekApiKey, settings.zaiApiKey])
-
-  // Effect to load settings on mount
-  useEffect(() => {
-    const loadAndSetSettings = async () => {
-      try {
-        const loadedSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
-        dispatch(setSettingsState(loadedSettings || {}))
-      } catch (error) {
-        console.error("Failed to load settings:", error);
-        toast.error("Failed to load settings.");
-      }
-    }
-    loadAndSetSettings()
-  }, [dispatch])
-
-  // Effect to auto-save settings when they change
-  useEffect(() => {
-    // Skip saving if settings are completely empty (e.g. initial load state before getting from disk)
-    if (!settings.provider && !settings.workingRootDirectory && !settings.highPreferenceModelId) return;
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        await window.electron.ipcRenderer.invoke('save-app-settings', settings);
-        console.log("Settings auto-saved via IPC.");
-      } catch (error) {
-        console.error("Failed to auto-save settings:", error);
-      }
-    }, 1000); // 1 second debounce for saves
-
-    return () => clearTimeout(timeoutId);
-  }, [settings]);
-
-  useEffect(() => {
-    const apiKey = selectedProviderApiKey.trim()
-    if (!apiKey) {
-      validationRequestIdRef.current += 1
-      setKeyValidationStatus('idle')
-      return
-    }
-
-    setKeyValidationStatus('checking')
-    const requestId = ++validationRequestIdRef.current
-
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const isValid = await llmService.verifyKey(apiKey, selectedProvider)
-        if (requestId !== validationRequestIdRef.current) return
-        if (isValid) {
-          setKeyValidationStatus('valid')
-        } else {
-          console.error(`API key validation failed for provider: ${selectedProvider}`)
-          setKeyValidationStatus('invalid')
-        }
-      } catch (error) {
-        if (requestId !== validationRequestIdRef.current) return
-        console.error(`API key validation request errored for provider: ${selectedProvider}`, error)
-        setKeyValidationStatus('invalid')
-      }
-    }, 500)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [selectedProvider, selectedProviderApiKey])
-
-  // Handler for provider change
-  const handleProviderChange = (value: string) => {
-    dispatch(setProvider(value));
-
-    // Auto-update to default models for the new provider
-    const newHighModel = PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS]?.high || PROVIDER_MODELS.google.high;
-    const newLowModel = PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS]?.low || PROVIDER_MODELS.google.low;
-
-    dispatch(setHighPreferenceModelId(newHighModel));
-    dispatch(setLowPreferenceModelId(newLowModel));
-  };
-
-  // Handler for provider API key changes
-  const handleGoogleApiKeyChange = (value: string) => {
-    dispatch(setGoogleApiKey(value));
-  };
-
-  const handleOpenaiApiKeyChange = (value: string) => {
-    dispatch(setOpenaiApiKey(value));
-  };
-
-  const handleDeepseekApiKeyChange = (value: string) => {
-    dispatch(setDeepseekApiKey(value));
-  };
-
-  const handleZaiApiKeyChange = (value: string) => {
-    dispatch(setZaiApiKey(value));
-  };
-
-  // Handler for High Preference Model Select change
-  const handleHighModelChange = (value: string) => {
-    dispatch(setHighPreferenceModelId(value));
-  };
-
-  // Handler for Low Preference Model Select change
-  const handleLowModelChange = (value: string) => {
-    dispatch(setLowPreferenceModelId(value));
-  };
-
-  // Handler for selecting the project directory
-  const selectFolder = async () => {
-    try {
-      const selectedPath = await window.electron.ipcRenderer.invoke('select-directory', 'export');
-      if (selectedPath) {
-        dispatch(setWorkingRootDirectory(selectedPath));
-      } else {
-        console.log("Folder selection cancelled.");
-      }
-    } catch (error) {
-      console.error("Error selecting directory:", error);
-      toast.error("Failed to select directory.");
-    }
-  };
-
-  const handleGoBack = () => {
-    dispatch(setActiveView('intro'))
-  }
-
+// ── Small helper: a labeled settings row ──────────────────────────────────────
+function SettingRow({
+  label,
+  description,
+  children,
+}: {
+  label: string
+  description?: string
+  children: ReactNode
+}) {
   return (
-    <div className={cn(
-      "flex flex-col h-screen p-16 md:p-32",
-      "animate-in fade-in zoom-in-95 duration-300"
-    )}>
-      <header className="flex items-center mb-6">
-        <Button variant="ghost" size="icon" onClick={handleGoBack} className="mr-2">
-          <ArrowLeft className="h-5 w-5" />
-          <span className="sr-only">Back</span>
-        </Button>
-        <h1 className="text-2xl font-bold">Settings</h1>
-      </header>
-
-      <main className="flex-grow overflow-y-auto">
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-6">
-            {/* Left Column */}
-            <div className="space-y-4">
-              {/* Provider Selection */}
-              <div>
-                <Label htmlFor="provider">AI Provider</Label>
-                <Select
-                  value={settings.provider || 'google'}
-                  onValueChange={handleProviderChange}
-                >
-                  <SelectTrigger id="provider" className="w-full">
-                    <SelectValue placeholder="Select AI provider" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVIDER_OPTIONS.map((provider) => (
-                      <SelectItem key={provider.value} value={provider.value}>
-                        {provider.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Provider-specific API Keys */}
-              {settings.provider === 'google' && (
-                <div>
-                  <Label htmlFor="googleApiKey">Google API Key</Label>
-                  <Input
-                    type="password"
-                    id="googleApiKey"
-                    value={settings.googleApiKey || ''}
-                    onChange={(e) => handleGoogleApiKeyChange(e.target.value)}
-                    placeholder="Enter your Google API Key"
-                  />
-                </div>
-              )}
-
-              {settings.provider === 'openai' && (
-                <div>
-                  <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
-                  <Input
-                    type="password"
-                    id="openaiApiKey"
-                    value={settings.openaiApiKey || ''}
-                    onChange={(e) => handleOpenaiApiKeyChange(e.target.value)}
-                    placeholder="Enter your OpenAI API Key"
-                  />
-                </div>
-              )}
-
-              {settings.provider === 'deepseek' && (
-                <div>
-                  <Label htmlFor="deepseekApiKey">DeepSeek API Key</Label>
-                  <Input
-                    type="password"
-                    id="deepseekApiKey"
-                    value={settings.deepseekApiKey || ''}
-                    onChange={(e) => handleDeepseekApiKeyChange(e.target.value)}
-                    placeholder="Enter your DeepSeek API Key"
-                  />
-                </div>
-              )}
-
-              {settings.provider === 'zai' && (
-                <div>
-                  <Label htmlFor="zaiApiKey">Z.AI API Key</Label>
-                  <Input
-                    type="password"
-                    id="zaiApiKey"
-                    value={settings.zaiApiKey || ''}
-                    onChange={(e) => handleZaiApiKeyChange(e.target.value)}
-                    placeholder="Enter your Z.AI API Key"
-                  />
-                </div>
-              )}
-
-              {selectedProviderApiKey.trim() && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {keyValidationStatus === 'checking' && (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Checking API key...</span>
-                    </>
-                  )}
-                  {keyValidationStatus === 'valid' && (
-                    <>
-                      <CircleCheck className="h-4 w-4 text-green-600" />
-                      <span className="text-green-700">API key is valid.</span>
-                    </>
-                  )}
-                  {keyValidationStatus === 'invalid' && (
-                    <>
-                      <CircleX className="h-4 w-4 text-red-600" />
-                      <span className="text-red-700">API key is invalid.</span>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* High Preference Model Select */}
-              <div>
-                <Label htmlFor="highModel">High Preference Model</Label>
-                <Select
-                  value={settings.highPreferenceModelId || ''}
-                  onValueChange={handleHighModelChange}
-                >
-                  <SelectTrigger id="highModel" className="w-full">
-                    <SelectValue placeholder="Select high preference model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currentModelOptions.map((model) => (
-                      <SelectItem key={`high-${model}`} value={model}>
-                        {model}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground pt-1">Model used for complex tasks like outlining and writing.</p>
-              </div>
-
-              {/* Low Preference Model Select */}
-              <div>
-                <Label htmlFor="lowModel">Low Preference Model</Label>
-                <Select
-                  value={settings.lowPreferenceModelId || ''}
-                  onValueChange={handleLowModelChange}
-                >
-                  <SelectTrigger id="lowModel" className="w-full">
-                    <SelectValue placeholder="Select low preference model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currentModelOptions.map((model) => (
-                      <SelectItem key={`low-${model}`} value={model}>
-                        {model}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground pt-1">Model used for simpler tasks like routing and critique.</p>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-4">
-              {/* Project Path Selector */}
-              <div>
-                <Label>Project Path</Label>
-                <Button variant="outline" onClick={selectFolder} className="w-full justify-start mt-1">
-                  <Folder className="mr-2 h-4 w-4" />
-                  Select Project Directory
-                </Button>
-                <p className="text-sm text-muted-foreground pt-2 truncate">
-                  Current: {settings.workingRootDirectory || 'Default (determined by system)'}
-                </p>
-              </div>
-              {/* Minstrel Version */}
-              <div className="pt-4">
-                <Label>Minstrel Version</Label>
-                <p className="text-sm text-muted-foreground mt-2">1.0</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Save Button is removed, handled by auto-save */}
-        </div>
-      </main>
+    <div className="space-y-1.5">
+      <Label className="text-sm font-medium">{label}</Label>
+      {children}
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
     </div>
   )
 }
 
-export default SettingsPage
+// ── Small helper: a section card ──────────────────────────────────────────────
+function Section({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-accent/30 p-4 space-y-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
+        <span className="text-primary">{icon}</span>
+        {title}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
+const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
+  const settings = useSelector(selectSettingsState)
+  const dispatch = useDispatch<AppDispatch>()
+
+  const [activeTab, setActiveTab] = useState<SettingsTab>('ai')
+  const [keyValidationStatus, setKeyValidationStatus] = useState<KeyValidationStatus>('idle')
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const validationRequestIdRef = useRef(0)
+
+  const currentModelOptions =
+    MODEL_OPTIONS_BY_PROVIDER[settings.provider || 'google'] ||
+    MODEL_OPTIONS_BY_PROVIDER.google
+
+  const selectedProvider = settings.provider || 'google'
+
+  const selectedProviderApiKey = useMemo(() => {
+    switch (selectedProvider) {
+      case 'google': return settings.googleApiKey || ''
+      case 'openai': return settings.openaiApiKey || ''
+      case 'deepseek': return settings.deepseekApiKey || ''
+      case 'zai': return settings.zaiApiKey || ''
+      default: return ''
+    }
+  }, [selectedProvider, settings.googleApiKey, settings.openaiApiKey, settings.deepseekApiKey, settings.zaiApiKey])
+
+  // Load settings when modal opens
+  useEffect(() => {
+    if (!open) return
+    const load = async () => {
+      try {
+        const loaded = await window.electron.ipcRenderer.invoke('get-app-settings')
+        dispatch(setSettingsState(loaded || {}))
+      } catch (err) {
+        console.error('Failed to load settings:', err)
+        toast.error('Failed to load settings.')
+      }
+    }
+    load()
+  }, [open, dispatch])
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (!settings.provider && !settings.workingRootDirectory && !settings.highPreferenceModelId) return
+    const id = setTimeout(async () => {
+      try {
+        await window.electron.ipcRenderer.invoke('save-app-settings', settings)
+        setLastSaved(new Date())
+      } catch (err) {
+        console.error('Failed to auto-save settings:', err)
+      }
+    }, 1000)
+    return () => clearTimeout(id)
+  }, [settings])
+
+  // Validate API key (debounced)
+  useEffect(() => {
+    const key = selectedProviderApiKey.trim()
+    if (!key) {
+      validationRequestIdRef.current += 1
+      setKeyValidationStatus('idle')
+      return
+    }
+    setKeyValidationStatus('checking')
+    const reqId = ++validationRequestIdRef.current
+    const id = window.setTimeout(async () => {
+      try {
+        const isValid = await llmService.verifyKey(key, selectedProvider)
+        if (reqId !== validationRequestIdRef.current) return
+        setKeyValidationStatus(isValid ? 'valid' : 'invalid')
+      } catch {
+        if (reqId !== validationRequestIdRef.current) return
+        setKeyValidationStatus('invalid')
+      }
+    }, 500)
+    return () => window.clearTimeout(id)
+  }, [selectedProvider, selectedProviderApiKey])
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+  const handleProviderChange = (value: string) => {
+    dispatch(setProvider(value))
+    dispatch(setHighPreferenceModelId(PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS]?.high || PROVIDER_MODELS.google.high))
+    dispatch(setLowPreferenceModelId(PROVIDER_MODELS[value as keyof typeof PROVIDER_MODELS]?.low || PROVIDER_MODELS.google.low))
+  }
+
+  const handleApiKeyChange = (value: string) => {
+    switch (selectedProvider) {
+      case 'google': dispatch(setGoogleApiKey(value)); break
+      case 'openai': dispatch(setOpenaiApiKey(value)); break
+      case 'deepseek': dispatch(setDeepseekApiKey(value)); break
+      case 'zai': dispatch(setZaiApiKey(value)); break
+    }
+  }
+
+  const selectFolder = async () => {
+    try {
+      const path = await window.electron.ipcRenderer.invoke('select-directory', 'export')
+      if (path) dispatch(setWorkingRootDirectory(path))
+    } catch {
+      toast.error('Failed to select directory.')
+    }
+  }
+
+  // ── Validation badge ──────────────────────────────────────────────────────
+  const ValidationBadge = () => {
+    if (!selectedProviderApiKey.trim()) return null
+    return (
+      <div className={cn(
+        'flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full w-fit',
+        keyValidationStatus === 'checking' && 'bg-muted text-muted-foreground',
+        keyValidationStatus === 'valid' && 'bg-highlight-100 text-highlight-700 dark:bg-highlight-900/40 dark:text-highlight-300',
+        keyValidationStatus === 'invalid' && 'bg-destructive/10 text-destructive',
+      )}>
+        {keyValidationStatus === 'checking' && <><Loader2 className="h-3 w-3 animate-spin" /> Verifying…</>}
+        {keyValidationStatus === 'valid' && <><CircleCheck className="h-3 w-3" /> Valid</>}
+        {keyValidationStatus === 'invalid' && <><CircleX className="h-3 w-3" /> Invalid</>}
+      </div>
+    )
+  }
+
+  const apiKeyFieldId = `${selectedProvider}ApiKey`
+  const apiKeyLabel: Record<string, string> = {
+    google: 'Google API Key', openai: 'OpenAI API Key',
+    deepseek: 'DeepSeek API Key', zai: 'Z.AI API Key',
+  }
+
+  const tabs: { id: SettingsTab; label: string; icon: ReactNode }[] = [
+    { id: 'ai', label: 'AI Provider', icon: <Bot className="h-4 w-4" /> },
+    { id: 'workspace', label: 'Workspace', icon: <FolderCog className="h-4 w-4" /> },
+  ]
+
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
+
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="text-xl font-semibold tracking-tight">Settings</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex" style={{ minHeight: '420px' }}>
+
+          {/* Sidebar nav */}
+          <nav className="w-44 shrink-0 border-r bg-accent/20 p-3 space-y-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors text-left',
+                  activeTab === tab.id
+                    ? 'bg-background text-foreground shadow-sm border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
+                )}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Content area */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-5">
+
+            {/* ── AI Provider tab ──────────────────────────────────────────── */}
+            {activeTab === 'ai' && (
+              <>
+                <Section title="Provider" icon={<Bot className="h-3.5 w-3.5" />}>
+                  <SettingRow label="AI Provider" description="The service that powers Minstrel's AI features.">
+                    <Select value={settings.provider || 'google'} onValueChange={handleProviderChange}>
+                      <SelectTrigger id="provider" className="w-full">
+                        <SelectValue placeholder="Select AI provider" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROVIDER_OPTIONS.map((p) => (
+                          <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </SettingRow>
+
+                  <SettingRow label={apiKeyLabel[selectedProvider] ?? 'API Key'}>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="password"
+                        id={apiKeyFieldId}
+                        value={selectedProviderApiKey}
+                        onChange={(e) => handleApiKeyChange(e.target.value)}
+                        placeholder={`Enter your ${apiKeyLabel[selectedProvider] ?? 'API key'}`}
+                        className="flex-1"
+                      />
+                    </div>
+                    <div className="mt-1.5">
+                      <ValidationBadge />
+                    </div>
+                  </SettingRow>
+                </Section>
+
+                <Section title="Models" icon={<Sparkles className="h-3.5 w-3.5" />}>
+                  <SettingRow
+                    label="High Preference Model"
+                    description="Used for complex tasks like outlining and writing."
+                  >
+                    <Select value={settings.highPreferenceModelId || ''} onValueChange={(v) => dispatch(setHighPreferenceModelId(v))}>
+                      <SelectTrigger id="highModel" className="w-full">
+                        <SelectValue placeholder="Select model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currentModelOptions.map((m) => (
+                          <SelectItem key={`high-${m}`} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </SettingRow>
+
+                  <SettingRow
+                    label="Low Preference Model"
+                    description="Used for simpler tasks like routing and critique."
+                  >
+                    <Select value={settings.lowPreferenceModelId || ''} onValueChange={(v) => dispatch(setLowPreferenceModelId(v))}>
+                      <SelectTrigger id="lowModel" className="w-full">
+                        <SelectValue placeholder="Select model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currentModelOptions.map((m) => (
+                          <SelectItem key={`low-${m}`} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </SettingRow>
+                </Section>
+              </>
+            )}
+
+            {/* ── Workspace tab ────────────────────────────────────────────── */}
+            {activeTab === 'workspace' && (
+              <Section title="Project Directory" icon={<FolderOpen className="h-3.5 w-3.5" />}>
+                <p className="text-sm text-muted-foreground -mt-1">
+                  The folder where Minstrel reads and saves your projects.
+                </p>
+                <Button variant="outline" onClick={selectFolder} className="w-full justify-start gap-2">
+                  <FolderOpen className="h-4 w-4 shrink-0" />
+                  Choose folder…
+                </Button>
+                {settings.workingRootDirectory ? (
+                  <div className="rounded-md bg-muted/60 px-3 py-2 text-xs font-mono text-muted-foreground break-all">
+                    {settings.workingRootDirectory}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    No folder selected — using system default.
+                  </p>
+                )}
+              </Section>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-3 border-t flex items-center justify-between bg-accent/10">
+          <span className="text-xs text-muted-foreground">
+            {lastSaved
+              ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : 'Changes saved automatically'}
+          </span>
+          <span className="text-xs text-muted-foreground">Minstrel v1.0</span>
+        </div>
+
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default SettingsModal
