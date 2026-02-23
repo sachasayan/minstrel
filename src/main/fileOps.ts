@@ -1,4 +1,4 @@
-import { dialog, ipcMain, IpcMainInvokeEvent, OpenDialogOptions } from 'electron'
+import { dialog, ipcMain, IpcMainInvokeEvent, OpenDialogOptions, SaveDialogOptions } from 'electron'
 import * as os from 'os'
 import * as fs from 'fs/promises'
 
@@ -120,11 +120,25 @@ export const handleDeleteFile = async (_event: IpcMainInvokeEvent, filePath: str
   }
 }
 
+export const handleShowSaveDialog = async (
+  _event: IpcMainInvokeEvent,
+  options: SaveDialogOptions
+) => {
+  const result = await dialog.showSaveDialog(options)
+  if (result.canceled || !result.filePath) {
+    return null
+  }
+  // Ensure the extension is always .mns
+  const filePath = result.filePath.endsWith('.mns') ? result.filePath : `${result.filePath}.mns`
+  return filePath
+}
+
 export const registerFileOpsHandlers = () => {
   ipcMain.handle('read-directory', handleReadDirectory)
   ipcMain.handle('read-file', handleReadFile)
   ipcMain.handle('write-file', handleWriteFile)
   ipcMain.handle('make-directory', handleMakeDirectory)
   ipcMain.handle('select-directory', handleSelectDirectory)
-  ipcMain.handle('delete-file', handleDeleteFile) // Register the new handler
+  ipcMain.handle('delete-file', handleDeleteFile)
+  ipcMain.handle('show-save-dialog', handleShowSaveDialog)
 }

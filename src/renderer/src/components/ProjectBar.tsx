@@ -28,16 +28,6 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 
-/** Converts a project title into a safe file-system base name. */
-const sanitizeFilename = (title: string): string =>
-  title
-    .trim()
-    .replace(/[^a-zA-Z0-9 _-]/g, '')
-    .replace(/\s+/g, '_')
-    .toLowerCase()
-    .slice(0, 80) || 'untitled_project'
-
-const PLACEHOLDER_TITLE = 'Untitled Project'
 
 const ProjectBar = () => {
   const dispatch = useDispatch()
@@ -92,15 +82,7 @@ const ProjectBar = () => {
 
     // ─── First-time save: no path yet ────────────────────────────────────────
     if (!currentPath) {
-      // 1. Validate title
-      if (!projectToSave.title || projectToSave.title === PLACEHOLDER_TITLE) {
-        toast.error('Please give your story a title before saving.', {
-          description: 'Click the title at the top of the editor to rename it.'
-        })
-        return false
-      }
-
-      // 2. Resolve the save directory
+      // 1. Resolve the save directory
       let saveDir = settings.workingRootDirectory
       if (!saveDir) {
         saveDir = await window.electron.ipcRenderer.invoke('select-directory', 'save')
@@ -110,18 +92,36 @@ const ProjectBar = () => {
         }
       }
 
-      // 3. Build the full path and create the project file
-      const filename = sanitizeFilename(projectToSave.title)
-      const newPath = `${saveDir}/${filename}.mns`
-      const created = await createSqliteProject(newPath, projectToSave)
+      // 2. Show a save-file dialog so the user names the file
+      const chosenPath = await window.electron.ipcRenderer.invoke('show-save-dialog', {
+        defaultPath: `${saveDir}/untitled.mns`,
+        filters: [{ name: 'Minstrel Project', extensions: ['mns'] }]
+      })
+      if (!chosenPath) {
+        toast.info('Save cancelled.')
+        return false
+      }
+
+      // 3. Derive the title from the chosen filename (no extension)
+      const chosenFilename = chosenPath.split('/').pop() ?? 'untitled'
+      const titleFromFilename = chosenFilename.replace(/\.mns$/i, '').replace(/_/g, ' ').trim()
+
+      // 4. Build the project with the derived title + path, then persist
+      const projectWithTitleAndPath = {
+        ...projectToSave,
+        title: titleFromFilename,
+        projectPath: chosenPath
+      }
+      const created = await createSqliteProject(chosenPath, projectWithTitleAndPath)
 
       if (!created) {
         toast.error('Failed to create project file.')
         return false
       }
 
-      // 4. Persist the new path to Redux so subsequent saves work normally
-      dispatch(updateMetaProperty({ property: 'projectPath', value: newPath }))
+      // 5. Persist title + path to Redux so subsequent saves work normally
+      dispatch(updateMetaProperty({ property: 'title', value: titleFromFilename }))
+      dispatch(updateMetaProperty({ property: 'projectPath', value: chosenPath }))
       dispatch(setAllFilesAsSaved())
       toast.success('Project saved!')
       return true
