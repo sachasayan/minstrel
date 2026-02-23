@@ -5,7 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Star } from 'lucide-react'
 import { useEffect, useState, useMemo } from 'react'
 
-import { selectActiveProject, updateMetaProperty } from '@/lib/store/projectsSlice'
+import { selectActiveProject, setWordCountHistorical } from '@/lib/store/projectsSlice'
 import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
 import { CoverCard } from '@/components/CoverCard'
 import { getChapterWordCounts } from '@/lib/storyContent'
@@ -33,10 +33,7 @@ export function DashboardRibbon() {
             const historical = activeProject.wordCountHistorical || []
 
             if ((!historical || historical.length === 0) && updatedHistory?.length > 0) {
-                dispatch(updateMetaProperty({
-                    property: 'wordCountHistorical',
-                    value: updatedHistory
-                }))
+                dispatch(setWordCountHistorical(updatedHistory))
             }
 
             // Generate dialogue count data

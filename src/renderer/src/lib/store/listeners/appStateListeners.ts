@@ -1,6 +1,6 @@
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import { setActiveSection } from '../appStateSlice'
-import { updateMetaProperty } from '../projectsSlice'
+import { setWordCountCurrent } from '../projectsSlice'
 import { calculateWordCount } from '@/lib/storyContent'
 import type { RootState } from '../store'
 
@@ -16,6 +16,6 @@ appStateListeners.startListening({
 
     const wordCountCurrent = calculateWordCount(activeProject.storyContent)
 
-    listenerApi.dispatch(updateMetaProperty({ property: 'wordCountCurrent', value: wordCountCurrent }))
+    listenerApi.dispatch(setWordCountCurrent(wordCountCurrent))
   }
 })

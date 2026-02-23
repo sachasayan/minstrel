@@ -5,7 +5,10 @@ import reducer, {
   addChapter,
   updateChapter,
   selectActiveProjectWithCoverDataUrl,
-  setAllFilesAsSaved
+  setAllFilesAsSaved,
+  setProjectPath,
+  setWordCountCurrent,
+  setWordCountHistorical
 } from './projectsSlice'
 import { ProjectState } from '@/types'
 
@@ -14,7 +17,8 @@ describe('projectsSlice', () => {
     projectHasLiveEdits: false,
     activeProject: null,
     pendingFiles: null,
-    modifiedChapters: []
+    modifiedChapters: [],
+    lastEdit: null
   }
 
   it('should handle startNewProject', () => {
@@ -95,6 +99,78 @@ describe('projectsSlice', () => {
     expect(actual.projectHasLiveEdits).toBe(false)
     expect(actual.activeProject?.files[0].hasEdits).toBe(false)
     expect(actual.modifiedChapters).toHaveLength(0)
+  })
+
+  describe('setProjectPath', () => {
+    it('should update title and projectPath together', () => {
+      const stateWithProject = {
+        ...initialState,
+        activeProject: { title: 'Old Title', projectPath: '', files: [], storyContent: '' } as any
+      }
+      const actual = reducer(
+        stateWithProject,
+        setProjectPath({ title: 'My Novel', projectPath: '/projects/my-novel.mns' })
+      )
+      expect(actual.activeProject?.title).toBe('My Novel')
+      expect(actual.activeProject?.projectPath).toBe('/projects/my-novel.mns')
+      expect(actual.projectHasLiveEdits).toBe(true)
+    })
+
+    it('should be a no-op when activeProject is null', () => {
+      const actual = reducer(
+        initialState,
+        setProjectPath({ title: 'X', projectPath: '/x.mns' })
+      )
+      expect(actual.activeProject).toBeNull()
+    })
+  })
+
+  describe('setWordCountCurrent', () => {
+    it('should update wordCountCurrent on the active project', () => {
+      const stateWithProject = {
+        ...initialState,
+        activeProject: { title: 'P1', wordCountCurrent: 0, files: [], storyContent: '' } as any
+      }
+      const actual = reducer(stateWithProject, setWordCountCurrent(42000))
+      expect(actual.activeProject?.wordCountCurrent).toBe(42000)
+    })
+
+    it('should not mark projectHasLiveEdits (word count is derived, not authored)', () => {
+      const stateWithProject = {
+        ...initialState,
+        projectHasLiveEdits: false,
+        activeProject: { title: 'P1', wordCountCurrent: 0, files: [], storyContent: '' } as any
+      }
+      const actual = reducer(stateWithProject, setWordCountCurrent(100))
+      expect(actual.projectHasLiveEdits).toBe(false)
+    })
+
+    it('should be a no-op when activeProject is null', () => {
+      const actual = reducer(initialState, setWordCountCurrent(999))
+      expect(actual.activeProject).toBeNull()
+    })
+  })
+
+  describe('setWordCountHistorical', () => {
+    const history = [
+      { date: '2026-01-01', wordCount: 1000 },
+      { date: '2026-01-02', wordCount: 2000 }
+    ]
+
+    it('should set the word count history on the active project', () => {
+      const stateWithProject = {
+        ...initialState,
+        activeProject: { title: 'P1', files: [], storyContent: '' } as any
+      }
+      const actual = reducer(stateWithProject, setWordCountHistorical(history))
+      expect(actual.activeProject?.wordCountHistorical).toEqual(history)
+      expect(actual.projectHasLiveEdits).toBe(true)
+    })
+
+    it('should be a no-op when activeProject is null', () => {
+      const actual = reducer(initialState, setWordCountHistorical(history))
+      expect(actual.activeProject).toBeNull()
+    })
   })
 
   describe('selectors', () => {

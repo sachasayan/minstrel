@@ -49,7 +49,9 @@ export interface Project extends ProjectFragment {
   chatHistory?: ChatMessage[]
   coverImageBase64?: string | null // Base64 encoded image data
   // coverImageMimeType is inherited from ProjectFragment and now allows null
-
+  dialogueAnalysis?: {
+    dialogCounts: Record<string, number[]>
+  } | null
   wordCountHistorical?: Array<{
     date: string // 'YYYY-MM-DD'
     wordCount: number

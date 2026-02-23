@@ -1,12 +1,4 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit'
-// Patch Project interface to add dialogueAnalysis property
-declare module '@/types' {
-  interface Project {
-    dialogueAnalysis?: {
-      dialogCounts: Record<string, number[]>
-    } | null
-  }
-}
 
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
@@ -78,9 +70,6 @@ export const projectsSlice = createSlice({
     setPendingFiles: (state, action: PayloadAction<string[] | null>) => {
       state.pendingFiles = action.payload
     },
-    resolvePendingFiles: (state, action: PayloadAction<string[] | null>) => {
-      state.pendingFiles = action.payload
-    },
     updateFile: (state, action: PayloadAction<ProjectFile>) => {
       if (state.activeProject) {
         const payload = action.payload
@@ -129,16 +118,19 @@ export const projectsSlice = createSlice({
         state.projectHasLiveEdits = true
       }
     },
-    updateMetaProperty: (state, action: PayloadAction<{ property: string; value: any }>) => {
-      if (!state.activeProject)
-        return // Use type assertion carefully or add type checks if property is specific
-      if (action.payload.property === 'storyContent' && typeof action.payload.value === 'string') {
-        state.activeProject.storyContent = action.payload.value
-        state.projectHasLiveEdits = true
-        return
-      }
-        // Cast to any to bypass TS error when assigning 'any' value to dynamic property
-      ;(state.activeProject as any)[action.payload.property] = action.payload.value
+    setProjectPath: (state, action: PayloadAction<{ title: string; projectPath: string }>) => {
+      if (!state.activeProject) return
+      state.activeProject.title = action.payload.title
+      state.activeProject.projectPath = action.payload.projectPath
+      state.projectHasLiveEdits = true
+    },
+    setWordCountCurrent: (state, action: PayloadAction<number>) => {
+      if (!state.activeProject) return
+      state.activeProject.wordCountCurrent = action.payload
+    },
+    setWordCountHistorical: (state, action: PayloadAction<Array<{ date: string; wordCount: number }>>) => {
+      if (!state.activeProject) return
+      state.activeProject.wordCountHistorical = action.payload
       state.projectHasLiveEdits = true
     },
     updateReviews: (state, action: PayloadAction<{ critique: any[]; analysis: { dialogCounts: Record<string, number[]> } }>) => {
@@ -223,19 +215,20 @@ export const {
   startNewProject,
   setActiveProject,
   setPendingFiles,
-  resolvePendingFiles,
   setActiveProjectFromFragment,
   setProjectHasLiveEdits,
   setAllFilesAsSaved,
   updateFile,
   updateParameters,
   updateReviews,
-  updateMetaProperty,
   updateCoverImage,
-  addChapter, // Export the new action
+  addChapter,
   updateChapter,
   setLastEdit,
-  clearLastEdit
+  clearLastEdit,
+  setProjectPath,
+  setWordCountCurrent,
+  setWordCountHistorical
 } = projectsSlice.actions
 export const selectProjects = (state: RootState) => state.projects
 export const selectActiveProject = (state: RootState) => state.projects.activeProject

@@ -8,7 +8,7 @@ import {
   setActiveProject,
   setAllFilesAsSaved,
   setProjectHasLiveEdits,
-  updateMetaProperty
+  setProjectPath
 } from '@/lib/store/projectsSlice'
 import { selectSettingsState } from '@/lib/store/settingsSlice'
 import pdfService from '@/lib/services/pdfService'
@@ -120,8 +120,7 @@ const ProjectBar = () => {
       }
 
       // 5. Persist title + path to Redux so subsequent saves work normally
-      dispatch(updateMetaProperty({ property: 'title', value: titleFromFilename }))
-      dispatch(updateMetaProperty({ property: 'projectPath', value: chosenPath }))
+      dispatch(setProjectPath({ title: titleFromFilename, projectPath: chosenPath }))
       dispatch(setAllFilesAsSaved())
       toast.success('Project saved!')
       return true
@@ -135,7 +134,7 @@ const ProjectBar = () => {
       dispatch(setAllFilesAsSaved())
 
       if (currentPath !== saveResult.finalPath) {
-        dispatch(updateMetaProperty({ property: 'projectPath', value: saveResult.finalPath }))
+        dispatch(setProjectPath({ title: projectToSave.title, projectPath: saveResult.finalPath }))
         toast.info('Project format updated to the latest version.')
       }
       return true

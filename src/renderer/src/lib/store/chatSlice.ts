@@ -4,7 +4,7 @@ import { ChatMessage } from '@/types'
 
 // Remove local ChatMessage definition as it's now imported
 
-interface ChatState {
+export interface ChatState {
   chatHistory: ChatMessage[]
   pendingChat: boolean
   actionSuggestions: string[]
