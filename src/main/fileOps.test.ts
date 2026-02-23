@@ -119,6 +119,7 @@ describe('fileOps', () => {
       const result = await handleSelectDirectory({} as any, 'import')
       expect(result).toBe('/selected/path')
       expect(dialog.showOpenDialog).toHaveBeenCalledWith({
+        title: 'Select folder',
         properties: ['openDirectory']
       })
     })
@@ -128,6 +129,7 @@ describe('fileOps', () => {
       const result = await handleSelectDirectory({} as any, 'export')
       expect(result).toBe('/selected/path')
       expect(dialog.showOpenDialog).toHaveBeenCalledWith({
+        title: 'Choose export folder',
         properties: ['openDirectory', 'createDirectory']
       })
     })

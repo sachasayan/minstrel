@@ -23,7 +23,8 @@ describe('settingsSlice', () => {
     googleApiKey: '',
     deepseekApiKey: '',
     zaiApiKey: '',
-    openaiApiKey: ''
+    openaiApiKey: '',
+    recentProjects: []
   }
 
   it('should return the initial state', () => {

@@ -2,7 +2,6 @@ import {
   EditorConfig,
   LexicalNode,
   NodeKey,
-  SerializedElementNode,
   Spread,
 } from 'lexical';
 import { HeadingNode, SerializedHeadingNode } from '@lexical/rich-text';

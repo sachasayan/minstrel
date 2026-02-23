@@ -136,7 +136,7 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                                             const splitNodes = item.node.splitText(relativeStart, relativeEnd)
                                             const targetNode = relativeStart > 0 ? splitNodes[1] : splitNodes[0]
                                             if (targetNode) nodesToWrap.push(targetNode)
-                                        } catch (e) {
+                                        } catch {
                                             // Ignore splitting errors 
                                         }
                                     } else {

@@ -64,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="Dashboard">
-                <SidebarMenuButton asChild isActive={appState.activeView === 'project/dashboard' || appState.activeSection === 'Overview'}>
+                <SidebarMenuButton asChild isActive={appState.activeSection === 'Overview'}>
                   <a onClick={() => {
                     dispatch(setActiveSection('Overview'))
                     dispatch(setActiveView('project/editor'))
