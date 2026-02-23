@@ -5,7 +5,8 @@ import {
   handleWriteFile,
   handleSelectDirectory,
   handleMakeDirectory,
-  handleDeleteFile
+  handleDeleteFile,
+  handleShowSaveDialog
 } from './fileOps'
 import { dialog } from 'electron'
 import * as fs from 'fs/promises'
@@ -13,7 +14,8 @@ import * as fs from 'fs/promises'
 // Mock electron
 vi.mock('electron', () => ({
   dialog: {
-    showOpenDialog: vi.fn()
+    showOpenDialog: vi.fn(),
+    showSaveDialog: vi.fn()
   },
   ipcMain: {
     handle: vi.fn()
@@ -161,6 +163,32 @@ describe('fileOps', () => {
       const result = await handleDeleteFile({} as any, '/file.txt')
       expect(result.success).toBe(false)
       expect(result.error).toContain('Unlink error')
+    })
+  })
+
+  describe('handleShowSaveDialog', () => {
+    it('should append .mns extension if not already present', async () => {
+      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: false, filePath: '/projects/mynovel' })
+      const result = await handleShowSaveDialog({} as any, {})
+      expect(result).toBe('/projects/mynovel.mns')
+    })
+
+    it('should not double-append .mns if already present', async () => {
+      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: false, filePath: '/projects/mynovel.mns' })
+      const result = await handleShowSaveDialog({} as any, {})
+      expect(result).toBe('/projects/mynovel.mns')
+    })
+
+    it('should return null if dialog is canceled', async () => {
+      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: true, filePath: undefined })
+      const result = await handleShowSaveDialog({} as any, {})
+      expect(result).toBeNull()
+    })
+
+    it('should return null if filePath is missing despite not being canceled', async () => {
+      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: false, filePath: undefined })
+      const result = await handleShowSaveDialog({} as any, {})
+      expect(result).toBeNull()
     })
   })
 })
