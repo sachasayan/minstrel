@@ -41,7 +41,6 @@ export default function App(): ReactNode {
         return <Intro />
       case 'project/outline':
       case 'project/parameters':
-      case 'project/dashboard':
       case 'project/editor':
         // Ensure activeProject exists before rendering ProjectOverview
         return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro />; // Fallback to Intro if no project

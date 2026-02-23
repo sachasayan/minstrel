@@ -7,7 +7,6 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { AppSidebar } from '@/components/editor/AppSidebar'
 import { StoryViewer } from '@/components/editor/StoryViewer'
 import { ArtifactViewer } from '@/components/editor/ArtifactViewer'
-import NovelDashboard from '@/components/NovelDashboard'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import ChatInterface from '@/components/ChatInterface'
 import CommandPalette from '@/components/CommandPalette'
@@ -66,8 +65,6 @@ const ProjectOverview = (): React.ReactNode => {
               content={editorContent.content}
             />
           )
-        ) : appState.activeView == 'project/dashboard' ? (
-          <NovelDashboard />
         ) : null}
 
         {/* Chat Interface */}

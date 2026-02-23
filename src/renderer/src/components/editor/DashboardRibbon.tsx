@@ -83,37 +83,41 @@ export function DashboardRibbon() {
                 </div>
 
                 {/* Summary Card */}
-                <Card className="flex-shrink-0 w-80 bg-muted/20 border-none shadow-sm h-64">
-                    <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-4 overflow-y-auto h-44">
-                        <p className="text-sm leading-relaxed text-foreground/80">{activeProject.summary || 'No summary yet...'}</p>
-                    </CardContent>
-                </Card>
+                {activeProject.summary && (
+                    <Card className="flex-shrink-0 w-80 bg-muted/20 border-none shadow-sm h-64">
+                        <CardHeader className="py-3 px-4">
+                            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="px-4 overflow-y-auto h-44">
+                            <p className="text-sm leading-relaxed text-foreground/80">{activeProject.summary}</p>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Word Count Progress Chart */}
-                <Card className="flex-shrink-0 w-96 bg-muted/20 border-none shadow-sm h-64">
-                    <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Word Count per Chapter</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <ChartContainer
-                            className="h-44 w-full"
-                            config={{
-                                chapterWordCount: { label: 'Words' }
-                            }}
-                        >
-                            <BarChart data={chapterData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                                <XAxis dataKey="chapter" hide />
-                                <YAxis hide />
-                                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                                <Bar dataKey="chapterWordCount" fill="var(--color-highlight-500)" radius={[2, 2, 0, 0]} />
-                            </BarChart>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
+                {chapterData.some(c => c.chapterWordCount > 0) && (
+                    <Card className="flex-shrink-0 w-96 bg-muted/20 border-none shadow-sm h-64">
+                        <CardHeader className="py-3 px-4">
+                            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Word Count per Chapter</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <ChartContainer
+                                className="h-44 w-full"
+                                config={{
+                                    chapterWordCount: { label: 'Words' }
+                                }}
+                            >
+                                <BarChart data={chapterData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                                    <XAxis dataKey="chapter" hide />
+                                    <YAxis hide />
+                                    <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                                    <Bar dataKey="chapterWordCount" fill="var(--color-highlight-500)" radius={[2, 2, 0, 0]} />
+                                </BarChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Character Dialogue Analysis */}
                 {dialogueCountData.length > 0 && (
