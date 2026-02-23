@@ -22,7 +22,9 @@ export const getAvailableFiles = (data: PromptData): string[] => {
   if (!activeProject) return []
 
   const artifactFiles = activeProject.files.map((f) => f.title)
-  const virtualChapters = getChaptersFromStoryContent(activeProject.storyContent).map((c) => c.title)
+  const virtualChapters = getChaptersFromStoryContent(activeProject.storyContent).map((c) => 
+    c.id ? `<!-- id: ${c.id} --> ${c.title}` : c.title
+  )
 
   return [...artifactFiles, ...virtualChapters]
 }
@@ -58,7 +60,12 @@ ${artifactFile.content || '(File content is empty)'}
     }
 
     // 2. Check virtual chapters in storyContent
-    const chapterContent = extractChapterContent(activeProject.storyContent, title)
+    // Parse ID from "<!-- id: abc123 --> Title" format if present
+    const idMatch = title.match(/^<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->\s*(.*)$/)
+    const chapterId = idMatch ? idMatch[1] : undefined
+    const cleanTitle = idMatch ? idMatch[2] : title
+
+    const chapterContent = extractChapterContent(activeProject.storyContent, cleanTitle, chapterId)
     if (chapterContent !== null) {
       filesContent.push(`
 ---

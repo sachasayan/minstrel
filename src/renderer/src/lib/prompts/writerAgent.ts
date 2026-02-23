@@ -14,11 +14,11 @@ export const getWriterAgentPrompt = () => `
 * If the user requests a chapter rewrite for a chapter in the case where a previous chapter has not yet been written, politely decline and ask them to write the previous chapter.
 * When writing a chapter, your response MUST ONLY include a brief description of the chapter events or any changes made.
 * CRITICAL: DO NOT output the chapter content in your text response. ONLY provide it via the "writeFile" tool.
-* Each chapter should be written in Markdown. The output should ALWAYS start with the chapter title as a Markdown H1 header (e.g., # Chapter 1: The Beginning).
-* If editing an existing chapter, you MUST use the existing title as the header and preserve any HTML ID comments (e.g., # Chapter X <!-- id: ... -->).
-* If creating a new chapter, you follow the outline guidance for the title if possible.
-* Otherwise, you may use whichever title you like for the header.
-* When you are finished, you MUST use the "writeFile" tool to save the chapter, passing the chapter's title as the "file_name" parameter, and the markdown content as the "content" parameter.
+* When you are finished, you MUST use the "writeFile" tool to save the chapter. 
+* CRITICAL: For "file_name", you MUST use EXACTLY the unique ID snippet (e.g. "abc123"). 
+* FAILURE WARNING: DO NOT use the chapter title. DO NOT add ".md". DO NOT use "ch1". 
+* Locate the ID in the directory listing: "<!-- id: abc123 --> Chapter 1" -> use "abc123" as the EXACT file_name.
+* The chapter content itself MUST start with a header including the same ID: "# <!-- id: abc123 --> Chapter Title".
 
 ## WRITING STYLE
 * All chapters are written in markdown.

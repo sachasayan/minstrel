@@ -66,21 +66,22 @@ describe('projectsSlice', () => {
       activeProject: { title: 'P1', files: [], storyContent: '# Chapter 1\nBody' } as any
     }
     const actual = reducer(stateWithProject, addChapter())
-    expect(actual.activeProject?.storyContent).toContain('# Chapter 2')
+    expect(actual.activeProject?.storyContent).toContain('# <!-- id:')
+    expect(actual.activeProject?.storyContent).toContain('Chapter 2')
     expect(actual.modifiedChapters).toContain(1) // Chapter 2 is index 1
   })
 
   it('should handle surgical updateChapter', () => {
     const stateWithProject = {
       ...initialState,
-      activeProject: { title: 'P1', files: [], storyContent: '# Chapter 1\nOld\n# Chapter 2\nOld' } as any
+      activeProject: { title: 'P1', files: [], storyContent: '# <!-- id: id1 --> Chapter 1\nOld\n# Chapter 2\nOld' } as any
     }
-    const actual = reducer(stateWithProject, updateChapter({ title: 'Chapter 1', content: 'New Body' }))
+    const actual = reducer(stateWithProject, updateChapter({ chapterId: 'id1', content: 'New Body' }))
     const content = actual.activeProject?.storyContent ?? ''
     // Split by H1 headings to isolate each chapter's section
-    const sections = content.split(/^#\s+/m).filter(Boolean)
-    const ch1Section = sections.find(s => s.toLowerCase().startsWith('chapter 1')) ?? ''
-    const ch2Section = sections.find(s => s.toLowerCase().startsWith('chapter 2')) ?? ''
+    const splitResult = content.split(/^#\s+/m).filter(Boolean)
+    const ch1Section = splitResult.find(s => s.toLowerCase().includes('chapter 1')) ?? ''
+    const ch2Section = splitResult.find(s => s.toLowerCase().includes('chapter 2')) ?? ''
     // Chapter 1 should have been updated
     expect(ch1Section).toContain('New Body')
     expect(ch1Section).not.toContain('Old')

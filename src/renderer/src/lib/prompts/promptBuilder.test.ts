@@ -6,7 +6,7 @@ import { RequestContext, Project, ChatMessage } from '@/types'
 describe('promptBuilder', () => {
   const mockProject: Project = {
     title: 'Test Project',
-    storyContent: '# Chapter 1: The Beginning\nOnce upon a time...',
+    storyContent: '# <!-- id: id1 --> Chapter 1: The Beginning\nOnce upon a time...',
     files: [
       { title: 'Outline', content: 'Test outline content' },
       { title: 'World', content: 'Test world content' }
@@ -32,11 +32,11 @@ describe('promptBuilder', () => {
     chatHistory: mockChat
   }
 
-  it('getAvailableFiles returns all files including virtual chapters', () => {
+  it('getAvailableFiles returns all files including virtual chapters with IDs', () => {
     const files = pb.getAvailableFiles(mockData)
     expect(files).toContain('Outline')
     expect(files).toContain('World')
-    expect(files).toContain('Chapter 1: The Beginning')
+    expect(files).toContain('<!-- id: id1 --> Chapter 1: The Beginning')
   })
 
   it('getProvidedFiles filters available files', () => {
@@ -44,8 +44,8 @@ describe('promptBuilder', () => {
     expect(provided).toEqual(['Outline'])
   })
 
-  it('getFileContents returns concatenated contents', () => {
-    const contents = pb.getFileContents(mockData, ['Outline', 'Chapter 1: The Beginning'])
+  it('getFileContents returns concatenated contents (handles ID suffix)', () => {
+    const contents = pb.getFileContents(mockData, ['Outline', '<!-- id: id1 --> Chapter 1: The Beginning'])
     expect(contents).toContain('Test outline content')
     expect(contents).toContain('Once upon a time...')
   })

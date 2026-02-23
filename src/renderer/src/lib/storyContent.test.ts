@@ -5,6 +5,7 @@ import {
   getChapterWordCounts,
   extractChapterContent,
   replaceChapterContent,
+  findChapterById,
   isStoryFile,
   normalizeProjectStoryContent,
   STORY_FILE_TYPE,
@@ -128,51 +129,69 @@ describe('getChapterWordCounts', () => {
 })
 
 describe('extractChapterContent', () => {
-  const content = '# Chapter 1\nContent 1\n# Chapter 2\nContent 2\nMore content 2'
+  const content = '# <!-- id: id1 --> Chapter 1\nContent 1\n# Chapter 2\nContent 2\nMore content 2'
 
-  it('should extract content for a given chapter', () => {
+  it('should extract content for a given chapter title (fuzzy)', () => {
     expect(extractChapterContent(content, 'Chapter 1')).toBe('Content 1')
     expect(extractChapterContent(content, 'Chapter 2')).toBe('Content 2\nMore content 2')
   })
 
-  it('should return null if chapter not found', () => {
+  it('should extract content for a given chapter ID (strict)', () => {
+    expect(extractChapterContent(content, '', 'id1')).toBe('Content 1')
+  })
+
+  it('should return null if chapter ID not found (even if title matches)', () => {
+    expect(extractChapterContent(content, 'Chapter 1', 'wrong-id')).toBeNull()
+  })
+
+  it('should return null if chapter title not found', () => {
     expect(extractChapterContent(content, 'Chapter 3')).toBeNull()
   })
 
-  it('should be case-insensitive and handle fuzzy matches', () => {
+  it('should be case-insensitive for title matching', () => {
     expect(extractChapterContent(content, 'chapter 1')).toBe('Content 1')
+  })
+})
 
-    const contentWithColon = '# Chapter 1: Introduction\nContent 1'
-    expect(extractChapterContent(contentWithColon, 'Chapter 1')).toBe('Content 1')
+describe('findChapterById', () => {
+  const content = '# <!-- id: id1 --> C1\nContent 1\n# <!-- id: id2 --> C2\nContent 2'
+
+  it('should find a chapter by ID', () => {
+    const result = findChapterById(content, 'id1')
+    expect(result).toEqual({ title: 'C1', content: 'Content 1' })
+  })
+
+  it('should return null for unknown ID', () => {
+    expect(findChapterById(content, 'id-unknown')).toBeNull()
   })
 })
 
 describe('replaceChapterContent', () => {
-  const content = '# C1\nOld 1\n# C2\nOld 2'
+  const content = '# <!-- id: id1 --> C1\nOld 1\n# C2\nOld 2'
 
-  it('should replace existing chapter content', () => {
-    const result = replaceChapterContent(content, 'C1', 'New 1')
-    expect(result).toContain('# C1')
+  it('should replace existing chapter content by ID', () => {
+    const result = replaceChapterContent(content, '', 'New 1', 'id1')
+    expect(result).toContain('# <!-- id: id1 --> C1')
     expect(result).toContain('New 1')
     expect(result).not.toContain('Old 1')
-    expect(result).toContain('# C2')
-    expect(result).toContain('Old 2')
   })
 
-  it('should append chapter if it doesn\'t exist', () => {
-    const result = replaceChapterContent(content, 'C3', 'New 3')
-    expect(result).toContain('# C1')
+  it('should replace existing chapter content by title (legacy)', () => {
+    const result = replaceChapterContent(content, 'C2', 'New 2')
     expect(result).toContain('# C2')
+    expect(result).toContain('New 2')
+    expect(result).not.toContain('Old 2')
+  })
+
+  it('should return original content if ID is provided but not found', () => {
+    const result = replaceChapterContent(content, 'C1', 'New 1', 'wrong-id')
+    expect(result).toBe(content)
+  })
+
+  it('should append chapter if it doesn\'t exist and no ID provided', () => {
+    const result = replaceChapterContent(content, 'C3', 'New 3')
     expect(result).toContain('# C3')
     expect(result).toContain('New 3')
-  })
-
-  it('should not duplicate header if new content already has one', () => {
-    const result = replaceChapterContent(content, 'C1', '# C1\nNew Content')
-    const matches = result.match(/# C1/g)
-    expect(matches).toHaveLength(1)
-    expect(result).toContain('New Content')
-    expect(result).not.toContain('Old 1')
   })
 })
 

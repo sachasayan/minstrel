@@ -52,7 +52,15 @@ export const projectsSlice = createSlice({
       state.lastEdit = null
     },
     setActiveProject: (state, action: PayloadAction<Project | null>) => {
-      state.activeProject = action.payload ? normalizeProjectStoryContent(action.payload) : null
+      if (action.payload) {
+        const normalized = normalizeProjectStoryContent(action.payload)
+        state.activeProject = {
+          ...normalized,
+          storyContent: ensureAllChaptersHaveIds(normalized.storyContent)
+        }
+      } else {
+        state.activeProject = null
+      }
       state.modifiedChapters = []
       state.lastEdit = null
     },
@@ -155,8 +163,8 @@ export const projectsSlice = createSlice({
         const newChapterNumber = (currentContent.match(/^#\s+/gm) || []).length + 1
         const newChapterTitle = `Chapter ${newChapterNumber}`
         const delimiter = currentContent.endsWith('\n\n') ? '' : currentContent.endsWith('\n') ? '\n' : '\n\n'
-        
-        state.activeProject.storyContent = `${currentContent}${delimiter}# ${newChapterTitle}\n\n`
+        const rawContent = `${currentContent}${delimiter}# ${newChapterTitle}\n\n`
+        state.activeProject.storyContent = ensureAllChaptersHaveIds(rawContent)
         state.projectHasLiveEdits = true
         
         // Track the new chapter as modified
@@ -165,34 +173,17 @@ export const projectsSlice = createSlice({
         }
       }
     },
-    updateChapter: (state, action: PayloadAction<{ title: string; content: string }>) => {
+    updateChapter: (state, action: PayloadAction<{ chapterId: string; content: string }>) => {
       const activeProject = state.activeProject
       if (activeProject) {
-        const { title, content } = action.payload
+        const { chapterId, content } = action.payload
         const storyContent = activeProject.storyContent || ''
 
-        // Find which chapter index we are updating
+        // Find which chapter index we are updating (for tracking modifiedChapters legacy UI state)
         const lines = storyContent.split('\n')
-        const chapterIdx = lines.findIndex((line) => {
-          const normalizedTitle = title.trim().toLowerCase()
-          const trimmedLine = line.trim().toLowerCase()
-          return (
-            trimmedLine.startsWith('# ') &&
-            (trimmedLine.includes(normalizedTitle + ':') ||
-              trimmedLine.includes(normalizedTitle + ' ') ||
-              trimmedLine.includes(normalizedTitle + '-') ||
-              trimmedLine === '# ' + normalizedTitle)
-          )
-        })
+        const chapterIdx = lines.findIndex((line) => line.trim().startsWith('# ') && line.includes(`id: ${chapterId}`))
 
-        let chapterId: string | undefined = undefined
         if (chapterIdx !== -1) {
-          const headerLine = lines[chapterIdx]
-          const idMatch = headerLine.match(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
-          if (idMatch) {
-            chapterId = idMatch[1]
-          }
-
           const linesBefore = lines.slice(0, chapterIdx)
           const index = linesBefore.filter((l) => l.trim().startsWith('# ')).length
           if (!state.modifiedChapters.includes(index)) {
@@ -200,7 +191,7 @@ export const projectsSlice = createSlice({
           }
         }
 
-        activeProject.storyContent = replaceChapterContent(storyContent, title, content, chapterId)
+        activeProject.storyContent = replaceChapterContent(storyContent, '', content, chapterId)
         // Run global ID insurance but ONLY if needed to keep performance high
         if (activeProject.storyContent.includes('# ') && !activeProject.storyContent.includes('<!-- id:')) {
            activeProject.storyContent = ensureAllChaptersHaveIds(activeProject.storyContent)

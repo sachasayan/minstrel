@@ -5,7 +5,7 @@ import { z } from 'zod'
  */
 
 export const writeFileSchema = z.object({
-  file_name: z.string().describe('The name of the file to write to. Only Markdown files supported.'),
+  file_name: z.string().describe('The name of the file to write to. For chapters, this MUST be the unique ID (e.g. "abc123") from the directory listing tag "<!-- id: abc123 --> Title". DO NOT use the title. For artifacts, use the title. Only Markdown supported.'),
   content: z.string().describe('The full content to write to the file.')
 })
 

@@ -94,9 +94,9 @@ const findChapterStartIndex = (lines: string[], title: string): number => {
   // Escape potential regex special characters in the title
   const escapedTitle = normalizedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   
-  // Pattern matches the title at the start of an H1,
-  // optionally followed by a separator (colon, dash, dot, space) or end of line.
-  const pattern = new RegExp(`^#\\s+${escapedTitle}(\\s*[:\\-.—\\s]|$)`, 'i')
+  // Pattern matches the title at the start of an H1, optionally preceded by an ID comment,
+  // and optionally followed by a separator (colon, dash, dot, space) or end of line.
+  const pattern = new RegExp(`^#\\s+(<!--\\s*id:\\s*[a-zA-Z0-9-]+\\s*-->\\s*)?${escapedTitle}(\\s*[:\\-.—\\s]|$)`, 'i')
 
   return lines.findIndex((line) => pattern.test(line.trim()))
 }
@@ -106,6 +106,19 @@ export const extractChapterId = (line: string): string | null => {
   return match ? match[1] : null
 }
 
+export const findChapterById = (storyContent: string, chapterId: string): { title: string; content: string } | null => {
+  const normalized = normalizeLineEndings(storyContent ?? '')
+  const lines = normalized.split('\n')
+  
+  const startIndex = lines.findIndex(line => line.trim().startsWith('# ') && (line.includes(`id: ${chapterId}`) || line.includes(`${chapterId}`)))
+  if (startIndex === -1) return null
+
+  const title = stripChapterId(lines[startIndex].trim().replace(/^#\s+/, ''))
+  const content = extractChapterContent(storyContent, '', chapterId) || ''
+  
+  return { title, content }
+}
+
 export const extractChapterContent = (storyContent: string, chapterTitle: string, chapterId?: string): string | null => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
@@ -113,9 +126,9 @@ export const extractChapterContent = (storyContent: string, chapterTitle: string
   let startIndex = -1
   if (chapterId) {
     startIndex = lines.findIndex(line => line.trim().startsWith('# ') && line.includes(`id: ${chapterId}`))
-  }
-  
-  if (startIndex === -1) {
+    // STRICT: If ID provided but not found, return null even if title match might exist
+    if (startIndex === -1) return null
+  } else {
     startIndex = findChapterStartIndex(lines, chapterTitle)
   }
 
@@ -140,22 +153,32 @@ export const replaceChapterContent = (storyContent: string, chapterTitle: string
   let startIndex = -1
   if (chapterId) {
     startIndex = lines.findIndex(line => line.trim().startsWith('# ') && line.includes(`id: ${chapterId}`))
-  }
-  
-  if (startIndex === -1) {
+    // STRICT: If ID provided but not found, fail loudly (return original content)
+    if (startIndex === -1) {
+      console.error(`replaceChapterContent: Chapter with ID ${chapterId} not found in storyContent.`)
+      return normalized
+    }
+  } else {
     startIndex = findChapterStartIndex(lines, chapterTitle)
   }
 
+  // If no title provided but we found the chapter, extract the existing title to use in header fallback
+  let effectiveTitle = chapterTitle
+  if (!effectiveTitle && startIndex !== -1) {
+    const existingHeader = lines[startIndex].trim().replace(/^#\s+/, '')
+    effectiveTitle = stripChapterId(existingHeader)
+  }
+
   // Ensure content starts with a header if it doesn't already have one
-  let contentToInsert = /^#\s+/.test(newContent.trim()) ? newContent.trim() : `# ${chapterTitle}\n\n${newContent.trim()}`
+  let contentToInsert = /^#\s+/.test(newContent.trim()) ? newContent.trim() : `# ${effectiveTitle || 'Untitled Chapter'}\n\n${newContent.trim()}`
   
-  // If we have an ID but it's not in the new content's header, inject it
+  // If we have an ID but it's not in the new content's header, inject it at the BEGINNING (after # )
   if (chapterId && !contentToInsert.includes(`id: ${chapterId}`)) {
-    contentToInsert = contentToInsert.replace(/^(#\s+[^\n]+)/, `$1 <!-- id: ${chapterId} -->`)
+    contentToInsert = contentToInsert.replace(/^(#\s+)(.*)/, `$1<!-- id: ${chapterId} --> $2`)
   }
 
   if (startIndex === -1) {
-    // If chapter doesn't exist, append it. If no ID, generate one if we typically want to.
+    // If chapter doesn't exist AND no ID was provided, append it.
     return `${normalized.trim()}\n\n${contentToInsert}`
   }
 
@@ -187,7 +210,7 @@ export const ensureAllChaptersHaveIds = (storyContent: string): string => {
     if (line.trim().startsWith('# ') && !line.includes('<!-- id:')) {
       const id = Math.random().toString(36).substring(2, 11) // Simple short ID
       changed = true
-      return `${line.trim()} <!-- id: ${id} -->`
+      return line.trim().replace(/^(#\s*)(.*)/, `$1<!-- id: ${id} --> $2`)
     }
     return line
   })
