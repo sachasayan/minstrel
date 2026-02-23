@@ -13,6 +13,7 @@ interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+  recentProjects?: any[]
 }
 
 const SENSITIVE_KEYS: (keyof AppSettings)[] = ['googleApiKey', 'deepseekApiKey', 'zaiApiKey', 'openaiApiKey']
@@ -86,6 +87,7 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   if (appSettings.deepseekApiKey === undefined) appSettings.deepseekApiKey = ''
   if (appSettings.zaiApiKey === undefined) appSettings.zaiApiKey = ''
   if (appSettings.openaiApiKey === undefined) appSettings.openaiApiKey = ''
+  if (appSettings.recentProjects === undefined) appSettings.recentProjects = []
 
   // Decrypt sensitive fields and check if migration is needed
   let needsMigration = false
@@ -120,7 +122,8 @@ export const saveAppSettings = async (config: AppSettings) => {
     googleApiKey: config.googleApiKey ?? '',
     deepseekApiKey: config.deepseekApiKey ?? '',
     zaiApiKey: config.zaiApiKey ?? '',
-    openaiApiKey: config.openaiApiKey ?? ''
+    openaiApiKey: config.openaiApiKey ?? '',
+    recentProjects: config.recentProjects ?? []
   }
 
   // Encrypt sensitive fields

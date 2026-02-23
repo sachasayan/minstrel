@@ -20,6 +20,14 @@ export const isSqliteFormat = (path: string): boolean => {
 }
 
 /**
+ * Opens the native OS file picker for selecting a .mns project file.
+ * @returns Promise resolving to the selected file path, or null if cancelled.
+ */
+export const openFileDialog = async (): Promise<string | null> => {
+  return await window.electron.ipcRenderer.invoke('open-file-dialog')
+}
+
+/**
  * Gets project fragment metadata from a project file (.md or .mns)
  * Constructs the cover data URL if image data is present.
  * @param projectPath Path to the project file

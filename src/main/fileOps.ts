@@ -133,6 +133,18 @@ export const handleShowSaveDialog = async (
   return filePath
 }
 
+export const handleOpenFileDialog = async () => {
+  const result = await dialog.showOpenDialog({
+    title: 'Open Minstrel Project',
+    properties: ['openFile'],
+    filters: [{ name: 'Minstrel Projects', extensions: ['mns'] }]
+  })
+  if (result.canceled || result.filePaths.length === 0) {
+    return null
+  }
+  return result.filePaths[0]
+}
+
 export const registerFileOpsHandlers = () => {
   ipcMain.handle('read-directory', handleReadDirectory)
   ipcMain.handle('read-file', handleReadFile)
@@ -141,4 +153,5 @@ export const registerFileOpsHandlers = () => {
   ipcMain.handle('select-directory', handleSelectDirectory)
   ipcMain.handle('delete-file', handleDeleteFile)
   ipcMain.handle('show-save-dialog', handleShowSaveDialog)
+  ipcMain.handle('open-file-dialog', handleOpenFileDialog)
 }

@@ -1,3 +1,13 @@
+export interface RecentProject {
+  projectPath: string
+  title: string
+  genre: Genre
+  cover?: string
+  coverImageMimeType?: string | null
+  wordCountCurrent?: number
+  lastOpenedAt: string // ISO timestamp
+}
+
 export interface AppSettings {
   workingRootDirectory?: string | null
   highPreferenceModelId?: string
@@ -8,6 +18,7 @@ export interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+  recentProjects?: RecentProject[]
 }
 export interface AppState {
   projectList: ProjectFragment[]

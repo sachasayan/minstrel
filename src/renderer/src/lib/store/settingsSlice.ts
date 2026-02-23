@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AppSettings } from '@/types'
+import { AppSettings, RecentProject } from '@/types'
 import { RootState } from '@/lib/store/store'
 import {
   DEFAULT_HIGH_PREFERENCE_MODEL_ID,
@@ -16,7 +16,8 @@ const initialState: AppSettings = {
   googleApiKey: '',
   deepseekApiKey: '',
   zaiApiKey: '',
-  openaiApiKey: ''
+  openaiApiKey: '',
+  recentProjects: []
 }
 
 export const settingsSlice = createSlice({
@@ -35,6 +36,7 @@ export const settingsSlice = createSlice({
       state.deepseekApiKey = loadedSettings.deepseekApiKey ?? initialState.deepseekApiKey
       state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
       state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
+      state.recentProjects = loadedSettings.recentProjects ?? initialState.recentProjects
     },
     // Ensure payload type allows null for working directory
     setWorkingRootDirectory: (state, action: PayloadAction<string | null>) => {
@@ -62,6 +64,18 @@ export const settingsSlice = createSlice({
     },
     setOpenaiApiKey: (state, action: PayloadAction<string>) => {
       state.openaiApiKey = action.payload
+    },
+    setRecentProjects: (state, action: PayloadAction<RecentProject[]>) => {
+      state.recentProjects = action.payload
+    },
+    addRecentProject: (state, action: PayloadAction<RecentProject>) => {
+      const MAX_RECENT = 3
+      const incoming = action.payload
+      // Remove any existing entry for the same path, then prepend, then trim
+      const filtered = (state.recentProjects ?? []).filter(
+        (p) => p.projectPath !== incoming.projectPath
+      )
+      state.recentProjects = [incoming, ...filtered].slice(0, MAX_RECENT)
     }
   }
 })
@@ -76,7 +90,9 @@ export const {
   setGoogleApiKey,
   setDeepseekApiKey,
   setZaiApiKey,
-  setOpenaiApiKey
+  setOpenaiApiKey,
+  setRecentProjects,
+  addRecentProject
 } = settingsSlice.actions
 
 export const selectSettingsState = (state: RootState) => state.settings
