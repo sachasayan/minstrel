@@ -3,7 +3,7 @@ import { Project, ProjectFragment } from '@/types'
 export const projectFromFragment = (projectFragment: ProjectFragment): Project => {
   return {
     ...projectFragment,
-    storyContent: '# Chapter 1\n\n',
+    storyContent: '',
     files: [],
     summary: '',
     year: 0,

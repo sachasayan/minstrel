@@ -30,6 +30,11 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
     const isPending = chatState.pendingChat
 
     const handleContentChange = useCallback((newContent: string) => {
+        // Don't write back empty/whitespace content — this can happen during the brief
+        // window between setActiveProjectFromFragment (skeleton state) and setActiveProject
+        // (real data loaded). Writing blank content here would clobber the real data on save.
+        if (!newContent || !newContent.trim()) return
+
         const isChapter = title?.includes('|||')
         const targetTitle = 'Story'
 
