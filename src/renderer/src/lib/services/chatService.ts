@@ -1,3 +1,5 @@
+import { tool } from 'ai'
+import { z } from 'zod'
 import geminiService from './llmService'
 import { resolvePendingChat } from '@/lib/store/chatSlice'
 import { setPendingFiles } from '@/lib/store/projectsSlice'
@@ -5,7 +7,7 @@ import { buildPrompt } from '@/lib/prompts/promptBuilder'
 import { PromptData } from '@/lib/prompts/types'
 import { toast } from 'sonner'
 import { RequestContext, AppSettings } from '@/types'
-import { store } from '@/lib/store/store' // Kept only for dispatching, will move to UI later
+import { AppDispatch, store } from '@/lib/store/store'
 import {
   handleMessage,
 } from './toolHandlers'
@@ -29,7 +31,12 @@ export const initializeGeminiService = () => {
  * Main entry point for sending a chat message.
  * Orchestrates multiple agents in an iterative loop.
  */
-export const sendMessage = async (initialContext: RequestContext, promptData: PromptData, settings: AppSettings) => {
+export const sendMessage = async (
+  initialContext: RequestContext,
+  promptData: PromptData,
+  settings: AppSettings,
+  dispatch: AppDispatch
+) => {
   // Cancel any existing loop if a new message arrives
   if (currentAbortController) {
     console.log('Aborting previous agent loop...')
@@ -49,11 +56,9 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
       if (signal.aborted) break
 
       const { system, userPrompt, allowedTools } = buildPrompt(context, promptData)
-      
-
 
       // Inform Redux about pending files AI might be reading
-      store.dispatch(setPendingFiles(context.requestedFiles || null))
+      dispatch(setPendingFiles(context.requestedFiles || null))
 
       // Determine model preference based on agent type
       const modelPreference: 'high' | 'low' = 
@@ -65,6 +70,8 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
 
       // Tools definition using the registry
       const toolkit = createTools({
+        dispatch,
+        activeProject: promptData.activeProject,
         onReadFile: (fileNames) => {
           nextRequestedFiles = fileNames
         },
@@ -97,26 +104,25 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
           })
         }
 
-          // Stream the actual text content if it's a message
-          for await (const textPart of stream.textStream) {
-            if (signal.aborted) {
-              streamingService.clear()
-              break
-            }
-            finalText += textPart
-            
-            // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
-            // Relaxed regex to catch headers even with ID comments or different spacing
-            const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
-            const isWritingLargeContent = (finalText.length > 500 && hasHeading);
-            const isLikelyInternalTask = context.agent === 'writerAgent' || context.agent === 'outlineAgent';
-            
-            if (isWritingLargeContent && isLikelyInternalTask) {
-               streamingService.updateText("Writing changes to story...")
-            } else {
-               streamingService.updateText(finalText)
-            }
+        // Stream the actual text content if it's a message
+        for await (const textPart of stream.textStream) {
+          if (signal.aborted) {
+            streamingService.clear()
+            break
           }
+          finalText += textPart
+          
+          // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
+          const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
+          const isWritingLargeContent = (finalText.length > 500 && hasHeading);
+          const isLikelyInternalTask = context.agent === 'writerAgent' || context.agent === 'outlineAgent';
+          
+          if (isWritingLargeContent && isLikelyInternalTask) {
+             streamingService.updateText("Writing changes to story...")
+          } else {
+             streamingService.updateText(finalText)
+          }
+        }
 
         // Wait for the text stream to finish
         try {
@@ -132,8 +138,6 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
           finalCalls = []
         }
         
-        // Tool state (nextAgent, nextRequestedFiles) is managed
-        // by the internal execute() callbacks provided via createTools.
       } catch (error: any) {
         if (signal.aborted) break
 
@@ -154,9 +158,9 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
         
         if (wasWriteAction && isVeryLarge) {
            console.log('Skipping chat message addition as it looks like a redundant large file write.');
-           handleMessage("I've updated the content as requested.");
+           handleMessage("I've updated the content as requested.", dispatch);
         } else {
-           handleMessage(finalText.trim());
+           handleMessage(finalText.trim(), dispatch);
         }
       }
 
@@ -171,8 +175,7 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
         sequenceInfo: context.sequenceInfo
       }
 
-      // Terminal condition: if no routing tool was used, we assume the task chain is finished 
-      // OR if the agent routes specifically to routingAgent.
+      // Terminal condition: if no routing tool was used, the task chain is finished
       if (!nextAgent || nextAgent === 'routingAgent') {
         break
       }
@@ -190,14 +193,13 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
     if (signal.aborted) return
 
     console.error('Failed to send chat message:', error)
-    handleMessage(`Hmm. Something went wrong, sorry. You might need to try again.`)
+    handleMessage(`Hmm. Something went wrong, sorry. You might need to try again.`, dispatch)
   } finally {
-    if (!signal.aborted) {
-      store.dispatch(setPendingFiles(null))
-      store.dispatch(resolvePendingChat())
-      if (currentAbortController?.signal === signal) {
-        currentAbortController = null
-      }
+    // Always clean up, regardless of abort status, to prevent stuck loading state
+    dispatch(setPendingFiles(null))
+    dispatch(resolvePendingChat())
+    if (currentAbortController?.signal === signal) {
+      currentAbortController = null
     }
     console.log('sendMessage() execution finished')
   }
@@ -205,8 +207,14 @@ export const sendMessage = async (initialContext: RequestContext, promptData: Pr
 
 /**
  * Specifically triggers the outline agent with initial parameters.
+ * Accepts promptData and settings directly so it has no store dependency.
  */
-export const generateOutlineFromParams = async (parameters: { [key: string]: any }): Promise<void> => {
+export const generateOutlineFromParams = async (
+  parameters: Record<string, unknown>,
+  promptData: PromptData,
+  settings: AppSettings,
+  dispatch: AppDispatch
+): Promise<void> => {
   const context: RequestContext = {
     agent: 'outlineAgent',
     currentStep: -1, // Special trigger for the outline agent
@@ -214,22 +222,19 @@ export const generateOutlineFromParams = async (parameters: { [key: string]: any
   }
 
   try {
-    const state = store.getState()
-    const promptData: PromptData = {
-      activeProject: state.projects.activeProject,
-      chatHistory: state.chat.chatHistory
-    }
-    await sendMessage(context, promptData, state.settings)
+    await sendMessage(context, promptData, settings, dispatch)
   } catch (error) {
     console.error('Failed to generate initial outline:', error)
-    handleMessage(`Sorry, I encountered an error trying to generate the initial outline.`)
+    handleMessage(`Sorry, I encountered an error trying to generate the initial outline.`, dispatch)
   } finally {
-    store.dispatch(resolvePendingChat())
+    dispatch(resolvePendingChat())
   }
 }
 
 /**
- * Generates book title suggestions. 
+ * Generates book title suggestions.
+ * Uses an inline tool definition so no Redux dispatch side-effects occur —
+ * the result is returned directly as a value.
  */
 export const generateTitleSuggestions = async (plotSummary: string, genre: string, setting: string): Promise<string[]> => {
   const prompt = `
@@ -243,18 +248,27 @@ ${plotSummary}
 Return the suggestions as action suggestions.
   `.trim()
 
-  try {
-    // For title suggestions, we typically want a quick single-turn response.
-    const toolkit = createTools()
-    const tools = {
-      actionSuggestion: toolkit.actionSuggestion
-    }
+  // Minimal inline tool — no dispatch, no side-effects; we just read the raw args back.
+  const suggestionTool = tool({
+    description: 'Provide title suggestions for the user.',
+    parameters: z.object({ suggestions: z.string().describe('Comma-separated list of title suggestions') }),
+    execute: async () => ({ status: 'success' })
+  })
 
+  try {
     const state = store.getState()
-    const result = await geminiService.generateTextWithTools(state.settings, prompt, '', tools, 'low')
+    const result = await geminiService.generateTextWithTools(
+      state.settings,
+      prompt,
+      '',
+      { actionSuggestion: suggestionTool },
+      'low'
+    )
     const suggestionCall = (result.toolCalls as any[]).find(tc => tc.toolName === 'actionSuggestion')
-    
-    return (suggestionCall?.args as any)?.suggestions || []
+    const raw = (suggestionCall?.args as any)?.suggestions ?? ''
+    return typeof raw === 'string'
+      ? raw.split(',').map(s => s.trim()).filter(Boolean)
+      : Array.isArray(raw) ? raw : []
   } catch (error) {
     console.error('Failed to generate title suggestions:', error)
     toast.error('Failed to generate title suggestions. Please try entering one manually.')

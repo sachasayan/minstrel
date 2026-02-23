@@ -1,19 +1,21 @@
-import { store } from '@/lib/store/store'
+import { AppDispatch } from '@/lib/store/store'
 import { addChatMessage, setActionSuggestions } from '@/lib/store/chatSlice'
 import { updateFile, updateReviews, updateChapter, setLastEdit } from '@/lib/store/projectsSlice'
 import { extractChapterContent } from '@/lib/storyContent'
+import { Project } from '@/types'
 
-export const handleWriteFile = (fileName: string, content: string) => {
-  const activeProject = store.getState().projects.activeProject
+export const handleWriteFile = (
+  fileName: string,
+  content: string,
+  dispatch: AppDispatch,
+  activeProject: Project | null
+) => {
   let oldContent = ''
 
   let chapterIndex: number | undefined = undefined
   let chapterId: string | undefined = undefined
   if (fileName.toLowerCase().includes('chapter')) {
     // Find chapter content in monolithic storyContent
-    oldContent = extractChapterContent(activeProject?.storyContent || '', fileName) || ''
-    
-    // Find which index and ID this chapter has
     const storyContent = activeProject?.storyContent || ''
     const lines = storyContent.split('\n')
     const matchIndex = lines.findIndex(line => {
@@ -40,7 +42,7 @@ export const handleWriteFile = (fileName: string, content: string) => {
   }
 
   // Record the edit for highlighting
-  store.dispatch(
+  dispatch(
     setLastEdit({
       fileTitle: fileName,
       oldContent: oldContent,
@@ -51,14 +53,13 @@ export const handleWriteFile = (fileName: string, content: string) => {
   )
 
   let fileType = 'unknown'
-  let sortOrder = 0 // Default sort order
+  let sortOrder = 0
 
-  // Infer type and sort_order based on filename
   if (fileName.toLowerCase().includes('outline')) {
     fileType = 'outline'
-    sortOrder = 0 // Outline always comes first
+    sortOrder = 0
 
-    store.dispatch(
+    dispatch(
       updateFile({
         title: fileName,
         content: content,
@@ -67,11 +68,9 @@ export const handleWriteFile = (fileName: string, content: string) => {
       })
     )
   } else if (fileName.toLowerCase().includes('chapter')) {
-    // Chapters are updated surgically in the monolithic storyContent
-    store.dispatch(updateChapter({ title: fileName, content: content }))
+    dispatch(updateChapter({ title: fileName, content: content }))
   } else {
-    // Dispatch updateFile for any other file types
-    store.dispatch(
+    dispatch(
       updateFile({
         title: fileName,
         content: content,
@@ -82,25 +81,25 @@ export const handleWriteFile = (fileName: string, content: string) => {
   }
 }
 
-export const handleCritique = (critiqueString: string) => {
+export const handleCritique = (critiqueString: string, dispatch: AppDispatch) => {
   try {
     const payload = JSON.parse(critiqueString)
-    store.dispatch(updateReviews(payload))
+    dispatch(updateReviews(payload))
   } catch (error) {
     console.error('Error parsing critique JSON:', error)
-    store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing critique from AI response.' }))
+    dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing critique from AI response.' }))
   }
 }
 
-export const handleMessage = (text: string) => {
-  store.dispatch(addChatMessage({ sender: 'Gemini', text }))
+export const handleMessage = (text: string, dispatch: AppDispatch) => {
+  dispatch(addChatMessage({ sender: 'Gemini', text }))
 }
 
-export const handleActionSuggestions = (suggestions: string[] | undefined) => {
+export const handleActionSuggestions = (suggestions: string[] | undefined, dispatch: AppDispatch) => {
   if (suggestions && suggestions.length > 0) {
     const flattened = suggestions.map((item) => `${item}`).slice(0, 3)
-    store.dispatch(setActionSuggestions(flattened))
+    dispatch(setActionSuggestions(flattened))
   } else {
-    store.dispatch(setActionSuggestions([])) // Clear suggestions if not present
+    dispatch(setActionSuggestions([]))
   }
 }

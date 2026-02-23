@@ -45,6 +45,8 @@ import { store } from '@/lib/store/store'
 import { handleWriteFile } from './toolHandlers'
 
 describe('chatService', () => {
+  const mockDispatch = vi.fn()
+
   const mockState = {
     projects: { activeProject: { title: 'Test', files: [], storyContent: '' } },
     settings: { googleApiKey: 'key', provider: 'google', highPreferenceModelId: 'h', lowPreferenceModelId: 'l' },
@@ -89,17 +91,21 @@ describe('chatService', () => {
         activeProject: mockState.projects.activeProject,
         chatHistory: mockState.chat.chatHistory
       }
-      await sendMessage(context, promptData, mockState.settings)
+      await sendMessage(context, promptData, mockState.settings, mockDispatch)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
-      expect(handleWriteFile).toHaveBeenCalledWith('test.md', 'content')
+      expect(handleWriteFile).toHaveBeenCalledWith(
+        'test.md',
+        'content',
+        mockDispatch,
+        mockState.projects.activeProject
+      )
     })
 
     it('should iterate when routeTo is called', async () => {
       const context = { agent: 'routingAgent', currentStep: 0 } as any
       
       let callCount = 0
-      // Correct signature: (settings, system, userPrompt, tools, modelPreference)
       vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_settings, _system, _userPrompt, tools: any) => {
         callCount++
         if (callCount === 1) {
@@ -125,7 +131,7 @@ describe('chatService', () => {
         activeProject: mockState.projects.activeProject,
         chatHistory: mockState.chat.chatHistory
       }
-      await sendMessage(context, promptData, mockState.settings)
+      await sendMessage(context, promptData, mockState.settings, mockDispatch)
       
       // Should have called the LLM twice: once for routing, once for the writerAgent
       expect(geminiService.streamTextWithTools).toHaveBeenCalledTimes(2)
@@ -141,7 +147,7 @@ describe('chatService', () => {
             activeProject: mockState.projects.activeProject,
             chatHistory: mockState.chat.chatHistory
           }
-          sendMessage(secondContext, promptData, mockState.settings)
+          sendMessage(secondContext, promptData, mockState.settings, mockDispatch)
           return new Promise((resolve) => {
             setTimeout(() => {
               resolve(mockStreamingResult('late', [], tools))
@@ -156,7 +162,7 @@ describe('chatService', () => {
         activeProject: mockState.projects.activeProject,
         chatHistory: mockState.chat.chatHistory
       }
-      await sendMessage(firstContext, promptData, mockState.settings)
+      await sendMessage(firstContext, promptData, mockState.settings, mockDispatch)
     })
   })
 
@@ -164,11 +170,21 @@ describe('chatService', () => {
     it('should extract suggestions from tool calls', async () => {
       vi.mocked(geminiService.generateTextWithTools).mockResolvedValueOnce({
         text: '',
-        toolCalls: [{ toolName: 'actionSuggestion', args: { suggestions: ['T1', 'T2'] } }]
+        toolCalls: [{ toolName: 'actionSuggestion', args: { suggestions: 'T1, T2' } }]
       } as any)
       
       const titles = await generateTitleSuggestions('plot', 'fantasy', 'space')
       expect(titles).toEqual(['T1', 'T2'])
+    })
+
+    it('should return empty array when no suggestions tool call is present', async () => {
+      vi.mocked(geminiService.generateTextWithTools).mockResolvedValueOnce({
+        text: 'Some text response',
+        toolCalls: []
+      } as any)
+
+      const titles = await generateTitleSuggestions('plot', 'fantasy', 'space')
+      expect(titles).toEqual([])
     })
   })
 })

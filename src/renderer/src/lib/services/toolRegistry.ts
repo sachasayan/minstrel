@@ -6,8 +6,12 @@ import {
   handleCritique,
   handleActionSuggestions
 } from './toolHandlers'
+import { AppDispatch } from '@/lib/store/store'
+import { Project } from '@/types'
 
 export interface ToolCallbacks {
+  dispatch: AppDispatch
+  activeProject: Project | null
   onReadFile?: (fileNames: string[]) => void
   onRouteTo?: (agent: string) => void
 }
@@ -15,7 +19,8 @@ export interface ToolCallbacks {
 /**
  * Creates the tools object for the AI SDK, injecting necessary callbacks.
  */
-export const createTools = (callbacks: ToolCallbacks = {}) => {
+export const createTools = (callbacks: ToolCallbacks) => {
+  const { dispatch, activeProject } = callbacks
   return {
     writeFile: tool({
       description: 'Write content to a file. Only Markdown files supported.',
@@ -23,7 +28,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       // @ts-expect-error
       execute: async (args: z.infer<typeof schemas.writeFileSchema>) => {
         console.log(`[TOOL EXECUTION] writeFile called with raw args:`, JSON.stringify(args))
-        handleWriteFile(args.file_name, args.content)
+        handleWriteFile(args.file_name, args.content, dispatch, activeProject)
         return { status: 'success', file: args.file_name }
       }
     }),
@@ -62,11 +67,10 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       execute: async (args: z.infer<typeof schemas.actionSuggestionSchema>) => {
         console.log(`[TOOL EXECUTION] actionSuggestion called with raw args:`, JSON.stringify(args))
         const suggestions = args.suggestions.split(',').map(s => s.trim()).filter(Boolean)
-        handleActionSuggestions(suggestions)
+        handleActionSuggestions(suggestions, dispatch)
         return { status: 'success' }
       }
     }),
-
 
     addCritique: tool({
       description: 'Submit a story critique.',
@@ -74,7 +78,7 @@ export const createTools = (callbacks: ToolCallbacks = {}) => {
       // @ts-expect-error
       execute: async (args: z.infer<typeof schemas.addCritiqueSchema>) => {
         console.log(`[TOOL EXECUTION] addCritique called with raw args:`, JSON.stringify(args))
-        handleCritique(args.critique)
+        handleCritique(args.critique, dispatch)
         return { status: 'success' }
       }
     })

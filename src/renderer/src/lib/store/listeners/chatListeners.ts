@@ -19,7 +19,7 @@ chatListeners.startListening({
         activeProject: state.projects.activeProject,
         chatHistory: state.chat.chatHistory
       }
-      sendMessage(blankContext, promptData, state.settings)
+      sendMessage(blankContext, promptData, state.settings, listenerApi.dispatch)
     }
   }
 })
