@@ -99,25 +99,25 @@ describe('chatService', () => {
       const context = { agent: 'routingAgent', currentStep: 0 } as any
       
       let callCount = 0
-      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_s, _p, tools: any) => {
+      // Correct signature: (settings, system, userPrompt, tools, modelPreference)
+      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_settings, _system, _userPrompt, tools: any) => {
         callCount++
         if (callCount === 1) {
-          // Manually trigger the tool execution which sets the closure variable nextAgent
-          if (tools.routeTo && tools.routeTo.execute) {
+          // Trigger the routeTo tool callback, which sets nextAgent inside chatService
+          if (tools.routeTo?.execute) {
             await tools.routeTo.execute({ agent: 'writerAgent' })
           }
           return {
             text: '',
             toolCalls: Promise.resolve([{ toolName: 'routeTo', args: { agent: 'writerAgent' } }]),
             textStream: (async function* () {})(),
-            then: (resolve: any) => resolve({ text: '', toolCalls: [{ toolName: 'routeTo', args: { agent: 'writerAgent' } }] })
           } as any
         }
+        // Second call: writerAgent produces a final response, no further routing
         return {
           text: 'Done',
           toolCalls: Promise.resolve([]),
           textStream: (async function* () { yield 'Done' })(),
-          then: (resolve: any) => resolve({ text: 'Done', toolCalls: [] })
         } as any
       })
         
@@ -127,7 +127,8 @@ describe('chatService', () => {
       }
       await sendMessage(context, promptData, mockState.settings)
       
-      expect(geminiService.streamTextWithTools).toHaveBeenCalled()
+      // Should have called the LLM twice: once for routing, once for the writerAgent
+      expect(geminiService.streamTextWithTools).toHaveBeenCalledTimes(2)
     })
 
     it('should respect AbortSignal', async () => {

@@ -72,10 +72,16 @@ describe('projectsSlice', () => {
       activeProject: { title: 'P1', files: [], storyContent: '# Chapter 1\nOld\n# Chapter 2\nOld' } as any
     }
     const actual = reducer(stateWithProject, updateChapter({ title: 'Chapter 1', content: 'New Body' }))
-    expect(actual.activeProject?.storyContent).toContain('New Body')
-    // Chapter 2's body content should be preserved (headers may have IDs injected)
-    expect(actual.activeProject?.storyContent).toContain('Chapter 2')
-    expect(actual.activeProject?.storyContent).toContain('Old')
+    const content = actual.activeProject?.storyContent ?? ''
+    // Split by H1 headings to isolate each chapter's section
+    const sections = content.split(/^#\s+/m).filter(Boolean)
+    const ch1Section = sections.find(s => s.toLowerCase().startsWith('chapter 1')) ?? ''
+    const ch2Section = sections.find(s => s.toLowerCase().startsWith('chapter 2')) ?? ''
+    // Chapter 1 should have been updated
+    expect(ch1Section).toContain('New Body')
+    expect(ch1Section).not.toContain('Old')
+    // Chapter 2's body should be untouched
+    expect(ch2Section).toContain('Old')
   })
 
   it('should handle setAllFilesAsSaved', () => {
