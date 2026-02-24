@@ -180,13 +180,13 @@ describe('fileOps', () => {
     })
 
     it('should return null if dialog is canceled', async () => {
-      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: true, filePath: undefined })
+      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: true, filePath: '' })
       const result = await handleShowSaveDialog({} as any, {})
       expect(result).toBeNull()
     })
 
     it('should return null if filePath is missing despite not being canceled', async () => {
-      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: false, filePath: undefined })
+      vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: false, filePath: '' })
       const result = await handleShowSaveDialog({} as any, {})
       expect(result).toBeNull()
     })

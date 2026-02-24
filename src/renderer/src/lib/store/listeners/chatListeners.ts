@@ -2,7 +2,7 @@ import { createListenerMiddleware } from '@reduxjs/toolkit'
 import { sendMessage } from '@/lib/services/chatService'
 import { addChatMessage } from '@/lib/store/chatSlice'
 import { RequestContext } from '@/types'
-import { RootState } from '../store'
+import { RootState, AppDispatch } from '../store'
 
 export const chatListeners = createListenerMiddleware()
 
@@ -19,7 +19,7 @@ chatListeners.startListening({
         activeProject: state.projects.activeProject,
         chatHistory: state.chat.chatHistory
       }
-      sendMessage(blankContext, promptData, state.settings, listenerApi.dispatch)
+      sendMessage(blankContext, promptData, state.settings, listenerApi.dispatch as AppDispatch)
     }
   }
 })

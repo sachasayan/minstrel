@@ -198,6 +198,7 @@ export const sendMessage = async (
     // Always clean up, regardless of abort status, to prevent stuck loading state
     dispatch(setPendingFiles(null))
     dispatch(resolvePendingChat())
+    
     if (currentAbortController?.signal === signal) {
       currentAbortController = null
     }
@@ -227,6 +228,7 @@ export const generateOutlineFromParams = async (
     console.error('Failed to generate initial outline:', error)
     handleMessage(`Sorry, I encountered an error trying to generate the initial outline.`, dispatch)
   } finally {
+    dispatch(setPendingFiles(null))
     dispatch(resolvePendingChat())
   }
 }
@@ -251,8 +253,11 @@ Return the suggestions as action suggestions.
   // Minimal inline tool — no dispatch, no side-effects; we just read the raw args back.
   const suggestionTool = tool({
     description: 'Provide title suggestions for the user.',
-    parameters: z.object({ suggestions: z.string().describe('Comma-separated list of title suggestions') }),
-    execute: async () => ({ status: 'success' })
+    inputSchema: z.object({ suggestions: z.string().describe('Comma-separated list of title suggestions') }),
+    execute: async ({ suggestions }) => {
+      console.log('Title suggestions tool executed with:', suggestions)
+      return { status: 'success' }
+    }
   })
 
   try {

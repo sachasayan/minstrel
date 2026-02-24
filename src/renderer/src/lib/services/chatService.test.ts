@@ -33,16 +33,20 @@ vi.mock('./toolHandlers', () => ({
   handleActionSuggestions: vi.fn()
 }))
 
-vi.mock('sonner', () => ({
-  toast: {
-    error: vi.fn()
-  }
+vi.mock('@/lib/store/chatSlice', () => ({
+  resolvePendingChat: vi.fn(() => ({ type: 'chat/resolvePendingChat' }))
+}))
+
+vi.mock('@/lib/store/projectsSlice', () => ({
+  setPendingFiles: vi.fn((files) => ({ type: 'projects/setPendingFiles', payload: files }))
 }))
 
 import { sendMessage, generateTitleSuggestions } from './chatService'
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
 import { handleWriteFile } from './toolHandlers'
+import { resolvePendingChat } from '@/lib/store/chatSlice'
+import { setPendingFiles } from '@/lib/store/projectsSlice'
 
 describe('chatService', () => {
   const mockDispatch = vi.fn()
@@ -163,6 +167,10 @@ describe('chatService', () => {
         chatHistory: mockState.chat.chatHistory
       }
       await sendMessage(firstContext, promptData, mockState.settings, mockDispatch)
+
+      // Verify cleanup was dispatched twice (once for each sendMessage call)
+      expect(mockDispatch).toHaveBeenCalledWith(setPendingFiles(null))
+      expect(mockDispatch).toHaveBeenCalledWith(resolvePendingChat())
     })
   })
 
