@@ -63,7 +63,7 @@ projectListeners.startListening({
   matcher: isAnyOf(startNewProject),
   effect: async (_action, listenerApi) => {
     listenerApi.dispatch(clearChatHistory())
-    listenerApi.dispatch(setActiveSection('Chapter 1|||0'))
+    listenerApi.dispatch(setActiveSection('Outline'))
     listenerApi.dispatch(setActiveView('project/editor'))
 
     try {
