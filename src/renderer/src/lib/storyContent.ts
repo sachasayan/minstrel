@@ -119,7 +119,7 @@ export const findChapterById = (storyContent: string, chapterId: string): { titl
   return { title, content }
 }
 
-export const extractChapterContent = (storyContent: string, chapterTitle: string, chapterId?: string): string | null => {
+export const extractChapterContent = (storyContent: string, chapterTitle: string, chapterId?: string, includeHeader = false): string | null => {
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
 
@@ -142,7 +142,7 @@ export const extractChapterContent = (storyContent: string, chapterTitle: string
     }
   }
 
-  const contentLines = lines.slice(startIndex + 1, endIndex === -1 ? lines.length : endIndex)
+  const contentLines = lines.slice(includeHeader ? startIndex : startIndex + 1, endIndex === -1 ? lines.length : endIndex)
   return contentLines.join('\n').trim()
 }
 

@@ -1,7 +1,8 @@
 import { AppDispatch } from '@/lib/store/store'
 import { addChatMessage, setActionSuggestions } from '@/lib/store/chatSlice'
 import { updateFile, updateReviews, updateChapter, setLastEdit } from '@/lib/store/projectsSlice'
-import { findChapterById, getChaptersFromStoryContent } from '@/lib/storyContent'
+import { setActiveSection, setActiveView } from '@/lib/store/appStateSlice'
+import { findChapterById, getChaptersFromStoryContent, extractChapterContent, stripChapterId } from '@/lib/storyContent'
 import { Project } from '@/types'
 
 export const handleWriteFile = (
@@ -14,24 +15,38 @@ export const handleWriteFile = (
 
   // 1. Attempt exact ID lookup in storyContent
   const chapter = findChapterById(storyContent, fileName)
-
   if (chapter) {
     // It's a chapter!
     const lines = storyContent.split('\n')
     const matchIndex = lines.findIndex(line => line.trim().startsWith('# ') && line.includes(`id: ${fileName}`))
     const chapterIndex = lines.slice(0, matchIndex).filter(l => l.trim().startsWith('# ')).length
 
+    // For highlighting, we need the FULL chapter content including the header
+    const oldContentWithHeader = extractChapterContent(storyContent, '', fileName, true) || chapter.content
+    
+    // Ensure the new content also starts with a header for alignment
+    let newContentWithHeader = content
+    if (!newContentWithHeader.trim().startsWith('# ')) {
+      const headerLine = lines[matchIndex].trim()
+      newContentWithHeader = `${headerLine}\n\n${content}`
+    }
+
     dispatch(
       setLastEdit({
         fileTitle: chapter.title,
-        oldContent: chapter.content,
-        newContent: content,
+        oldContent: oldContentWithHeader,
+        newContent: newContentWithHeader,
         chapterIndex,
         chapterId: fileName
       })
     )
 
     dispatch(updateChapter({ chapterId: fileName, content: content }))
+    
+    // Force view switch so the user sees the highlights immediately
+    dispatch(setActiveSection(`${chapter.title}|||${chapterIndex}|||${fileName}`))
+    dispatch(setActiveView('project/editor'))
+    
     return
   }
 

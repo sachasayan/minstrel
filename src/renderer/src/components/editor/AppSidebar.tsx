@@ -38,8 +38,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }
 
-  const handleChapterSelect = (title: string, index: number) => {
-    dispatch(setActiveSection(`${title}|||${index}`))
+  const handleChapterSelect = (title: string, index: number, id?: string) => {
+    dispatch(setActiveSection(`${title}|||${index}${id ? `|||${id}` : ''}`))
     dispatch(setActiveView('project/editor'))
   }
 
@@ -88,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   return (
                     <SidebarMenuItem key={`chapter-${i}`}>
                       <SidebarMenuButton asChild isActive={isActive}>
-                        <a onClick={() => handleChapterSelect(chapter.title, i)} className={`flex items-center`}>
+                        <a onClick={() => handleChapterSelect(chapter.title, i, chapter.id)} className={`flex items-center`}>
                           <Book />
                           <span className="flex-grow ml-2">
                             {chapter.title.trim() || `Chapter ${i + 1}`}
