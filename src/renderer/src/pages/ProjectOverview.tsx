@@ -41,7 +41,7 @@ const ProjectOverview = (): React.ReactNode => {
   ])
 
   return (
-    <SidebarProvider className="h-screen overflow-hidden">
+    <SidebarProvider defaultOpen={false} className="h-screen overflow-hidden">
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
         <ProjectBar />
         <StatusBar floating={false} />
