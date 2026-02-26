@@ -2,7 +2,7 @@ import llmService from '@/lib/services/llmService'
 import { AppSettings } from '@/types'
 
 const SYSTEM_PROMPT = `You are a creative writing assistant specializing in book titles.
-Given a story outline, suggest exactly 12 compelling, distinct titles for the novel.
+Given a story outline, suggest exactly 12 compelling, distinct, artful titles for the novel.
 Prefix each title with a single thematically fitting emoji (e.g. a genre or mood cue).
 Respond ONLY with a valid JSON array of 12 strings. No markdown, no explanation, no extra text.
 Example format: ["🌙 Title One", "⚔️ Title Two", ...]`
