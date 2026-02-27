@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo } from 'react'
+import { useState, useRef, useEffect, memo, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
 import { RootState } from '@/lib/store/store'
@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button'
 import minstrelIcon from '@/assets/bot/base.png'
 import { ChatMessage } from '@/types'
 import { streamingService } from '@/lib/services/streamingService'
+import { selectActiveProject } from '@/lib/store/projectsSlice'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 const ChatLoadingIndicator = ({ status }: { status: string }) => {
   const [dots, setDots] = useState('')
@@ -58,13 +61,20 @@ ChatMessageItem.displayName = 'ChatMessageItem'
 
 const ChatInterface = () => {
   const { chatHistory, pendingChat } = useSelector((state: RootState) => selectChat(state))
+  const activeProject = useSelector(selectActiveProject)
   const [message, setMessage] = useState('')
   const [streamingText, setStreamingText] = useState('')
   const [streamingStatus, setStreamingStatus] = useState('')
   const dispatch = useDispatch()
   const inputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-  const lastMessageRef = useRef<HTMLDivElement>(null)
+  const lastMessageRef = useRef<HTMLDivElement | null>(null)
+
+  const isProjectEmpty = useMemo(() => {
+    const hasStoryContent = !!activeProject?.storyContent && activeProject.storyContent.trim() !== ''
+    const hasAncillaryFiles = !!activeProject?.files && activeProject.files.some(f => f.content && f.content.trim() !== '')
+    return !hasStoryContent && !hasAncillaryFiles
+  }, [activeProject?.storyContent, activeProject?.files])
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -99,15 +109,31 @@ const ChatInterface = () => {
   const actionSuggestions = useSelector((state: RootState) => selectChat(state).actionSuggestions)
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-      <div className="w-[370px] h-[600px] max-h-[80vh] bg-background border rounded-lg shadow-2xl flex flex-col overflow-hidden">
+    <div className={cn(
+      "fixed inset-0 pointer-events-none z-50 flex transition-all duration-500",
+      isProjectEmpty ? "items-center justify-center" : "items-end justify-end p-6"
+    )}>
+      <motion.div
+        layout
+        initial={false}
+        animate={{
+          width: isProjectEmpty ? '450px' : '370px',
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 260,
+          damping: 25,
+          mass: 1
+        }}
+        className="pointer-events-auto flex flex-col bg-background border rounded-lg shadow-2xl overflow-hidden h-[600px]"
+      >
         <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
           {chatHistory.map((msg, index) => (
             <ChatMessageItem
               key={index}
               msg={msg}
               isLast={index === chatHistory.length - 1 && !streamingText && !pendingChat}
-              lastMessageRef={lastMessageRef}
+              lastMessageRef={lastMessageRef as any}
             />
           ))}
 
@@ -115,19 +141,25 @@ const ChatInterface = () => {
             <ChatMessageItem
               msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
               isLast={!pendingChat || (pendingChat && !streamingStatus)}
-              lastMessageRef={lastMessageRef}
+              lastMessageRef={lastMessageRef as any}
             />
           )}
 
           {/* Suggestions */}
-          {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-            <Button onClick={() => handleNextStage(suggestion)} key={index} className="transition-all mr-2 my-2 inline-block bg-highlight-600">
-              {suggestion}
-            </Button>
-          ))}
+          <div className="flex flex-wrap items-center">
+            {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+              <Button
+                onClick={() => handleNextStage(suggestion)}
+                key={index}
+                className="transition-all mr-2 my-2 inline-block bg-highlight-600 whitespace-normal text-left h-auto py-2"
+              >
+                {suggestion}
+              </Button>
+            ))}
+          </div>
 
           {pendingChat && (
-            <div ref={lastMessageRef}>
+            <div ref={lastMessageRef as any}>
               <ChatLoadingIndicator status={streamingStatus} />
             </div>
           )}
@@ -143,11 +175,15 @@ const ChatInterface = () => {
             className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden text-sm"
             disabled={pendingChat}
           />
-          <button onClick={handleSend} className="bg-highlight-700 text-white p-2 rounded-lg shrink-0 text-sm" disabled={pendingChat}>
+          <button
+            onClick={handleSend}
+            className="bg-highlight-700 text-white p-2 rounded-lg shrink-0 text-sm"
+            disabled={pendingChat}
+          >
             Send
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

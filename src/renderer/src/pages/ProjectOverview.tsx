@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { selectAppState } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-
+import { motion } from 'framer-motion'
 
 import { StoryViewer } from '@/components/editor/StoryViewer'
 import { ArtifactViewer } from '@/components/editor/ArtifactViewer'
@@ -15,6 +15,12 @@ import ProjectBar from '@/components/ProjectBar'
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
   const activeProject = useSelector(selectActiveProject)
+
+  const isProjectEmpty = useMemo(() => {
+    const hasStoryContent = !!activeProject?.storyContent && activeProject.storyContent.trim() !== ''
+    const hasAncillaryFiles = !!activeProject?.files && activeProject.files.some(f => f.content && f.content.trim() !== '')
+    return !hasStoryContent && !hasAncillaryFiles
+  }, [activeProject?.storyContent, activeProject?.files])
 
   const isStorySection = useMemo(() => {
     return appState.activeSection === 'Overview' || appState.activeSection?.includes('|||')
@@ -40,14 +46,27 @@ const ProjectOverview = (): React.ReactNode => {
 
   return (
     <div className="h-screen overflow-hidden bg-background">
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+      <motion.div
+        animate={{ opacity: isProjectEmpty ? 0 : 1 }}
+        transition={{ duration: 0.5 }}
+        className={cn(
+          "fixed top-4 right-4 z-50 flex items-center gap-2",
+          isProjectEmpty && "pointer-events-none"
+        )}
+      >
         <ProjectBar />
         <StatusBar floating={false} />
-      </div>
-      <main className={cn(
-        "relative flex-1 min-w-0 h-full overflow-hidden",
-        "animate-in fade-in zoom-in-95 duration-300"
-      )}>
+      </motion.div>
+
+      <motion.main
+        animate={{ opacity: isProjectEmpty ? 0 : 1 }}
+        transition={{ duration: 0.5 }}
+        className={cn(
+          "relative flex-1 min-w-0 h-full overflow-hidden",
+          "animate-in fade-in zoom-in-95 duration-300",
+          isProjectEmpty && "pointer-events-none"
+        )}
+      >
         {appState.activeView == 'project/editor' && editorContent ? (
           isStorySection ? (
             <StoryViewer
@@ -63,7 +82,7 @@ const ProjectOverview = (): React.ReactNode => {
             />
           )
         ) : null}
-      </main>
+      </motion.main>
       <ChatInterface />
       <CommandPalette />
     </div>
