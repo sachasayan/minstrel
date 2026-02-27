@@ -1,8 +1,8 @@
 import { AppDispatch } from '@/lib/store/store'
 import { addChatMessage, setActionSuggestions } from '@/lib/store/chatSlice'
-import { updateFile, updateReviews, updateChapter, setLastEdit } from '@/lib/store/projectsSlice'
+import { updateFile, updateChapter, setLastEdit } from '@/lib/store/projectsSlice'
 import { setActiveSection, setActiveView } from '@/lib/store/appStateSlice'
-import { findChapterById, getChaptersFromStoryContent, extractChapterContent, stripChapterId } from '@/lib/storyContent'
+import { findChapterById, getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
 import { Project } from '@/types'
 
 export const handleWriteFile = (

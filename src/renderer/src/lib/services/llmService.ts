@@ -1,4 +1,4 @@
-import { generateText, streamText, LanguageModel } from 'ai'
+import { generateText, streamText, LanguageModel, ModelMessage } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
 import { AppSettings } from '@/types'
@@ -188,7 +188,7 @@ const service: any = {
   },
 
   // Stream content with native tools
-  async streamTextWithTools(settings: AppSettings, system: string, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
+  async streamTextWithTools(settings: AppSettings, system: string, messages: ModelMessage[], tools: any, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
     console.log(
@@ -199,7 +199,7 @@ const service: any = {
       return streamText({
         model,
         system: system,
-        prompt: prompt,
+        messages: messages,
         tools: tools
       })
     } catch (error) {

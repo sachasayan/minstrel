@@ -55,14 +55,14 @@ export const sendMessage = async (
     while (context.currentStep < MAX_STEPS) {
       if (signal.aborted) break
 
-      const { system, userPrompt, allowedTools } = buildPrompt(context, promptData)
+      const { system, messages, allowedTools } = buildPrompt(context, promptData)
 
       // Inform Redux about pending files AI might be reading
       dispatch(setPendingFiles(context.requestedFiles || null))
 
       // Determine model preference based on agent type
       const modelPreference: 'high' | 'low' = 
-        (context.agent === 'outlineAgent' || context.agent === 'writerAgent') ? 'high' : 'low'
+        context.agent === 'writerAgent' ? 'high' : 'low'
 
       // Define local variables to capture state changes from tools
       let nextAgent: string | null = null
@@ -88,7 +88,7 @@ export const sendMessage = async (
       let finalText = ''
       let finalCalls: any[] = []
       try {
-        const stream = await geminiService.streamTextWithTools(settings, system, userPrompt, activeTools, modelPreference)
+        const stream = await geminiService.streamTextWithTools(settings, system, messages, activeTools, modelPreference)
         
         streamingService.updateStatus('Minstrel is thinking...')
 
@@ -115,7 +115,7 @@ export const sendMessage = async (
           // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
           const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
           const isWritingLargeContent = (finalText.length > 500 && hasHeading);
-          const isLikelyInternalTask = context.agent === 'writerAgent' || context.agent === 'outlineAgent';
+          const isLikelyInternalTask = context.agent === 'writerAgent';
           
           if (isWritingLargeContent && isLikelyInternalTask) {
              streamingService.updateText("Writing changes to story...")
@@ -175,8 +175,13 @@ export const sendMessage = async (
         sequenceInfo: context.sequenceInfo
       }
 
+      // Defensive: warn if readFile was called without a routeTo in the same turn
+      if (nextRequestedFiles && !nextAgent) {
+        console.warn('[chatService] readFile called without routeTo — loop will stall. Files requested:', nextRequestedFiles)
+      }
+
       // Terminal condition: if no routing tool was used, the task chain is finished
-      if (!nextAgent || nextAgent === 'routingAgent') {
+      if (!nextAgent) {
         break
       }
 
@@ -203,33 +208,6 @@ export const sendMessage = async (
       currentAbortController = null
     }
     console.log('sendMessage() execution finished')
-  }
-}
-
-/**
- * Specifically triggers the outline agent with initial parameters.
- * Accepts promptData and settings directly so it has no store dependency.
- */
-export const generateOutlineFromParams = async (
-  parameters: Record<string, unknown>,
-  promptData: PromptData,
-  settings: AppSettings,
-  dispatch: AppDispatch
-): Promise<void> => {
-  const context: RequestContext = {
-    agent: 'outlineAgent',
-    currentStep: -1, // Special trigger for the outline agent
-    carriedContext: JSON.stringify(parameters, null, 2)
-  }
-
-  try {
-    await sendMessage(context, promptData, settings, dispatch)
-  } catch (error) {
-    console.error('Failed to generate initial outline:', error)
-    handleMessage(`Sorry, I encountered an error trying to generate the initial outline.`, dispatch)
-  } finally {
-    dispatch(setPendingFiles(null))
-    dispatch(resolvePendingChat())
   }
 }
 

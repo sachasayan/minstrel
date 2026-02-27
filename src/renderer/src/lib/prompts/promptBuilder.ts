@@ -1,14 +1,13 @@
 import { RequestContext } from '@/types'
+import { ModelMessage } from 'ai'
 import {
   basePrompt,
   addAvailableFiles,
   addProvidedFiles,
   addFileContents,
-  addParameters,
   appendWithSeparator
 } from './promptsUtils'
 import { getRoutingAgentPrompt } from './routingAgent'
-import { getOutlineAgentPrompt } from './outlineAgent'
 import { getWriterAgentPrompt } from './writerAgent'
 import { getToolsPrompt } from './tools'
 
@@ -78,9 +77,19 @@ ${chapterContent || '(Chapter content is empty)'}
   return filesContent.join('\n')
 }
 
-export const getLatestUserMessage = (data: PromptData): string => {
-  // Ensure text exists and trim whitespace
-  return data.chatHistory.findLast((message) => message.sender === 'User')?.text?.trim() || '(No user message found)'
+export const buildMessages = (data: PromptData): ModelMessage[] => {
+  const messages: ModelMessage[] = []
+  for (const msg of data.chatHistory) {
+    const role = msg.sender === 'User' ? 'user' : 'assistant'
+    if (msg.text?.trim()) {
+      messages.push({ role, content: msg.text.trim() })
+    }
+  }
+  // Ensure the last message is always from the user
+  if (messages.length === 0 || messages[messages.length - 1].role !== 'user') {
+    messages.push({ role: 'user', content: '(Continue)' })
+  }
+  return messages
 }
 
 // --- Refactored buildPrompt ---
@@ -89,45 +98,41 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
   let system = basePrompt
 
   const availableFiles = getAvailableFiles(data)
-  const providedFiles = getProvidedFiles(data, context.requestedFiles)
-  const fileContents = getFileContents(data, context.requestedFiles)
-  const userMessage = getLatestUserMessage(data)
-
-  const applyContext = (p: string) => {
-    let s = p
-    s = addAvailableFiles(s, availableFiles)
-    s = addProvidedFiles(s, providedFiles)
-    s = addFileContents(s, fileContents)
-    return s
-  }
+  const messages = buildMessages(data)
 
   let allowedTools: string[] = []
 
+
   switch (context.agent) {
     case 'routingAgent': {
-      allowedTools = ['readFile', 'actionSuggestion', 'routeTo']
+      allowedTools = ['readFile', 'actionSuggestion', 'routeTo', 'writeFile']
       system = appendWithSeparator(system, getRoutingAgentPrompt())
       system = appendWithSeparator(system, getToolsPrompt(allowedTools))
-      system = applyContext(system)
-      break
-    }
-    case 'outlineAgent': {
-      allowedTools = ['writeFile']
-      system = appendWithSeparator(system, getOutlineAgentPrompt())
-      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
-      
-      if (context.carriedContext) {
-         system = addParameters(system, context.carriedContext)
-      } else {
-        system = applyContext(system)
-      }
+
+      // Always auto-include the Outline if it exists, plus any explicitly requested files
+      const outlineExists = availableFiles.includes('Outline')
+      const routingFiles = Array.from(new Set([
+        ...(outlineExists ? ['Outline'] : []),
+        ...(context.requestedFiles || [])
+      ]))
+      const routingProvidedFiles = getProvidedFiles(data, routingFiles)
+      const routingFileContents = getFileContents(data, routingFiles)
+
+      system = addAvailableFiles(system, availableFiles)
+      system = addProvidedFiles(system, routingProvidedFiles)
+      system = addFileContents(system, routingFileContents)
       break
     }
     case 'writerAgent': {
       allowedTools = ['writeFile']
       system = appendWithSeparator(system, getWriterAgentPrompt())
       system = appendWithSeparator(system, getToolsPrompt(allowedTools))
-      system = applyContext(system)
+
+      const writerProvidedFiles = getProvidedFiles(data, context.requestedFiles)
+      const writerFileContents = getFileContents(data, context.requestedFiles)
+      system = addAvailableFiles(system, availableFiles)
+      system = addProvidedFiles(system, writerProvidedFiles)
+      system = addFileContents(system, writerFileContents)
       break
     }
     default: {
@@ -136,5 +141,5 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
     }
   }
 
-  return { system, userPrompt: userMessage, allowedTools }
+  return { system, messages, allowedTools }
 }

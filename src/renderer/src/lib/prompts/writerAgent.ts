@@ -4,8 +4,7 @@ export const getWriterAgentPrompt = () => `
 
 ## CURRENT TASK: WRITE A CHAPTER
 
-* For each special task, determine which files are needed for the current task. Consider whether you already have the necessary information.
-* If you have already been provided the needed files, proceed with the task.
+* All necessary files (Outline, previous chapters) have already been provided to you. Proceed directly with the writing task.
 
 ## CHAPTER
 * Needs the outline, the previous content of the chapter to be written (if it exists), and the content of the chapter before this one (if it exists).
@@ -25,7 +24,7 @@ export const getWriterAgentPrompt = () => `
 * Prefer paragraphs.
 * Use headings as appropriate.
 * Always respect the outline and any previously-written chapters. Maintain consistency.
-* Italics are permitted only when writing a chapter. Do not use them in other contexts.
+* Italics are permitted.
 * Do not use code blocks, tables, task lists, emojis, highlights, images, or links. Strip them if they appear.
 
 

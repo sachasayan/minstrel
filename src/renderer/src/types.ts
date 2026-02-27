@@ -105,8 +105,7 @@ export interface AppListenerApi {
 
 export interface RequestContext {
   currentStep: number
-  agent: 'outlineAgent' | 'routingAgent' | 'writerAgent'
-  carriedContext?: string
+  agent: 'routingAgent' | 'writerAgent'
   sequenceInfo?: string
   requestedFiles?: string[]
   message?: string

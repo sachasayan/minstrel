@@ -1,7 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectProjects, clearLastEdit } from '@/lib/store/projectsSlice'
+import { selectProjects } from '@/lib/store/projectsSlice'
 import { getAddedRanges, stripMarkdown } from '@/lib/utils/diffUtils'
 import { extractChapterId } from '@/lib/storyContent'
 import { $getRoot, $isElementNode, TextNode } from 'lexical'
@@ -85,7 +85,6 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                                 inSection = true
                                 // Special logic: include the heading text itself in accumulatedText
                                 // stripped to match stripMarkdown()
-                                const strippedHeading = childText.replace(/<!--\s*id:.*-->/, '').trim()
                                 const descendantNodes = $isElementNode(child) ? child.getAllTextNodes() : []
                                 for (const node of descendantNodes) {
                                     targetTextNodes.push({

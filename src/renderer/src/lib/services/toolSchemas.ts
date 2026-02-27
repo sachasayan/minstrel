@@ -14,7 +14,7 @@ export const readFileSchema = z.object({
 })
 
 export const routeToSchema = z.object({
-  agent: z.string().describe('The name of the specialist agent to route the request to. MUST be one of: "routingAgent", "outlineAgent", "writerAgent".')
+  agent: z.string().describe('The name of the specialist agent to route the request to. MUST be one of: "routingAgent", "writerAgent".')
 })
 
 

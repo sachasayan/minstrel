@@ -43,7 +43,7 @@ ${
 ## routeTo
 * Routes the user to a specialist agent.
 * REQUIRED PARAMETERS:
-  - "agent" (string): The name of the specialist agent (e.g. "outlineAgent", "writerAgent").
+  - "agent" (string): The name of the specialist agent (e.g. "writerAgent").
 `
     : ''
 }

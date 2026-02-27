@@ -1,4 +1,5 @@
 import { Project, ChatMessage } from '@/types'
+import { ModelMessage } from 'ai'
 
 export interface PromptData {
   activeProject: Project | null
@@ -7,6 +8,6 @@ export interface PromptData {
 
 export interface BuildPromptResult {
   system: string
-  userPrompt: string
+  messages: ModelMessage[]
   allowedTools: string[]
 }
