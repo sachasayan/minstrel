@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useRef, JSX, useCallback } from 'react'
 
-import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/projectsSlice'
+import { setProjectHasLiveEdits, selectProjects, updateFile, addChapter } from '@/lib/store/projectsSlice'
 import { setActiveSection } from '@/lib/store/appStateSlice'
 import { selectChat } from '@/lib/store/chatSlice'
 import { LexicalEditor } from './LexicalEditor'
@@ -63,6 +63,7 @@ export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Ele
                         modifiedChapters={modifiedChapters}
                         artifacts={artifacts}
                         onSelect={(section) => dispatch(setActiveSection(section))}
+                        onAddChapter={() => dispatch(addChapter())}
                     />
                 </div>
                 <div className="max-w-3xl w-full">

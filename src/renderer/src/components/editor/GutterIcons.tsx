@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { LayoutDashboard, Book, Diff } from 'lucide-react'
+import { LayoutDashboard, Book, Diff, Plus } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface GutterIconsProps {
@@ -8,6 +8,7 @@ interface GutterIconsProps {
     modifiedChapters?: number[]
     artifacts: Array<{ title: string; icon: React.ReactNode }>
     onSelect: (section: string) => void
+    onAddChapter?: () => void
 }
 
 export function GutterIcons({
@@ -15,7 +16,8 @@ export function GutterIcons({
     chapters,
     modifiedChapters = [],
     artifacts,
-    onSelect
+    onSelect,
+    onAddChapter
 }: GutterIconsProps) {
     return (
         <TooltipProvider delayDuration={0}>
@@ -37,11 +39,19 @@ export function GutterIcons({
                             key={`chapter-${i}`}
                             icon={<Book className="h-4 w-4" />}
                             label={chapter.title || `Chapter ${i + 1}`}
-                            isActive={activeSection?.endsWith(`|||${i}`)}
+                            isActive={!!activeSection?.endsWith(`|||${i}`)}
                             isModified={modifiedChapters.includes(i)}
                             onClick={() => onSelect(`${chapter.title}|||${i}${chapter.id ? `|||${chapter.id}` : ''}`)}
                         />
                     ))}
+                    {onAddChapter && (
+                        <GutterItem
+                            icon={<Plus className="h-4 w-4" />}
+                            label="Add Chapter"
+                            isActive={false}
+                            onClick={onAddChapter}
+                        />
+                    )}
                 </div>
 
                 {chapters.length > 0 && artifacts.length > 0 && (

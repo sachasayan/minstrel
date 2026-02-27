@@ -4,10 +4,8 @@ import { selectAppState } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 
 
-import { AppSidebar } from '@/components/editor/AppSidebar'
 import { StoryViewer } from '@/components/editor/StoryViewer'
 import { ArtifactViewer } from '@/components/editor/ArtifactViewer'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import ChatInterface from '@/components/ChatInterface'
 import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
@@ -41,14 +39,13 @@ const ProjectOverview = (): React.ReactNode => {
   ])
 
   return (
-    <SidebarProvider defaultOpen={false} className="h-screen overflow-hidden">
+    <div className="h-screen overflow-hidden bg-background">
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
         <ProjectBar />
         <StatusBar floating={false} />
       </div>
-      <AppSidebar />
-      <SidebarInset className={cn(
-        "relative flex-1 min-w-0 overflow-hidden",
+      <main className={cn(
+        "relative flex-1 min-w-0 h-full overflow-hidden",
         "animate-in fade-in zoom-in-95 duration-300"
       )}>
         {appState.activeView == 'project/editor' && editorContent ? (
@@ -66,13 +63,10 @@ const ProjectOverview = (): React.ReactNode => {
             />
           )
         ) : null}
-
-        {/* Chat Interface */}
-      </SidebarInset>
+      </main>
       <ChatInterface />
       <CommandPalette />
-      {/* Removed conditional rendering of BookOutlineWizard dialog */}
-    </SidebarProvider>
+    </div>
   )
 }
 
