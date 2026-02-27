@@ -5,6 +5,10 @@ import { setProjectHasLiveEdits, selectProjects, updateFile } from '@/lib/store/
 import { setActiveSection } from '@/lib/store/appStateSlice'
 import { selectChat } from '@/lib/store/chatSlice'
 import { LexicalEditor } from './LexicalEditor'
+import { GutterIcons } from './GutterIcons'
+import { useMemo } from 'react'
+import { getChaptersFromStoryContent } from '@/lib/storyContent'
+import { ListOrdered } from 'lucide-react'
 
 interface ArtifactViewerProps {
     title: string | null
@@ -16,6 +20,19 @@ export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Ele
     const projectState = useSelector(selectProjects)
     const chatState = useSelector(selectChat)
     const containerRef = useRef<HTMLDivElement>(null)
+
+    const chapters = useMemo(() => {
+        return projectState.activeProject ? getChaptersFromStoryContent(projectState.activeProject.storyContent) : []
+    }, [projectState.activeProject?.storyContent])
+
+    const modifiedChapters = projectState.modifiedChapters || []
+
+    const artifacts = useMemo(() => [
+        {
+            title: 'Outline',
+            icon: <ListOrdered className="h-4 w-4" />
+        }
+    ], [])
 
     const isPending = chatState.pendingChat
 
@@ -39,7 +56,15 @@ export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Ele
             )}
 
             <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-                <div className="flex-grow"></div>
+                <div className="flex-grow flex justify-end items-start pt-12">
+                    <GutterIcons
+                        activeSection={title}
+                        chapters={chapters}
+                        modifiedChapters={modifiedChapters}
+                        artifacts={artifacts}
+                        onSelect={(section) => dispatch(setActiveSection(section))}
+                    />
+                </div>
                 <div className="max-w-3xl w-full">
                     <LexicalEditor
                         initialContent={content || ''}
