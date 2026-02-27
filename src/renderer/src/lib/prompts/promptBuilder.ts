@@ -10,7 +10,6 @@ import {
 import { getRoutingAgentPrompt } from './routingAgent'
 import { getOutlineAgentPrompt } from './outlineAgent'
 import { getWriterAgentPrompt } from './writerAgent'
-import { getCriticAgentPrompt } from './criticAgent'
 import { getToolsPrompt } from './tools'
 
 import { getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
@@ -127,13 +126,6 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
     case 'writerAgent': {
       allowedTools = ['writeFile']
       system = appendWithSeparator(system, getWriterAgentPrompt())
-      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
-      system = applyContext(system)
-      break
-    }
-    case 'criticAgent': {
-      allowedTools = ['addCritique']
-      system = appendWithSeparator(system, getCriticAgentPrompt())
       system = appendWithSeparator(system, getToolsPrompt(allowedTools))
       system = applyContext(system)
       break

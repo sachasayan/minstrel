@@ -43,7 +43,7 @@ ${
 ## routeTo
 * Routes the user to a specialist agent.
 * REQUIRED PARAMETERS:
-  - "agent" (string): The name of the specialist agent (e.g. "outlineAgent", "writerAgent", "criticAgent").
+  - "agent" (string): The name of the specialist agent (e.g. "outlineAgent", "writerAgent").
 `
     : ''
 }
@@ -59,16 +59,6 @@ ${
     : ''
 }
 
-${
-  (tools.includes('addCritique'))
-    ? `
-## addCritique
-* Submits a JSON-formatted critique of the story.
-* REQUIRED PARAMETERS:
-  - "critique" (string): A single stringified JSON object containing the critique structure.
-`
-    : ''
-}
 
 ---
 `

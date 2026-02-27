@@ -14,12 +14,9 @@ export const readFileSchema = z.object({
 })
 
 export const routeToSchema = z.object({
-  agent: z.string().describe('The name of the specialist agent to route the request to. MUST be one of: "routingAgent", "criticAgent", "outlineAgent", "writerAgent".')
+  agent: z.string().describe('The name of the specialist agent to route the request to. MUST be one of: "routingAgent", "outlineAgent", "writerAgent".')
 })
 
-export const addCritiqueSchema = z.object({
-  critique: z.string().describe('The JSON string representation of the story critique.')
-})
 
 export const actionSuggestionSchema = z.object({
   suggestions: z.string().describe('A list of short suggestions for the user, separated by completely commas. For example: "Write a new chapter, Add more details"')

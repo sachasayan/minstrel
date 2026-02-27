@@ -1,7 +1,7 @@
-export const getCriticAgentPrompt = () => `
+import llmService from '@/lib/services/llmService'
+import { AppSettings } from '@/types'
 
----
-
+const SYSTEM_PROMPT = `
 ## CURRENT TASK: CRITIQUE THE STORY
 
 * The user is asking you to critique the story. They have provided the outline, and every available chapter of the story.
@@ -12,12 +12,11 @@ export const getCriticAgentPrompt = () => `
 * Write in paragraph form, from the perspective of the expert.
 * Up to five paragraphs may be written per expert.
 * The story may be unfinished. If so, review the book as an in-progress work.
-* The story may contain a mismatch between the the outline and the number of chapters provided. Review the provided chapters only.
 
 # CREATING A STRUCTURED RESPONSE
 
-* This task provides output via the "addCritique" tool and does not ever involve a writeFile tool.
-* You must pass a single stringified JSON object into the "critique" parameter of the "addCritique" tool. The object must contain exactly two properties, in this order:
+* You must respond ONLY with a valid JSON object. No markdown, no explanation, no extra text.
+* The object must contain exactly two properties, in this order:
 * "critique": an array of three expert objects. Each object contains:
   - "name": the expert's name. (string)
   - "expertise": their field of focus. (string)
@@ -32,10 +31,36 @@ export const getCriticAgentPrompt = () => `
   - Do NOT include minor or side characters.
   - Ignore unattributed dialogue entirely.
 * The experts' critiques should NOT reference the analysis data — it is included purely for the user's review.
-* If you cannot complete the task for any reason, do not use the addCritique tool. Apologize and explain why the task couldn't be completed in your response.
-* Let the user know the critiques have been written in your conversational text.
-
----
-
-* The user may also provide you with the contents of any files needed for the current task.
 `
+
+/**
+ * Uses the LLM to critique a story based on its outline and full content.
+ * Returns the parsed critique object or null if it fails.
+ */
+export async function runCritique(
+  settings: AppSettings,
+  outlineContent: string,
+  storyContent: string
+): Promise<any | null> {
+  console.log('[criticAssistant] Starting story critique...')
+  const prompt = `${SYSTEM_PROMPT}\n\n---\nOUTLINE:\n${outlineContent}\n\nSTORY CONTENT:\n${storyContent}`
+
+  try {
+    const raw = await llmService.generateContent(settings, prompt, 'high')
+    console.log('[criticAssistant] Raw LLM response received.')
+    
+    // Strip any accidental markdown fences before parsing
+    const cleaned = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim()
+    
+    const parsed = JSON.parse(cleaned)
+    if (parsed.critique && parsed.analysis) {
+      console.log('[criticAssistant] Critique successfully generated and parsed.')
+      return parsed
+    }
+    console.warn('[criticAssistant] Parsed value is missing required fields:', parsed)
+    return null
+  } catch (err) {
+    console.error('[criticAssistant] Failed to generate or parse critique:', err)
+    return null
+  }
+}

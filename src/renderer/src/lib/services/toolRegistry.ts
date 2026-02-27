@@ -2,7 +2,6 @@ import { tool } from 'ai'
 import * as schemas from './toolSchemas'
 import {
   handleWriteFile,
-  handleCritique,
   handleActionSuggestions
 } from './toolHandlers'
 import { AppDispatch } from '@/lib/store/store'
@@ -63,16 +62,6 @@ export const createTools = (callbacks: ToolCallbacks) => {
         console.log(`[TOOL EXECUTION] actionSuggestion called with raw args:`, JSON.stringify(args))
         const suggestions = args.suggestions.split(',').map(s => s.trim()).filter(Boolean)
         handleActionSuggestions(suggestions, dispatch)
-        return { status: 'success' }
-      }
-    }),
-
-    addCritique: tool({
-      description: 'Submit a story critique.',
-      inputSchema: schemas.addCritiqueSchema,
-      execute: async (args) => {
-        console.log(`[TOOL EXECUTION] addCritique called with raw args:`, JSON.stringify(args))
-        handleCritique(args.critique, dispatch)
         return { status: 'success' }
       }
     })

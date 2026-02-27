@@ -145,16 +145,6 @@ export const handleWriteFile = (
   }))
 }
 
-export const handleCritique = (critiqueString: string, dispatch: AppDispatch) => {
-  try {
-    const payload = JSON.parse(critiqueString)
-    dispatch(updateReviews(payload))
-  } catch (error) {
-    console.error('Error parsing critique JSON:', error)
-    dispatch(addChatMessage({ sender: 'Gemini', text: 'Error parsing critique from AI response.' }))
-  }
-}
-
 export const handleMessage = (text: string, dispatch: AppDispatch) => {
   dispatch(addChatMessage({ sender: 'Gemini', text }))
 }
