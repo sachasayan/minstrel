@@ -12,10 +12,10 @@ export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
 
 const findChapterOneTitle = (project: Project | undefined): string => {
-  if (!project || !project.storyContent) return 'Chapter 1'
+  if (!project || !project.storyContent) return 'Outline'
 
   const chapters = getChaptersFromStoryContent(project.storyContent)
-  if (chapters.length === 0) return 'Chapter 1'
+  if (chapters.length === 0) return 'Outline'
 
   // Return the first chapter found in format Title|||index
   return `${chapters[0].title}|||0`

@@ -53,7 +53,7 @@ const Intro = (): ReactNode => {
 
       // Navigate to first chapter
       const chapters = getChaptersFromStoryContent(fullProject.storyContent || '')
-      const firstSection = chapters.length > 0 ? `${chapters[0].title}|||0` : 'Chapter 1|||0'
+      const firstSection = chapters.length > 0 ? `${chapters[0].title}|||0` : 'Outline'
       dispatch(setActiveSection(firstSection))
       dispatch(setActiveView('project/editor'))
     } catch (err) {

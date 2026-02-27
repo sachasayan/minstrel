@@ -32,7 +32,7 @@ export const projectsSlice = createSlice({
         cover: undefined,
         coverImageMimeType: null,
         coverImageBase64: null,
-        storyContent: '# Chapter 1\n\n',
+        storyContent: '',
         files: [],
         summary: '',
         year: new Date().getFullYear(),

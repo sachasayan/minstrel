@@ -23,7 +23,7 @@ describe('projectsSlice', () => {
 
   it('should handle startNewProject', () => {
     const actual = reducer(initialState, startNewProject())
-    expect(actual.activeProject).not.toBeNull()
+    expect(actual.activeProject?.storyContent).toBe('')
     expect(actual.activeProject?.title).toBe('Untitled Project')
     expect(actual.projectHasLiveEdits).toBe(true)
   })
