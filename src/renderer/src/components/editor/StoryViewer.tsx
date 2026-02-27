@@ -9,6 +9,8 @@ import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { suggestTitles } from '@/lib/assistants/titleSuggestion'
 import { DashboardRibbon } from './DashboardRibbon'
 import { LexicalEditor } from './LexicalEditor'
+import { GutterIcons } from './GutterIcons'
+import { ListOrdered } from 'lucide-react'
 
 interface StoryViewerProps {
     title: string | null
@@ -26,6 +28,19 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
     const [suggestedTitles, setSuggestedTitles] = useState<string[]>([])
     const [isSuggestingTitles, setIsSuggestingTitles] = useState(false)
     const titleInputRef = useRef<HTMLInputElement>(null)
+
+    const chapters = useMemo(() => {
+        return projectState.activeProject ? getChaptersFromStoryContent(projectState.activeProject.storyContent) : []
+    }, [projectState.activeProject?.storyContent])
+
+    const modifiedChapters = projectState.modifiedChapters || []
+
+    const artifacts = useMemo(() => [
+        {
+            title: 'Outline',
+            icon: <ListOrdered className="h-4 w-4" />
+        }
+    ], [])
 
     const isPending = chatState.pendingChat
 
@@ -241,7 +256,15 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
 
 
             <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-                <div className="flex-grow"></div>
+                <div className="flex-grow flex justify-end items-start pt-12">
+                    <GutterIcons
+                        activeSection={title}
+                        chapters={chapters}
+                        modifiedChapters={modifiedChapters}
+                        artifacts={artifacts}
+                        onSelect={(section) => dispatch(setActiveSection(section))}
+                    />
+                </div>
                 <div className="max-w-3xl w-full">
                     <LexicalEditor
                         initialContent={content || ''}
