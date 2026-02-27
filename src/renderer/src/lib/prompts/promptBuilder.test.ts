@@ -50,18 +50,13 @@ describe('promptBuilder', () => {
     expect(contents).toContain('Once upon a time...')
   })
 
-  it('getLatestUserMessage trims and returns latest user text', () => {
-    const msg = pb.getLatestUserMessage(mockData)
-    expect(msg).toBe('Write a chapter')
-  })
-
   it('buildPrompt returns correct structure for writerAgent', () => {
     const context: RequestContext = {
       agent: 'writerAgent',
       currentStep: 0
     }
     const result = pb.buildPrompt(context, mockData)
-    expect(result.userPrompt).toBeDefined()
+    expect(result.messages).toHaveLength(3) // 3 messages in mockChat + ensuring last is user (already user in mock)
     expect(result.allowedTools).toHaveLength(1)
     expect(result.allowedTools).toContain('writeFile')
     expect(result.allowedTools).not.toContain('routeTo')

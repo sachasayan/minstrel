@@ -13,7 +13,39 @@ export const handleWriteFile = (
 ) => {
   const storyContent = activeProject?.storyContent || ''
 
-  // 1. Attempt exact ID lookup in storyContent
+  // 1. Check artifacts in files[] by exact title match - Prioritize this!
+  const artifactFile = activeProject?.files.find((f) => f.title === fileName)
+
+  if (artifactFile) {
+    // It's an artifact!
+    dispatch(
+      setLastEdit({
+        fileTitle: fileName,
+        oldContent: artifactFile.content || '',
+        newContent: content
+      })
+    )
+
+    let fileType = artifactFile.type || 'unknown'
+    let sortOrder = artifactFile.sort_order || 0
+
+    if (fileName.toLowerCase().includes('outline')) {
+      fileType = 'outline'
+      sortOrder = 0
+    }
+
+    dispatch(
+      updateFile({
+        title: fileName,
+        content: content,
+        type: fileType,
+        sort_order: sortOrder
+      })
+    )
+    return
+  }
+
+  // 2. Attempt exact ID lookup in storyContent
   const chapter = findChapterById(storyContent, fileName)
   if (chapter) {
     // It's a chapter!
@@ -47,38 +79,6 @@ export const handleWriteFile = (
     dispatch(setActiveSection(`${chapter.title}|||${chapterIndex}|||${fileName}`))
     dispatch(setActiveView('project/editor'))
     
-    return
-  }
-
-  // 2. Check artifacts in files[] by exact title match
-  const artifactFile = activeProject?.files.find((f) => f.title === fileName)
-
-  if (artifactFile) {
-    // It's an artifact!
-    dispatch(
-      setLastEdit({
-        fileTitle: fileName,
-        oldContent: artifactFile.content || '',
-        newContent: content
-      })
-    )
-
-    let fileType = artifactFile.type || 'unknown'
-    let sortOrder = artifactFile.sort_order || 0
-
-    if (fileName.toLowerCase().includes('outline')) {
-      fileType = 'outline'
-      sortOrder = 0
-    }
-
-    dispatch(
-      updateFile({
-        title: fileName,
-        content: content,
-        type: fileType,
-        sort_order: sortOrder
-      })
-    )
     return
   }
 

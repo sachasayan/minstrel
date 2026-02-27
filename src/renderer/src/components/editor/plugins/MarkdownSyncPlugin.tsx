@@ -27,7 +27,7 @@ export function MarkdownSyncPlugin({ initialMarkdown, onChange, transformers = T
                     root.clear()
                     $convertFromMarkdownString(initialMarkdown || '', transformers)
                 }
-            })
+            }, { tag: 'import-markdown' })
         }
     }, [editor, initialMarkdown, transformers])
 

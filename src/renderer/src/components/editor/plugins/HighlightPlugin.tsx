@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect, useRef } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { selectProjects } from '@/lib/store/projectsSlice'
 import { getAddedRanges, stripMarkdown } from '@/lib/utils/diffUtils'
 import { extractChapterId } from '@/lib/storyContent'
@@ -15,43 +15,35 @@ interface HighlightPluginProps {
 export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
     const [editor] = useLexicalComposerContext()
     const { lastEdit } = useSelector(selectProjects)
-    const dispatch = useDispatch()
     const processingRef = useRef(false)
 
     useEffect(() => {
         if (!lastEdit || processingRef.current) return
 
-        // Critical: Guard against race conditions. We are starting to process this edit.
-        processingRef.current = true
+        const applyHighlights = () => {
+            if (processingRef.current) return
+            processingRef.current = true
 
-        const normalizedSection = activeSection?.toLowerCase() || ''
-        const normalizedFile = lastEdit.fileTitle.toLowerCase()
-        const sectionIndexParts = activeSection?.split('|||')
-        const activeIdx = sectionIndexParts && sectionIndexParts.length > 1 ? parseInt(sectionIndexParts[1]) : undefined
-        const activeId = sectionIndexParts && sectionIndexParts.length > 2 ? sectionIndexParts[2] : undefined
-
-        const isOverview = activeSection === 'Overview'
-        const isChapterEdit = lastEdit.chapterId !== undefined || lastEdit.chapterIndex !== undefined
-
-        const isMatch = (isOverview && isChapterEdit) ||
-            (lastEdit.chapterId !== undefined && activeId === lastEdit.chapterId) ||
-            (lastEdit.chapterIndex !== undefined && lastEdit.chapterIndex === activeIdx) ||
-            normalizedSection.includes(normalizedFile) ||
-            normalizedFile.includes(normalizedSection)
-
-        console.log(`[Highlight] Edit detected: "${lastEdit.fileTitle}" (ID: ${lastEdit.chapterId}, Idx: ${lastEdit.chapterIndex}) | View: "${activeSection}" | Match: ${isMatch}`)
-
-        if (!isMatch) {
-            processingRef.current = false
-            return
-        }
-
-        // Wait to ensure MarkdownSyncPlugin has fully finished tree construction
-        const timeoutIdInternal = setTimeout(() => {
             try {
                 editor.update(() => {
                     const root = $getRoot()
+                    const normalizedSection = activeSection?.toLowerCase() || ''
+                    const normalizedFile = lastEdit.fileTitle.toLowerCase()
+                    const sectionIndexParts = activeSection?.split('|||')
+                    const activeIdx = sectionIndexParts && sectionIndexParts.length > 1 ? parseInt(sectionIndexParts[1]) : undefined
+                    const activeId = sectionIndexParts && sectionIndexParts.length > 2 ? sectionIndexParts[2] : undefined
+
                     const isOverview = activeSection === 'Overview'
+                    const isChapterEdit = lastEdit.chapterId !== undefined || lastEdit.chapterIndex !== undefined
+
+                    const isMatch = (isOverview && isChapterEdit) ||
+                        (lastEdit.chapterId !== undefined && activeId === lastEdit.chapterId) ||
+                        (lastEdit.chapterIndex !== undefined && lastEdit.chapterIndex === activeIdx) ||
+                        normalizedSection.includes(normalizedFile) ||
+                        normalizedFile.includes(normalizedSection)
+
+                    if (!isMatch) return
+
                     const isMonolithic = (activeSection?.includes('|||') || isOverview) && (lastEdit.chapterId !== undefined || lastEdit.chapterIndex !== undefined)
 
                     const targetTextNodes: Array<{ node: TextNode, offset: number }> = []
@@ -83,23 +75,19 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
 
                             if (isTarget) {
                                 inSection = true
-                                // Special logic: include the heading text itself in accumulatedText
-                                // stripped to match stripMarkdown()
                                 const descendantNodes = $isElementNode(child) ? child.getAllTextNodes() : []
                                 for (const node of descendantNodes) {
                                     targetTextNodes.push({
                                         node,
                                         offset: accumulatedText.length
                                     })
-                                    // We use stripped text for the buffer to match stripMarkdown(oldContent)
-                                    // This keeps paragraph offsets aligned after the heading.
                                     accumulatedText += node.getTextContent().replace(/<!--\s*id:.*-->/, '')
                                 }
                                 accumulatedText += '\n\n'
                                 currentChapterCount++
-                                continue // Skip the standard descendant walk below for the heading
+                                continue
                             } else if (inSection) {
-                                break // Next section reached
+                                break
                             }
                             currentChapterCount++
                         }
@@ -117,27 +105,14 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                         }
                     }
 
-                    if (targetTextNodes.length === 0) {
-                        console.warn('[Highlight] No text nodes found for target section.')
-                        return
-                    }
+                    if (targetTextNodes.length === 0) return
 
                     const trimStart = accumulatedText.length - accumulatedText.trimStart().length
                     const normalizedNewText = accumulatedText.trim()
                     const oldPlainText = stripMarkdown(lastEdit.oldContent)
 
-                    console.log('[Highlight] Diffing:', {
-                        old: oldPlainText.substring(0, 50) + '...',
-                        new: normalizedNewText.substring(0, 50) + '...',
-                        trimStart
-                    })
-
                     const ranges = getAddedRanges(oldPlainText, normalizedNewText)
-                    console.log(`[Highlight] Found ${ranges.length} ranges to highlight.`)
-
-                    if (ranges.length === 0) {
-                        return
-                    }
+                    if (ranges.length === 0) return
 
                     const nodesToWrap: TextNode[] = []
                     for (const range of ranges) {
@@ -157,9 +132,7 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                                         const splitNodes = item.node.splitText(relativeStart, relativeEnd)
                                         const targetNode = relativeStart > 0 ? splitNodes[1] : splitNodes[0]
                                         if (targetNode) nodesToWrap.push(targetNode)
-                                    } catch {
-                                        // Ignore splitting errors 
-                                    }
+                                    } catch { /* ignore */ }
                                 } else {
                                     nodesToWrap.push(item.node)
                                 }
@@ -171,23 +144,44 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
                         if (node.isAttached()) {
                             const parent = node.getParent()
                             if (parent instanceof MarkNode) continue
-
                             const markNode = $createMarkNode(['agent-edit'])
                             node.replace(markNode)
                             markNode.append(node)
                         }
                     }
-                })
+                }, { tag: 'apply-highlights' })
             } finally {
                 processingRef.current = false
             }
-        }, 800)
+        }
+
+        // 1. Listen for the 'import-markdown' tag from MarkdownSyncPlugin
+        let unregister: (() => void) | null = null
+        let fallbackTimeoutId: NodeJS.Timeout | null = null
+
+        const registerListener = () => {
+            unregister = editor.registerUpdateListener(({ tags }) => {
+                if (tags.has('import-markdown')) {
+                    if (fallbackTimeoutId) clearTimeout(fallbackTimeoutId)
+                    applyHighlights()
+                    if (unregister) unregister()
+                }
+            })
+        }
+
+        // 2. Set a small fallback timeout in case the markdown was already synced or tag is missed
+        fallbackTimeoutId = setTimeout(() => {
+            applyHighlights()
+            if (unregister) unregister()
+        }, 300)
+
+        registerListener()
 
         return () => {
-            clearTimeout(timeoutIdInternal)
-            processingRef.current = false
+            if (unregister) unregister()
+            if (fallbackTimeoutId) clearTimeout(fallbackTimeoutId)
         }
-    }, [editor, lastEdit, activeSection, dispatch])
+    }, [editor, lastEdit, activeSection])
 
     return null
 }

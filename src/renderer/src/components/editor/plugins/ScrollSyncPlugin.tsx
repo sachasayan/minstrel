@@ -95,7 +95,11 @@ export function ScrollSyncPlugin({
 
                         if (idx !== -1) {
                             const section = `${heading.innerText.trim()}|||${idx}`
-                            if (activeSection !== section) {
+                            // Only report indexed sections if we are in a monolithic or indexed view
+                            // This prevents artifacts (which might have H1s) from triggering a jump to Story monolith
+                            const isAlreadyMonolithic = activeSection === 'Overview' || (activeSection?.includes('|||'))
+
+                            if (activeSection !== section && isAlreadyMonolithic) {
                                 lastObserverSection.current = section
                                 onSectionChange(section)
                             }

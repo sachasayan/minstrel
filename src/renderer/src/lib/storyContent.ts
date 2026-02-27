@@ -110,7 +110,7 @@ export const findChapterById = (storyContent: string, chapterId: string): { titl
   const normalized = normalizeLineEndings(storyContent ?? '')
   const lines = normalized.split('\n')
   
-  const startIndex = lines.findIndex(line => line.trim().startsWith('# ') && (line.includes(`id: ${chapterId}`) || line.includes(`${chapterId}`)))
+  const startIndex = lines.findIndex(line => line.trim().startsWith('# ') && line.includes(`id: ${chapterId}`))
   if (startIndex === -1) return null
 
   const title = stripChapterId(lines[startIndex].trim().replace(/^#\s+/, ''))
