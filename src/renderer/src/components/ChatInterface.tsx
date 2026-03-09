@@ -35,27 +35,76 @@ interface ChatMessageItemProps {
   lastMessageRef: React.RefObject<HTMLDivElement | null>
 }
 
+const STREAM_WORD_TRANSITION = {
+  duration: 0.14,
+  ease: 'easeOut' as const,
+}
+
+const BUBBLE_LAYOUT_TRANSITION = {
+  layout: {
+    duration: 0.2,
+    ease: 'easeOut' as const,
+  },
+}
+
+const StreamedMessageText = memo(({ text }: { text: string }) => {
+  const tokens = useMemo(() => text.split(/(\s+)/), [text])
+
+  return (
+    <>
+      {tokens.map((token, index) =>
+        /\s+/.test(token) ? (
+          <span key={`space-${index}`}>{token}</span>
+        ) : (
+          <motion.span
+            key={`${index}-${token}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={STREAM_WORD_TRANSITION}
+          >
+            {token}
+          </motion.span>
+        )
+      )}
+    </>
+  )
+})
+
+StreamedMessageText.displayName = 'StreamedMessageText'
+
 const ChatMessageItem = memo(({ msg, isLast, lastMessageRef }: ChatMessageItemProps) => {
   return msg.sender === 'User' ? (
-    <div
+    <motion.div
+      layout
+      transition={BUBBLE_LAYOUT_TRANSITION}
       ref={isLast ? lastMessageRef : null}
       className="flex items-start justify-end"
     >
-      <div className="chat-message relative mb-2 ml-14 rounded-lg border border-border bg-card px-4 py-2 text-left text-sm font-medium text-card-foreground shadow-sm">
+      <motion.div
+        layout
+        transition={BUBBLE_LAYOUT_TRANSITION}
+        className="chat-message relative mb-2 ml-14 rounded-lg border border-border bg-card px-4 py-2 text-left text-sm font-medium text-card-foreground shadow-sm"
+      >
         {msg.text}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   ) : (
-    <div
+    <motion.div
+      layout
+      transition={BUBBLE_LAYOUT_TRANSITION}
       ref={isLast ? lastMessageRef : null}
       className="flex items-start"
     >
       <img src={minstrelIcon} className="size-10 mr-1" alt="" />
-      <div className={`chat-message relative mb-2 mr-8 rounded-lg bg-highlight-600 px-4 py-2 text-left text-sm text-highlight-100 shadow-sm ${(msg as any).isStreaming ? 'opacity-90' : ''}`}>
+      <motion.div
+        layout
+        transition={BUBBLE_LAYOUT_TRANSITION}
+        className={`chat-message relative mb-2 mr-8 rounded-lg bg-highlight-600 px-4 py-2 text-left text-sm text-highlight-100 shadow-sm ${(msg as any).isStreaming ? 'opacity-90' : ''}`}
+      >
         <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-600"></div>
-        {msg.text}
-      </div>
-    </div>
+        {(msg as any).isStreaming ? <StreamedMessageText text={msg.text} /> : msg.text}
+      </motion.div>
+    </motion.div>
   )
 })
 
@@ -148,7 +197,7 @@ const ChatInterface = () => {
         }}
         className="pointer-events-auto flex h-[600px] flex-col overflow-hidden rounded-lg border border-border bg-background/95 shadow-2xl backdrop-blur-sm"
       >
-        <div className="flex-1 overflow-y-auto bg-muted/10 p-4" ref={chatContainerRef}>
+        <motion.div layoutScroll className="flex-1 overflow-y-auto bg-muted/10 p-4" ref={chatContainerRef}>
           {chatHistory.map((msg, index) => (
             <ChatMessageItem
               key={index}
@@ -180,11 +229,15 @@ const ChatInterface = () => {
           </div>
 
           {pendingChat && (
-            <div ref={lastMessageRef as any}>
+            <motion.div
+              layout
+              transition={BUBBLE_LAYOUT_TRANSITION}
+              ref={lastMessageRef as any}
+            >
               <ChatLoadingIndicator status={streamingStatus} />
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
         <div className="flex items-end border-t border-border bg-background/90 p-2">
           <textarea
             ref={inputRef}
