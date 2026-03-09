@@ -1,0 +1,10 @@
+export const DEFAULT_NEW_PROJECT_COVER_PATHS = [
+  'default_covers/0_abstract_expressionism_art__business_theme__mid_century_modern_swiss_modernism_influence__flat_geometric_abstraction__limited_color_palette__strong_negative_space__minimalist_graphic__1603239562.png',
+  'default_covers/0_abstract_expressionism_art__business_theme__mid_century_modern_swiss_modernism_influence__full_bleed__flat_geometric_abstraction__limited_color_palette__strong_negative_space__minimali_330651450.png',
+  'default_covers/0_abstract_expressionism_art__business_theme__mid_century_modern_swiss_modernism_influence__full_bleed__flat_geometric_abstraction__limited_color_palette__strong_negative_space__minimali_405756464.png'
+] as const
+
+export const pickRandomDefaultNewProjectCoverPath = (randomValue = Math.random()): string => {
+  const coverIndex = Math.floor(randomValue * DEFAULT_NEW_PROJECT_COVER_PATHS.length)
+  return DEFAULT_NEW_PROJECT_COVER_PATHS[Math.min(coverIndex, DEFAULT_NEW_PROJECT_COVER_PATHS.length - 1)]
+}

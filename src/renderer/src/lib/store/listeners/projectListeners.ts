@@ -9,9 +9,9 @@ import { convertImagePathToBase64 } from '@/lib/coverImage'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
 import { cancelActiveChatRequest } from '@/lib/services/chatService'
+import { pickRandomDefaultNewProjectCoverPath } from '@/lib/defaultProjectCovers'
 
 export const projectListeners = createListenerMiddleware()
-const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
 
 const findChapterOneSection = (project: Project | undefined) => {
   if (!project || !project.storyContent) return makeArtifactSection('Outline')
@@ -83,7 +83,7 @@ projectListeners.startListening({
       if (activeProject.projectPath !== '') return
       if (activeProject.coverImageBase64 || activeProject.coverImageMimeType) return
 
-      const coverData = await convertImagePathToBase64(DEFAULT_NEW_PROJECT_COVER_PATH)
+      const coverData = await convertImagePathToBase64(pickRandomDefaultNewProjectCoverPath())
       if (!coverData.base64 || !coverData.mimeType) return
 
       const latestState = listenerApi.getState() as RootState
