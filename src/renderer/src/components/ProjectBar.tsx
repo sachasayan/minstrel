@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { saveAppSettings } from '@/lib/services/settingsService'
 import { buildRecentProjectEntry } from '@/lib/recentProjects'
+import { Project } from '@/types'
 
 
 const ProjectBar = () => {
@@ -41,6 +42,22 @@ const ProjectBar = () => {
   const currentChatHistory = useSelector(selectChatHistory)
   const [isExporting, setIsExporting] = useState(false)
   const [alertDialogOpen, setAlertDialogOpen] = useState(false)
+
+  const refreshRecentProjects = async (project: Project) => {
+    const recentEntry = buildRecentProjectEntry(project)
+    const updatedRecents = [
+      recentEntry,
+      ...(settings.recentProjects ?? []).filter((recentProject) => recentProject.projectPath !== project.projectPath)
+    ].slice(0, 3)
+
+    dispatch(addRecentProject(recentEntry))
+    try {
+      await saveAppSettings({ ...settings, recentProjects: updatedRecents })
+    } catch (error) {
+      console.error('Failed to persist recent projects after save:', error)
+      toast.error('Project saved, but recent projects could not be updated.')
+    }
+  }
 
   const handleExportConfigured = async (config: PdfExportConfig) => {
     if (!activeProject || isExporting) {
@@ -70,22 +87,6 @@ const ProjectBar = () => {
   }
 
   const handleClose = async () => {
-    if (activeProject?.projectPath) {
-      const recentEntry = buildRecentProjectEntry(activeProject)
-      const updatedRecents = [
-        recentEntry,
-        ...(settings.recentProjects ?? []).filter((project) => project.projectPath !== activeProject.projectPath)
-      ].slice(0, 3)
-
-      dispatch(addRecentProject(recentEntry))
-      try {
-        await saveAppSettings({ ...settings, recentProjects: updatedRecents })
-      } catch (error) {
-        console.error('Failed to persist recent projects on close:', error)
-        toast.error('Could not update recent projects, but the project was closed.')
-      }
-    }
-
     dispatch(setProjectHasLiveEdits(false))
     dispatch(setActiveProject(null))
     dispatch(setActiveView('intro'))
@@ -142,6 +143,7 @@ const ProjectBar = () => {
       // 5. Persist title + path to Redux so subsequent saves work normally
       dispatch(setProjectPath({ title: titleFromFilename, projectPath: chosenPath }))
       dispatch(setAllFilesAsSaved())
+      await refreshRecentProjects(projectWithTitleAndPath)
       toast.success('Project saved!')
       return true
     }
@@ -153,10 +155,17 @@ const ProjectBar = () => {
       toast.success('Project saved successfully!')
       dispatch(setAllFilesAsSaved())
 
+      const savedProject = {
+        ...projectToSave,
+        projectPath: saveResult.finalPath
+      }
+
       if (currentPath !== saveResult.finalPath) {
         dispatch(setProjectPath({ title: projectToSave.title, projectPath: saveResult.finalPath }))
         toast.info('Project format updated to the latest version.')
       }
+
+      await refreshRecentProjects(savedProject)
       return true
     }
 
