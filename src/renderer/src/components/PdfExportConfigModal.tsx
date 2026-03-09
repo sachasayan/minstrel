@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 // --- Configuration Options ---
 const fontOptions = [
@@ -49,11 +50,15 @@ export interface PdfExportConfig {
 interface PdfExportConfigModalProps {
   children: React.ReactNode // Trigger element
   onExport: (config: PdfExportConfig) => void
-
+  triggerTooltip?: string
 }
 
 // --- Component ---
-const PdfExportConfigModal: React.FC<PdfExportConfigModalProps> = ({ children, onExport }) => {
+const PdfExportConfigModal: React.FC<PdfExportConfigModalProps> = ({
+  children,
+  onExport,
+  triggerTooltip,
+}) => {
   const [selectedFont, setSelectedFont] = useState<string>(fontOptions[0].value)
   const [selectedPaperSizeValue, setSelectedPaperSizeValue] = useState<string>(paperSizeOptions[0].value)
   const [isOpen, setIsOpen] = useState(false); // Control dialog open state
@@ -105,7 +110,16 @@ const PdfExportConfigModal: React.FC<PdfExportConfigModalProps> = ({ children, o
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {triggerTooltip ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="top">{triggerTooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <DialogTrigger asChild>{children}</DialogTrigger>
+      )}
       {/* Increase max width and height for preview */}
       <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>

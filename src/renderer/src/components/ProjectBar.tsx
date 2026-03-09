@@ -14,6 +14,7 @@ import { selectSettingsState } from '@/lib/store/settingsSlice'
 import pdfService from '@/lib/services/pdfService'
 import PdfExportConfigModal, { PdfExportConfig } from '@/components/PdfExportConfigModal'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { selectChatHistory } from '@/lib/store/chatSlice'
 import { saveProject, createSqliteProject } from '@/lib/services/fileService'
 import { setActiveView } from '@/lib/store/appStateSlice'
@@ -174,34 +175,49 @@ const ProjectBar = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="flex items-center gap-2 rounded-full border p-2">
-        <Button
-          variant="outline"
-          size="icon"
-          title="Save Project"
-          onClick={handleSave}
-          className="h-7 w-7 rounded-full"
+      <div className="flex items-center gap-1 rounded-full border bg-background/80 p-1 shadow-sm backdrop-blur-sm">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Save Project"
+              onClick={handleSave}
+              className="h-8 w-8 rounded-full"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Save Project</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Close Project"
+              onClick={handleCloseSafe}
+              className="h-8 w-8 rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Close Project</TooltipContent>
+        </Tooltip>
+
+        <PdfExportConfigModal
+          onExport={handleExportConfigured}
+          triggerTooltip="Export Project to PDF"
         >
-          <Save className="h-3 w-3" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          title="Close Project"
-          onClick={handleCloseSafe}
-          className="h-7 w-7 rounded-full"
-        >
-          <X className="h-3 w-3" />
-        </Button>
-        <PdfExportConfigModal onExport={handleExportConfigured}>
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            title="Export Project to PDF"
+            aria-label="Export Project to PDF"
             disabled={isExporting}
-            className="h-7 w-7 rounded-full"
+            className="h-8 w-8 rounded-full"
           >
-            {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileDown className="h-3 w-3" />}
+            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
           </Button>
         </PdfExportConfigModal>
       </div>
