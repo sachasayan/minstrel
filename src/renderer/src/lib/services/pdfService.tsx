@@ -3,6 +3,7 @@ import { Document, Page, Text, View, Image, StyleSheet, pdf } from '@react-pdf/r
 import { Project } from '@/types'
 import { toast } from 'sonner'
 import { PdfExportConfig } from '@/components/PdfExportConfigModal' // Import the config type
+import { getChapterWordCounts } from '@/lib/storyContent'
 
 // Define the specific type expected by the Page component's size prop
 type PdfPageSize = 'A4' | 'LETTER' | [number, number]; // Add other standard sizes like 'LEGAL', 'A3' etc. if needed
@@ -103,10 +104,13 @@ export const ProjectPdfDocument: React.FC<ProjectPdfProps> = ({ project, config 
   const styles = createStyles(config);
   const coverDataUrl = dataUrlFromBase64(project.coverImageBase64, project.coverImageMimeType)
 
-  // Filter and sort chapters
-  const chapters = project.files
-    .filter(file => file.type === 'chapter')
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+  // Prefer the normalized storyContent source; fall back to legacy chapter files for older projects.
+  const chapters = (project.storyContent?.trim()
+    ? getChapterWordCounts(project.storyContent).map(({ title, content, id }) => ({ title, content, id }))
+    : project.files
+        .filter(file => file.type === 'chapter')
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map(file => ({ title: file.title, content: file.content, id: file.title })))
 
   // Helper to get the correct paper size format for @react-pdf/renderer
   const getPaperSize = (): PdfPageSize => { // Use the specific type alias
@@ -133,7 +137,7 @@ export const ProjectPdfDocument: React.FC<ProjectPdfProps> = ({ project, config 
 
       {/* Chapter Pages */}
       {chapters.map((chapter, index) => (
-        <Page key={chapter.title || index} size={paperSize} style={styles.page}>
+        <Page key={chapter.id || chapter.title || index} size={paperSize} style={styles.page}>
           <Text style={styles.chapterTitle}>{chapter.title}</Text>
           {stripMarkdown(chapter.content).split('\n').map((paragraph, pIndex) => (
             <Text key={pIndex} style={styles.paragraph}>
