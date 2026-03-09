@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectActiveView } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
+import { bridge } from '@/lib/bridge'
 
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -25,7 +26,7 @@ export default function App(): ReactNode {
     console.log('Loading settings')
     setLoadError(null)
     try {
-      const appSettings = await window.electron.ipcRenderer.invoke('get-app-settings')
+      const appSettings = await bridge.getAppSettings()
       dispatch(setSettingsState(appSettings || {})) // Dispatch loaded settings or empty object
     } catch (error) {
       console.error("Failed to load settings in App:", error);

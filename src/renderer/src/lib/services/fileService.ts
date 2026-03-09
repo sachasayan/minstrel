@@ -1,5 +1,6 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 import { loadSqliteProject, saveSqliteProject, initSqliteProject } from './sqliteService'
+import { bridge } from '@/lib/bridge'
 import {
   buildPersistableProject,
   normalizeProjectStoryContent
@@ -24,7 +25,7 @@ export const isSqliteFormat = (path: string): boolean => {
  * @returns Promise resolving to the selected file path, or null if cancelled.
  */
 export const openFileDialog = async (): Promise<string | null> => {
-  return await window.electron.ipcRenderer.invoke('open-file-dialog')
+  return await bridge.openFileDialog()
 }
 
 /**
@@ -38,7 +39,7 @@ export const getProjectFragmentMeta = async (projectPath: string): Promise<Proje
   if (isSqliteFormat(projectPath)) {
     // Fetch the full metadata object from the backend (includes base64 potentially)
     // This IPC call now returns the full metadata object or null
-    const fullMetadata = await window.electron.ipcRenderer.invoke('get-sqlite-project-meta', projectPath)
+    const fullMetadata = await bridge.getSqliteProjectMeta(projectPath)
 
     if (!fullMetadata || !fullMetadata.title) {
       console.warn(`Failed to load or essential metadata missing for SQLite project: ${projectPath}`)
@@ -65,7 +66,7 @@ export const getProjectFragmentMeta = async (projectPath: string): Promise<Proje
   } else {
     // Original Markdown format handler (doesn't support embedded covers)
     try {
-      const fileContent = await window.electron.ipcRenderer.invoke('read-file', `${projectPath}`)
+      const fileContent = await bridge.readFile(`${projectPath}`)
       const metadataMatch = fileContent?.match(/----Metadata\.json([\s\S]+?)----/i)
       if (!metadataMatch || !metadataMatch[1]) {
         console.warn(`Metadata section not found in Markdown file: ${projectPath}`)
@@ -98,7 +99,7 @@ export const fetchProjects = async (rootDir: string | null): Promise<ProjectFrag
   if (!!rootDir) {
     try {
       // Fetch directory items once
-      const directoryItems = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
+      const directoryItems = await bridge.readDirectory(rootDir)
       if (!Array.isArray(directoryItems)) {
         console.error('Read-directory did not return an array:', directoryItems)
         return []
@@ -140,7 +141,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
 
   // Original Markdown format handler
   try {
-    const fileContent = await window.electron.ipcRenderer.invoke('read-file', projectFragment.projectPath)
+    const fileContent = await bridge.readFile(projectFragment.projectPath)
     if (!fileContent) {
       throw new Error('Failed to read Markdown file content.')
     }
@@ -242,7 +243,7 @@ export const saveProject = async (project: Project): Promise<{ success: boolean;
         // Attempt to delete the old .md file
         try {
           console.log('Attempting to delete original Markdown file:', originalPath)
-          const deleteResult = await window.electron.ipcRenderer.invoke('delete-file', originalPath)
+          const deleteResult = await bridge.deleteFile(originalPath)
           if (deleteResult.success) {
             console.log('Successfully deleted original Markdown file:', originalPath)
           } else {

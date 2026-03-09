@@ -10,10 +10,13 @@ import { Project, ProjectFragment } from '@/types'
 // Mock Electron window global
 const mockInvoke = vi.fn()
 ;(global as any).window = {
-  electron: {
-    ipcRenderer: {
-      invoke: mockInvoke
-    }
+  api: {
+    initSqliteProject: (...args: any[]) => mockInvoke('init-sqlite-project', ...args),
+    saveSqliteProject: (...args: any[]) => mockInvoke('save-sqlite-project', ...args),
+    getSqliteProjectMeta: (...args: any[]) => mockInvoke('get-sqlite-project-meta', ...args),
+    loadSqliteProject: (...args: any[]) => mockInvoke('load-sqlite-project', ...args),
+    readDirectory: (...args: any[]) => mockInvoke('read-directory', ...args),
+    getSqliteProjectsMeta: (...args: any[]) => mockInvoke('get-sqlite-projects-meta', ...args)
   }
 }
 

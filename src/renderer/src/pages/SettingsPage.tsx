@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { bridge } from '@/lib/bridge'
 import { toast } from 'sonner'
 import { Bot, CircleCheck, CircleX, FolderOpen, Loader2, Sparkles, FolderCog } from 'lucide-react'
 import llmService from '@/lib/services/llmService'
@@ -109,7 +110,7 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
     if (!open) return
     const load = async () => {
       try {
-        const loaded = await window.electron.ipcRenderer.invoke('get-app-settings')
+        const loaded = await bridge.getAppSettings()
         dispatch(setSettingsState(loaded || {}))
       } catch (err) {
         console.error('Failed to load settings:', err)
@@ -124,7 +125,7 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
     if (!settings.provider && !settings.workingRootDirectory && !settings.highPreferenceModelId) return
     const id = setTimeout(async () => {
       try {
-        await window.electron.ipcRenderer.invoke('save-app-settings', settings)
+        await bridge.saveAppSettings(settings)
         setLastSaved(new Date())
       } catch (err) {
         console.error('Failed to auto-save settings:', err)
@@ -174,7 +175,7 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
 
   const selectFolder = async () => {
     try {
-      const path = await window.electron.ipcRenderer.invoke('select-directory', 'export')
+      const path = await bridge.selectDirectory('export')
       if (path) dispatch(setWorkingRootDirectory(path))
     } catch {
       toast.error('Failed to select directory.')

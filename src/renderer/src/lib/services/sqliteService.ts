@@ -1,5 +1,6 @@
 import { ProjectFragment, Project } from '@/types'
 import { buildPersistableProject } from '@/lib/storyContent'
+import { bridge } from '@/lib/bridge'
 
 /**
  * Initializes a new SQLite project file
@@ -21,7 +22,7 @@ export const initSqliteProject = async (projectPath: string, project: Project): 
       expertSuggestions: project.expertSuggestions
     }
 
-    const result = await window.electron.ipcRenderer.invoke('init-sqlite-project', projectPath, metadata)
+    const result = await bridge.initSqliteProject(projectPath, metadata)
 
     if (!result.success) {
       console.error('Failed to initialize SQLite project:', result.error)
@@ -53,7 +54,7 @@ export const saveSqliteProject = async (project: Project): Promise<boolean> => {
 
   try {
     // Pass the full project object, including files, to the backend
-    const result = await window.electron.ipcRenderer.invoke('save-sqlite-project', persistableProject.projectPath, persistableProject)
+    const result = await bridge.saveSqliteProject(persistableProject.projectPath, persistableProject)
 
     if (!result.success) {
       console.error('Failed to save SQLite project:', result.error)
@@ -75,7 +76,7 @@ export const saveSqliteProject = async (project: Project): Promise<boolean> => {
 export const getSqliteProjectFragmentMeta = async (projectPath: string): Promise<ProjectFragment | null> => {
   try {
     // The backend handler 'get-sqlite-project-meta' now returns null on error
-    const metadata = await window.electron.ipcRenderer.invoke('get-sqlite-project-meta', projectPath)
+    const metadata = await bridge.getSqliteProjectMeta(projectPath)
 
     // If metadata is null (because backend failed), return null
     if (metadata === null) {
@@ -104,7 +105,7 @@ export const getSqliteProjectFragmentMeta = async (projectPath: string): Promise
  */
 export const loadSqliteProject = async (projectFragment: ProjectFragment): Promise<Project> => {
   try {
-    const project = await window.electron.ipcRenderer.invoke('load-sqlite-project', projectFragment.projectPath)
+    const project = await bridge.loadSqliteProject(projectFragment.projectPath)
 
     if (!project || typeof project !== 'object') {
       throw new Error('Invalid project data received from backend.')
@@ -125,7 +126,7 @@ export const loadSqliteProject = async (projectFragment: ProjectFragment): Promi
 export const fetchSqliteProjects = async (rootDir: string | null): Promise<ProjectFragment[]> => {
   if (!!rootDir) {
     try {
-      const directoryItems = await window.electron.ipcRenderer.invoke('read-directory', rootDir)
+      const directoryItems = await bridge.readDirectory(rootDir)
       // Ensure directoryItems is an array before filtering
       if (!Array.isArray(directoryItems)) {
         console.error('Read-directory did not return an array:', directoryItems)
@@ -137,7 +138,7 @@ export const fetchSqliteProjects = async (rootDir: string | null): Promise<Proje
         .map((item) => `${rootDir}/${item.name}`)
 
       // Call bulk fetch handler in the main process
-      const results: (ProjectFragment | null)[] = await window.electron.ipcRenderer.invoke('get-sqlite-projects-meta', filesList)
+      const results: (ProjectFragment | null)[] = await bridge.getSqliteProjectsMeta(filesList)
 
       // Filter out null results to get the valid fragments
       const projectsList = results.filter((meta): meta is ProjectFragment => {

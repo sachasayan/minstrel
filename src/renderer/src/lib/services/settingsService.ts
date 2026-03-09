@@ -1,15 +1,16 @@
 import { AppSettings } from '@/types'
+import { bridge } from '@/lib/bridge'
 
 export const defaultSettings: AppSettings = {
   workingRootDirectory: '~/Documents/minstrel'
 }
 
 export const loadAppSettings = async () => {
-  const settings = await window.electron.ipcRenderer.invoke('get-app-settings')
+  const settings = await bridge.getAppSettings()
   return settings
 }
 
 export const saveAppSettings = async (config: AppSettings) => {
-  await window.electron.ipcRenderer.invoke('save-app-settings', config)
+  await bridge.saveAppSettings(config)
   return config
 }

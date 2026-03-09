@@ -1,15 +1,8 @@
 import { ipcMain } from 'electron'
-import * as os from 'os'
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths with home directory
-const resolvePath = (filePath: string): string => {
-  return filePath.replace('~', homedir)
-}
+import { approveFilePath, assertPathAuthorized, normalizeUserPath } from './pathAccess'
 
 const isChapterTitle = (title: string | null | undefined): boolean => {
   if (!title) return false
@@ -71,9 +64,10 @@ const CREATE_TABLES_SQL = `
 
 // Initialize a new SQLite database for a project
 export const handleInitSqliteProject = async (_event, filePath: string, metadata: any) => {
-  const resolvedPath = resolvePath(filePath)
+  let resolvedPath = ''
   let db
   try {
+    resolvedPath = assertPathAuthorized(filePath, 'init-sqlite-project')
     // Ensure directory exists
     const dir = path.dirname(resolvedPath)
     await fs.mkdir(dir, { recursive: true })
@@ -94,6 +88,7 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
     })
 
     insertMetadataTransaction(initialMetadata)
+    approveFilePath(resolvedPath)
 
     return { success: true }
   } catch (error) {
@@ -108,10 +103,11 @@ export const handleInitSqliteProject = async (_event, filePath: string, metadata
 
 // Save project to SQLite database - Reverted project type to 'any'
 export const handleSaveSqliteProject = async (_event, filePath: string, project: any) => {
-  const resolvedPath = resolvePath(filePath)
+  let resolvedPath = ''
 
   let db
   try {
+    resolvedPath = assertPathAuthorized(filePath, 'save-sqlite-project')
     // Ensure directory exists before opening/creating the database
     const dir = path.dirname(resolvedPath)
     await fs.mkdir(dir, { recursive: true })
@@ -190,6 +186,7 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
 
     // --- Commit Transaction ---
     db.exec('COMMIT')
+    approveFilePath(resolvedPath)
 
     return { success: true }
   } catch (error) {
@@ -211,9 +208,11 @@ export const handleSaveSqliteProject = async (_event, filePath: string, project:
  * This function returns the full metadata object including the project path.
  */
 const getProjectMetaInternal = async (filePath: string) => {
-  const resolvedPath = resolvePath(filePath)
+  const normalized = normalizeUserPath(filePath)
+  let resolvedPath = normalized
   let db
   try {
+    resolvedPath = assertPathAuthorized(normalized, 'get-sqlite-project-meta')
     // Check if file exists before trying to open
     await fs.access(resolvedPath, fs.constants.R_OK) // Check read access
     db = new Database(resolvedPath, { readonly: true, fileMustExist: true }) // Ensure file exists
@@ -281,9 +280,11 @@ export const handleGetSqliteProjectsMeta = async (_event, filePaths: string[]) =
 
 // Load full project from SQLite database
 export const handleLoadSqliteProject = async (_event, filePath: string) => {
-  const resolvedPath = resolvePath(filePath)
+  const normalized = normalizeUserPath(filePath)
+  let resolvedPath = normalized
   let db
   try {
+    resolvedPath = assertPathAuthorized(normalized, 'load-sqlite-project')
     // Check if file exists before trying to open
     await fs.access(resolvedPath, fs.constants.R_OK)
     // Open read-write to allow potential deletion of skeleton rows

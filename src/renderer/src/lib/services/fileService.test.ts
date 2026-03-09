@@ -18,10 +18,12 @@ import { loadSqliteProject, saveSqliteProject } from './sqliteService'
 // Mock Electron window global
 const mockInvoke = vi.fn()
 ;(global as any).window = {
-  electron: {
-    ipcRenderer: {
-      invoke: mockInvoke
-    }
+  api: {
+    getSqliteProjectMeta: (...args: any[]) => mockInvoke('get-sqlite-project-meta', ...args),
+    readFile: (...args: any[]) => mockInvoke('read-file', ...args),
+    readDirectory: (...args: any[]) => mockInvoke('read-directory', ...args),
+    deleteFile: (...args: any[]) => mockInvoke('delete-file', ...args),
+    openFileDialog: (...args: any[]) => mockInvoke('open-file-dialog', ...args)
   }
 }
 

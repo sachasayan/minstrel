@@ -1,7 +1,8 @@
 import { ReactNode, version } from 'react'
+import { bridge } from '@/lib/bridge'
 
 function Versions(): ReactNode {
-  const versions = window?.electron?.process?.versions
+  const versions = bridge.getProcessVersions()
 
   return (
     <ul className="versions">

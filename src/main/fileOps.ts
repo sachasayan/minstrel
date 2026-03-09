@@ -1,25 +1,15 @@
 import { dialog, ipcMain, IpcMainInvokeEvent, OpenDialogOptions, SaveDialogOptions } from 'electron'
-import * as os from 'os'
 import * as fs from 'fs/promises'
-
-const homedir = os.homedir()
-
-// Helper function to resolve paths, handling '~'
-const resolvePath = (filePath: string): string => {
-  if (typeof filePath !== 'string') {
-    console.error('Invalid path provided:', filePath)
-    // Return a value or throw an error as appropriate for your error handling strategy
-    // For now, returning an empty string to avoid crashing, but this should be handled robustly
-    return ''
-  }
-  return filePath.replace('~', homedir)
-}
+import {
+  approveDirectoryPath,
+  approveFilePath,
+  assertPathAuthorized,
+  normalizeUserPath
+} from './pathAccess'
 
 export const handleReadDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
-  const resolvedPath = resolvePath(dirPath)
-  if (!resolvedPath) return []
-
   try {
+    const resolvedPath = assertPathAuthorized(dirPath, 'read-directory')
     const entries = await fs.readdir(resolvedPath, { withFileTypes: true })
     return entries.map((entry) => ({
       name: entry.name,
@@ -32,10 +22,8 @@ export const handleReadDirectory = async (_event: IpcMainInvokeEvent, dirPath: s
 }
 
 export const handleReadFile = async (_event: IpcMainInvokeEvent, filePath: string) => {
-  const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return ''
-
   try {
+    const resolvedPath = assertPathAuthorized(filePath, 'read-file')
     const content = await fs.readFile(resolvedPath, 'utf-8')
     return content
   } catch (error) {
@@ -49,11 +37,9 @@ export const handleWriteFile = async (
   filePath: string,
   content: string
 ) => {
-  const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
-
-  console.log('Writing file to:', resolvedPath)
   try {
+    const resolvedPath = assertPathAuthorized(filePath, 'write-file')
+    console.log('Writing file to:', resolvedPath)
     await fs.writeFile(resolvedPath, content, 'utf-8')
     return { success: true }
   } catch (error: unknown) {
@@ -82,16 +68,16 @@ export const handleSelectDirectory = async (_event: IpcMainInvokeEvent, operatio
   if (result.canceled) {
     return null
   } else {
-    return result.filePaths && result.filePaths.length > 0 ? result.filePaths[0] : null
+    if (!result.filePaths || result.filePaths.length === 0) return null
+    const selectedPath = approveDirectoryPath(result.filePaths[0])
+    return selectedPath || null
   }
 }
 
 export const handleMakeDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
-  const resolvedPath = resolvePath(dirPath)
-  if (!resolvedPath) return { success: false, error: 'Invalid directory path provided.' }
-
-  console.log('Making directory at:', resolvedPath)
   try {
+    const resolvedPath = assertPathAuthorized(dirPath, 'make-directory')
+    console.log('Making directory at:', resolvedPath)
     await fs.mkdir(resolvedPath, { recursive: true })
     return { success: true }
   } catch (error: unknown) {
@@ -102,11 +88,10 @@ export const handleMakeDirectory = async (_event: IpcMainInvokeEvent, dirPath: s
 
 // New handler for deleting a file
 export const handleDeleteFile = async (_event: IpcMainInvokeEvent, filePath: string) => {
-  const resolvedPath = resolvePath(filePath)
-  if (!resolvedPath) return { success: false, error: 'Invalid file path provided.' }
-
-  console.log('Deleting file at:', resolvedPath)
+  let resolvedPath = ''
   try {
+    resolvedPath = assertPathAuthorized(filePath, 'delete-file')
+    console.log('Deleting file at:', resolvedPath)
     await fs.unlink(resolvedPath)
     console.log('File deleted successfully:', resolvedPath)
     return { success: true }
@@ -130,7 +115,9 @@ export const handleShowSaveDialog = async (
   }
   // Ensure the extension is always .mns
   const filePath = result.filePath.endsWith('.mns') ? result.filePath : `${result.filePath}.mns`
-  return filePath
+  const normalized = normalizeUserPath(filePath)
+  const approved = approveFilePath(normalized)
+  return approved || null
 }
 
 export const handleOpenFileDialog = async () => {
@@ -142,7 +129,8 @@ export const handleOpenFileDialog = async () => {
   if (result.canceled || result.filePaths.length === 0) {
     return null
   }
-  return result.filePaths[0]
+  const approved = approveFilePath(result.filePaths[0])
+  return approved || null
 }
 
 export const registerFileOpsHandlers = () => {

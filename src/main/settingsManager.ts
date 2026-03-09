@@ -2,6 +2,7 @@ import settings from 'electron-settings'
 import * as os from 'os'
 import { ipcMain, safeStorage } from 'electron'
 import { DEFAULT_HIGH_PREFERENCE_MODEL_ID, DEFAULT_LOW_PREFERENCE_MODEL_ID, DEFAULT_PROVIDER } from '../shared/constants'
+import { approveDirectoryPath, approveFilePath, normalizeUserPath } from './pathAccess'
 
 interface AppSettings {
   workingRootDirectory?: string | null
@@ -108,6 +109,19 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
     await saveAppSettings(appSettings)
   }
 
+  const approvedRoot = normalizeUserPath(appSettings.workingRootDirectory ?? '')
+  if (approvedRoot) {
+    approveDirectoryPath(approvedRoot)
+  }
+
+  if (Array.isArray(appSettings.recentProjects)) {
+    for (const project of appSettings.recentProjects) {
+      if (project?.projectPath) {
+        approveFilePath(project.projectPath)
+      }
+    }
+  }
+
   return appSettings as AppSettings
 }
 
@@ -136,6 +150,17 @@ export const saveAppSettings = async (config: AppSettings) => {
   // but providing defaults should generally work.
   await settings.get('settings') // Keep for side effect if necessary, but actually we probably don't need it before set
   await settings.set('settings', settingsToSave as any) // Using 'as any' temporarily if strict typing persists as an issue
+
+  if (settingsToSave.workingRootDirectory) {
+    approveDirectoryPath(settingsToSave.workingRootDirectory)
+  }
+  if (Array.isArray(settingsToSave.recentProjects)) {
+    for (const project of settingsToSave.recentProjects) {
+      if (project?.projectPath) {
+        approveFilePath(project.projectPath)
+      }
+    }
+  }
 }
 
 /**

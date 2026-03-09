@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { selectChatHistory } from '@/lib/store/chatSlice'
 import { saveProject, createSqliteProject } from '@/lib/services/fileService'
 import { setActiveView } from '@/lib/store/appStateSlice'
+import { bridge } from '@/lib/bridge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,7 +86,7 @@ const ProjectBar = () => {
       // 1. Resolve the save directory
       let saveDir = settings.workingRootDirectory
       if (!saveDir) {
-        saveDir = await window.electron.ipcRenderer.invoke('select-directory', 'save')
+        saveDir = await bridge.selectDirectory('save')
         if (!saveDir) {
           toast.info('Save cancelled — no folder selected.')
           return false
@@ -93,7 +94,7 @@ const ProjectBar = () => {
       }
 
       // 2. Show a save-file dialog so the user names the file
-      const chosenPath = await window.electron.ipcRenderer.invoke('show-save-dialog', {
+      const chosenPath = await bridge.showSaveDialog({
         defaultPath: `${saveDir}/untitled.mns`,
         filters: [{ name: 'Minstrel Project', extensions: ['mns'] }]
       })
