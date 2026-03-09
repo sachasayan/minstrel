@@ -151,23 +151,24 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
     ], [])
 
     return (
-        <div ref={containerRef} className="relative w-full max-w-7xl mx-auto h-full overflow-y-auto overflow-x-hidden no-scrollbar px-6 py-1 md:px-24 md:py-12">
-            <div id="overview-target" className="w-full h-1" />
+        <div ref={containerRef} className="story-viewer-scroll relative h-full w-full overflow-y-auto overflow-x-hidden">
+            <div className="mx-auto w-full max-w-7xl px-6 py-1 md:px-24 md:py-12">
+                <div id="overview-target" className="w-full h-1" />
 
-            {projectState.activeProject && (
-                <div className="group flex items-center gap-3 mb-8">
-                    <h1 className="text-4xl font-bold text-highlight-700 dark:text-highlight-300">
-                        {projectState.activeProject.title}
-                    </h1>
-                    <button
-                        onClick={openTitleModal}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-muted"
-                        aria-label="Edit story title"
-                    >
-                        Edit
-                    </button>
-                </div>
-            )}
+                {projectState.activeProject && (
+                    <div className="group flex items-center gap-3 mb-8">
+                        <h1 className="text-4xl font-bold text-highlight-700 dark:text-highlight-300">
+                            {projectState.activeProject.title}
+                        </h1>
+                        <button
+                            onClick={openTitleModal}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-muted"
+                            aria-label="Edit story title"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                )}
 
             {isTitleModalOpen && (
                 <div
@@ -246,40 +247,41 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
                 </div>
             )}
 
-            <DashboardRibbon />
+                <DashboardRibbon />
 
-            {isPending && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
-                    <div className="bg-background/80 backdrop-blur-md border border-highlight-500/20 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-in fade-in zoom-in duration-300">
-                        <div className="size-3 bg-highlight-500 rounded-full animate-pulse"></div>
-                        <span className="text-lg font-semibold text-highlight-700 dark:text-highlight-300">Agent is thinking...</span>
+                {isPending && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
+                        <div className="bg-background/80 backdrop-blur-md border border-highlight-500/20 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-in fade-in zoom-in duration-300">
+                            <div className="size-3 bg-highlight-500 rounded-full animate-pulse"></div>
+                            <span className="text-lg font-semibold text-highlight-700 dark:text-highlight-300">Agent is thinking...</span>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
 
-            <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-                <div className="flex-grow flex justify-end items-start pt-12">
-                    <GutterIcons
-                        activeSection={activeSection}
-                        chapters={chapters}
-                        modifiedChapters={modifiedChapters}
-                        artifacts={artifacts}
-                        onSelect={(section) => dispatch(setActiveSection(section))}
-                        onAddChapter={() => dispatch(addChapter())}
-                    />
+                <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+                    <div className="flex-grow flex justify-end items-start pt-12">
+                        <GutterIcons
+                            activeSection={activeSection}
+                            chapters={chapters}
+                            modifiedChapters={modifiedChapters}
+                            artifacts={artifacts}
+                            onSelect={(section) => dispatch(setActiveSection(section))}
+                            onAddChapter={() => dispatch(addChapter())}
+                        />
+                    </div>
+                    <div className="max-w-3xl w-full">
+                        <LexicalEditor
+                            initialContent={content || ''}
+                            onChange={handleContentChange}
+                            activeSection={activeSection}
+                            onSectionChange={(section) => dispatch(setActiveSection(section))}
+                            containerRef={containerRef}
+                            editable={!isPending}
+                        />
+                    </div>
+                    <div className="flex-grow"></div>
                 </div>
-                <div className="max-w-3xl w-full">
-                    <LexicalEditor
-                        initialContent={content || ''}
-                        onChange={handleContentChange}
-                        activeSection={activeSection}
-                        onSectionChange={(section) => dispatch(setActiveSection(section))}
-                        containerRef={containerRef}
-                        editable={!isPending}
-                    />
-                </div>
-                <div className="flex-grow"></div>
             </div>
         </div>
     )
