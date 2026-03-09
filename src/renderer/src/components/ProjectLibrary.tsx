@@ -42,7 +42,7 @@ const RecentCard = ({ project, onClick }: RecentCardProps): ReactNode => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: backgroundImageUrl }}
         >
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/95 to-card/60 p-4 backdrop-blur-sm">
+          <div className="absolute inset-x-0 bg-card bottom-0 p-4">
             <h3 className="truncate text-lg font-semibold text-card-foreground">{project.title}</h3>
             <p className="text-sm text-muted-foreground">
               {project.wordCountCurrent != null ? `${project.wordCountCurrent.toLocaleString()} words` : ''}
@@ -64,23 +64,23 @@ interface ActionCardProps {
   compact?: boolean
 }
 
-const ActionCard = ({ icon, label, onClick, variant = 'primary', compact = false }: ActionCardProps): ReactNode => {
+const ActionCard = ({ icon, label, onClick, variant = 'primary' }: ActionCardProps): ReactNode => {
   const isPrimary = variant === 'primary'
   return (
     <div
-      className="relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 shadow-md transition-transform duration-300 hover:scale-105 hover:border-border"
+      className={`grow relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 shadow-md transition-transform duration-300 hover:scale-105 hover:border-border p-4 ${isPrimary ? 'bg-primary' : 'bg-secondary'} flex flex-col items-center justify-center`}
       onClick={onClick}
     >
-      <div className="relative" style={{ paddingTop: compact ? '87.5%' : '175%' }}>
-        <div className={`absolute inset-0 flex flex-col items-center justify-center ${isPrimary ? 'bg-primary' : 'bg-secondary'}`}>
+
+
           <div className={isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}>
             {icon}
           </div>
           <h3 className={`text-lg font-semibold ${isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}`}>
             {label}
           </h3>
-        </div>
-      </div>
+
+
     </div>
   )
 }
