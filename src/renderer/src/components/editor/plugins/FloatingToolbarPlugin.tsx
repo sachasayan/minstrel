@@ -82,13 +82,13 @@ export function FloatingToolbarPlugin(): JSX.Element | null {
     return createPortal(
         <div
             ref={toolbarRef}
-            className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-1 p-1 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl transition-all duration-300 pointer-events-auto transform ${isShowing ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
+            className={`fixed top-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-1 rounded-xl border border-border bg-background/90 p-1 text-foreground shadow-2xl backdrop-blur-xl transition-all duration-300 pointer-events-auto transform ${isShowing ? 'translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-4 scale-95 opacity-0'
                 }`}
         >
-            <div className="flex items-center gap-0.5 px-1 border-r border-neutral-200 dark:border-neutral-800 mr-1">
+            <div className="mr-1 flex items-center gap-0.5 border-r border-border px-1">
                 <button
                     onClick={() => formatHeading('h1')}
-                    className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${blockType === 'h1' ? 'text-highlight-600 bg-highlight-50 dark:bg-highlight-900/20' : 'text-neutral-600 dark:text-neutral-400'
+                    className={`rounded-lg p-2 transition-colors hover:bg-muted ${blockType === 'h1' ? 'bg-highlight-50 text-highlight-600 dark:bg-highlight-900/20 dark:text-highlight-300' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     title="Heading 1"
                 >
@@ -96,7 +96,7 @@ export function FloatingToolbarPlugin(): JSX.Element | null {
                 </button>
                 <button
                     onClick={() => formatHeading('h2')}
-                    className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${blockType === 'h2' ? 'text-highlight-600 bg-highlight-50 dark:bg-highlight-900/20' : 'text-neutral-600 dark:text-neutral-400'
+                    className={`rounded-lg p-2 transition-colors hover:bg-muted ${blockType === 'h2' ? 'bg-highlight-50 text-highlight-600 dark:bg-highlight-900/20 dark:text-highlight-300' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     title="Heading 2"
                 >
@@ -104,7 +104,7 @@ export function FloatingToolbarPlugin(): JSX.Element | null {
                 </button>
                 <button
                     onClick={() => formatHeading('h3')}
-                    className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${blockType === 'h3' ? 'text-highlight-600 bg-highlight-50 dark:bg-highlight-900/20' : 'text-neutral-600 dark:text-neutral-400'
+                    className={`rounded-lg p-2 transition-colors hover:bg-muted ${blockType === 'h3' ? 'bg-highlight-50 text-highlight-600 dark:bg-highlight-900/20 dark:text-highlight-300' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     title="Heading 3"
                 >
@@ -114,7 +114,7 @@ export function FloatingToolbarPlugin(): JSX.Element | null {
 
             <button
                 onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
-                className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${isBold ? 'text-highlight-600 bg-highlight-50 dark:bg-highlight-900/20' : 'text-neutral-600 dark:text-neutral-400'
+                className={`rounded-lg p-2 transition-colors hover:bg-muted ${isBold ? 'bg-highlight-50 text-highlight-600 dark:bg-highlight-900/20 dark:text-highlight-300' : 'text-muted-foreground hover:text-foreground'
                     }`}
                 title="Bold"
             >
@@ -122,17 +122,17 @@ export function FloatingToolbarPlugin(): JSX.Element | null {
             </button>
             <button
                 onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
-                className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${isItalic ? 'text-highlight-600 bg-highlight-50 dark:bg-highlight-900/20' : 'text-neutral-600 dark:text-neutral-400'
+                className={`rounded-lg p-2 transition-colors hover:bg-muted ${isItalic ? 'bg-highlight-50 text-highlight-600 dark:bg-highlight-900/20 dark:text-highlight-300' : 'text-muted-foreground hover:text-foreground'
                     }`}
                 title="Italic"
             >
                 <Italic size={18} />
             </button>
 
-            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-800 mx-1" />
+            <div className="mx-1 h-6 w-px bg-border" />
 
             <button
-                className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-600 dark:text-neutral-400 disabled:opacity-30"
+                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30"
                 title="Add Link (Coming Soon)"
                 disabled
             >

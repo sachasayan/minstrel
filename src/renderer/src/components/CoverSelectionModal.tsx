@@ -205,7 +205,7 @@ const CoverSelectionModal: React.FC<CoverSelectionModalProps> = ({
                                                 {selectedGalleryImage === cover.image && (
                                                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                                                         <div className="bg-primary text-primary-foreground rounded-full p-1">
-                                                            <div className="w-3 h-3 rounded-full bg-white" />
+                                                            <div className="h-3 w-3 rounded-full bg-primary-foreground" />
                                                         </div>
                                                     </div>
                                                 )}

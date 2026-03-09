@@ -52,7 +52,7 @@ export function ArtifactViewer({ activeSection, content }: ArtifactViewerProps):
                 <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
                     <div className="bg-background/80 backdrop-blur-md border border-highlight-500/20 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-in fade-in zoom-in duration-300">
                         <div className="size-3 bg-highlight-500 rounded-full animate-pulse"></div>
-                        <span className="text-lg font-semibold text-highlight-700">Agent is thinking...</span>
+                        <span className="text-lg font-semibold text-highlight-700 dark:text-highlight-300">Agent is thinking...</span>
                     </div>
                 </div>
             )}

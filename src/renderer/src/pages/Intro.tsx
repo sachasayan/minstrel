@@ -86,7 +86,7 @@ const Intro = (): ReactNode => {
         "flex flex-col items-center justify-center p-8 h-full",
         "animate-in fade-in zoom-in-95 gap-8 duration-300"
       )}>
-        <h1 className="text-2xl font-bold text-highlight-700">Welcome to Minstrel</h1>
+        <h1 className="text-2xl font-bold text-highlight-700 dark:text-highlight-300">Welcome to Minstrel</h1>
 
         <ProjectLibrary
           recentProjects={recentProjects}
@@ -95,9 +95,9 @@ const Intro = (): ReactNode => {
           onOpen={handleOpen}
         />
 
-        <p className="outline rounded-2xl py-2 px-4 text-sm text-highlight-800">
+        <p className="rounded-2xl border border-border bg-card/70 py-2 px-4 text-sm text-highlight-800 shadow-sm dark:text-highlight-200">
           Minstrel is totally free for personal use. Like it?{' '}
-          <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline" target="_blank">
+          <a href="https://ko-fi.com/writewithminstrel" rel="noreferrer" className="cursor-pointer underline decoration-highlight-500/70 underline-offset-2" target="_blank">
             Buy me a coffee.
           </a>{' '}
           ☕ ❤️

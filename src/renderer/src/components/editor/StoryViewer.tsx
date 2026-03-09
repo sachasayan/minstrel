@@ -156,7 +156,7 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
 
             {projectState.activeProject && (
                 <div className="group flex items-center gap-3 mb-8">
-                    <h1 className="text-4xl font-bold text-highlight-700">
+                    <h1 className="text-4xl font-bold text-highlight-700 dark:text-highlight-300">
                         {projectState.activeProject.title}
                     </h1>
                     <button
@@ -237,7 +237,7 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
                             </button>
                             <button
                                 onClick={saveTitleEdit}
-                                className="text-sm font-medium text-highlight-700 hover:text-highlight-600 px-3 py-1.5 rounded-lg hover:bg-highlight-500/10 transition-colors"
+                                className="text-sm font-medium text-highlight-700 transition-colors hover:bg-highlight-500/10 hover:text-highlight-600 dark:text-highlight-300 dark:hover:text-highlight-200"
                             >
                                 Save
                             </button>
@@ -252,7 +252,7 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
                 <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
                     <div className="bg-background/80 backdrop-blur-md border border-highlight-500/20 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-in fade-in zoom-in duration-300">
                         <div className="size-3 bg-highlight-500 rounded-full animate-pulse"></div>
-                        <span className="text-lg font-semibold text-highlight-700">Agent is thinking...</span>
+                        <span className="text-lg font-semibold text-highlight-700 dark:text-highlight-300">Agent is thinking...</span>
                     </div>
                 </div>
             )}

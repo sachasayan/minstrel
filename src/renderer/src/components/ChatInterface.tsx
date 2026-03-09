@@ -23,7 +23,7 @@ const ChatLoadingIndicator = ({ status }: { status: string }) => {
   }, [])
 
   return (
-    <div className="flex items-center p-2 text-neutral-400 text-xs italic">
+    <div className="flex items-center p-2 text-xs italic text-muted-foreground">
       {status || 'Minstrel is thinking'}{dots}
     </div>
   )
@@ -41,7 +41,7 @@ const ChatMessageItem = memo(({ msg, isLast, lastMessageRef }: ChatMessageItemPr
       ref={isLast ? lastMessageRef : null}
       className="flex items-start justify-end"
     >
-      <div className="mb-2 py-2 px-4 rounded-lg text-sm chat-message outline-1 outline-neutral-600 text-neutral-600 text-left ml-14 relative font-medium">
+      <div className="chat-message relative mb-2 ml-14 rounded-lg border border-border bg-card px-4 py-2 text-left text-sm font-medium text-card-foreground shadow-sm">
         {msg.text}
       </div>
     </div>
@@ -51,7 +51,7 @@ const ChatMessageItem = memo(({ msg, isLast, lastMessageRef }: ChatMessageItemPr
       className="flex items-start"
     >
       <img src={minstrelIcon} className="size-10 mr-1" alt="" />
-      <div className={`mb-2 py-2 px-4 rounded-lg text-sm chat-message bg-highlight-600 text-highlight-100 text-left mr-8 relative ${(msg as any).isStreaming ? 'opacity-90' : ''}`}>
+      <div className={`chat-message relative mb-2 mr-8 rounded-lg bg-highlight-600 px-4 py-2 text-left text-sm text-highlight-100 shadow-sm ${(msg as any).isStreaming ? 'opacity-90' : ''}`}>
         <div className="absolute left-0 top-2 -translate-x-full w-0 h-0 border-[6px] border-transparent border-r-highlight-600"></div>
         {msg.text}
       </div>
@@ -146,9 +146,9 @@ const ChatInterface = () => {
           damping: 25,
           mass: 1
         }}
-        className="pointer-events-auto flex flex-col bg-background border rounded-lg shadow-2xl overflow-hidden h-[600px]"
+        className="pointer-events-auto flex h-[600px] flex-col overflow-hidden rounded-lg border border-border bg-background/95 shadow-2xl backdrop-blur-sm"
       >
-        <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
+        <div className="flex-1 overflow-y-auto bg-muted/10 p-4" ref={chatContainerRef}>
           {chatHistory.map((msg, index) => (
             <ChatMessageItem
               key={index}
@@ -172,7 +172,7 @@ const ChatInterface = () => {
               <Button
                 onClick={() => handleNextStage(suggestion)}
                 key={index}
-                className="transition-all mr-2 my-2 inline-block bg-highlight-600 whitespace-normal text-left h-auto py-2"
+                className="mr-2 my-2 inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
               >
                 {suggestion}
               </Button>
@@ -185,7 +185,7 @@ const ChatInterface = () => {
             </div>
           )}
         </div>
-        <div className="border-t p-2 flex items-end bg-background">
+        <div className="flex items-end border-t border-border bg-background/90 p-2">
           <textarea
             ref={inputRef}
             value={message}
@@ -198,12 +198,12 @@ const ChatInterface = () => {
             }}
             placeholder="Type your message..."
             rows={1}
-            className="flex-1 border rounded-md px-4 py-2 mr-2 outline-hidden text-sm resize-none min-h-10 max-h-none"
+            className="mr-2 min-h-10 max-h-none flex-1 resize-none rounded-md border border-input bg-card px-4 py-2 text-sm text-foreground outline-hidden placeholder:text-muted-foreground"
             disabled={pendingChat}
           />
           <button
             onClick={handleSend}
-            className="bg-highlight-700 text-white p-2 rounded-lg shrink-0 text-sm"
+            className="shrink-0 rounded-lg bg-highlight-700 p-2 text-sm text-primary-foreground transition-colors hover:bg-highlight-600 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={pendingChat}
           >
             Send

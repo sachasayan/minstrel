@@ -44,8 +44,8 @@ export function CoverCard({ className }: { className?: string }) {
     <>
       <div
         className={cn(
-          `group border-2 rounded-xl p-4 transition-colors duration-200 ease-in-out flex flex-col mx-auto h-full relative overflow-hidden`,
-          "border-gray-300 hover:border-gray-400",
+          `group relative mx-auto flex h-full flex-col overflow-hidden rounded-xl border-2 p-4 transition-colors duration-200 ease-in-out`,
+          "border-border/70 hover:border-border",
           `bg-cover bg-center`,
           className
         )}
@@ -60,7 +60,7 @@ export function CoverCard({ className }: { className?: string }) {
             <Upload className="mr-2 h-4 w-4" /> {coverPreviewUrl ? 'Change Cover' : 'Add Cover'}
           </Button>
           {!coverPreviewUrl && (
-            <p className="text-xs text-muted-foreground text-white text-center shadow-sm">
+            <p className="text-center text-xs text-white shadow-sm">
               Choose from gallery or upload
             </p>
           )}

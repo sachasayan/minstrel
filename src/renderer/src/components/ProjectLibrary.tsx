@@ -36,15 +36,15 @@ const RecentCard = ({ project, onClick }: RecentCardProps): ReactNode => {
     : `url("/covers/${project.genre}.png")`
 
   return (
-    <div className="relative rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none" onClick={onClick}>
+    <div className="relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 bg-card shadow-md transition-transform duration-300 hover:scale-105 hover:border-border" onClick={onClick}>
       <div className="relative" style={{ paddingTop: '175%' }}>
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: backgroundImageUrl }}
         >
-          <div className="p-4 absolute bottom-0 left-0 right-0 bg-neutral-50">
-            <h3 className="text-lg font-semibold text-gray-800 truncate">{project.title}</h3>
-            <p className="text-sm text-gray-600">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/95 to-card/60 p-4 backdrop-blur-sm">
+            <h3 className="truncate text-lg font-semibold text-card-foreground">{project.title}</h3>
+            <p className="text-sm text-muted-foreground">
               {project.wordCountCurrent != null ? `${project.wordCountCurrent.toLocaleString()} words` : ''}
               {project.wordCountCurrent != null ? ' · ' : ''}
               {formatRelativeDate(project.lastOpenedAt)}
@@ -67,7 +67,7 @@ const ActionCard = ({ icon, label, onClick, variant = 'primary' }: ActionCardPro
   const isPrimary = variant === 'primary'
   return (
     <div
-      className={`relative rounded-lg shadow-md overflow-hidden transition-transform w-50 duration-300 hover:scale-105 cursor-pointer select-none`}
+      className="relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 shadow-md transition-transform duration-300 hover:scale-105 hover:border-border"
       onClick={onClick}
     >
       <div className="relative" style={{ paddingTop: '175%' }}>

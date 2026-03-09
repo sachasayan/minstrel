@@ -1,5 +1,10 @@
 body {
   margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 }
 
 .titlebar {
