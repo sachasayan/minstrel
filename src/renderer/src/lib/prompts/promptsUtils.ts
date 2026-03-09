@@ -52,7 +52,7 @@ export function appendWithSeparator(prompt: string, sectionToAdd: string | null 
  * Adds a formatted subsection (like Available Files, User Prompt) with a title.
  * Uses the internal separator before the title.
  */
-function addFormattedSection(prompt: string, sectionTitle: string, content: string): string {
+export function addFormattedSection(prompt: string, sectionTitle: string, content: string): string {
   if (!content || content.trim() === '') {
     return prompt // Don't add empty sections
   }

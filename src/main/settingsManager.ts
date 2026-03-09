@@ -14,6 +14,8 @@ interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+  writingSample?: string
+  writingStyleDescription?: string
   recentProjects?: any[]
 }
 
@@ -88,6 +90,8 @@ export const loadAppSettings = async (): Promise<AppSettings> => {
   if (appSettings.deepseekApiKey === undefined) appSettings.deepseekApiKey = ''
   if (appSettings.zaiApiKey === undefined) appSettings.zaiApiKey = ''
   if (appSettings.openaiApiKey === undefined) appSettings.openaiApiKey = ''
+  if (appSettings.writingSample === undefined) appSettings.writingSample = ''
+  if (appSettings.writingStyleDescription === undefined) appSettings.writingStyleDescription = ''
   if (appSettings.recentProjects === undefined) appSettings.recentProjects = []
 
   // Decrypt sensitive fields and check if migration is needed
@@ -137,6 +141,8 @@ export const saveAppSettings = async (config: AppSettings) => {
     deepseekApiKey: config.deepseekApiKey ?? '',
     zaiApiKey: config.zaiApiKey ?? '',
     openaiApiKey: config.openaiApiKey ?? '',
+    writingSample: config.writingSample ?? '',
+    writingStyleDescription: config.writingStyleDescription ?? '',
     recentProjects: config.recentProjects ?? []
   }
 

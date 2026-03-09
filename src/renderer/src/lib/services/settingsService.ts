@@ -2,7 +2,9 @@ import { AppSettings } from '@/types'
 import { bridge } from '@/lib/bridge'
 
 export const defaultSettings: AppSettings = {
-  workingRootDirectory: '~/Documents/minstrel'
+  workingRootDirectory: '~/Documents/minstrel',
+  writingSample: '',
+  writingStyleDescription: ''
 }
 
 export const loadAppSettings = async () => {

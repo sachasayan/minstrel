@@ -10,6 +10,8 @@ import {
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
+  setWritingSample,
+  setWritingStyleDescription,
   selectSettingsState
 } from '@/lib/store/settingsSlice'
 import { AppDispatch } from '@/lib/store/store'
@@ -17,6 +19,7 @@ import { AppDispatch } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -33,12 +36,14 @@ import {
 import { cn } from '@/lib/utils'
 import { bridge } from '@/lib/bridge'
 import { toast } from 'sonner'
-import { Bot, CircleCheck, CircleX, FolderOpen, Loader2, Sparkles, FolderCog } from 'lucide-react'
+import { Bot, CircleCheck, CircleX, FolderOpen, Loader2, Sparkles, FolderCog, PenTool } from 'lucide-react'
 import llmService from '@/lib/services/llmService'
 import { PROVIDER_OPTIONS, MODEL_OPTIONS_BY_PROVIDER, PROVIDER_MODELS } from '@shared/constants'
+import { describeWritingStyle } from '@/lib/assistants/writingStyleAssistant'
 
 type KeyValidationStatus = 'idle' | 'checking' | 'valid' | 'invalid'
-type SettingsTab = 'ai' | 'workspace'
+type PersonalizationStatus = 'idle' | 'analyzing' | 'ready' | 'failed'
+type SettingsTab = 'ai' | 'workspace' | 'personalization'
 
 type SettingsModalProps = {
   open: boolean
@@ -86,8 +91,13 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('ai')
   const [keyValidationStatus, setKeyValidationStatus] = useState<KeyValidationStatus>('idle')
+  const [personalizationStatus, setPersonalizationStatus] = useState<PersonalizationStatus>('idle')
+  const [writingSampleDraft, setWritingSampleDraft] = useState('')
+  const [writingStyleDraft, setWritingStyleDraft] = useState('')
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const validationRequestIdRef = useRef(0)
+  const styleRequestIdRef = useRef(0)
 
   const currentModelOptions =
     MODEL_OPTIONS_BY_PROVIDER[settings.provider || 'google'] ||
@@ -108,13 +118,21 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
   // Load settings when modal opens
   useEffect(() => {
     if (!open) return
+    setSettingsLoaded(false)
     const load = async () => {
       try {
         const loaded = await bridge.getAppSettings()
         dispatch(setSettingsState(loaded || {}))
+        setWritingSampleDraft(loaded?.writingSample || '')
+        setWritingStyleDraft(loaded?.writingStyleDescription || '')
+        styleRequestIdRef.current += 1
+        const loadedDescription = loaded?.writingStyleDescription?.trim() || ''
+        setPersonalizationStatus(loadedDescription ? 'ready' : 'idle')
+        setSettingsLoaded(true)
       } catch (err) {
         console.error('Failed to load settings:', err)
         toast.error('Failed to load settings.')
+        setSettingsLoaded(true)
       }
     }
     load()
@@ -122,17 +140,32 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
 
   // Auto-save with debounce
   useEffect(() => {
-    if (!settings.provider && !settings.workingRootDirectory && !settings.highPreferenceModelId) return
+    if (!open || !settingsLoaded) return
+
+    const hasAnySetting =
+      Boolean(settings.provider) ||
+      Boolean(settings.workingRootDirectory) ||
+      Boolean(settings.highPreferenceModelId) ||
+      Boolean(settings.lowPreferenceModelId)
+
+    if (!hasAnySetting) return
+
+    let cancelled = false
     const id = setTimeout(async () => {
       try {
         await bridge.saveAppSettings(settings)
+        if (cancelled) return
         setLastSaved(new Date())
       } catch (err) {
+        if (cancelled) return
         console.error('Failed to auto-save settings:', err)
       }
     }, 1000)
-    return () => clearTimeout(id)
-  }, [settings])
+    return () => {
+      cancelled = true
+      clearTimeout(id)
+    }
+  }, [open, settingsLoaded, settings, dispatch])
 
   // Validate API key (debounced)
   useEffect(() => {
@@ -207,8 +240,124 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
 
   const tabs: { id: SettingsTab; label: string; icon: ReactNode }[] = [
     { id: 'ai', label: 'AI Provider', icon: <Bot className="h-4 w-4" /> },
+    { id: 'personalization', label: 'Personalization', icon: <PenTool className="h-4 w-4" /> },
     { id: 'workspace', label: 'Workspace', icon: <FolderCog className="h-4 w-4" /> },
   ]
+
+  const personalizationStatusCopy: Record<PersonalizationStatus, string> = {
+    idle: '',
+    analyzing: 'Analyzing your writing sample to build a style profile...',
+    ready: 'Style profile is ready and will be used for future chapter writing.',
+    failed: 'Style analysis failed. Minstrel will fall back to the default writing prompt until this succeeds.'
+  }
+
+  const processWritingSample = async (pastedText: string) => {
+    const nextSample = pastedText.trim()
+
+    styleRequestIdRef.current += 1
+    const requestId = styleRequestIdRef.current
+
+    setWritingSampleDraft(pastedText)
+    setWritingStyleDraft('')
+
+    if (!nextSample) {
+      setPersonalizationStatus('idle')
+      return
+    }
+
+    setPersonalizationStatus('analyzing')
+
+    const description = await describeWritingStyle(settings, nextSample)
+    if (requestId !== styleRequestIdRef.current) return
+
+    if (!description) {
+      setPersonalizationStatus('failed')
+      return
+    }
+
+    setWritingStyleDraft(description)
+    setPersonalizationStatus('ready')
+
+    const updatedSettings = {
+      ...settings,
+      writingSample: pastedText,
+      writingStyleDescription: description
+    }
+
+    try {
+      await bridge.saveAppSettings(updatedSettings)
+      if (requestId !== styleRequestIdRef.current) return
+      dispatch(setWritingSample(pastedText))
+      dispatch(setWritingStyleDescription(description))
+      setLastSaved(new Date())
+    } catch (error) {
+      console.error('Failed to save writing style settings:', error)
+      setPersonalizationStatus('failed')
+    }
+  }
+
+  const handleWritingSamplePaste: React.ClipboardEventHandler<HTMLTextAreaElement> = async (event) => {
+    event.preventDefault()
+    await processWritingSample(event.clipboardData.getData('text/plain'))
+  }
+
+  const handleWritingSampleKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
+    const isPasteShortcut =
+      (event.key.toLowerCase() === 'v' && (event.metaKey || event.ctrlKey)) ||
+      (event.key === 'Insert' && event.shiftKey)
+
+    const isNavigationKey = [
+      'Tab',
+      'Escape',
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'Home',
+      'End',
+      'PageUp',
+      'PageDown'
+    ].includes(event.key)
+
+    if (isPasteShortcut || isNavigationKey) return
+
+    event.preventDefault()
+  }
+
+  const handleClearWritingSample = async () => {
+    styleRequestIdRef.current += 1
+    setWritingSampleDraft('')
+    setWritingStyleDraft('')
+    setPersonalizationStatus('idle')
+
+    const updatedSettings = {
+      ...settings,
+      writingSample: '',
+      writingStyleDescription: ''
+    }
+
+    dispatch(setWritingSample(''))
+    dispatch(setWritingStyleDescription(''))
+
+    try {
+      await bridge.saveAppSettings(updatedSettings)
+      setLastSaved(new Date())
+    } catch (error) {
+      console.error('Failed to clear writing style settings:', error)
+      setPersonalizationStatus('failed')
+    }
+  }
+
+  const handlePasteButtonClick = async () => {
+    try {
+      const pastedText = await navigator.clipboard.readText()
+      if (!pastedText) return
+      await processWritingSample(pastedText)
+    } catch (error) {
+      console.error('Failed to read clipboard:', error)
+      toast.error('Clipboard access failed.')
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
@@ -311,6 +460,58 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
                   </SettingRow>
                 </Section>
               </>
+            )}
+
+            {/* ── Personalization tab ─────────────────────────────────────── */}
+            {activeTab === 'personalization' && (
+              <Section title="Writing Style" icon={<PenTool className="h-3.5 w-3.5" />}>
+                <SettingRow
+                  label="Writing Sample"
+                  description="Paste a sample of your writing here so Minstrel can analyze it and mimic your style while drafting chapters."
+                >
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={handlePasteButtonClick}>
+                      Paste
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={handleClearWritingSample}>
+                      Clear
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="writingSample"
+                    value={writingSampleDraft}
+                    readOnly
+                    onPaste={handleWritingSamplePaste}
+                    onKeyDown={handleWritingSampleKeyDown}
+                    onDrop={(e) => e.preventDefault()}
+                    placeholder="Paste a paragraph or two that reflects the voice you want Minstrel to emulate."
+                    className="h-[5.5rem] max-h-[5.5rem] resize-none overflow-y-auto text-[0.5rem] leading-tight"
+                  />
+                </SettingRow>
+
+                {personalizationStatusCopy[personalizationStatus] && (
+                  <div className="rounded-md border bg-background/70 px-3 py-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      {personalizationStatus === 'analyzing' && <Loader2 className="h-4 w-4 animate-spin" />}
+                      <span>{personalizationStatusCopy[personalizationStatus]}</span>
+                    </div>
+                  </div>
+                )}
+
+                <SettingRow
+                  label="Style Analysis"
+                  description="This generated style description is what Minstrel will inject into the writing prompt."
+                >
+                  <Textarea
+                    id="writingStyleDescription"
+                    value={writingStyleDraft}
+                    disabled
+                    readOnly
+                    placeholder="Analysis will appear here after you paste a writing sample."
+                    className="h-[2.5rem] max-h-[2.5rem] resize-none overflow-y-auto"
+                  />
+                </SettingRow>
+              </Section>
             )}
 
             {/* ── Workspace tab ────────────────────────────────────────────── */}

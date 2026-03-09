@@ -18,6 +18,8 @@ export interface AppSettings {
   deepseekApiKey?: string
   zaiApiKey?: string
   openaiApiKey?: string
+  writingSample?: string
+  writingStyleDescription?: string
   recentProjects?: RecentProject[]
 }
 export interface AppState {

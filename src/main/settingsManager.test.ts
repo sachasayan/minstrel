@@ -112,12 +112,16 @@ describe('settingsManager encryption helpers', () => {
       const encryptedKey = 'enc:' + Buffer.from('encrypted-secret').toString('base64')
       vi.mocked(settings.get).mockResolvedValue({
         googleApiKey: encryptedKey,
-        openaiApiKey: encryptedKey
+        openaiApiKey: encryptedKey,
+        writingSample: 'Sample text',
+        writingStyleDescription: 'Measured, reflective prose.'
       })
 
       const loaded = await loadAppSettings()
       expect(loaded.googleApiKey).toBe('secret')
       expect(loaded.openaiApiKey).toBe('secret')
+      expect(loaded.writingSample).toBe('Sample text')
+      expect(loaded.writingStyleDescription).toBe('Measured, reflective prose.')
       // Should NOT call saveAppSettings (settings.set) if already encrypted
       expect(settings.set).not.toHaveBeenCalled()
     })
@@ -152,7 +156,9 @@ describe('settingsManager encryption helpers', () => {
     it('should encrypt sensitive fields when saving', async () => {
       await saveAppSettings({
         googleApiKey: 'secret',
-        openaiApiKey: 'secret'
+        openaiApiKey: 'secret',
+        writingSample: 'A sample',
+        writingStyleDescription: 'Crisp, restrained prose.'
       } as any)
 
       const savedSettings = vi.mocked(settings.set).mock.calls[0][1] as any
@@ -160,6 +166,8 @@ describe('settingsManager encryption helpers', () => {
 
       expect(savedSettings.googleApiKey).toBe(expectedEncrypted)
       expect(savedSettings.openaiApiKey).toBe(expectedEncrypted)
+      expect(savedSettings.writingSample).toBe('A sample')
+      expect(savedSettings.writingStyleDescription).toBe('Crisp, restrained prose.')
     })
   })
 })

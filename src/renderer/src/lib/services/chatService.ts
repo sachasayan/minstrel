@@ -103,7 +103,7 @@ export const sendMessage = async (
       }
       const liveSettings: AppSettings = latestState.settings ?? settings
 
-      const { system, messages, allowedTools } = buildPrompt(context, livePromptData)
+      const { system, messages, allowedTools } = buildPrompt(context, livePromptData, liveSettings)
 
       // Inform Redux about pending files AI might be reading
       dispatchIfCurrent(setPendingFiles(context.requestedFiles || null))

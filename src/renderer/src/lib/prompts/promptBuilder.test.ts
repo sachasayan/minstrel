@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import * as pb from './promptBuilder'
 import { PromptData } from './types'
-import { RequestContext, Project, ChatMessage } from '@/types'
+import { RequestContext, Project, ChatMessage, AppSettings } from '@/types'
 
 describe('promptBuilder', () => {
   const mockProject: Project = {
@@ -32,6 +32,11 @@ describe('promptBuilder', () => {
     chatHistory: mockChat
   }
 
+  const mockSettings: AppSettings = {
+    writingSample: '',
+    writingStyleDescription: ''
+  }
+
   it('getAvailableFiles returns all files including virtual chapters with IDs', () => {
     const files = pb.getAvailableFiles(mockData)
     expect(files).toContain('Outline')
@@ -55,11 +60,38 @@ describe('promptBuilder', () => {
       agent: 'writerAgent',
       currentStep: 0
     }
-    const result = pb.buildPrompt(context, mockData)
+    const result = pb.buildPrompt(context, mockData, mockSettings)
     expect(result.messages).toHaveLength(3) // 3 messages in mockChat + ensuring last is user (already user in mock)
     expect(result.allowedTools).toHaveLength(1)
     expect(result.allowedTools).toContain('writeFile')
     expect(result.allowedTools).not.toContain('routeTo')
+  })
+
+  it('buildPrompt includes writing style personalization for writerAgent when available', () => {
+    const context: RequestContext = {
+      agent: 'writerAgent',
+      currentStep: 0
+    }
+    const result = pb.buildPrompt(context, mockData, {
+      ...mockSettings,
+      writingStyleDescription: 'Measured first-person voice with lyrical imagery and long, winding sentences.'
+    })
+
+    expect(result.system).toContain('PERSONALIZATION: TARGET WRITING STYLE')
+    expect(result.system).toContain('Measured first-person voice with lyrical imagery')
+  })
+
+  it('buildPrompt omits writing style personalization when description is blank', () => {
+    const context: RequestContext = {
+      agent: 'writerAgent',
+      currentStep: 0
+    }
+    const result = pb.buildPrompt(context, mockData, {
+      ...mockSettings,
+      writingStyleDescription: '   '
+    })
+
+    expect(result.system).not.toContain('PERSONALIZATION: TARGET WRITING STYLE')
   })
 
   it('buildPrompt returns correct structure for routingAgent', () => {
@@ -67,7 +99,7 @@ describe('promptBuilder', () => {
       agent: 'routingAgent',
       currentStep: 0
     }
-    const result = pb.buildPrompt(context, mockData)
+    const result = pb.buildPrompt(context, mockData, mockSettings)
     expect(result.allowedTools).toContain('routeTo')
     expect(result.allowedTools).toContain('readFile')
   })

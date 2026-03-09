@@ -1,11 +1,12 @@
-import { RequestContext } from '@/types'
+import { RequestContext, AppSettings } from '@/types'
 import { ModelMessage } from 'ai'
 import {
   basePrompt,
   addAvailableFiles,
   addProvidedFiles,
   addFileContents,
-  appendWithSeparator
+  appendWithSeparator,
+  addFormattedSection
 } from './promptsUtils'
 import { getRoutingAgentPrompt } from './routingAgent'
 import { getWriterAgentPrompt } from './writerAgent'
@@ -94,7 +95,22 @@ export const buildMessages = (data: PromptData): ModelMessage[] => {
 
 // --- Refactored buildPrompt ---
 
-export const buildPrompt = (context: RequestContext, data: PromptData): BuildPromptResult => {
+const addWritingStyleGuidance = (prompt: string, settings: AppSettings): string => {
+  const description = settings.writingStyleDescription?.trim()
+  if (!description) return prompt
+
+  return addFormattedSection(
+    prompt,
+    'PERSONALIZATION: TARGET WRITING STYLE',
+    `Match this writing style description while still following the outline, preserving story continuity, and obeying all formatting and tool-use rules:\n\n${description}`
+  )
+}
+
+export const buildPrompt = (
+  context: RequestContext,
+  data: PromptData,
+  settings: AppSettings = {}
+): BuildPromptResult => {
   let system = basePrompt
 
   const availableFiles = getAvailableFiles(data)
@@ -127,6 +143,7 @@ export const buildPrompt = (context: RequestContext, data: PromptData): BuildPro
       allowedTools = ['writeFile']
       system = appendWithSeparator(system, getWriterAgentPrompt())
       system = appendWithSeparator(system, getToolsPrompt(allowedTools))
+      system = addWritingStyleGuidance(system, settings)
 
       const writerProvidedFiles = getProvidedFiles(data, context.requestedFiles)
       const writerFileContents = getFileContents(data, context.requestedFiles)

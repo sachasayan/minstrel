@@ -17,6 +17,8 @@ const initialState: AppSettings = {
   deepseekApiKey: '',
   zaiApiKey: '',
   openaiApiKey: '',
+  writingSample: '',
+  writingStyleDescription: '',
   recentProjects: []
 }
 
@@ -36,6 +38,8 @@ export const settingsSlice = createSlice({
       state.deepseekApiKey = loadedSettings.deepseekApiKey ?? initialState.deepseekApiKey
       state.zaiApiKey = loadedSettings.zaiApiKey ?? initialState.zaiApiKey
       state.openaiApiKey = loadedSettings.openaiApiKey ?? initialState.openaiApiKey
+      state.writingSample = loadedSettings.writingSample ?? initialState.writingSample
+      state.writingStyleDescription = loadedSettings.writingStyleDescription ?? initialState.writingStyleDescription
       state.recentProjects = loadedSettings.recentProjects ?? initialState.recentProjects
     },
     // Ensure payload type allows null for working directory
@@ -65,6 +69,12 @@ export const settingsSlice = createSlice({
     setOpenaiApiKey: (state, action: PayloadAction<string>) => {
       state.openaiApiKey = action.payload
     },
+    setWritingSample: (state, action: PayloadAction<string>) => {
+      state.writingSample = action.payload
+    },
+    setWritingStyleDescription: (state, action: PayloadAction<string>) => {
+      state.writingStyleDescription = action.payload
+    },
     setRecentProjects: (state, action: PayloadAction<RecentProject[]>) => {
       state.recentProjects = action.payload
     },
@@ -91,6 +101,8 @@ export const {
   setDeepseekApiKey,
   setZaiApiKey,
   setOpenaiApiKey,
+  setWritingSample,
+  setWritingStyleDescription,
   setRecentProjects,
   addRecentProject
 } = settingsSlice.actions

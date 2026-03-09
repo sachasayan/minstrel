@@ -6,6 +6,8 @@ import reducer, {
   setLowPreferenceModelId,
   setProvider,
   setGoogleApiKey,
+  setWritingSample,
+  setWritingStyleDescription,
   setRecentProjects,
   addRecentProject
 } from './settingsSlice'
@@ -27,6 +29,8 @@ describe('settingsSlice', () => {
     deepseekApiKey: '',
     zaiApiKey: '',
     openaiApiKey: '',
+    writingSample: '',
+    writingStyleDescription: '',
     recentProjects: []
   }
 
@@ -45,6 +49,8 @@ describe('settingsSlice', () => {
     // Defaults should be preserved
     expect(actual.highPreferenceModelId).toBe(DEFAULT_HIGH_PREFERENCE_MODEL_ID)
     expect(actual.provider).toBe(DEFAULT_PROVIDER)
+    expect(actual.writingSample).toBe('')
+    expect(actual.writingStyleDescription).toBe('')
   })
 
   // Removed setApi test as field is now deprecated (always using default endpoints)
@@ -75,6 +81,16 @@ describe('settingsSlice', () => {
   it('should handle setGoogleApiKey', () => {
     const actual = reducer(initialState, setGoogleApiKey('google-key-123'))
     expect(actual.googleApiKey).toBe('google-key-123')
+  })
+
+  it('should handle setWritingSample', () => {
+    const actual = reducer(initialState, setWritingSample('A sample paragraph'))
+    expect(actual.writingSample).toBe('A sample paragraph')
+  })
+
+  it('should handle setWritingStyleDescription', () => {
+    const actual = reducer(initialState, setWritingStyleDescription('Sparse, clipped, observational prose.'))
+    expect(actual.writingStyleDescription).toBe('Sparse, clipped, observational prose.')
   })
 
   describe('setRecentProjects', () => {
@@ -131,4 +147,3 @@ describe('settingsSlice', () => {
     })
   })
 })
-
