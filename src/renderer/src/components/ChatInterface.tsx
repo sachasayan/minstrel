@@ -10,6 +10,8 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
+const MAX_INPUT_LINES = 10
+
 const ChatLoadingIndicator = ({ status }: { status: string }) => {
   const [dots, setDots] = useState('')
 
@@ -66,7 +68,7 @@ const ChatInterface = () => {
   const [streamingText, setStreamingText] = useState('')
   const [streamingStatus, setStreamingStatus] = useState('')
   const dispatch = useDispatch()
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const lastMessageRef = useRef<HTMLDivElement | null>(null)
 
@@ -94,6 +96,25 @@ const ChatInterface = () => {
   useEffect(() => {
     scrollToBottom()
   }, [chatHistory, streamingText, streamingStatus])
+
+  useEffect(() => {
+    const textarea = inputRef.current
+    if (!textarea) return
+
+    textarea.style.height = 'auto'
+
+    const computedStyle = window.getComputedStyle(textarea)
+    const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 20
+    const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0
+    const paddingBottom = Number.parseFloat(computedStyle.paddingBottom) || 0
+    const borderTop = Number.parseFloat(computedStyle.borderTopWidth) || 0
+    const borderBottom = Number.parseFloat(computedStyle.borderBottomWidth) || 0
+    const maxHeight =
+      lineHeight * MAX_INPUT_LINES + paddingTop + paddingBottom + borderTop + borderBottom
+
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
+  }, [message])
 
   const handleSend = () => {
     if (message.trim() !== '') {
@@ -164,15 +185,20 @@ const ChatInterface = () => {
             </div>
           )}
         </div>
-        <div className="border-t p-2 flex items-center bg-background">
-          <input
+        <div className="border-t p-2 flex items-end bg-background">
+          <textarea
             ref={inputRef}
-            type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.metaKey) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
             placeholder="Type your message..."
-            className="flex-1 border rounded-md px-4 p-2 mr-2 outline-hidden text-sm"
+            rows={1}
+            className="flex-1 border rounded-md px-4 py-2 mr-2 outline-hidden text-sm resize-none min-h-10 max-h-none"
             disabled={pendingChat}
           />
           <button
