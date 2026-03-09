@@ -9,3 +9,4 @@ out
 .aider.chat.history.md
 .aider.input.history
 coverage
+test-results

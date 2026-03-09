@@ -23,7 +23,8 @@
     "prepare": "husky",
     "rebuild:node": "npm rebuild better-sqlite3",
     "rebuild:electron": "npx @electron/rebuild -v 40.4.1 --force",
-    "test": "npm run rebuild:node && vitest run"
+    "test": "npm run rebuild:node && vitest run",
+    "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.29",
@@ -104,6 +105,7 @@
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25.2.3",
     "@types/react": "19.2.14",
