@@ -1,20 +1,25 @@
-import React, { useState } from 'react' // Import useState
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { FileDown, Loader2 } from 'lucide-react' // Import Loader2
-import { useSelector } from 'react-redux'
-import { selectActiveProject } from '@/lib/store/projectsSlice'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { FileDown, Loader2, Sparkles } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectActiveProject, updateReviews } from '@/lib/store/projectsSlice'
+import { runCritique } from '@/lib/assistants/criticAssistant'
+import { AppDispatch, RootState } from '@/lib/store/store'
 import { toast } from 'sonner'
-import pdfService from '@/lib/services/pdfService' // Import the service
-import PdfExportConfigModal, { PdfExportConfig } from './PdfExportConfigModal' // Import modal and config type
+import { cn } from '@/lib/utils'
+import pdfService from '@/lib/services/pdfService'
+import PdfExportConfigModal, { PdfExportConfig } from './PdfExportConfigModal'
 
 const FloatingToolbar: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>()
   const activeProject = useSelector(selectActiveProject)
-  const [isExporting, setIsExporting] = useState(false) // State for loading indicator
+  const settings = useSelector((state: RootState) => state.settings)
+  const [isExporting, setIsExporting] = useState(false)
+  const [isCritiquing, setIsCritiquing] = useState(false)
 
-  // This function is now called by the modal on export
   const handleExportConfigured = async (config: PdfExportConfig) => {
     if (!activeProject || isExporting) {
-      // This check might be redundant if the button is disabled, but good practice
       if (!activeProject) toast.error('No active project selected.')
       return
     }
@@ -23,7 +28,6 @@ const FloatingToolbar: React.FC = () => {
     const exportToastId = toast.loading(`Generating PDF for ${activeProject.title}...`)
 
     try {
-      // Pass the config options to the service
       const blob = await pdfService.generateProjectPdf(activeProject, config)
 
       if (blob) {
@@ -31,11 +35,9 @@ const FloatingToolbar: React.FC = () => {
         pdfService.triggerDownload(blob, filename)
         toast.success(`Successfully exported ${filename}`, { id: exportToastId })
       } else {
-        // Error toast is handled within generateProjectPdf
-        toast.dismiss(exportToastId) // Dismiss loading toast if blob is null
+        toast.dismiss(exportToastId)
       }
     } catch (error) {
-      // Catch any unexpected errors during the process
       console.error('Unexpected error during PDF export:', error)
       toast.error('An unexpected error occurred during PDF export.', { id: exportToastId })
     } finally {
@@ -43,30 +45,74 @@ const FloatingToolbar: React.FC = () => {
     }
   }
 
-  // Only render the toolbar if there is an active project
+  const handleRunCritique = async () => {
+    if (!activeProject || isCritiquing) return
+
+    const outlineFile = activeProject.files.find(f => f.title.toLowerCase().includes('outline'))
+    const outlineContent = outlineFile?.content || ''
+
+    if (!outlineContent) {
+      console.warn('Cannot run critique without an outline.')
+      return
+    }
+
+    setIsCritiquing(true)
+    console.log('[FloatingToolbar] Triggered story critique.')
+    try {
+      const result = await runCritique(settings, outlineContent, activeProject.storyContent)
+      if (result) {
+        console.log('[FloatingToolbar] Critique result received, updating store.')
+        dispatch(updateReviews(result))
+      }
+    } catch (err) {
+      console.error('[FloatingToolbar] Failed to run critique:', err)
+    } finally {
+      setIsCritiquing(false)
+    }
+  }
+
   if (!activeProject) {
     return null
   }
 
   return (
-    // Changed positioning classes: removed right-4, added left-1/2 -translate-x-1/2
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 p-2 bg-card/80 backdrop-blur-sm rounded-lg shadow-lg border border-border">
-      {/* Wrap the Button with the Modal component */}
-      <PdfExportConfigModal onExport={handleExportConfigured}>
-        {/* The Button now acts as the DialogTrigger */}
-        <Button
-          variant="outline"
-          size="icon"
-          title="Export Project to PDF"
-          disabled={isExporting} // Disable button while exporting
-        >
-          {isExporting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <FileDown className="h-4 w-4" />
-          )}
-        </Button>
-      </PdfExportConfigModal>
+      <div className="flex items-center gap-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRunCritique}
+              disabled={isCritiquing}
+              aria-label="Critique Story"
+              className={cn(isCritiquing && 'animate-pulse')}
+            >
+              {isCritiquing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">Critique Story</TooltipContent>
+        </Tooltip>
+
+        <PdfExportConfigModal onExport={handleExportConfigured}>
+          <Button
+            variant="outline"
+            size="icon"
+            title="Export Project to PDF"
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4" />
+            )}
+          </Button>
+        </PdfExportConfigModal>
+      </div>
     </div>
   )
 }
