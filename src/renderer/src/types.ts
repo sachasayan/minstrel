@@ -23,7 +23,7 @@ export interface AppSettings {
 export interface AppState {
   projectList: ProjectFragment[]
   activeView: ActiveView
-  activeSection: string | null
+  activeSection: ActiveSection
 }
 export interface ProjectState {
   projectHasLiveEdits: boolean
@@ -113,6 +113,22 @@ export interface RequestContext {
 }
 
 export type ActiveView = 'intro' | 'project/outline' | 'project/editor' | 'project/parameters'
+
+export type ActiveSection =
+  | {
+      kind: 'overview'
+    }
+  | {
+      kind: 'chapter'
+      title: string
+      index: number
+      chapterId?: string
+    }
+  | {
+      kind: 'artifact'
+      title: string
+    }
+  | null
 
 export type Genre =
   | 'dystopian-post-apocalyptic-climate-fiction'

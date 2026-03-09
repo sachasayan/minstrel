@@ -12,6 +12,7 @@ import { saveAppSettings } from '@/lib/services/settingsService'
 import { RecentProject } from '@/types'
 import { cn } from '@/lib/utils'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
+import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
 
 const Intro = (): ReactNode => {
   const dispatch = useDispatch()
@@ -53,7 +54,10 @@ const Intro = (): ReactNode => {
 
       // Navigate to first chapter
       const chapters = getChaptersFromStoryContent(fullProject.storyContent || '')
-      const firstSection = chapters.length > 0 ? `${chapters[0].title}|||0` : 'Outline'
+      const firstSection =
+        chapters.length > 0
+          ? makeChapterSection(chapters[0].title, 0, chapters[0].id)
+          : makeArtifactSection('Outline')
       dispatch(setActiveSection(firstSection))
       dispatch(setActiveView('project/editor'))
     } catch (err) {

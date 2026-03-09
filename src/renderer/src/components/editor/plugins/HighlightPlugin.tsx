@@ -7,9 +7,11 @@ import { extractChapterId } from '@/lib/storyContent'
 import { $getRoot, $isElementNode, TextNode } from 'lexical'
 import { $createMarkNode, MarkNode } from '@lexical/mark'
 import { $isChapterHeadingNode } from '../nodes/ChapterHeadingNode'
+import { ActiveSection } from '@/types'
+import { isChapterSection, isOverviewSection } from '@/lib/activeSection'
 
 interface HighlightPluginProps {
-    activeSection: string | null
+    activeSection: ActiveSection
 }
 
 export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
@@ -27,13 +29,17 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
             try {
                 editor.update(() => {
                     const root = $getRoot()
-                    const normalizedSection = activeSection?.toLowerCase() || ''
+                    const normalizedSection =
+                        activeSection?.kind === 'artifact'
+                            ? activeSection.title.toLowerCase()
+                            : activeSection?.kind === 'chapter'
+                                ? activeSection.title.toLowerCase()
+                                : ''
                     const normalizedFile = lastEdit.fileTitle.toLowerCase()
-                    const sectionIndexParts = activeSection?.split('|||')
-                    const activeIdx = sectionIndexParts && sectionIndexParts.length > 1 ? parseInt(sectionIndexParts[1]) : undefined
-                    const activeId = sectionIndexParts && sectionIndexParts.length > 2 ? sectionIndexParts[2] : undefined
+                    const activeIdx = isChapterSection(activeSection) ? activeSection.index : undefined
+                    const activeId = isChapterSection(activeSection) ? activeSection.chapterId : undefined
 
-                    const isOverview = activeSection === 'Overview'
+                    const isOverview = isOverviewSection(activeSection)
                     const isChapterEdit = lastEdit.chapterId !== undefined || lastEdit.chapterIndex !== undefined
 
                     const isMatch = (isOverview && isChapterEdit) ||
@@ -44,7 +50,9 @@ export function HighlightPlugin({ activeSection }: HighlightPluginProps): null {
 
                     if (!isMatch) return
 
-                    const isMonolithic = (activeSection?.includes('|||') || isOverview) && (lastEdit.chapterId !== undefined || lastEdit.chapterIndex !== undefined)
+                    const isMonolithic =
+                        (isChapterSection(activeSection) || isOverview) &&
+                        (lastEdit.chapterId !== undefined || lastEdit.chapterIndex !== undefined)
 
                     const targetTextNodes: Array<{ node: TextNode, offset: number }> = []
                     let accumulatedText = ''

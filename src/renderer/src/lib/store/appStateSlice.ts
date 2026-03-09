@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ActiveView, AppState, ProjectFragment } from '@/types'
+import { ActiveSection, ActiveView, AppState, ProjectFragment } from '@/types'
 import { RootState } from './store'
 
 const initialState: AppState = {
@@ -21,7 +21,7 @@ export const appStateSlice = createSlice({
     setActiveView: (state, action: PayloadAction<ActiveView>) => {
       state.activeView = action.payload
     },
-    setActiveSection: (state, action: PayloadAction<string | null>) => {
+    setActiveSection: (state, action: PayloadAction<ActiveSection>) => {
       state.activeSection = action.payload
     }
   }

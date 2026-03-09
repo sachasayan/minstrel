@@ -11,6 +11,7 @@ import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
 import StatusBar from '@/components/StatusBar'
 import ProjectBar from '@/components/ProjectBar'
+import { activeSectionKey, isArtifactSection, isChapterSection, isOverviewSection } from '@/lib/activeSection'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -23,18 +24,22 @@ const ProjectOverview = (): React.ReactNode => {
   }, [activeProject?.storyContent, activeProject?.files])
 
   const isStorySection = useMemo(() => {
-    return appState.activeSection === 'Overview' || appState.activeSection?.includes('|||')
+    return isOverviewSection(appState.activeSection) || isChapterSection(appState.activeSection)
   }, [appState.activeSection])
 
   const editorContent = useMemo(() => {
     if (appState.activeView !== 'project/editor') return null
+    const section = appState.activeSection
 
-    const content = isStorySection
-      ? activeProject?.storyContent
-      : activeProject?.files?.find((f) => f.title === appState.activeSection)?.content
+    let content = ''
+    if (isStorySection) {
+      content = activeProject?.storyContent || ''
+    } else if (isArtifactSection(section)) {
+      content = activeProject?.files?.find((f) => f.title === section.title)?.content || ''
+    }
 
     return {
-      content: content || ''
+      content
     }
   }, [
     appState.activeView,
@@ -71,13 +76,13 @@ const ProjectOverview = (): React.ReactNode => {
           isStorySection ? (
             <StoryViewer
               key={`${activeProject?.projectPath}-story`}
-              title={appState.activeSection}
+              activeSection={appState.activeSection}
               content={editorContent.content}
             />
           ) : (
             <ArtifactViewer
-              key={`${activeProject?.projectPath}-${appState.activeSection}`}
-              title={appState.activeSection}
+              key={`${activeProject?.projectPath}-${activeSectionKey(appState.activeSection)}`}
+              activeSection={appState.activeSection}
               content={editorContent.content}
             />
           )

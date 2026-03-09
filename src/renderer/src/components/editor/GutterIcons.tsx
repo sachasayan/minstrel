@@ -1,13 +1,15 @@
 import * as React from 'react'
 import { LayoutDashboard, Book, Diff, Plus } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { ActiveSection } from '@/types'
+import { isArtifactSection, isChapterSection, isOverviewSection, makeArtifactSection, makeChapterSection, makeOverviewSection } from '@/lib/activeSection'
 
 interface GutterIconsProps {
-    activeSection: string | null
+    activeSection: ActiveSection
     chapters: Array<{ title: string; id?: string }>
     modifiedChapters?: number[]
     artifacts: Array<{ title: string; icon: React.ReactNode }>
-    onSelect: (section: string) => void
+    onSelect: (section: ActiveSection) => void
     onAddChapter?: () => void
 }
 
@@ -26,8 +28,8 @@ export function GutterIcons({
                 <GutterItem
                     icon={<LayoutDashboard className="h-4 w-4" />}
                     label="Dashboard"
-                    isActive={activeSection === 'Overview'}
-                    onClick={() => onSelect('Overview')}
+                    isActive={isOverviewSection(activeSection)}
+                    onClick={() => onSelect(makeOverviewSection())}
                 />
 
                 <div className="h-px w-6 bg-border/20 my-1" />
@@ -39,9 +41,9 @@ export function GutterIcons({
                             key={`chapter-${i}`}
                             icon={<Book className="h-4 w-4" />}
                             label={chapter.title || `Chapter ${i + 1}`}
-                            isActive={!!activeSection?.endsWith(`|||${i}`)}
+                            isActive={isChapterSection(activeSection) && activeSection.index === i}
                             isModified={modifiedChapters.includes(i)}
-                            onClick={() => onSelect(`${chapter.title}|||${i}${chapter.id ? `|||${chapter.id}` : ''}`)}
+                            onClick={() => onSelect(makeChapterSection(chapter.title, i, chapter.id))}
                         />
                     ))}
                     {onAddChapter && (
@@ -65,8 +67,8 @@ export function GutterIcons({
                             key={`artifact-${i}`}
                             icon={artifact.icon}
                             label={artifact.title}
-                            isActive={activeSection === artifact.title}
-                            onClick={() => onSelect(artifact.title)}
+                            isActive={isArtifactSection(activeSection) && activeSection.title === artifact.title}
+                            onClick={() => onSelect(makeArtifactSection(artifact.title))}
                         />
                     ))}
                 </div>

@@ -7,18 +7,18 @@ import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment i
 import type { RootState } from '../store' // Re-added RootState import
 import { convertImagePathToBase64 } from '@/lib/coverImage'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
+import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
 
 export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
 
-const findChapterOneTitle = (project: Project | undefined): string => {
-  if (!project || !project.storyContent) return 'Outline'
+const findChapterOneSection = (project: Project | undefined) => {
+  if (!project || !project.storyContent) return makeArtifactSection('Outline')
 
   const chapters = getChaptersFromStoryContent(project.storyContent)
-  if (chapters.length === 0) return 'Outline'
+  if (chapters.length === 0) return makeArtifactSection('Outline')
 
-  // Return the first chapter found in format Title|||index
-  return `${chapters[0].title}|||0`
+  return makeChapterSection(chapters[0].title, 0, chapters[0].id)
 }
 
 // Listen for setting active project from fragment - fetch full details and set chat history
@@ -45,7 +45,7 @@ projectListeners.startListening({
             console.log(`Listener: Dispatching setChatHistory for ${fullProject.title}`)
             // Dispatch action to set the chat history
             listenerApi.dispatch(setChatHistory(fullProject.chatHistory ?? []))
-            listenerApi.dispatch(setActiveSection(findChapterOneTitle(fullProject)))
+            listenerApi.dispatch(setActiveSection(findChapterOneSection(fullProject)))
             listenerApi.dispatch(setActiveView('project/editor'))
         } else {
              console.error(`Listener: Failed to fetch full project details for ${projectFragment.title}`)
@@ -63,7 +63,7 @@ projectListeners.startListening({
   matcher: isAnyOf(startNewProject),
   effect: async (_action, listenerApi) => {
     listenerApi.dispatch(clearChatHistory())
-    listenerApi.dispatch(setActiveSection('Outline'))
+    listenerApi.dispatch(setActiveSection(makeArtifactSection('Outline')))
     listenerApi.dispatch(setActiveView('project/editor'))
 
     try {

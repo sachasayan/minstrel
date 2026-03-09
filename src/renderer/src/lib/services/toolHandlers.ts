@@ -4,6 +4,7 @@ import { updateFile, updateChapter, setLastEdit } from '@/lib/store/projectsSlic
 import { setActiveSection, setActiveView } from '@/lib/store/appStateSlice'
 import { findChapterById, getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
 import { Project } from '@/types'
+import { makeChapterSection } from '@/lib/activeSection'
 
 export const handleWriteFile = (
   fileName: string, // This is either a chapter ID or an artifact title
@@ -76,7 +77,7 @@ export const handleWriteFile = (
     dispatch(updateChapter({ chapterId: fileName, content: content }))
     
     // Force view switch so the user sees the highlights immediately
-    dispatch(setActiveSection(`${chapter.title}|||${chapterIndex}|||${fileName}`))
+    dispatch(setActiveSection(makeChapterSection(chapter.title, chapterIndex, fileName)))
     dispatch(setActiveView('project/editor'))
     
     return

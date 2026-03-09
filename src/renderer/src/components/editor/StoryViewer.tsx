@@ -11,13 +11,15 @@ import { DashboardRibbon } from './DashboardRibbon'
 import { LexicalEditor } from './LexicalEditor'
 import { GutterIcons } from './GutterIcons'
 import { ListOrdered } from 'lucide-react'
+import { ActiveSection } from '@/types'
+import { isChapterSection, makeChapterSection } from '@/lib/activeSection'
 
 interface StoryViewerProps {
-    title: string | null
+    activeSection: ActiveSection
     content: string
 }
 
-export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
+export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.Element {
     const dispatch = useDispatch()
     const projectState = useSelector(selectProjects)
     const chatState = useSelector(selectChat)
@@ -50,25 +52,26 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
         // (real data loaded). Writing blank content here would clobber the real data on save.
         if (!newContent || !newContent.trim()) return
 
-        const isChapter = title?.includes('|||')
+        const isChapter = isChapterSection(activeSection)
         const targetTitle = 'Story'
 
         let chapterIndex: number | undefined = undefined
-        if (isChapter && title) {
-            const parts = title.split('|||')
-            chapterIndex = parseInt(parts[parts.length - 1])
+        if (isChapter) {
+            chapterIndex = activeSection.index
         }
 
         dispatch(updateFile({ title: targetTitle, content: newContent, chapterIndex }))
 
         // Synchronize the activeSection title if it changed in the text
-        if (isChapter && title) {
-            const parts = title.split('|||')
-            const index = parseInt(parts[parts.length - 1])
+        if (isChapter) {
+            const index = activeSection.index
             const chapters = getChaptersFromStoryContent(newContent)
 
-            if (chapters[index] && (chapters[index].title !== parts[0] || chapters[index].id !== parts[2])) {
-                const newSection = `${chapters[index].title}|||${index}${chapters[index].id ? `|||${chapters[index].id}` : ''}`
+            if (
+                chapters[index] &&
+                (chapters[index].title !== activeSection.title || chapters[index].id !== activeSection.chapterId)
+            ) {
+                const newSection = makeChapterSection(chapters[index].title, index, chapters[index].id)
                 dispatch(setActiveSection(newSection))
             }
         }
@@ -76,7 +79,7 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
         if (!projectState.projectHasLiveEdits) {
             dispatch(setProjectHasLiveEdits(true))
         }
-    }, [dispatch, projectState.projectHasLiveEdits, title])
+    }, [activeSection, dispatch, projectState.projectHasLiveEdits])
 
     const openTitleModal = useCallback(() => {
         setEditingTitle(projectState.activeProject?.title ?? '')
@@ -258,7 +261,7 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
             <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
                 <div className="flex-grow flex justify-end items-start pt-12">
                     <GutterIcons
-                        activeSection={title}
+                        activeSection={activeSection}
                         chapters={chapters}
                         modifiedChapters={modifiedChapters}
                         artifacts={artifacts}
@@ -270,7 +273,7 @@ export function StoryViewer({ title, content }: StoryViewerProps): JSX.Element {
                     <LexicalEditor
                         initialContent={content || ''}
                         onChange={handleContentChange}
-                        activeSection={title}
+                        activeSection={activeSection}
                         onSectionChange={(section) => dispatch(setActiveSection(section))}
                         containerRef={containerRef}
                         editable={!isPending}

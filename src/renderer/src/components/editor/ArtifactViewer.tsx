@@ -9,13 +9,14 @@ import { GutterIcons } from './GutterIcons'
 import { useMemo } from 'react'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { ListOrdered } from 'lucide-react'
+import { ActiveSection } from '@/types'
 
 interface ArtifactViewerProps {
-    title: string | null
+    activeSection: ActiveSection
     content: string
 }
 
-export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Element {
+export function ArtifactViewer({ activeSection, content }: ArtifactViewerProps): JSX.Element {
     const dispatch = useDispatch()
     const projectState = useSelector(selectProjects)
     const chatState = useSelector(selectChat)
@@ -35,14 +36,15 @@ export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Ele
     ], [])
 
     const isPending = chatState.pendingChat
+    const artifactTitle = activeSection?.kind === 'artifact' ? activeSection.title : 'Untitled'
 
     const handleContentChange = useCallback((newContent: string) => {
-        dispatch(updateFile({ title: title || 'Untitled', content: newContent }))
+        dispatch(updateFile({ title: artifactTitle, content: newContent }))
 
         if (!projectState.projectHasLiveEdits) {
             dispatch(setProjectHasLiveEdits(true))
         }
-    }, [dispatch, projectState.projectHasLiveEdits, title])
+    }, [artifactTitle, dispatch, projectState.projectHasLiveEdits])
 
     return (
         <div ref={containerRef} className="relative w-full max-w-7xl mx-auto h-full overflow-y-auto overflow-x-hidden no-scrollbar px-6 py-1 md:px-24 md:py-12">
@@ -58,7 +60,7 @@ export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Ele
             <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
                 <div className="flex-grow flex justify-end items-start pt-12">
                     <GutterIcons
-                        activeSection={title}
+                        activeSection={activeSection}
                         chapters={chapters}
                         modifiedChapters={modifiedChapters}
                         artifacts={artifacts}
@@ -70,7 +72,7 @@ export function ArtifactViewer({ title, content }: ArtifactViewerProps): JSX.Ele
                     <LexicalEditor
                         initialContent={content || ''}
                         onChange={handleContentChange}
-                        activeSection={title}
+                        activeSection={activeSection}
                         onSectionChange={(section) => dispatch(setActiveSection(section))}
                         containerRef={containerRef}
                         editable={!isPending}

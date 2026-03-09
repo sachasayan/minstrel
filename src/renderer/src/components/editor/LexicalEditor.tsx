@@ -27,6 +27,7 @@ import { FloatingToolbarPlugin } from './plugins/FloatingToolbarPlugin'
 import { HighlightPlugin } from './plugins/HighlightPlugin'
 import { JSX } from 'react'
 import { ElementTransformer } from '@lexical/markdown'
+import { ActiveSection } from '@/types'
 
 const CHAPTER_HEADING_TRANSFORMER: ElementTransformer = {
     dependencies: [ChapterHeadingNode],
@@ -114,8 +115,8 @@ const editorConfig = {
 interface LexicalEditorProps {
     initialContent: string
     onChange: (markdown: string) => void
-    activeSection: string | null
-    onSectionChange: (section: string) => void
+    activeSection: ActiveSection
+    onSectionChange: (section: ActiveSection) => void
     containerRef: React.RefObject<HTMLDivElement | null>
     editable?: boolean
 }

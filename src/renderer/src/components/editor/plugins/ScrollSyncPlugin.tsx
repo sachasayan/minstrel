@@ -2,10 +2,12 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useEffect, useRef } from 'react'
 import { $getRoot } from 'lexical'
 import { HeadingNode } from '@lexical/rich-text'
+import { ActiveSection } from '@/types'
+import { activeSectionKey, isChapterSection, isOverviewSection, makeChapterSection, makeOverviewSection } from '@/lib/activeSection'
 
 interface ScrollSyncPluginProps {
-    activeSection: string | null
-    onSectionChange: (section: string) => void
+    activeSection: ActiveSection
+    onSectionChange: (section: ActiveSection) => void
     containerRef: React.RefObject<HTMLDivElement | null>
 }
 
@@ -16,7 +18,7 @@ export function ScrollSyncPlugin({
 }: ScrollSyncPluginProps): null {
     const [editor] = useLexicalComposerContext()
     const isProgrammaticScroll = useRef(false)
-    const lastObserverSection = useRef<string | null>(null)
+    const lastObserverSection = useRef<ActiveSection>(null)
 
     // 1. Handle External Scroll Requests (Story -> Editor)
     useEffect(() => {
@@ -24,7 +26,7 @@ export function ScrollSyncPlugin({
 
         // If the activeSection change was triggered by the observer itself,
         // don't perform a programmatic scroll (it would fight the user's manual scroll).
-        if (activeSection === lastObserverSection.current) {
+        if (lastObserverSection.current && activeSectionKey(activeSection) === activeSectionKey(lastObserverSection.current)) {
             lastObserverSection.current = null
             return
         }
@@ -34,15 +36,14 @@ export function ScrollSyncPlugin({
         lastObserverSection.current = null
 
         // Programmatic scroll for Overview or any section that doesn't have an index
-        if (activeSection === 'Overview' || !activeSection.includes('|||')) {
+        if (isOverviewSection(activeSection) || !isChapterSection(activeSection)) {
             isProgrammaticScroll.current = true
             containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
             setTimeout(() => (isProgrammaticScroll.current = false), 800)
             return
         }
 
-        const [, indexStr] = activeSection.split('|||')
-        const index = parseInt(indexStr)
+        const index = activeSection.index
 
         editor.getEditorState().read(() => {
             const root = $getRoot()
@@ -77,9 +78,10 @@ export function ScrollSyncPlugin({
 
                         // Handle Overview target
                         if (entry.target.id === 'overview-target') {
-                            if (activeSection !== 'Overview') {
-                                lastObserverSection.current = 'Overview'
-                                onSectionChange('Overview')
+                            if (!isOverviewSection(activeSection)) {
+                                const section = makeOverviewSection()
+                                lastObserverSection.current = section
+                                onSectionChange(section)
                             }
                             return
                         }
@@ -94,12 +96,18 @@ export function ScrollSyncPlugin({
                         const idx = allEditorHeadings.indexOf(heading as HTMLHeadingElement)
 
                         if (idx !== -1) {
-                            const section = `${heading.innerText.trim()}|||${idx}`
+                            const section = makeChapterSection(heading.innerText.trim(), idx)
                             // Only report indexed sections if we are in a monolithic or indexed view
                             // This prevents artifacts (which might have H1s) from triggering a jump to Story monolith
-                            const isAlreadyMonolithic = activeSection === 'Overview' || (activeSection?.includes('|||'))
+                            const isAlreadyMonolithic = isOverviewSection(activeSection) || isChapterSection(activeSection)
 
-                            if (activeSection !== section && isAlreadyMonolithic) {
+                            const isCurrentSection =
+                                isChapterSection(activeSection) &&
+                                isChapterSection(section) &&
+                                activeSection.index === section.index &&
+                                activeSection.title === section.title
+
+                            if (!isCurrentSection && isAlreadyMonolithic) {
                                 lastObserverSection.current = section
                                 onSectionChange(section)
                             }
