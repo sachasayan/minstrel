@@ -61,16 +61,17 @@ interface ActionCardProps {
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary'
+  compact?: boolean
 }
 
-const ActionCard = ({ icon, label, onClick, variant = 'primary' }: ActionCardProps): ReactNode => {
+const ActionCard = ({ icon, label, onClick, variant = 'primary', compact = false }: ActionCardProps): ReactNode => {
   const isPrimary = variant === 'primary'
   return (
     <div
       className="relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 shadow-md transition-transform duration-300 hover:scale-105 hover:border-border"
       onClick={onClick}
     >
-      <div className="relative" style={{ paddingTop: '175%' }}>
+      <div className="relative" style={{ paddingTop: compact ? '87.5%' : '175%' }}>
         <div className={`absolute inset-0 flex flex-col items-center justify-center ${isPrimary ? 'bg-primary' : 'bg-secondary'}`}>
           <div className={isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}>
             {icon}
@@ -88,12 +89,22 @@ const ProjectLibrary = ({ recentProjects, onProjectSelect, onNew, onOpen }: Proj
   return (
     <div className="container mx-auto">
       <div className="flex flex-wrap flex-row justify-center gap-6">
-        <ActionCard
-          icon={<FolderOpenIcon className="w-10 h-10" />}
-          label="Open"
-          onClick={onOpen}
-          variant="secondary"
-        />
+        <div className="flex flex-col gap-6">
+          <ActionCard
+            icon={<FolderOpenIcon className="w-10 h-10" />}
+            label="Open"
+            onClick={onOpen}
+            variant="secondary"
+            compact
+          />
+          <ActionCard
+            icon={<BookPlusIcon className="w-10 h-10" />}
+            label="New"
+            onClick={onNew}
+            variant="primary"
+            compact
+          />
+        </div>
         {recentProjects.map((project) => (
           <RecentCard
             key={project.projectPath}
@@ -101,12 +112,6 @@ const ProjectLibrary = ({ recentProjects, onProjectSelect, onNew, onOpen }: Proj
             onClick={() => onProjectSelect(project.projectPath)}
           />
         ))}
-        <ActionCard
-          icon={<BookPlusIcon className="w-10 h-10" />}
-          label="New"
-          onClick={onNew}
-          variant="primary"
-        />
       </div>
     </div>
   )
