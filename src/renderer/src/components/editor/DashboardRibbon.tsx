@@ -1,19 +1,22 @@
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Star } from 'lucide-react'
-import { useEffect, useState, useMemo } from 'react'
+import { useMemo } from 'react'
 
-import { selectActiveProject, setWordCountHistorical } from '@/lib/store/projectsSlice'
-import { colors, updateRollingWordCountHistory } from '@/lib/dashboardUtils'
+import { selectActiveProject } from '@/lib/store/projectsSlice'
+import { colors } from '@/lib/dashboardUtils'
 import { CoverCard } from '@/components/CoverCard'
 import { getChapterWordCounts } from '@/lib/storyContent'
 
+type DialogueCountRow = {
+    chapter: number
+    [characterName: string]: number
+}
+
 export function DashboardRibbon() {
     const activeProject = useSelector(selectActiveProject)
-    const [dialogueCountData, setDialogueCountData] = useState<any[]>([])
-    const dispatch = useDispatch()
 
     const chapterData = useMemo(() => {
         if (!activeProject) return []
@@ -23,36 +26,22 @@ export function DashboardRibbon() {
         }))
     }, [activeProject?.storyContent])
 
-    useEffect(() => {
-        if (activeProject) {
-            // Historical word count logic
-            // Note: In a larger refactor, this might belong in a middleware
-            // but keeping it aligned with existing NovelDashboard logic for now.
-            // @ts-ignore - assuming updateRollingWordCountHistory is imported correctly or we use the logic
-            const updatedHistory = updateRollingWordCountHistory ? updateRollingWordCountHistory(activeProject) : []
-            const historical = activeProject.wordCountHistorical || []
+    const dialogueCountData = useMemo<DialogueCountRow[]>(() => {
+        const dialogCounts = activeProject?.dialogueAnalysis?.dialogCounts
+        if (!dialogCounts) return []
 
-            if ((!historical || historical.length === 0) && updatedHistory?.length > 0) {
-                dispatch(setWordCountHistorical(updatedHistory))
-            }
+        const charNames = Object.keys(dialogCounts)
+        if (charNames.length === 0) return []
 
-            // Generate dialogue count data
-            const analysis = activeProject.dialogueAnalysis
-            if (analysis && analysis.dialogCounts) {
-                const charNames = Object.keys(analysis.dialogCounts)
-                const chapterCount = Math.max(...charNames.map(name => analysis.dialogCounts[name].length))
-                const transformed: any[] = []
-                for (let chapterIdx = 0; chapterIdx < chapterCount; chapterIdx++) {
-                    const chapterData: any = { chapter: chapterIdx + 1 }
-                    for (const charName of charNames) {
-                        chapterData[charName] = analysis.dialogCounts[charName][chapterIdx] ?? 0
-                    }
-                    transformed.push(chapterData)
-                }
-                setDialogueCountData(transformed)
+        const chapterCount = Math.max(...charNames.map((name) => dialogCounts[name]?.length ?? 0))
+        return Array.from({ length: chapterCount }, (_, chapterIdx) => {
+            const chapterData: DialogueCountRow = { chapter: chapterIdx + 1 }
+            for (const charName of charNames) {
+                chapterData[charName] = dialogCounts[charName]?.[chapterIdx] ?? 0
             }
-        }
-    }, [activeProject, dispatch])
+            return chapterData
+        })
+    }, [activeProject?.dialogueAnalysis])
 
     if (!activeProject) return null
 
