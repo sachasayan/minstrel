@@ -55,7 +55,15 @@ export const sendMessage = async (
     while (context.currentStep < MAX_STEPS) {
       if (signal.aborted) break
 
-      const { system, messages, allowedTools } = buildPrompt(context, promptData)
+      // Re-read live state every loop iteration so prompts/tools see latest edits and chat.
+      const latestState = store.getState()
+      const livePromptData: PromptData = {
+        activeProject: latestState.projects.activeProject ?? promptData.activeProject,
+        chatHistory: latestState.chat.chatHistory ?? promptData.chatHistory
+      }
+      const liveSettings: AppSettings = latestState.settings ?? settings
+
+      const { system, messages, allowedTools } = buildPrompt(context, livePromptData)
 
       // Inform Redux about pending files AI might be reading
       dispatch(setPendingFiles(context.requestedFiles || null))
@@ -71,7 +79,7 @@ export const sendMessage = async (
       // Tools definition using the registry
       const toolkit = createTools({
         dispatch,
-        activeProject: promptData.activeProject,
+        activeProject: livePromptData.activeProject,
         onReadFile: (fileNames) => {
           nextRequestedFiles = fileNames
         },
@@ -88,7 +96,13 @@ export const sendMessage = async (
       let finalText = ''
       let finalCalls: any[] = []
       try {
-        const stream = await geminiService.streamTextWithTools(settings, system, messages, activeTools, modelPreference)
+        const stream = await geminiService.streamTextWithTools(
+          liveSettings,
+          system,
+          messages,
+          activeTools,
+          modelPreference
+        )
         
         streamingService.updateStatus('Minstrel is thinking...')
 

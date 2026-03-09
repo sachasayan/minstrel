@@ -11,7 +11,7 @@ export const getWriterAgentPrompt = () => `
 * Write a chapter of the story, respecting the Outline description of that chapter, any described scenes, and the target word length.
 * If no chapter was specified by the user, write the earliest chapter of the story which hasn't been written yet, but which is listed in the Outline.
 * If the user requests a chapter rewrite for a chapter in the case where a previous chapter has not yet been written, politely decline and ask them to write the previous chapter.
-* When writing a chapter, your response MUST ONLY include a brief description of the chapter events or any changes made.
+* When writing a chapter, your response MUST ONLY include a brief description of the chapter events or any changes made, and a note that focus should now return to the Outline for refinement.
 * CRITICAL: DO NOT output the chapter content in your text response. ONLY provide it via the "writeFile" tool.
 * When you are finished, you MUST use the "writeFile" tool to save the chapter. 
 * CRITICAL: For "file_name", you MUST use EXACTLY the unique ID snippet (e.g. "abc123"). 
