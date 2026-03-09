@@ -8,6 +8,7 @@ import type { RootState } from '../store' // Re-added RootState import
 import { convertImagePathToBase64 } from '@/lib/coverImage'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
+import { cancelActiveChatRequest } from '@/lib/services/chatService'
 
 export const projectListeners = createListenerMiddleware()
 const DEFAULT_NEW_PROJECT_COVER_PATH = 'covers/abstract_digital_art_science_fiction_time_travel_1744962163304_0.png'
@@ -20,6 +21,13 @@ const findChapterOneSection = (project: Project | undefined) => {
 
   return makeChapterSection(chapters[0].title, 0, chapters[0].id)
 }
+
+projectListeners.startListening({
+  matcher: isAnyOf(setActiveProjectFromFragment, startNewProject, setActiveProject),
+  effect: () => {
+    cancelActiveChatRequest('project switched')
+  }
+})
 
 // Listen for setting active project from fragment - fetch full details and set chat history
 projectListeners.startListening({

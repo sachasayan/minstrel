@@ -44,7 +44,7 @@ vi.mock('@/lib/store/projectsSlice', () => ({
 import { sendMessage, generateTitleSuggestions } from './chatService'
 import geminiService from './llmService'
 import { store } from '@/lib/store/store'
-import { handleWriteFile } from './toolHandlers'
+import { handleMessage, handleWriteFile } from './toolHandlers'
 import { resolvePendingChat } from '@/lib/store/chatSlice'
 import { setPendingFiles } from '@/lib/store/projectsSlice'
 
@@ -52,7 +52,7 @@ describe('chatService', () => {
   const mockDispatch = vi.fn()
 
   const mockState = {
-    projects: { activeProject: { title: 'Test', files: [], storyContent: '' } },
+    projects: { activeProject: { title: 'Test', projectPath: '/projects/test.mns', files: [], storyContent: '' } },
     settings: { googleApiKey: 'key', provider: 'google', highPreferenceModelId: 'h', lowPreferenceModelId: 'l' },
     chat: { chatHistory: [] }
   } as any
@@ -98,10 +98,11 @@ describe('chatService', () => {
       await sendMessage(context, promptData, mockState.settings, mockDispatch)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
+      expect(handleWriteFile).toHaveBeenCalledTimes(1)
       expect(handleWriteFile).toHaveBeenCalledWith(
         'test.md',
         'content',
-        mockDispatch,
+        expect.any(Function),
         mockState.projects.activeProject
       )
     })
@@ -169,6 +170,42 @@ describe('chatService', () => {
       await sendMessage(firstContext, promptData, mockState.settings, mockDispatch)
 
       // Verify cleanup was dispatched twice (once for each sendMessage call)
+      expect(mockDispatch).toHaveBeenCalledWith(setPendingFiles(null))
+      expect(mockDispatch).toHaveBeenCalledWith(resolvePendingChat())
+    })
+
+    it('should discard assistant output after switching projects', async () => {
+      let currentState = mockState
+
+      vi.mocked(store.getState).mockImplementation(() => currentState as any)
+      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async () => ({
+        text: Promise.resolve('Late response'),
+        toolCalls: Promise.resolve([]),
+        textStream: (async function* () {
+          currentState = {
+            ...mockState,
+            projects: {
+              activeProject: {
+                title: 'Other',
+                projectPath: '/projects/other.mns',
+                files: [],
+                storyContent: ''
+              }
+            }
+          } as any
+          yield 'Late response'
+        })()
+      }) as any)
+
+      const context = { agent: 'routingAgent', currentStep: 0, projectPath: '/projects/test.mns' } as any
+      const promptData = {
+        activeProject: mockState.projects.activeProject,
+        chatHistory: mockState.chat.chatHistory
+      }
+
+      await sendMessage(context, promptData, mockState.settings, mockDispatch)
+
+      expect(handleMessage).not.toHaveBeenCalled()
       expect(mockDispatch).toHaveBeenCalledWith(setPendingFiles(null))
       expect(mockDispatch).toHaveBeenCalledWith(resolvePendingChat())
     })

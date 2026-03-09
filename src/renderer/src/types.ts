@@ -110,6 +110,7 @@ export interface RequestContext {
   requestedFiles?: string[]
   message?: string
   modelPreference?: 'high' | 'low'
+  projectPath?: string | null
 }
 
 export type ActiveView = 'intro' | 'project/outline' | 'project/editor' | 'project/parameters'

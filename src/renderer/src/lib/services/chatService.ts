@@ -22,6 +22,18 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
  * Tracks the current active agent loop to allow for interruption.
  */
 let currentAbortController: AbortController | null = null
+let currentRequestToken = 0
+
+const getActiveProjectPath = (): string | null => store.getState().projects.activeProject?.projectPath ?? null
+const isCurrentRequestToken = (requestToken: number): boolean => currentRequestToken === requestToken
+const isRequestProjectActive = (requestToken: number, projectPath: string | null): boolean =>
+  isCurrentRequestToken(requestToken) && getActiveProjectPath() === projectPath
+
+export const cancelActiveChatRequest = (reason = 'request canceled') => {
+  if (!currentAbortController) return
+  console.log(`[chatService] ${reason}`)
+  currentAbortController.abort()
+}
 
 export const initializeGeminiService = () => {
   console.log('LLM service initialized with multi-provider support')
@@ -45,15 +57,43 @@ export const sendMessage = async (
   
   currentAbortController = new AbortController()
   const signal = currentAbortController.signal
+  const requestToken = ++currentRequestToken
+  const requestProjectPath = initialContext.projectPath ?? promptData.activeProject?.projectPath ?? null
+
+  const dispatchIfCurrent = (action: Parameters<AppDispatch>[0]) => {
+    if (!isCurrentRequestToken(requestToken)) {
+      return action
+    }
+    return dispatch(action)
+  }
+
+  const dispatchIfProjectActive = (action: Parameters<AppDispatch>[0]) => {
+    if (!isRequestProjectActive(requestToken, requestProjectPath)) {
+      console.warn('[chatService] Dropping side effect for stale project-bound request.')
+      return action
+    }
+    return dispatch(action)
+  }
+
+  const requestStillActive = () => {
+    if (signal.aborted) return false
+    if (isRequestProjectActive(requestToken, requestProjectPath)) return true
+    if (isCurrentRequestToken(requestToken)) {
+      console.log('[chatService] Active project changed; discarding pending response.')
+      currentAbortController?.abort()
+    }
+    return false
+  }
 
   let context: RequestContext = {
     ...initialContext,
-    currentStep: initialContext.currentStep || 0
+    currentStep: initialContext.currentStep || 0,
+    projectPath: requestProjectPath
   }
 
   try {
     while (context.currentStep < MAX_STEPS) {
-      if (signal.aborted) break
+      if (!requestStillActive()) break
 
       // Re-read live state every loop iteration so prompts/tools see latest edits and chat.
       const latestState = store.getState()
@@ -66,7 +106,7 @@ export const sendMessage = async (
       const { system, messages, allowedTools } = buildPrompt(context, livePromptData)
 
       // Inform Redux about pending files AI might be reading
-      dispatch(setPendingFiles(context.requestedFiles || null))
+      dispatchIfCurrent(setPendingFiles(context.requestedFiles || null))
 
       // Determine model preference based on agent type
       const modelPreference: 'high' | 'low' = 
@@ -78,12 +118,14 @@ export const sendMessage = async (
 
       // Tools definition using the registry
       const toolkit = createTools({
-        dispatch,
+        dispatch: dispatchIfProjectActive as AppDispatch,
         activeProject: livePromptData.activeProject,
         onReadFile: (fileNames) => {
+          if (!requestStillActive()) return
           nextRequestedFiles = fileNames
         },
         onRouteTo: (agent) => {
+          if (!requestStillActive()) return
           nextAgent = agent
         }
       })
@@ -104,12 +146,14 @@ export const sendMessage = async (
           modelPreference
         )
         
+        if (!requestStillActive()) break
         streamingService.updateStatus('Minstrel is thinking...')
 
         // Handle tool calls as they are being identified
         const toolCallsPromise = stream.toolCalls
         if (toolCallsPromise) {
           toolCallsPromise.then((calls) => {
+            if (!isRequestProjectActive(requestToken, requestProjectPath)) return
             calls.forEach((call) => {
               if (call.toolName === 'writeFile') {
                 streamingService.updateStatus(`Writing ${(call as any).args?.file_name}...`)
@@ -120,7 +164,7 @@ export const sendMessage = async (
 
         // Stream the actual text content if it's a message
         for await (const textPart of stream.textStream) {
-          if (signal.aborted) {
+          if (!requestStillActive()) {
             streamingService.clear()
             break
           }
@@ -154,6 +198,7 @@ export const sendMessage = async (
         
       } catch (error: any) {
         if (signal.aborted) break
+        if (!requestStillActive()) break
 
         if (error.message?.includes('resource exhausted')) {
           console.warn('Resource exhausted, debouncing...')
@@ -163,7 +208,7 @@ export const sendMessage = async (
         throw error
       }
 
-      if (signal.aborted) break
+      if (!requestStillActive()) break
 
       if (finalText && finalText.trim().length > 0) {
         // Prevent leaking giant edits into chat if a tool call already handled it
@@ -172,9 +217,9 @@ export const sendMessage = async (
         
         if (wasWriteAction && isVeryLarge) {
            console.log('Skipping chat message addition as it looks like a redundant large file write.');
-           handleMessage("I've updated the content as requested.", dispatch);
+           handleMessage("I've updated the content as requested.", dispatchIfProjectActive as AppDispatch);
         } else {
-           handleMessage(finalText.trim(), dispatch);
+           handleMessage(finalText.trim(), dispatchIfProjectActive as AppDispatch);
         }
       }
 
@@ -212,13 +257,15 @@ export const sendMessage = async (
     if (signal.aborted) return
 
     console.error('Failed to send chat message:', error)
-    handleMessage(`Hmm. Something went wrong, sorry. You might need to try again.`, dispatch)
+    handleMessage(`Hmm. Something went wrong, sorry. You might need to try again.`, dispatchIfProjectActive as AppDispatch)
   } finally {
     // Always clean up, regardless of abort status, to prevent stuck loading state
-    dispatch(setPendingFiles(null))
-    dispatch(resolvePendingChat())
+    if (isCurrentRequestToken(requestToken)) {
+      dispatch(setPendingFiles(null))
+      dispatch(resolvePendingChat())
+    }
     
-    if (currentAbortController?.signal === signal) {
+    if (isCurrentRequestToken(requestToken) && currentAbortController?.signal === signal) {
       currentAbortController = null
     }
     console.log('sendMessage() execution finished')
