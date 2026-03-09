@@ -361,7 +361,7 @@ const SettingsModal = ({ open, onClose }: SettingsModalProps): ReactNode => {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-3xl p-0 gap-0 overflow-hidden">
 
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
