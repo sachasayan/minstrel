@@ -9,10 +9,10 @@ import { setActiveView, setActiveSection } from '@/lib/store/appStateSlice'
 import { setChatHistory } from '@/lib/store/chatSlice'
 import { fetchProjectDetails, getProjectFragmentMeta, openFileDialog } from '@/lib/services/fileService'
 import { saveAppSettings } from '@/lib/services/settingsService'
-import { RecentProject } from '@/types'
 import { cn } from '@/lib/utils'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
+import { buildRecentProjectEntry } from '@/lib/recentProjects'
 
 const Intro = (): ReactNode => {
   const dispatch = useDispatch()
@@ -29,15 +29,7 @@ const Intro = (): ReactNode => {
       }
 
       // Build and record a RecentProject entry
-      const recentEntry: RecentProject = {
-        projectPath: fragment.projectPath,
-        title: fragment.title,
-        genre: fragment.genre,
-        cover: fragment.cover,           // cache the cover data URL (only 3 entries)
-        coverImageMimeType: fragment.coverImageMimeType,
-        wordCountCurrent: fragment.wordCountCurrent,
-        lastOpenedAt: new Date().toISOString()
-      }
+      const recentEntry = buildRecentProjectEntry(fragment)
 
       // Update redux + persist to disk
       dispatch(addRecentProject(recentEntry))

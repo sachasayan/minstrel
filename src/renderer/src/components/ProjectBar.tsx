@@ -10,7 +10,7 @@ import {
   setProjectHasLiveEdits,
   setProjectPath
 } from '@/lib/store/projectsSlice'
-import { selectSettingsState } from '@/lib/store/settingsSlice'
+import { addRecentProject, selectSettingsState } from '@/lib/store/settingsSlice'
 import pdfService from '@/lib/services/pdfService'
 import PdfExportConfigModal, { PdfExportConfig } from '@/components/PdfExportConfigModal'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { saveAppSettings } from '@/lib/services/settingsService'
+import { buildRecentProjectEntry } from '@/lib/recentProjects'
 
 
 const ProjectBar = () => {
@@ -67,7 +69,23 @@ const ProjectBar = () => {
     }
   }
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    if (activeProject?.projectPath) {
+      const recentEntry = buildRecentProjectEntry(activeProject)
+      const updatedRecents = [
+        recentEntry,
+        ...(settings.recentProjects ?? []).filter((project) => project.projectPath !== activeProject.projectPath)
+      ].slice(0, 3)
+
+      dispatch(addRecentProject(recentEntry))
+      try {
+        await saveAppSettings({ ...settings, recentProjects: updatedRecents })
+      } catch (error) {
+        console.error('Failed to persist recent projects on close:', error)
+        toast.error('Could not update recent projects, but the project was closed.')
+      }
+    }
+
     dispatch(setProjectHasLiveEdits(false))
     dispatch(setActiveProject(null))
     dispatch(setActiveView('intro'))
@@ -148,7 +166,7 @@ const ProjectBar = () => {
 
   const saveAndClose = async () => {
     const result = await handleSave()
-    if (result) handleClose()
+    if (result) await handleClose()
   }
 
   const handleCloseSafe = () => {
@@ -156,7 +174,7 @@ const ProjectBar = () => {
       setAlertDialogOpen(true)
       return
     }
-    handleClose()
+    void handleClose()
   }
 
   return (
@@ -169,7 +187,7 @@ const ProjectBar = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClose}>Close without Saving</AlertDialogAction>
+            <AlertDialogAction onClick={() => void handleClose()}>Close without Saving</AlertDialogAction>
             <AlertDialogAction onClick={saveAndClose}>Save and Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
