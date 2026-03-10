@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo, useMemo } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, memo, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
 import { RootState } from '@/lib/store/store'
@@ -7,7 +7,7 @@ import minstrelIcon from '@/assets/bot/base.png'
 import { ChatMessage } from '@/types'
 import { streamingService } from '@/lib/services/streamingService'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 const MAX_INPUT_LINES = 10
@@ -45,6 +45,11 @@ const BUBBLE_LAYOUT_TRANSITION = {
   },
 }
 
+const HEIGHT_TRANSITION = {
+  duration: 0.2,
+  ease: 'easeOut' as const,
+}
+
 const StreamedMessageText = memo(({ text }: { text: string }) => {
   const tokens = useMemo(() => text.split(/(\s+)/), [text])
 
@@ -70,16 +75,67 @@ const StreamedMessageText = memo(({ text }: { text: string }) => {
 
 StreamedMessageText.displayName = 'StreamedMessageText'
 
+const SmoothHeight = memo(({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) => {
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    const element = contentRef.current
+    if (!element) return
+
+    const updateHeight = () => {
+      setHeight(element.getBoundingClientRect().height)
+    }
+
+    updateHeight()
+
+    const observer = new ResizeObserver(() => {
+      updateHeight()
+    })
+
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [children])
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{ height }}
+      transition={HEIGHT_TRANSITION}
+      className={cn('overflow-hidden', className)}
+    >
+      <div ref={contentRef}>
+        {children}
+      </div>
+    </motion.div>
+  )
+})
+
+SmoothHeight.displayName = 'SmoothHeight'
+
+const StreamingBubbleBody = memo(({ text }: { text: string }) => (
+  <SmoothHeight>
+    <StreamedMessageText text={text} />
+  </SmoothHeight>
+))
+
+StreamingBubbleBody.displayName = 'StreamingBubbleBody'
+
 const ChatMessageItem = memo(({ msg }: ChatMessageItemProps) => {
   return msg.sender === 'User' ? (
     <motion.div
-      layout
+      layout="position"
       transition={BUBBLE_LAYOUT_TRANSITION}
       className="flex items-start justify-end"
     >
       <motion.div
-        layout
-        transition={BUBBLE_LAYOUT_TRANSITION}
         className="chat-message mb-2 ml-16 max-w-[85%] rounded-[28px] border border-border/50 bg-card px-5 py-3 text-left text-sm font-medium text-card-foreground shadow-none"
       >
         {msg.text}
@@ -87,17 +143,15 @@ const ChatMessageItem = memo(({ msg }: ChatMessageItemProps) => {
     </motion.div>
   ) : (
     <motion.div
-      layout
+      layout="position"
       transition={BUBBLE_LAYOUT_TRANSITION}
       className="flex items-start gap-2"
     >
       <img src={minstrelIcon} className="mt-1 size-10 shrink-0" alt="" />
       <motion.div
-        layout
-        transition={BUBBLE_LAYOUT_TRANSITION}
         className={`chat-message mb-2 mr-6 max-w-[85%] rounded-[28px] border border-highlight-200/70 bg-highlight-100 px-5 py-3 text-left text-sm text-highlight-900 shadow-none ${(msg as any).isStreaming ? 'opacity-90' : ''}`}
       >
-        {(msg as any).isStreaming ? <StreamedMessageText text={msg.text} /> : msg.text}
+        {(msg as any).isStreaming ? <StreamingBubbleBody text={msg.text} /> : msg.text}
       </motion.div>
     </motion.div>
   )
@@ -220,27 +274,58 @@ const ChatInterface = () => {
             />
           )}
 
-          {/* Suggestions */}
-          <div className="flex flex-wrap items-center">
-            {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-              <Button
-                onClick={() => handleNextStage(suggestion)}
-                key={index}
-                className="mr-2 my-2 inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
+          <AnimatePresence initial={false}>
+            {actionSuggestions.length > 0 && (
+              <motion.div
+                key="suggestions"
+                layout="position"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={HEIGHT_TRANSITION}
               >
-                {suggestion}
-              </Button>
-            ))}
-          </div>
+                <SmoothHeight>
+                  <div className="flex flex-wrap items-center">
+                    {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                      <motion.div
+                        key={suggestion}
+                        layout="position"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={HEIGHT_TRANSITION}
+                        className="mr-2 my-2"
+                      >
+                        <Button
+                          onClick={() => handleNextStage(suggestion)}
+                          className="inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
+                        >
+                          {suggestion}
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </SmoothHeight>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {pendingChat && (
-            <motion.div
-              layout
-              transition={BUBBLE_LAYOUT_TRANSITION}
-            >
-              <ChatLoadingIndicator status={streamingStatus} />
-            </motion.div>
-          )}
+          <AnimatePresence initial={false}>
+            {pendingChat && (
+              <motion.div
+                key="loading"
+                layout="position"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={HEIGHT_TRANSITION}
+              >
+                <SmoothHeight>
+                  <ChatLoadingIndicator status={streamingStatus} />
+                </SmoothHeight>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
         <div className="flex items-end gap-2 px-3 py-3">
           <textarea
