@@ -165,7 +165,7 @@ describe('projectsSlice', () => {
       }
       const actual = reducer(stateWithProject, setWordCountHistorical(history))
       expect(actual.activeProject?.wordCountHistorical).toEqual(history)
-      expect(actual.projectHasLiveEdits).toBe(true)
+      expect(actual.projectHasLiveEdits).toBe(false)
     })
 
     it('should be a no-op when activeProject is null', () => {

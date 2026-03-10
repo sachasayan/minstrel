@@ -38,7 +38,11 @@ export function MarkdownSyncPlugin({ initialMarkdown, onChange, transformers = T
 
     // Handle Local Changes
     useEffect(() => {
-        return editor.registerUpdateListener(({ editorState }) => {
+        return editor.registerUpdateListener(({ editorState, tags }) => {
+            if (tags.has('import-markdown')) {
+                return
+            }
+
             editorState.read(() => {
                 const markdown = $convertToMarkdownString(transformers)
 

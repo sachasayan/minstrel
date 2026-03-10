@@ -45,6 +45,7 @@ describe('appStateListeners', () => {
     } as any))
 
     const project = store.getState().projects.activeProject
+    expect(store.getState().projects.projectHasLiveEdits).toBe(false)
     const expectedWordCount = calculateWordCount(project?.storyContent ?? '')
     expect(project?.wordCountCurrent).toBe(expectedWordCount)
     expect(project?.wordCountHistorical).toEqual([

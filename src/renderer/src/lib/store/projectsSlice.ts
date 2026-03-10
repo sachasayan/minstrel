@@ -139,7 +139,6 @@ export const projectsSlice = createSlice({
     setWordCountHistorical: (state, action: PayloadAction<Array<{ date: string; wordCount: number }>>) => {
       if (!state.activeProject) return
       state.activeProject.wordCountHistorical = action.payload
-      state.projectHasLiveEdits = true
     },
     updateReviews: (state, action: PayloadAction<{ critique: any[]; analysis: { dialogCounts: Record<string, number[]> } }>) => {
       if (!state.activeProject) return
