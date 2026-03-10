@@ -58,6 +58,7 @@ export interface Project extends ProjectFragment {
     date: string // 'YYYY-MM-DD'
     wordCount: number
   }>
+  lastViewedSection?: ActiveSection
 }
 export interface ProjectFragment {
   projectPath: string

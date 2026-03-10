@@ -10,12 +10,14 @@ interface ScrollSyncPluginProps {
     activeSection: ActiveSection
     onSectionChange: (section: ActiveSection) => void
     containerRef: React.RefObject<HTMLDivElement | null>
+    instantInitialScroll?: boolean
 }
 
 export function ScrollSyncPlugin({
     activeSection,
     onSectionChange,
-    containerRef
+    containerRef,
+    instantInitialScroll = false
 }: ScrollSyncPluginProps): null {
     const [editor] = useLexicalComposerContext()
     const isProgrammaticScroll = useRef(false)
@@ -25,6 +27,16 @@ export function ScrollSyncPlugin({
     const observedSections = useRef(new Map<Element, ActiveSection>())
     const lastDispatchedSectionKey = useRef<string>('none')
     const lastDispatchAt = useRef(0)
+    const hasHandledInitialScroll = useRef(false)
+
+    const getScrollBehavior = () =>
+        !hasHandledInitialScroll.current && instantInitialScroll ? 'auto' : 'smooth'
+
+    const markInitialScrollHandled = () => {
+        if (!hasHandledInitialScroll.current) {
+            hasHandledInitialScroll.current = true
+        }
+    }
 
     useEffect(() => {
         activeSectionRef.current = activeSection
@@ -51,7 +63,8 @@ export function ScrollSyncPlugin({
 
         if (isOverviewSection(activeSection)) {
             isProgrammaticScroll.current = true
-            containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+            containerRef.current?.scrollTo({ top: 0, behavior: getScrollBehavior() })
+            markInitialScrollHandled()
             setTimeout(() => (isProgrammaticScroll.current = false), 800)
             return
         }
@@ -60,7 +73,8 @@ export function ScrollSyncPlugin({
             const outlineElement = containerRef.current?.querySelector('[data-outline-target="true"]')
             if (outlineElement instanceof HTMLElement) {
                 isProgrammaticScroll.current = true
-                outlineElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                outlineElement.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
+                markInitialScrollHandled()
                 setTimeout(() => (isProgrammaticScroll.current = false), 800)
             }
             return
@@ -86,7 +100,8 @@ export function ScrollSyncPlugin({
                 const domElement = editor.getElementByKey(targetNode.getKey())
                 if (domElement) {
                     isProgrammaticScroll.current = true
-                    domElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    domElement.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
+                    markInitialScrollHandled()
                     // Wait for scroll to finish before allowing observer to update sidebar
                     setTimeout(() => (isProgrammaticScroll.current = false), 800)
                 }

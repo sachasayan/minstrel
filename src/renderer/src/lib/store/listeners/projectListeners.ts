@@ -6,21 +6,11 @@ import { setChatHistory, clearChatHistory } from '../chatSlice'
 import { Project, ProjectFragment } from '@/types' // Re-added ProjectFragment import
 import type { RootState } from '../store' // Re-added RootState import
 import { convertImagePathToBase64 } from '@/lib/coverImage'
-import { getChaptersFromStoryContent } from '@/lib/storyContent'
-import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
+import { makeArtifactSection, resolveProjectSection } from '@/lib/activeSection'
 import { cancelActiveChatRequest } from '@/lib/services/chatService'
 import { pickRandomDefaultNewProjectCoverPath } from '@/lib/defaultProjectCovers'
 
 export const projectListeners = createListenerMiddleware()
-
-const findChapterOneSection = (project: Project | undefined) => {
-  if (!project || !project.storyContent) return makeArtifactSection('Outline')
-
-  const chapters = getChaptersFromStoryContent(project.storyContent)
-  if (chapters.length === 0) return makeArtifactSection('Outline')
-
-  return makeChapterSection(chapters[0].title, 0, chapters[0].id)
-}
 
 projectListeners.startListening({
   matcher: isAnyOf(setActiveProjectFromFragment, startNewProject, setActiveProject),
@@ -53,7 +43,7 @@ projectListeners.startListening({
             console.log(`Listener: Dispatching setChatHistory for ${fullProject.title}`)
             // Dispatch action to set the chat history
             listenerApi.dispatch(setChatHistory(fullProject.chatHistory ?? []))
-            listenerApi.dispatch(setActiveSection(findChapterOneSection(fullProject)))
+            listenerApi.dispatch(setActiveSection(resolveProjectSection(fullProject, fullProject.lastViewedSection)))
             listenerApi.dispatch(setActiveView('project/editor'))
         } else {
              console.error(`Listener: Failed to fetch full project details for ${projectFragment.title}`)

@@ -87,6 +87,12 @@ describe('sqliteOps', () => {
       const project = {
         title: 'Saved Project',
         genre: 'Sci-Fi',
+        lastViewedSection: {
+          kind: 'chapter',
+          title: 'Chapter 2',
+          index: 1,
+          chapterId: 'chapter-2'
+        },
         files: [
           { title: 'Chapter 1', content: 'Content 1', type: 'chapter', sort_order: 1 },
           { title: 'Outline', content: 'Outline content', type: 'outline', sort_order: 0 }
@@ -102,6 +108,8 @@ describe('sqliteOps', () => {
       // Verify metadata
       const titleRow = mockDb.prepare("SELECT value FROM metadata WHERE key='title'").get()
       expect(JSON.parse(titleRow.value)).toBe('Saved Project')
+      const lastViewedSectionRow = mockDb.prepare("SELECT value FROM metadata WHERE key='lastViewedSection'").get()
+      expect(JSON.parse(lastViewedSectionRow.value)).toEqual(project.lastViewedSection)
 
       // Verify files (non-chapter)
       const files = mockDb.prepare('SELECT title, type FROM files').all()
@@ -160,7 +168,7 @@ describe('sqliteOps', () => {
         CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, title TEXT, content TEXT, type TEXT, sort_order INTEGER);
         CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY, sender TEXT, text TEXT, timestamp TEXT, metadata TEXT);
         
-        INSERT INTO metadata (key, value) VALUES ('title', '"Loaded Project"'), ('genre', '"Mystery"'), ('wordCountTarget', '50000');
+        INSERT INTO metadata (key, value) VALUES ('title', '"Loaded Project"'), ('genre', '"Mystery"'), ('wordCountTarget', '50000'), ('lastViewedSection', '{"kind":"artifact","title":"Outline"}');
         INSERT INTO files (title, content, type, sort_order) VALUES ('Notes', 'Some notes', 'note', 1);
         INSERT INTO chat_history (sender, text, timestamp) VALUES ('ai', 'Hello there', '2023-01-01T00:00:00Z');
       `)
@@ -171,6 +179,7 @@ describe('sqliteOps', () => {
       expect(project.files).toHaveLength(1)
       expect(project.files[0].title).toBe('Notes')
       expect(project.chatHistory).toHaveLength(1)
+      expect(project.lastViewedSection).toEqual({ kind: 'artifact', title: 'Outline' })
     })
   })
 })

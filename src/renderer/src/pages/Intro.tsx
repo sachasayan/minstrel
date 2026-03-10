@@ -10,8 +10,7 @@ import { setChatHistory } from '@/lib/store/chatSlice'
 import { fetchProjectDetails, getProjectFragmentMeta, openFileDialog } from '@/lib/services/fileService'
 import { saveAppSettings } from '@/lib/services/settingsService'
 import { cn } from '@/lib/utils'
-import { getChaptersFromStoryContent } from '@/lib/storyContent'
-import { makeArtifactSection, makeChapterSection } from '@/lib/activeSection'
+import { resolveProjectSection } from '@/lib/activeSection'
 import { buildRecentProjectEntry } from '@/lib/recentProjects'
 
 const Intro = (): ReactNode => {
@@ -44,13 +43,7 @@ const Intro = (): ReactNode => {
       dispatch(setActiveProject(fullProject))
       dispatch(setChatHistory(fullProject.chatHistory ?? []))
 
-      // Navigate to first chapter
-      const chapters = getChaptersFromStoryContent(fullProject.storyContent || '')
-      const firstSection =
-        chapters.length > 0
-          ? makeChapterSection(chapters[0].title, 0, chapters[0].id)
-          : makeArtifactSection('Outline')
-      dispatch(setActiveSection(firstSection))
+      dispatch(setActiveSection(resolveProjectSection(fullProject, fullProject.lastViewedSection)))
       dispatch(setActiveView('project/editor'))
     } catch (err) {
       console.error('Failed to open project:', err)

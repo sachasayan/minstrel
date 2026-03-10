@@ -164,6 +164,7 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
               onSectionChange={(section) => dispatch(setActiveSection(section))}
               containerRef={containerRef}
               editable={!isPending}
+              instantInitialScroll
             />
           </div>
           <div className="flex-grow flex justify-start items-start pt-12">

@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { selectChatHistory } from '@/lib/store/chatSlice'
 import { saveProject, createSqliteProject } from '@/lib/services/fileService'
-import { setActiveView } from '@/lib/store/appStateSlice'
+import { selectAppState, setActiveView } from '@/lib/store/appStateSlice'
 import { bridge } from '@/lib/bridge'
 import {
   AlertDialog,
@@ -38,6 +38,7 @@ const ProjectBar = () => {
   const dispatch = useDispatch()
   const activeProject = useSelector(selectActiveProject)
   const projectsState = useSelector(selectProjects)
+  const appState = useSelector(selectAppState)
   const settings = useSelector(selectSettingsState)
   const currentChatHistory = useSelector(selectChatHistory)
   const [isExporting, setIsExporting] = useState(false)
@@ -98,7 +99,8 @@ const ProjectBar = () => {
     const currentPath = projectsState.activeProject.projectPath
     const projectToSave = {
       ...projectsState.activeProject,
-      chatHistory: currentChatHistory
+      chatHistory: currentChatHistory,
+      lastViewedSection: appState.activeSection
     }
 
     // ─── First-time save: no path yet ────────────────────────────────────────

@@ -119,6 +119,7 @@ interface LexicalEditorProps {
     onSectionChange: (section: ActiveSection) => void
     containerRef: React.RefObject<HTMLDivElement | null>
     editable?: boolean
+    instantInitialScroll?: boolean
 }
 
 export function LexicalEditor({
@@ -127,7 +128,8 @@ export function LexicalEditor({
     activeSection,
     onSectionChange,
     containerRef,
-    editable = true
+    editable = true,
+    instantInitialScroll = false
 }: LexicalEditorProps): JSX.Element {
     const config = {
         ...editorConfig,
@@ -156,6 +158,7 @@ export function LexicalEditor({
                     activeSection={activeSection}
                     onSectionChange={onSectionChange}
                     containerRef={containerRef}
+                    instantInitialScroll={instantInitialScroll}
                 />
                 <HighlightPlugin activeSection={activeSection} />
                 <FloatingToolbarPlugin />
