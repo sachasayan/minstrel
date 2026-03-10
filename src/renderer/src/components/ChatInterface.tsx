@@ -15,6 +15,17 @@ const DOCK_WIDTH = 390
 const EMPTY_WIDTH = 480
 const VIEWPORT_PADDING = 24
 const DOCK_TARGET_SELECTOR = '[data-chat-dock-target="true"]'
+const STATE_CHANGE_TRANSITION = {
+  type: 'spring' as const,
+  stiffness: 260,
+  damping: 25,
+  mass: 1,
+}
+const DOCKED_TRANSITION = {
+  type: 'tween' as const,
+  duration: 0.08,
+  ease: 'linear' as const,
+}
 
 const ChatLoadingIndicator = ({ status }: { status: string }) => {
   const [dots, setDots] = useState('')
@@ -171,7 +182,10 @@ const ChatInterface = () => {
   const [streamingStatus, setStreamingStatus] = useState('')
   const dispatch = useDispatch()
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const [dockRect, setDockRect] = useState<DOMRect | null>(null)
+  const [panelHeight, setPanelHeight] = useState(220)
+  const actionSuggestions = useSelector((state: RootState) => selectChat(state).actionSuggestions)
 
   const isProjectEmpty = useMemo(() => {
     const hasStoryContent = !!activeProject?.storyContent && activeProject.storyContent.trim() !== ''
@@ -249,6 +263,24 @@ const ChatInterface = () => {
     }
   }, [activeProject?.projectPath, isProjectEmpty])
 
+  useLayoutEffect(() => {
+    const panel = panelRef.current
+    if (!panel) return
+
+    const updatePanelHeight = () => {
+      setPanelHeight(panel.getBoundingClientRect().height)
+    }
+
+    updatePanelHeight()
+
+    if (typeof ResizeObserver === 'undefined') return
+
+    const observer = new ResizeObserver(updatePanelHeight)
+    observer.observe(panel)
+
+    return () => observer.disconnect()
+  }, [chatHistory, actionSuggestions.length, pendingChat, streamingText, isProjectEmpty])
+
   const handleSend = () => {
     if (message.trim() !== '') {
       dispatch(addChatMessage({ sender: 'User', text: message }))
@@ -260,7 +292,6 @@ const ChatInterface = () => {
     dispatch(addChatMessage({ sender: 'User', text: action }))
   }
 
-  const actionSuggestions = useSelector((state: RootState) => selectChat(state).actionSuggestions)
   const visibleMessages = useMemo(() => {
     if (chatHistory.length === 0) return []
 
@@ -290,12 +321,18 @@ const ChatInterface = () => {
 
   const viewportWidth = typeof window === 'undefined' ? DOCK_WIDTH + VIEWPORT_PADDING * 2 : window.innerWidth
   const viewportHeight = typeof window === 'undefined' ? 220 + VIEWPORT_PADDING * 2 : window.innerHeight
+  const dockHeight = dockRect?.height ?? Math.min(Math.max(viewportHeight * 0.75, 400), viewportHeight - VIEWPORT_PADDING * 2)
+  const visiblePanelHeight = isProjectEmpty ? panelHeight : Math.min(panelHeight, dockHeight)
   const dockLeft = dockRect
     ? Math.min(dockRect.left, viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING)
     : viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING
-  const dockTop = dockRect
-    ? Math.max(dockRect.top, VIEWPORT_PADDING)
-    : viewportHeight - 220 - VIEWPORT_PADDING
+  const dockBottom = dockRect
+    ? Math.min(dockRect.bottom, viewportHeight - VIEWPORT_PADDING)
+    : viewportHeight - VIEWPORT_PADDING
+  const dockTop = isProjectEmpty
+    ? '50%'
+    : Math.max(dockBottom - visiblePanelHeight, VIEWPORT_PADDING)
+  const showTopFade = !isProjectEmpty && panelHeight > dockHeight
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
@@ -304,108 +341,111 @@ const ChatInterface = () => {
         animate={{
           width: isProjectEmpty ? EMPTY_WIDTH : DOCK_WIDTH,
           left: isProjectEmpty ? '50%' : dockLeft,
-          top: isProjectEmpty ? '50%' : dockTop,
+          top: dockTop,
           x: isProjectEmpty ? '-50%' : 0,
           y: isProjectEmpty ? '-50%' : 0,
         }}
-        transition={{
-          type: 'spring',
-          stiffness: 260,
-          damping: 25,
-          mass: 1
+        transition={isProjectEmpty ? STATE_CHANGE_TRANSITION : DOCKED_TRANSITION}
+        style={{
+          maxHeight: isProjectEmpty ? undefined : dockHeight,
         }}
-        className="pointer-events-auto fixed flex min-h-[220px] flex-col"
+        className="pointer-events-auto fixed relative flex min-h-[220px] flex-col justify-end overflow-hidden"
       >
-        <motion.div className="flex-1 p-5">
-          {visibleMessages.map((msg, index) => (
-            <ChatMessageItem
-              key={index}
-              msg={msg}
-            />
-          ))}
+        {showTopFade ? (
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background via-background/95 to-transparent" />
+        ) : null}
+        <div ref={panelRef} className="relative flex min-h-[220px] shrink-0 flex-col">
+          <motion.div className="flex-1 p-5">
+            {visibleMessages.map((msg, index) => (
+              <ChatMessageItem
+                key={index}
+                msg={msg}
+              />
+            ))}
 
-          {streamingText && (
-            <ChatMessageItem
-              msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
-            />
-          )}
+            {streamingText && (
+              <ChatMessageItem
+                msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
+              />
+            )}
 
-          <AnimatePresence initial={false}>
-            {actionSuggestions.length > 0 && (
-              <motion.div
-                key="suggestions"
-                layout="position"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={HEIGHT_TRANSITION}
-              >
-                <SmoothHeight>
-                  <div className="flex flex-wrap items-center">
-                    {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-                      <motion.div
-                        key={suggestion}
-                        layout="position"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={HEIGHT_TRANSITION}
-                        className="mr-2 my-2"
-                      >
-                        <Button
-                          onClick={() => handleNextStage(suggestion)}
-                          className="inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
+            <AnimatePresence initial={false}>
+              {actionSuggestions.length > 0 && (
+                <motion.div
+                  key="suggestions"
+                  layout="position"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={HEIGHT_TRANSITION}
+                >
+                  <SmoothHeight>
+                    <div className="flex flex-wrap items-center">
+                      {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                        <motion.div
+                          key={suggestion}
+                          layout="position"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={HEIGHT_TRANSITION}
+                          className="mr-2 my-2"
                         >
-                          {suggestion}
-                        </Button>
-                      </motion.div>
-                    ))}
-                  </div>
-                </SmoothHeight>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                          <Button
+                            onClick={() => handleNextStage(suggestion)}
+                            className="inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
+                          >
+                            {suggestion}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </SmoothHeight>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <AnimatePresence initial={false}>
-            {pendingChat && (
-              <motion.div
-                key="loading"
-                layout="position"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={HEIGHT_TRANSITION}
-              >
-                <SmoothHeight>
-                  <ChatLoadingIndicator status={streamingStatus} />
-                </SmoothHeight>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-        <div className="flex items-end gap-2 px-3 py-3">
-          <textarea
-            ref={inputRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && e.metaKey) {
-                e.preventDefault()
-                handleSend()
-              }
-            }}
-            placeholder="Type your message..."
-            rows={1}
-            className="min-h-11 max-h-none flex-1 resize-none rounded-[24px] border border-input bg-card px-4 py-3 text-sm text-foreground outline-hidden placeholder:text-muted-foreground"
-            disabled={pendingChat}
-          />
-          <button
-            onClick={handleSend}
-            className="shrink-0 rounded-full bg-highlight-700 px-4 py-3 text-sm text-primary-foreground transition-colors hover:bg-highlight-600 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={pendingChat}
-          >
-            Send
-          </button>
+            <AnimatePresence initial={false}>
+              {pendingChat && (
+                <motion.div
+                  key="loading"
+                  layout="position"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={HEIGHT_TRANSITION}
+                >
+                  <SmoothHeight>
+                    <ChatLoadingIndicator status={streamingStatus} />
+                  </SmoothHeight>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+          <div className="flex items-end gap-2 px-3 py-3">
+            <textarea
+              ref={inputRef}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.metaKey) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              placeholder="Type your message..."
+              rows={1}
+              className="min-h-11 max-h-none flex-1 resize-none rounded-[24px] border border-input bg-card px-4 py-3 text-sm text-foreground outline-hidden placeholder:text-muted-foreground"
+              disabled={pendingChat}
+            />
+            <button
+              onClick={handleSend}
+              className="shrink-0 rounded-full bg-highlight-700 px-4 py-3 text-sm text-primary-foreground transition-colors hover:bg-highlight-600 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={pendingChat}
+            >
+              Send
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>

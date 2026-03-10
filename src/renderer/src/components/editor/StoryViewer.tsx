@@ -170,7 +170,10 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
             <div
               data-chat-dock-target="true"
               aria-hidden="true"
-              className="sticky top-12 h-px w-[390px] max-w-full shrink-0"
+              style={{
+                height: 'min(max(75vh, 400px), calc(100vh - 48px))',
+              }}
+              className="sticky top-6 w-[390px] max-w-full shrink-0"
             />
           </div>
         </div>
