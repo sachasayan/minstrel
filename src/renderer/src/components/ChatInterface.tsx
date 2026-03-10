@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect, useLayoutEffect, memo, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectChat, addChatMessage } from '@/lib/store/chatSlice'
+import { clearChatHistory, selectChat, addChatMessage } from '@/lib/store/chatSlice'
 import { RootState } from '@/lib/store/store'
 import { Button } from '@/components/ui/button'
 import minstrelIcon from '@/assets/bot/base.png'
 import { ChatMessage } from '@/types'
 import { streamingService } from '@/lib/services/streamingService'
-import { selectActiveProject } from '@/lib/store/projectsSlice'
+import { selectActiveProject, setActiveProject, setProjectHasLiveEdits } from '@/lib/store/projectsSlice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { setActiveView } from '@/lib/store/appStateSlice'
 
 const MAX_INPUT_LINES = 10
 const DOCK_WIDTH = 390
@@ -193,6 +194,15 @@ const ChatInterface = () => {
     return !hasStoryContent && !hasAncillaryFiles
   }, [activeProject?.storyContent, activeProject?.files])
 
+  const isFloatingNewProjectStage = useMemo(() => {
+    if (!activeProject) return false
+    if (activeProject.projectPath !== '') return false
+    if (!isProjectEmpty) return false
+
+    const hasUserStartedFirstTurn = chatHistory.some((chatMessage) => chatMessage.sender === 'User')
+    return !hasUserStartedFirstTurn || pendingChat
+  }, [activeProject, chatHistory, isProjectEmpty, pendingChat])
+
   useEffect(() => {
     const unsubText = streamingService.subscribeToText(setStreamingText)
     const unsubStatus = streamingService.subscribeToStatus(setStreamingStatus)
@@ -292,6 +302,13 @@ const ChatInterface = () => {
     dispatch(addChatMessage({ sender: 'User', text: action }))
   }
 
+  const handleCancelNewProject = () => {
+    dispatch(setProjectHasLiveEdits(false))
+    dispatch(clearChatHistory())
+    dispatch(setActiveProject(null))
+    dispatch(setActiveView('intro'))
+  }
+
   const visibleMessages = useMemo(() => {
     if (chatHistory.length === 0) return []
 
@@ -349,104 +366,115 @@ const ChatInterface = () => {
         style={{
           maxHeight: isProjectEmpty ? undefined : dockHeight,
         }}
-        className="pointer-events-auto fixed relative flex min-h-[220px] flex-col justify-end overflow-hidden"
+        className="fixed relative flex min-h-[220px] flex-col items-center justify-end"
       >
-        {showTopFade ? (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background via-background/95 to-transparent" />
-        ) : null}
-        <div ref={panelRef} className="relative flex min-h-[220px] shrink-0 flex-col">
-          <motion.div className="flex-1 p-5">
-            {visibleMessages.map((msg, index) => (
-              <ChatMessageItem
-                key={index}
-                msg={msg}
-              />
-            ))}
+        <div className="pointer-events-auto relative w-full overflow-hidden">
+          {showTopFade ? (
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background via-background/95 to-transparent" />
+          ) : null}
+          <div ref={panelRef} className="relative flex min-h-[220px] shrink-0 flex-col">
+            <motion.div className="flex-1 p-5">
+              {visibleMessages.map((msg, index) => (
+                <ChatMessageItem
+                  key={index}
+                  msg={msg}
+                />
+              ))}
 
-            {streamingText && (
-              <ChatMessageItem
-                msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
-              />
-            )}
+              {streamingText && (
+                <ChatMessageItem
+                  msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
+                />
+              )}
 
-            <AnimatePresence initial={false}>
-              {actionSuggestions.length > 0 && (
-                <motion.div
-                  key="suggestions"
-                  layout="position"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={HEIGHT_TRANSITION}
-                >
-                  <SmoothHeight>
-                    <div className="flex flex-wrap items-center">
-                      {actionSuggestions.slice(0, 3).map((suggestion, index) => (
-                        <motion.div
-                          key={suggestion}
-                          layout="position"
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          transition={HEIGHT_TRANSITION}
-                          className="mr-2 my-2"
-                        >
-                          <Button
-                            onClick={() => handleNextStage(suggestion)}
-                            className="inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
+              <AnimatePresence initial={false}>
+                {actionSuggestions.length > 0 && (
+                  <motion.div
+                    key="suggestions"
+                    layout="position"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={HEIGHT_TRANSITION}
+                  >
+                    <SmoothHeight>
+                      <div className="flex flex-wrap items-center">
+                        {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                          <motion.div
+                            key={suggestion}
+                            layout="position"
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={HEIGHT_TRANSITION}
+                            className="mr-2 my-2"
                           >
-                            {suggestion}
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </SmoothHeight>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                            <Button
+                              onClick={() => handleNextStage(suggestion)}
+                              className="inline-block h-auto whitespace-normal bg-highlight-600 py-2 text-left text-highlight-100 transition-all hover:bg-highlight-500"
+                            >
+                              {suggestion}
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </SmoothHeight>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            <AnimatePresence initial={false}>
-              {pendingChat && (
-                <motion.div
-                  key="loading"
-                  layout="position"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={HEIGHT_TRANSITION}
-                >
-                  <SmoothHeight>
-                    <ChatLoadingIndicator status={streamingStatus} />
-                  </SmoothHeight>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-          <div className="flex items-end gap-2 px-3 py-3">
-            <textarea
-              ref={inputRef}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.metaKey) {
-                  e.preventDefault()
-                  handleSend()
-                }
-              }}
-              placeholder="Type your message..."
-              rows={1}
-              className="min-h-11 max-h-none flex-1 resize-none rounded-[24px] border border-input bg-card px-4 py-3 text-sm text-foreground outline-hidden placeholder:text-muted-foreground"
-              disabled={pendingChat}
-            />
-            <button
-              onClick={handleSend}
-              className="shrink-0 rounded-full bg-highlight-700 px-4 py-3 text-sm text-primary-foreground transition-colors hover:bg-highlight-600 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={pendingChat}
-            >
-              Send
-            </button>
+              <AnimatePresence initial={false}>
+                {pendingChat && (
+                  <motion.div
+                    key="loading"
+                    layout="position"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={HEIGHT_TRANSITION}
+                  >
+                    <SmoothHeight>
+                      <ChatLoadingIndicator status={streamingStatus} />
+                    </SmoothHeight>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+            <div className="flex items-end gap-2 px-3 py-3">
+              <textarea
+                ref={inputRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.metaKey) {
+                    e.preventDefault()
+                    handleSend()
+                  }
+                }}
+                placeholder="Type your message..."
+                rows={1}
+                className="min-h-11 max-h-none flex-1 resize-none rounded-[24px] border border-input bg-card px-4 py-3 text-sm text-foreground outline-hidden placeholder:text-muted-foreground"
+                disabled={pendingChat}
+              />
+              <button
+                onClick={handleSend}
+                className="shrink-0 rounded-full bg-highlight-700 px-4 py-3 text-sm text-primary-foreground transition-colors hover:bg-highlight-600 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={pendingChat}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
+        {isFloatingNewProjectStage ? (
+          <button
+            type="button"
+            onClick={handleCancelNewProject}
+            className="pointer-events-auto mt-2 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Cancel
+          </button>
+        ) : null}
       </motion.div>
     </div>
   )
