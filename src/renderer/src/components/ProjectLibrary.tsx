@@ -89,6 +89,13 @@ const ProjectLibrary = ({ recentProjects, onProjectSelect, onNew, onOpen }: Proj
   return (
     <div className="container mx-auto">
       <div className="flex flex-wrap flex-row justify-center gap-6">
+        {recentProjects.map((project) => (
+          <RecentCard
+            key={project.projectPath}
+            project={project}
+            onClick={() => onProjectSelect(project.projectPath)}
+          />
+        ))}
         <div className="flex flex-col gap-6">
           <ActionCard
             icon={<FolderOpenIcon className="w-10 h-10" />}
@@ -105,13 +112,6 @@ const ProjectLibrary = ({ recentProjects, onProjectSelect, onNew, onOpen }: Proj
             compact
           />
         </div>
-        {recentProjects.map((project) => (
-          <RecentCard
-            key={project.projectPath}
-            project={project}
-            onClick={() => onProjectSelect(project.projectPath)}
-          />
-        ))}
       </div>
     </div>
   )
