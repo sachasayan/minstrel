@@ -66,6 +66,58 @@ const HEIGHT_TRANSITION = {
   ease: 'easeOut' as const,
 }
 
+const INLINE_MARKDOWN_PATTERN = /(\*\*[^*\n]+?\*\*|__[^_\n]+?__|\*[^*\n]+?\*|_[^_\n]+?_)/g
+
+const renderInlineMarkdown = (text: string, keyPrefix: string): React.ReactNode[] => {
+  const nodes: React.ReactNode[] = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(INLINE_MARKDOWN_PATTERN)) {
+    const [token] = match
+    const index = match.index ?? 0
+
+    if (index > lastIndex) {
+      nodes.push(text.slice(lastIndex, index))
+    }
+
+    if (
+      (token.startsWith('**') && token.endsWith('**')) ||
+      (token.startsWith('__') && token.endsWith('__'))
+    ) {
+      nodes.push(
+        <strong key={`${keyPrefix}-strong-${index}`}>
+          {renderInlineMarkdown(token.slice(2, -2), `${keyPrefix}-strong-${index}`)}
+        </strong>
+      )
+    } else {
+      nodes.push(
+        <em key={`${keyPrefix}-em-${index}`}>
+          {renderInlineMarkdown(token.slice(1, -1), `${keyPrefix}-em-${index}`)}
+        </em>
+      )
+    }
+
+    lastIndex = index + token.length
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex))
+  }
+
+  return nodes
+}
+
+const renderBasicMarkdown = (text: string): React.ReactNode => {
+  const lines = text.split('\n')
+
+  return lines.map((line, index) => (
+    <span key={`line-${index}`}>
+      {renderInlineMarkdown(line, `line-${index}`)}
+      {index < lines.length - 1 ? <br /> : null}
+    </span>
+  ))
+}
+
 const StreamedMessageText = memo(({ text }: { text: string }) => {
   const tokens = useMemo(() => text.split(/(\s+)/), [text])
 
@@ -167,7 +219,7 @@ const ChatMessageItem = memo(({ msg }: ChatMessageItemProps) => {
       <motion.div
         className={`chat-message mb-2 mr-6 max-w-[85%] rounded-[28px] border border-highlight-200/70 bg-highlight-100 px-5 py-3 text-left text-sm text-highlight-900 shadow-none ${(msg as any).isStreaming ? 'opacity-90' : ''}`}
       >
-        {(msg as any).isStreaming ? <StreamingBubbleBody text={msg.text} /> : msg.text}
+        {(msg as any).isStreaming ? <StreamingBubbleBody text={msg.text} /> : renderBasicMarkdown(msg.text)}
       </motion.div>
     </motion.div>
   )

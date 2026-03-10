@@ -128,4 +128,26 @@ describe('ChatInterface floating new-project controls', () => {
 
     expect(container.textContent).not.toContain('Cancel')
   })
+
+  it('renders basic markdown formatting for agent messages', async () => {
+    const store = createStore()
+
+    await act(async () => {
+      store.dispatch(clearChatHistory())
+      store.dispatch(addChatMessage({ sender: 'Gemini', text: 'Use **bold** and *italics* here.' }))
+      root.render(
+        <Provider store={store}>
+          <ChatInterface />
+        </Provider>
+      )
+      await flushPromises()
+    })
+
+    const strong = container.querySelector('strong')
+    const em = container.querySelector('em')
+
+    expect(strong?.textContent).toBe('bold')
+    expect(em?.textContent).toBe('italics')
+    expect(container.textContent).toContain('Use bold and italics here.')
+  })
 })
