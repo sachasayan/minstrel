@@ -47,6 +47,7 @@ import { store } from '@/lib/store/store'
 import { handleMessage, handleWriteFile } from './toolHandlers'
 import { resolvePendingChat } from '@/lib/store/chatSlice'
 import { setPendingFiles } from '@/lib/store/projectsSlice'
+import { agentTraceService } from './agentTraceService'
 
 describe('chatService', () => {
   const mockDispatch = vi.fn()
@@ -60,6 +61,7 @@ describe('chatService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(store.getState).mockReturnValue(mockState)
+    agentTraceService.clear()
   })
 
   describe('sendMessage', () => {
@@ -112,6 +114,12 @@ describe('chatService', () => {
         expect.any(Function),
         mockState.projects.activeProject
       )
+
+      const trace = agentTraceService.getRecentTraces()[0]
+      expect(trace.status).toBe('completed')
+      expect(trace.steps).toHaveLength(1)
+      expect(trace.steps[0]?.toolCalls[0]?.toolName).toBe('writeFile')
+      expect(trace.steps[0]?.prompt.metadata.agent).toBe('writerAgent')
     })
 
     it('should iterate when routeTo is called', async () => {
@@ -149,6 +157,11 @@ describe('chatService', () => {
       expect(geminiService.streamTextWithTools).toHaveBeenCalledTimes(2)
       expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[0]?.[4]).toBe('low')
       expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[1]?.[4]).toBe('high')
+
+      const trace = agentTraceService.getRecentTraces()[0]
+      expect(trace.steps).toHaveLength(2)
+      expect(trace.steps[0]?.nextAgent).toBe('writerAgent')
+      expect(trace.steps[1]?.agent).toBe('writerAgent')
     })
 
     it('should respect AbortSignal', async () => {
@@ -217,6 +230,9 @@ describe('chatService', () => {
       expect(handleMessage).not.toHaveBeenCalled()
       expect(mockDispatch).toHaveBeenCalledWith(setPendingFiles(null))
       expect(mockDispatch).toHaveBeenCalledWith(resolvePendingChat())
+
+      const trace = agentTraceService.getRecentTraces()[0]
+      expect(trace.status).toBe('stale_project')
     })
   })
 

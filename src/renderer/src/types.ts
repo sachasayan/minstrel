@@ -114,6 +114,7 @@ export interface RequestContext {
   message?: string
   modelPreference?: 'high' | 'low'
   projectPath?: string | null
+  traceId?: string
 }
 
 export type ActiveView = 'intro' | 'project/outline' | 'project/editor' | 'project/parameters'

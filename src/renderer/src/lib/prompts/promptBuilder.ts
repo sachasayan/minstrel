@@ -13,7 +13,8 @@ import { getWriterAgentPrompt } from './writerAgent'
 import { getToolsPrompt } from './tools'
 
 import { getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
-import { PromptData, BuildPromptResult } from './types'
+import { PromptData, BuildPromptResult, PromptSectionMetadata } from './types'
+import { hashString } from '@/lib/observability/hash'
 
 // Gets all available files (including virtual chapters)
 export const getAvailableFiles = (data: PromptData): string[] => {
@@ -78,7 +79,7 @@ ${chapterContent || '(Chapter content is empty)'}
   return filesContent.join('\n')
 }
 
-export const buildMessages = (data: PromptData): ModelMessage[] => {
+export const buildMessages = (data: PromptData): { messages: ModelMessage[]; syntheticContinueMessage: boolean } => {
   const messages: ModelMessage[] = []
   for (const msg of data.chatHistory) {
     const role = msg.sender === 'User' ? 'user' : 'assistant'
@@ -86,11 +87,13 @@ export const buildMessages = (data: PromptData): ModelMessage[] => {
       messages.push({ role, content: msg.text.trim() })
     }
   }
+  let syntheticContinueMessage = false
   // Ensure the last message is always from the user
   if (messages.length === 0 || messages[messages.length - 1].role !== 'user') {
     messages.push({ role: 'user', content: '(Continue)' })
+    syntheticContinueMessage = true
   }
-  return messages
+  return { messages, syntheticContinueMessage }
 }
 
 // --- Refactored buildPrompt ---
@@ -114,16 +117,39 @@ export const buildPrompt = (
   let system = basePrompt
 
   const availableFiles = getAvailableFiles(data)
-  const messages = buildMessages(data)
+  const { messages, syntheticContinueMessage } = buildMessages(data)
 
   let allowedTools: string[] = []
+  let providedFiles: string[] = []
+  const sectionMetadata: PromptSectionMetadata[] = [
+    {
+      key: 'basePrompt',
+      title: 'BASE PROMPT',
+      contentLength: basePrompt.length,
+      hash: hashString(basePrompt)
+    }
+  ]
 
+  const recordSection = (key: string, title: string, content: string, itemCount?: number) => {
+    if (!content.trim()) return
+    sectionMetadata.push({
+      key,
+      title,
+      contentLength: content.length,
+      hash: hashString(content),
+      itemCount
+    })
+  }
 
   switch (context.agent) {
     case 'routingAgent': {
       allowedTools = ['readFile', 'actionSuggestion', 'routeTo', 'writeFile']
-      system = appendWithSeparator(system, getRoutingAgentPrompt())
-      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
+      const routingPrompt = getRoutingAgentPrompt()
+      const toolsPrompt = getToolsPrompt(allowedTools)
+      system = appendWithSeparator(system, routingPrompt)
+      system = appendWithSeparator(system, toolsPrompt)
+      recordSection('agentPrompt', 'ROUTING AGENT PROMPT', routingPrompt)
+      recordSection('toolsPrompt', 'TOOLS PROMPT', toolsPrompt, allowedTools.length)
 
       // Always auto-include the Outline if it exists, plus any explicitly requested files
       const outlineExists = availableFiles.includes('Outline')
@@ -133,23 +159,43 @@ export const buildPrompt = (
       ]))
       const routingProvidedFiles = getProvidedFiles(data, routingFiles)
       const routingFileContents = getFileContents(data, routingFiles)
+      providedFiles = routingProvidedFiles
 
       system = addAvailableFiles(system, availableFiles)
       system = addProvidedFiles(system, routingProvidedFiles)
       system = addFileContents(system, routingFileContents)
+      recordSection('availableFiles', 'DIRECTORY LISTING: FILES IN PROJECT', availableFiles.join('\n'), availableFiles.length)
+      recordSection('providedFiles', 'ACTIVE FILES', routingProvidedFiles.join('\n'), routingProvidedFiles.length)
+      recordSection('fileContents', 'ACTIVE FILE CONTENTS', routingFileContents, routingProvidedFiles.length)
       break
     }
     case 'writerAgent': {
       allowedTools = ['writeFile']
-      system = appendWithSeparator(system, getWriterAgentPrompt())
-      system = appendWithSeparator(system, getToolsPrompt(allowedTools))
+      const writerPrompt = getWriterAgentPrompt()
+      const toolsPrompt = getToolsPrompt(allowedTools)
+      const writingStyleDescription = settings.writingStyleDescription?.trim() ?? ''
+      system = appendWithSeparator(system, writerPrompt)
+      system = appendWithSeparator(system, toolsPrompt)
       system = addWritingStyleGuidance(system, settings)
+      recordSection('agentPrompt', 'WRITER AGENT PROMPT', writerPrompt)
+      recordSection('toolsPrompt', 'TOOLS PROMPT', toolsPrompt, allowedTools.length)
+      if (writingStyleDescription) {
+        recordSection(
+          'writingStyle',
+          'PERSONALIZATION: TARGET WRITING STYLE',
+          writingStyleDescription
+        )
+      }
 
       const writerProvidedFiles = getProvidedFiles(data, context.requestedFiles)
       const writerFileContents = getFileContents(data, context.requestedFiles)
+      providedFiles = writerProvidedFiles
       system = addAvailableFiles(system, availableFiles)
       system = addProvidedFiles(system, writerProvidedFiles)
       system = addFileContents(system, writerFileContents)
+      recordSection('availableFiles', 'DIRECTORY LISTING: FILES IN PROJECT', availableFiles.join('\n'), availableFiles.length)
+      recordSection('providedFiles', 'ACTIVE FILES', writerProvidedFiles.join('\n'), writerProvidedFiles.length)
+      recordSection('fileContents', 'ACTIVE FILE CONTENTS', writerFileContents, writerProvidedFiles.length)
       break
     }
     default: {
@@ -158,5 +204,20 @@ export const buildPrompt = (
     }
   }
 
-  return { system, messages, allowedTools }
+  return {
+    system,
+    messages,
+    allowedTools,
+    metadata: {
+      agent: context.agent,
+      availableFiles,
+      providedFiles,
+      sectionMetadata,
+      systemLength: system.length,
+      systemHash: hashString(system),
+      messageCount: messages.length,
+      messageHash: hashString(JSON.stringify(messages)),
+      syntheticContinueMessage
+    }
+  }
 }

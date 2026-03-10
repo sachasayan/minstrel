@@ -13,6 +13,7 @@ import {
 } from './toolHandlers'
 import { createTools } from './toolRegistry'
 import { streamingService } from './streamingService'
+import { agentTraceService } from './agentTraceService'
 
 const DEBOUNCE_TIME = 5000 // 5 seconds
 const MAX_STEPS = 6
@@ -28,6 +29,20 @@ const getActiveProjectPath = (): string | null => store.getState().projects.acti
 const isCurrentRequestToken = (requestToken: number): boolean => currentRequestToken === requestToken
 const isRequestProjectActive = (requestToken: number, projectPath: string | null): boolean =>
   isCurrentRequestToken(requestToken) && getActiveProjectPath() === projectPath
+const getUserMessageFromHistory = (promptData: PromptData, initialContext: RequestContext) =>
+  [...promptData.chatHistory].reverse().find((message) => message.sender === 'User')?.text ?? initialContext.message
+const getSelectedModelId = (
+  settings: AppSettings,
+  provider: string,
+  modelPreference: 'high' | 'low'
+) => {
+  const explicitModelId =
+    modelPreference === 'high' ? settings.highPreferenceModelId : settings.lowPreferenceModelId
+  if (explicitModelId) return explicitModelId
+  return typeof geminiService.getDefaultModelId === 'function'
+    ? geminiService.getDefaultModelId(provider, modelPreference)
+    : undefined
+}
 
 export const cancelActiveChatRequest = (reason = 'request canceled') => {
   if (!currentAbortController) return
@@ -59,6 +74,18 @@ export const sendMessage = async (
   const signal = currentAbortController.signal
   const requestToken = ++currentRequestToken
   const requestProjectPath = initialContext.projectPath ?? promptData.activeProject?.projectPath ?? null
+  const traceId =
+    initialContext.traceId ||
+    agentTraceService.startTrace({
+      requestToken,
+      projectPath: requestProjectPath,
+      initialAgent: initialContext.agent,
+      currentStep: initialContext.currentStep || 0,
+      userMessage: getUserMessageFromHistory(promptData, initialContext)
+    })
+  let traceStatus: 'completed' | 'aborted' | 'stale_project' | 'error' | 'max_steps' = 'completed'
+  let traceErrorMessage: string | undefined
+  let inactiveReason: 'aborted' | 'stale_project' = 'aborted'
 
   const dispatchIfCurrent = (action: Parameters<AppDispatch>[0]) => {
     if (!isCurrentRequestToken(requestToken)) {
@@ -80,6 +107,12 @@ export const sendMessage = async (
     if (isRequestProjectActive(requestToken, requestProjectPath)) return true
     if (isCurrentRequestToken(requestToken)) {
       console.log('[chatService] Active project changed; discarding pending response.')
+      inactiveReason = 'stale_project'
+      traceStatus = 'stale_project'
+      agentTraceService.addEvent(traceId, 'project_switched', {
+        requestToken,
+        projectPath: requestProjectPath
+      })
       currentAbortController?.abort()
     }
     return false
@@ -88,7 +121,8 @@ export const sendMessage = async (
   let context: RequestContext = {
     ...initialContext,
     currentStep: initialContext.currentStep || 0,
-    projectPath: requestProjectPath
+    projectPath: requestProjectPath,
+    traceId
   }
 
   try {
@@ -103,7 +137,7 @@ export const sendMessage = async (
       }
       const liveSettings: AppSettings = latestState.settings ?? settings
 
-      const { system, messages, allowedTools } = buildPrompt(context, livePromptData, liveSettings)
+      const { system, messages, allowedTools, metadata } = buildPrompt(context, livePromptData, liveSettings)
 
       // Inform Redux about pending files AI might be reading
       dispatchIfCurrent(setPendingFiles(context.requestedFiles || null))
@@ -111,6 +145,30 @@ export const sendMessage = async (
       // Determine model preference based on agent type
       const modelPreference: 'high' | 'low' = 
         context.agent === 'writerAgent' ? 'high' : 'low'
+      const provider = liveSettings.provider || 'google'
+      const selectedModelId = getSelectedModelId(liveSettings, provider, modelPreference)
+      const stepId = agentTraceService.startStep(traceId, {
+        index: context.currentStep,
+        agent: context.agent,
+        requestedFiles: context.requestedFiles,
+        allowedTools,
+        modelPreference,
+        provider,
+        modelId: selectedModelId,
+        prompt: {
+          system,
+          messages,
+          metadata
+        }
+      })
+      agentTraceService.addEvent(traceId, 'step_started', {
+        stepIndex: context.currentStep,
+        agent: context.agent,
+        requestedFiles: context.requestedFiles ?? [],
+        allowedTools,
+        provider,
+        modelId: selectedModelId
+      })
 
       // Define local variables to capture state changes from tools
       let nextAgent: string | null = null
@@ -127,6 +185,9 @@ export const sendMessage = async (
         onRouteTo: (agent) => {
           if (!requestStillActive()) return
           nextAgent = agent
+        },
+        onToolCall: (event) => {
+          agentTraceService.addToolCall(traceId, stepId, event)
         }
       })
 
@@ -138,6 +199,7 @@ export const sendMessage = async (
       let finalText = ''
       let finalCalls: any[] = []
       try {
+        agentTraceService.startLlmCall(traceId, stepId, provider, selectedModelId)
         const stream = await geminiService.streamTextWithTools(
           liveSettings,
           system,
@@ -169,6 +231,7 @@ export const sendMessage = async (
             break
           }
           finalText += textPart
+          agentTraceService.appendStreamText(traceId, stepId, textPart)
           
           // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
           const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
@@ -195,21 +258,46 @@ export const sendMessage = async (
         } catch {
           finalCalls = []
         }
+        agentTraceService.finishLlmCall(traceId, stepId, { status: 'success' })
         
       } catch (error: any) {
+        agentTraceService.finishLlmCall(traceId, stepId, {
+          status: 'error',
+          errorMessage: error instanceof Error ? error.message : String(error)
+        })
         if (signal.aborted) break
         if (!requestStillActive()) break
 
         if (error.message?.includes('resource exhausted')) {
           console.warn('Resource exhausted, debouncing...')
+          agentTraceService.addEvent(traceId, 'llm_retry', {
+            stepIndex: context.currentStep,
+            reason: 'resource_exhausted'
+          })
+          agentTraceService.finishStep(traceId, stepId, {
+            status: 'retry',
+            finalText
+          })
           await sleep(DEBOUNCE_TIME)
           continue // Retry the same step
         }
+        agentTraceService.finishStep(traceId, stepId, {
+          status: 'error',
+          finalText
+        })
         throw error
       }
 
-      if (!requestStillActive()) break
+      if (!requestStillActive()) {
+        agentTraceService.finishStep(traceId, stepId, {
+          status: 'aborted',
+          finalText
+        })
+        break
+      }
 
+      let displayedText: string | undefined
+      let outputSuppressed = false
       if (finalText && finalText.trim().length > 0) {
         // Prevent leaking giant edits into chat if a tool call already handled it
         const wasWriteAction = finalCalls.some(c => c.toolName === 'writeFile' || c.toolName === 'updateChapter');
@@ -217,9 +305,12 @@ export const sendMessage = async (
         
         if (wasWriteAction && isVeryLarge) {
            console.log('Skipping chat message addition as it looks like a redundant large file write.');
-           handleMessage("I've updated the content as requested.", dispatchIfProjectActive as AppDispatch);
+           displayedText = "I've updated the content as requested."
+           outputSuppressed = true
+           handleMessage(displayedText, dispatchIfProjectActive as AppDispatch);
         } else {
-           handleMessage(finalText.trim(), dispatchIfProjectActive as AppDispatch);
+           displayedText = finalText.trim()
+           handleMessage(displayedText, dispatchIfProjectActive as AppDispatch);
         }
       }
 
@@ -237,7 +328,20 @@ export const sendMessage = async (
       // Defensive: warn if readFile was called without a routeTo in the same turn
       if (nextRequestedFiles && !nextAgent) {
         console.warn('[chatService] readFile called without routeTo — loop will stall. Files requested:', nextRequestedFiles)
+        agentTraceService.addEvent(traceId, 'read_without_route', {
+          stepIndex: context.currentStep,
+          requestedFiles: nextRequestedFiles
+        })
       }
+
+      agentTraceService.finishStep(traceId, stepId, {
+        status: 'completed',
+        finalText,
+        displayedText,
+        outputSuppressed,
+        nextAgent,
+        nextRequestedFiles
+      })
 
       // Terminal condition: if no routing tool was used, the task chain is finished
       if (!nextAgent) {
@@ -251,12 +355,19 @@ export const sendMessage = async (
       const errorMsg = 'Recursion depth exceeded in agent loop.'
       console.error(errorMsg)
       toast.error(errorMsg)
+      traceStatus = 'max_steps'
+      traceErrorMessage = errorMsg
     }
 
   } catch (error) {
-    if (signal.aborted) return
+    if (signal.aborted) {
+      traceStatus = inactiveReason
+      return
+    }
 
     console.error('Failed to send chat message:', error)
+    traceStatus = 'error'
+    traceErrorMessage = error instanceof Error ? error.message : String(error)
     handleMessage(`Hmm. Something went wrong, sorry. You might need to try again.`, dispatchIfProjectActive as AppDispatch)
   } finally {
     // Always clean up, regardless of abort status, to prevent stuck loading state
@@ -268,6 +379,13 @@ export const sendMessage = async (
     if (isCurrentRequestToken(requestToken) && currentAbortController?.signal === signal) {
       currentAbortController = null
     }
+    if (signal.aborted && traceStatus === 'completed') {
+      traceStatus = inactiveReason
+    }
+    agentTraceService.finishTrace(traceId, {
+      status: traceStatus,
+      errorMessage: traceErrorMessage
+    })
     console.log('sendMessage() execution finished')
   }
 }

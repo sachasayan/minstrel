@@ -161,6 +161,7 @@ export function LexicalEditor({
                     instantInitialScroll={instantInitialScroll}
                 />
                 <HighlightPlugin activeSection={activeSection} />
+                <ClearHighlightsOnEditPlugin />
                 <FloatingToolbarPlugin />
             </div>
         </LexicalComposer>
@@ -169,6 +170,8 @@ export function LexicalEditor({
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect } from 'react'
+import { $getRoot } from 'lexical'
+import { $isMarkNode, $unwrapMarkNode } from '@lexical/mark'
 
 function EditablePlugin({ editable }: { editable: boolean }) {
     const [editor] = useLexicalComposerContext()
@@ -176,6 +179,45 @@ function EditablePlugin({ editable }: { editable: boolean }) {
     useEffect(() => {
         editor.setEditable(editable)
     }, [editor, editable])
+
+    return null
+}
+
+function ClearHighlightsOnEditPlugin() {
+    const [editor] = useLexicalComposerContext()
+
+    useEffect(() => {
+        return editor.registerUpdateListener(({ dirtyElements, dirtyLeaves, tags }) => {
+            if (tags.has('import-markdown') || tags.has('apply-highlights') || tags.has('clear-highlights')) {
+                return
+            }
+
+            if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {
+                return
+            }
+
+            editor.update(() => {
+                const markNodes = new Set<MarkNode>()
+
+                for (const textNode of $getRoot().getAllTextNodes()) {
+                    let parent = textNode.getParent()
+
+                    while (parent !== null) {
+                        if ($isMarkNode(parent) && parent.getIDs().includes('agent-edit')) {
+                            markNodes.add(parent)
+                        }
+                        parent = parent.getParent()
+                    }
+                }
+
+                for (const markNode of markNodes) {
+                    if (markNode.isAttached()) {
+                        $unwrapMarkNode(markNode)
+                    }
+                }
+            }, { tag: 'clear-highlights' })
+        })
+    }, [editor])
 
     return null
 }

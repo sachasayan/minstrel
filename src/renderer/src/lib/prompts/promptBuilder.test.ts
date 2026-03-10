@@ -65,6 +65,9 @@ describe('promptBuilder', () => {
     expect(result.allowedTools).toHaveLength(1)
     expect(result.allowedTools).toContain('writeFile')
     expect(result.allowedTools).not.toContain('routeTo')
+    expect(result.metadata.agent).toBe('writerAgent')
+    expect(result.metadata.sectionMetadata.some((section) => section.key === 'toolsPrompt')).toBe(true)
+    expect(result.metadata.systemHash).toMatch(/^fnv1a:/)
   })
 
   it('buildPrompt includes writing style personalization for writerAgent when available', () => {
@@ -102,5 +105,16 @@ describe('promptBuilder', () => {
     const result = pb.buildPrompt(context, mockData, mockSettings)
     expect(result.allowedTools).toContain('routeTo')
     expect(result.allowedTools).toContain('readFile')
+    expect(result.metadata.providedFiles).toContain('Outline')
+  })
+
+  it('buildMessages notes when a synthetic continue message is added', () => {
+    const { messages, syntheticContinueMessage } = pb.buildMessages({
+      activeProject: mockProject,
+      chatHistory: [{ sender: 'Gemini', text: 'Need anything else?' }]
+    })
+
+    expect(messages[messages.length - 1]).toEqual({ role: 'user', content: '(Continue)' })
+    expect(syntheticContinueMessage).toBe(true)
   })
 })
