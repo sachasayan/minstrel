@@ -3,7 +3,8 @@ import { useEffect, useRef } from 'react'
 import { $getRoot } from 'lexical'
 import { HeadingNode } from '@lexical/rich-text'
 import { ActiveSection } from '@/types'
-import { activeSectionKey, isChapterSection, isOverviewSection, makeChapterSection, makeOverviewSection } from '@/lib/activeSection'
+import { activeSectionKey, isArtifactSection, isOverviewSection, makeArtifactSection, makeChapterSection, makeOverviewSection } from '@/lib/activeSection'
+import { $isChapterHeadingNode, ChapterHeadingNode } from '../nodes/ChapterHeadingNode'
 
 interface ScrollSyncPluginProps {
     activeSection: ActiveSection
@@ -18,7 +19,20 @@ export function ScrollSyncPlugin({
 }: ScrollSyncPluginProps): null {
     const [editor] = useLexicalComposerContext()
     const isProgrammaticScroll = useRef(false)
+    const activeSectionRef = useRef(activeSection)
+    const onSectionChangeRef = useRef(onSectionChange)
     const lastObserverSection = useRef<ActiveSection>(null)
+    const observedSections = useRef(new Map<Element, ActiveSection>())
+    const lastDispatchedSectionKey = useRef<string>('none')
+    const lastDispatchAt = useRef(0)
+
+    useEffect(() => {
+        activeSectionRef.current = activeSection
+    }, [activeSection])
+
+    useEffect(() => {
+        onSectionChangeRef.current = onSectionChange
+    }, [onSectionChange])
 
     // 1. Handle External Scroll Requests (Story -> Editor)
     useEffect(() => {
@@ -35,24 +49,41 @@ export function ScrollSyncPlugin({
         // SAME section (e.g. clicking the same sidebar item) will still scroll.
         lastObserverSection.current = null
 
-        // Programmatic scroll for Overview or any section that doesn't have an index
-        if (isOverviewSection(activeSection) || !isChapterSection(activeSection)) {
+        if (isOverviewSection(activeSection)) {
             isProgrammaticScroll.current = true
             containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
             setTimeout(() => (isProgrammaticScroll.current = false), 800)
             return
         }
 
-        const index = activeSection.index
+        if (isArtifactSection(activeSection)) {
+            const outlineElement = containerRef.current?.querySelector('[data-outline-target="true"]')
+            if (outlineElement instanceof HTMLElement) {
+                isProgrammaticScroll.current = true
+                outlineElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                setTimeout(() => (isProgrammaticScroll.current = false), 800)
+            }
+            return
+        }
 
         editor.getEditorState().read(() => {
             const root = $getRoot()
             const headingNodes = root
                 .getChildren()
-                .filter((node): node is HeadingNode => node instanceof HeadingNode && node.getTag() === 'h1')
+                .filter(
+                    (node): node is ChapterHeadingNode =>
+                        node instanceof HeadingNode &&
+                        node.getTag() === 'h1' &&
+                        $isChapterHeadingNode(node) &&
+                        !!node.getChapterId()
+                )
 
-            if (headingNodes[index]) {
-                const domElement = editor.getElementByKey(headingNodes[index].getKey())
+            const targetNode = headingNodes.find((node, index) =>
+                node.getChapterId() === activeSection.chapterId || index === activeSection.index
+            )
+
+            if (targetNode) {
+                const domElement = editor.getElementByKey(targetNode.getKey())
                 if (domElement) {
                     isProgrammaticScroll.current = true
                     domElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -72,48 +103,38 @@ export function ScrollSyncPlugin({
             (entries) => {
                 if (isProgrammaticScroll.current) return
 
-                entries.forEach((entry) => {
-                    // Use a slightly higher threshold or rootMargin to be more precise
-                    if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                const candidate = entries
+                    .filter((entry) => entry.isIntersecting && entry.intersectionRatio > 0.1)
+                    .map((entry) => {
+                        const section = observedSections.current.get(entry.target)
+                        if (!section || !entry.rootBounds) return null
 
-                        // Handle Overview target
-                        if (entry.target.id === 'overview-target') {
-                            if (!isOverviewSection(activeSection)) {
-                                const section = makeOverviewSection()
-                                lastObserverSection.current = section
-                                onSectionChange(section)
-                            }
-                            return
+                        return {
+                            section,
+                            sectionKey: activeSectionKey(section),
+                            distanceFromTop: Math.abs(entry.boundingClientRect.top - entry.rootBounds.top)
                         }
+                    })
+                    .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+                    .sort((a, b) => a.distanceFromTop - b.distanceFromTop)[0]
 
-                        // Find index of this heading ONLY within the editor's editable area
-                        // This avoids counting the project title H1
-                        const heading = entry.target as HTMLElement
-                        const editorElement = containerRef.current?.querySelector('[contenteditable="true"]')
-                        if (!editorElement?.contains(heading)) return
+                if (!candidate) return
 
-                        const allEditorHeadings = Array.from(editorElement.querySelectorAll('h1'))
-                        const idx = allEditorHeadings.indexOf(heading as HTMLHeadingElement)
+                const currentKey = activeSectionKey(activeSectionRef.current)
+                if (candidate.sectionKey === currentKey) return
 
-                        if (idx !== -1) {
-                            const section = makeChapterSection(heading.innerText.trim(), idx)
-                            // Only report indexed sections if we are in a monolithic or indexed view
-                            // This prevents artifacts (which might have H1s) from triggering a jump to Story monolith
-                            const isAlreadyMonolithic = isOverviewSection(activeSection) || isChapterSection(activeSection)
+                const now = Date.now()
+                if (
+                    candidate.sectionKey === lastDispatchedSectionKey.current &&
+                    now - lastDispatchAt.current < 150
+                ) {
+                    return
+                }
 
-                            const isCurrentSection =
-                                isChapterSection(activeSection) &&
-                                isChapterSection(section) &&
-                                activeSection.index === section.index &&
-                                activeSection.title === section.title
-
-                            if (!isCurrentSection && isAlreadyMonolithic) {
-                                lastObserverSection.current = section
-                                onSectionChange(section)
-                            }
-                        }
-                    }
-                })
+                lastObserverSection.current = candidate.section
+                lastDispatchedSectionKey.current = candidate.sectionKey
+                lastDispatchAt.current = now
+                onSectionChangeRef.current(candidate.section)
             },
             {
                 root: scrollContainer,
@@ -124,13 +145,42 @@ export function ScrollSyncPlugin({
 
         const updateObservation = () => {
             observer.disconnect()
+            observedSections.current = new Map<Element, ActiveSection>()
             const overview = document.getElementById('overview-target')
-            if (overview) observer.observe(overview)
+            if (overview) {
+                observedSections.current.set(overview, makeOverviewSection())
+                observer.observe(overview)
+            }
+
+            const outline = containerRef.current?.querySelector('[data-outline-target="true"]')
+            if (outline instanceof HTMLElement) {
+                const section = makeArtifactSection('Outline')
+                observedSections.current.set(outline, section)
+                observer.observe(outline)
+            }
 
             // Only observe headings INSIDE the editor
-            const editorElement = containerRef.current?.querySelector('[contenteditable="true"]')
-            const headings = editorElement?.querySelectorAll('h1')
-            headings?.forEach((h) => observer.observe(h))
+            editor.getEditorState().read(() => {
+                const root = $getRoot()
+                let chapterIndex = 0
+
+                root.getChildren().forEach((node) => {
+                    if (!(node instanceof HeadingNode) || node.getTag() !== 'h1' || !$isChapterHeadingNode(node)) {
+                        return
+                    }
+
+                    const chapterId = node.getChapterId()
+                    if (!chapterId) return
+
+                    const domElement = editor.getElementByKey(node.getKey())
+                    if (!domElement) return
+
+                    const section = makeChapterSection(node.getTextContent().trim(), chapterIndex, chapterId)
+                    observedSections.current.set(domElement, section)
+                    observer.observe(domElement)
+                    chapterIndex++
+                })
+            })
         }
 
         updateObservation()
@@ -138,7 +188,7 @@ export function ScrollSyncPlugin({
         return editor.registerUpdateListener(() => {
             setTimeout(updateObservation, 200)
         })
-    }, [editor, activeSection, onSectionChange, containerRef])
+    }, [editor, containerRef])
 
     return null
 }

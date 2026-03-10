@@ -32,7 +32,26 @@ export function GutterIcons({
                     onClick={() => onSelect(makeOverviewSection())}
                 />
 
-                <div className="h-px w-6 bg-border/20 my-1" />
+                {artifacts.length > 0 && (
+                    <div className="h-px w-6 bg-border/20 my-1" />
+                )}
+
+                {/* Artifacts */}
+                <div className="flex flex-col gap-1.5">
+                    {artifacts.map((artifact, i) => (
+                        <GutterItem
+                            key={`artifact-${i}`}
+                            icon={artifact.icon}
+                            label={artifact.title}
+                            isActive={isArtifactSection(activeSection) && activeSection.title === artifact.title}
+                            onClick={() => onSelect(makeArtifactSection(artifact.title))}
+                        />
+                    ))}
+                </div>
+
+                {chapters.length > 0 && (
+                    <div className="h-px w-6 bg-border/20 my-1" />
+                )}
 
                 {/* Chapters */}
                 <div className="flex flex-col gap-1.5">
@@ -54,23 +73,6 @@ export function GutterIcons({
                             onClick={onAddChapter}
                         />
                     )}
-                </div>
-
-                {chapters.length > 0 && artifacts.length > 0 && (
-                    <div className="h-px w-6 bg-border/20 my-1" />
-                )}
-
-                {/* Artifacts */}
-                <div className="flex flex-col gap-1.5">
-                    {artifacts.map((artifact, i) => (
-                        <GutterItem
-                            key={`artifact-${i}`}
-                            icon={artifact.icon}
-                            label={artifact.title}
-                            isActive={isArtifactSection(activeSection) && activeSection.title === artifact.title}
-                            onClick={() => onSelect(makeArtifactSection(artifact.title))}
-                        />
-                    ))}
                 </div>
             </div>
         </TooltipProvider>

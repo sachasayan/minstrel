@@ -5,13 +5,12 @@ import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { motion } from 'framer-motion'
 
 import { StoryViewer } from '@/components/editor/StoryViewer'
-import { ArtifactViewer } from '@/components/editor/ArtifactViewer'
 import ChatInterface from '@/components/ChatInterface'
 import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
 import StatusBar from '@/components/StatusBar'
 import ProjectBar from '@/components/ProjectBar'
-import { activeSectionKey, isArtifactSection, isChapterSection, isOverviewSection } from '@/lib/activeSection'
+import { isChapterSection, isOverviewSection } from '@/lib/activeSection'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -29,24 +28,14 @@ const ProjectOverview = (): React.ReactNode => {
 
   const editorContent = useMemo(() => {
     if (appState.activeView !== 'project/editor') return null
-    const section = appState.activeSection
-
-    let content = ''
-    if (isStorySection) {
-      content = activeProject?.storyContent || ''
-    } else if (isArtifactSection(section)) {
-      content = activeProject?.files?.find((f) => f.title === section.title)?.content || ''
-    }
 
     return {
-      content
+      content: activeProject?.storyContent || ''
     }
   }, [
     appState.activeView,
-    appState.activeSection,
     isStorySection,
-    activeProject?.storyContent,
-    activeProject?.files
+    activeProject?.storyContent
   ])
 
   return (
@@ -73,19 +62,11 @@ const ProjectOverview = (): React.ReactNode => {
         )}
       >
         {appState.activeView == 'project/editor' && editorContent ? (
-          isStorySection ? (
-            <StoryViewer
-              key={`${activeProject?.projectPath}-story`}
-              activeSection={appState.activeSection}
-              content={editorContent.content}
-            />
-          ) : (
-            <ArtifactViewer
-              key={`${activeProject?.projectPath}-${activeSectionKey(appState.activeSection)}`}
-              activeSection={appState.activeSection}
-              content={editorContent.content}
-            />
-          )
+          <StoryViewer
+            key={activeProject?.projectPath}
+            activeSection={appState.activeSection}
+            content={editorContent.content}
+          />
         ) : null}
       </motion.main>
       <ChatInterface />
