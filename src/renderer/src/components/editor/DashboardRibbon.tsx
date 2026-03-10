@@ -45,6 +45,12 @@ export function DashboardRibbon() {
 
     if (!activeProject) return null
 
+    const hasSummary = Boolean(activeProject.summary?.trim())
+    const hasWordCountChart = chapterData.some((c) => c.chapterWordCount > 0)
+    const hasDialogueChart = dialogueCountData.length > 0
+    const hasExpertSuggestions = activeProject.expertSuggestions.length > 0
+    const hasVisibleSections = hasSummary || hasWordCountChart || hasDialogueChart || hasExpertSuggestions
+
     function StarRating({ rating }: { rating: number }) {
         return (
             <div className="flex items-center">
@@ -56,33 +62,39 @@ export function DashboardRibbon() {
     }
 
     return (
-        <div className="w-full overflow-hidden mb-12" id="project-overview">
-            <div className="flex flex-row gap-4 overflow-x-auto pb-4 no-scrollbar items-stretch">
+        <div
+            className={`w-full overflow-hidden transition-all ${hasVisibleSections ? 'mb-12' : 'mb-0 max-h-0'}`}
+            data-state={hasVisibleSections ? 'expanded' : 'collapsed'}
+            id="project-overview"
+        >
+            <div className="grid grid-flow-dense auto-rows-[minmax(220px,_auto)] grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
 
                 {/* Cover Card */}
-                <div className="flex-shrink-0 w-48">
-                    <Card className="h-full overflow-hidden border-none shadow-sm bg-muted/30">
-                        <CardContent className="p-0 h-full">
-                            <CoverCard className="h-full object-cover" />
-                        </CardContent>
-                    </Card>
-                </div>
+                {hasSummary && (
+                    <div className="md:col-span-1 xl:col-span-1 xl:row-span-2">
+                        <Card className="h-full min-h-[220px] overflow-hidden border-none bg-muted/30 shadow-sm">
+                            <CardContent className="p-0 h-full">
+                                <CoverCard className="h-full object-cover" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
 
                 {/* Summary Card */}
-                {activeProject.summary && (
-                    <Card className="flex-shrink-0 w-80 bg-muted/20 border-none shadow-sm h-64">
+                {hasSummary && (
+                    <Card className="min-h-[220px] border-none bg-muted/20 shadow-sm md:col-span-1 xl:col-span-1">
                         <CardHeader className="py-3 px-4">
                             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Summary</CardTitle>
                         </CardHeader>
-                        <CardContent className="px-4 overflow-y-auto h-44">
+                        <CardContent className="h-[160px] overflow-y-auto px-4">
                             <p className="text-sm leading-relaxed text-foreground/80">{activeProject.summary}</p>
                         </CardContent>
                     </Card>
                 )}
 
                 {/* Word Count Progress Chart */}
-                {chapterData.some(c => c.chapterWordCount > 0) && (
-                    <Card className="flex-shrink-0 w-96 bg-muted/20 border-none shadow-sm h-64">
+                {hasWordCountChart && (
+                    <Card className="min-h-[220px] border-none bg-muted/20 shadow-sm md:col-span-2 xl:col-span-2">
                         <CardHeader className="py-3 px-4">
                             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Word Count per Chapter</CardTitle>
                         </CardHeader>
@@ -106,8 +118,8 @@ export function DashboardRibbon() {
                 )}
 
                 {/* Character Dialogue Analysis */}
-                {dialogueCountData.length > 0 && (
-                    <Card className="flex-shrink-0 w-96 bg-muted/20 border-none shadow-sm h-64">
+                {hasDialogueChart && (
+                    <Card className="min-h-[220px] border-none bg-muted/20 shadow-sm md:col-span-2 xl:col-span-2">
                         <CardHeader className="py-3 px-4">
                             <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Dialogue Flow</CardTitle>
                         </CardHeader>
@@ -139,7 +151,10 @@ export function DashboardRibbon() {
 
                 {/* Expert Feedback Cards */}
                 {activeProject.expertSuggestions.map((suggestion, index) => (
-                    <Card key={index} className="flex-shrink-0 w-72 bg-muted/20 border-none shadow-sm h-64">
+                    <Card
+                        key={index}
+                        className="min-h-[220px] border-none bg-muted/20 shadow-sm md:col-span-1 xl:col-span-1"
+                    >
                         <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="text-xs font-bold">{suggestion.name}</CardTitle>
@@ -152,9 +167,6 @@ export function DashboardRibbon() {
                         </CardContent>
                     </Card>
                 ))}
-
-                {/* Placeholder for spacing */}
-                <div className="flex-shrink-0 w-8"></div>
             </div>
         </div>
     )
