@@ -74,10 +74,7 @@ const Intro = (): ReactNode => {
   return (
     <>
       <StatusBar />
-      <div className={cn(
-        "flex flex-col items-center justify-center p-8 h-full",
-        "animate-in fade-in zoom-in-95 gap-8 duration-300"
-      )}>
+      <div className={cn("flex flex-col items-center justify-center p-8 h-full gap-8")}>
         <h1 className="text-2xl font-bold text-highlight-700 dark:text-highlight-300">Welcome to Minstrel</h1>
 
         <ProjectLibrary

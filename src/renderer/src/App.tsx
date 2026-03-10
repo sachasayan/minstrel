@@ -4,6 +4,7 @@ import { selectActiveView } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
 import { setSettingsState } from '@/lib/store/settingsSlice'
 import { bridge } from '@/lib/bridge'
+import { AnimatePresence, motion } from 'framer-motion'
 
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -13,6 +14,18 @@ import { AlertCircle } from 'lucide-react'
 
 import ProjectOverview from '@/pages/ProjectOverview'
 import Intro from '@/pages/Intro'
+
+const ROUTE_TRANSITION = {
+  duration: 0.28,
+  ease: [0.22, 1, 0.36, 1] as const
+}
+
+const ROUTE_VARIANTS = {
+  initial: { opacity: 0, scale: 0.9 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 1.06 }
+}
+
 export default function App(): ReactNode {
   const dispatch = useDispatch()
   const activeProject = useSelector(selectActiveProject)
@@ -20,8 +33,6 @@ export default function App(): ReactNode {
 
   const [hasLoaded, setHasLoaded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
-
-
   const loadSettings = async () => {
     console.log('Loading settings')
     setLoadError(null)
@@ -51,6 +62,10 @@ export default function App(): ReactNode {
     }
   }
 
+  const routeKey = activeView.startsWith('project/')
+    ? `${activeView}:${activeProject?.projectPath || 'new-project'}`
+    : activeView
+
   // Load settings on first boot
   useEffect(() => {
     if (!hasLoaded) {
@@ -78,7 +93,20 @@ export default function App(): ReactNode {
       <div className="flex-grow overflow-hidden">
         <div className="h-full">
           <TooltipProvider>
-            {router(activeView)}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={routeKey}
+                data-testid="app-route-transition"
+                data-route-key={routeKey}
+                className="h-full"
+                initial={ROUTE_VARIANTS.initial}
+                animate={ROUTE_VARIANTS.animate}
+                exit={ROUTE_VARIANTS.exit}
+                transition={ROUTE_TRANSITION}
+              >
+                {router(activeView)}
+              </motion.div>
+            </AnimatePresence>
             <Toaster position="bottom-center" richColors />
           </TooltipProvider>
         </div>

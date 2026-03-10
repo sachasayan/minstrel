@@ -1,28 +1,52 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { configureStore } from '@reduxjs/toolkit'
 
-import {
-  DEFAULT_NEW_PROJECT_COVER_PATHS,
-  pickRandomDefaultNewProjectCoverPath
-} from '@/lib/defaultProjectCovers'
+import appStateReducer from '../appStateSlice'
+import projectsReducer, { startNewProject } from '../projectsSlice'
+import chatReducer from '../chatSlice'
+import { projectListeners } from './projectListeners'
+
+vi.mock('@/lib/services/chatService', () => ({
+  cancelActiveChatRequest: vi.fn()
+}))
+
+vi.mock('@/lib/coverImage', () => ({
+  convertImagePathToBase64: vi.fn().mockResolvedValue({
+    base64: null,
+    mimeType: null
+  })
+}))
 
 describe('projectListeners', () => {
-  describe('pickRandomDefaultNewProjectCoverPath', () => {
-    it('returns the first cover for a zero random value', () => {
-      expect(pickRandomDefaultNewProjectCoverPath(0)).toBe(DEFAULT_NEW_PROJECT_COVER_PATHS[0])
-    })
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
 
-    it('returns the last cover for a high random value', () => {
-      expect(pickRandomDefaultNewProjectCoverPath(0.999999)).toBe(
-        DEFAULT_NEW_PROJECT_COVER_PATHS[DEFAULT_NEW_PROJECT_COVER_PATHS.length - 1]
-      )
-    })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.clearAllMocks()
+  })
 
-    it('always returns a path from the default covers list', () => {
-      for (const randomValue of [0.1, 0.4, 0.8]) {
-        expect(DEFAULT_NEW_PROJECT_COVER_PATHS).toContain(
-          pickRandomDefaultNewProjectCoverPath(randomValue)
-        )
-      }
+  function makeStore() {
+    return configureStore({
+      reducer: {
+        appState: appStateReducer,
+        projects: projectsReducer,
+        chat: chatReducer
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().prepend(projectListeners.middleware)
     })
+  }
+
+  it('routes a new project into the editor view', async () => {
+    const store = makeStore()
+
+    store.dispatch(startNewProject())
+    await vi.runAllTimersAsync()
+
+    expect(store.getState().appState.activeView).toBe('project/editor')
+    expect(store.getState().projects.activeProject?.projectPath).toBe('')
+    expect(store.getState().projects.activeProject?.title).toBe('Untitled Project')
   })
 })
