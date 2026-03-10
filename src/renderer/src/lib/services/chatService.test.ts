@@ -98,6 +98,13 @@ describe('chatService', () => {
       await sendMessage(context, promptData, mockState.settings, mockDispatch)
       
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
+      expect(geminiService.streamTextWithTools).toHaveBeenCalledWith(
+        mockState.settings,
+        expect.any(String),
+        expect.any(Array),
+        expect.any(Object),
+        'high'
+      )
       expect(handleWriteFile).toHaveBeenCalledTimes(1)
       expect(handleWriteFile).toHaveBeenCalledWith(
         'test.md',
@@ -140,6 +147,8 @@ describe('chatService', () => {
       
       // Should have called the LLM twice: once for routing, once for the writerAgent
       expect(geminiService.streamTextWithTools).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[0]?.[4]).toBe('low')
+      expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[1]?.[4]).toBe('high')
     })
 
     it('should respect AbortSignal', async () => {
