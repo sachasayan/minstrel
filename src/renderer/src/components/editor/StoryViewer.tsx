@@ -166,7 +166,13 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
               editable={!isPending}
             />
           </div>
-          <div className="flex-grow"></div>
+          <div className="flex-grow flex justify-start items-start pt-12">
+            <div
+              data-chat-dock-target="true"
+              aria-hidden="true"
+              className="sticky top-12 h-px w-[390px] max-w-full shrink-0"
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -11,6 +11,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 const MAX_INPUT_LINES = 10
+const DOCK_WIDTH = 390
+const EMPTY_WIDTH = 480
+const VIEWPORT_PADDING = 24
+const DOCK_TARGET_SELECTOR = '[data-chat-dock-target="true"]'
 
 const ChatLoadingIndicator = ({ status }: { status: string }) => {
   const [dots, setDots] = useState('')
@@ -167,6 +171,7 @@ const ChatInterface = () => {
   const [streamingStatus, setStreamingStatus] = useState('')
   const dispatch = useDispatch()
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const [dockRect, setDockRect] = useState<DOMRect | null>(null)
 
   const isProjectEmpty = useMemo(() => {
     const hasStoryContent = !!activeProject?.storyContent && activeProject.storyContent.trim() !== ''
@@ -201,6 +206,48 @@ const ChatInterface = () => {
     textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
     textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
   }, [message])
+
+  useLayoutEffect(() => {
+    let frameId = 0
+    let observer: ResizeObserver | null = null
+
+    const updateDockRect = () => {
+      const target = document.querySelector(DOCK_TARGET_SELECTOR)
+      if (!(target instanceof HTMLElement)) {
+        setDockRect(null)
+        return
+      }
+
+      setDockRect(target.getBoundingClientRect())
+    }
+
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(frameId)
+      frameId = window.requestAnimationFrame(updateDockRect)
+    }
+
+    scheduleUpdate()
+
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(scheduleUpdate)
+      observer.observe(document.body)
+    }
+
+    const target = document.querySelector(DOCK_TARGET_SELECTOR)
+    if (observer && target instanceof HTMLElement) {
+      observer.observe(target)
+    }
+
+    window.addEventListener('resize', scheduleUpdate)
+    window.addEventListener('scroll', scheduleUpdate, true)
+
+    return () => {
+      cancelAnimationFrame(frameId)
+      observer?.disconnect()
+      window.removeEventListener('resize', scheduleUpdate)
+      window.removeEventListener('scroll', scheduleUpdate, true)
+    }
+  }, [activeProject?.projectPath, isProjectEmpty])
 
   const handleSend = () => {
     if (message.trim() !== '') {
@@ -241,16 +288,25 @@ const ChatInterface = () => {
     return [chatHistory[lastUserIndex]]
   }, [chatHistory])
 
+  const viewportWidth = typeof window === 'undefined' ? DOCK_WIDTH + VIEWPORT_PADDING * 2 : window.innerWidth
+  const viewportHeight = typeof window === 'undefined' ? 220 + VIEWPORT_PADDING * 2 : window.innerHeight
+  const dockLeft = dockRect
+    ? Math.min(dockRect.left, viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING)
+    : viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING
+  const dockTop = dockRect
+    ? Math.max(dockRect.top, VIEWPORT_PADDING)
+    : viewportHeight - 220 - VIEWPORT_PADDING
+
   return (
-    <div className={cn(
-      "fixed inset-0 pointer-events-none z-50 flex transition-all duration-500",
-      isProjectEmpty ? "items-center justify-center" : "items-end justify-end p-6"
-    )}>
+    <div className="fixed inset-0 pointer-events-none z-50">
       <motion.div
-        layout
         initial={false}
         animate={{
-          width: isProjectEmpty ? '480px' : '390px',
+          width: isProjectEmpty ? EMPTY_WIDTH : DOCK_WIDTH,
+          left: isProjectEmpty ? '50%' : dockLeft,
+          top: isProjectEmpty ? '50%' : dockTop,
+          x: isProjectEmpty ? '-50%' : 0,
+          y: isProjectEmpty ? '-50%' : 0,
         }}
         transition={{
           type: 'spring',
@@ -258,7 +314,7 @@ const ChatInterface = () => {
           damping: 25,
           mass: 1
         }}
-        className="pointer-events-auto flex min-h-[220px] flex-col"
+        className="pointer-events-auto fixed flex min-h-[220px] flex-col"
       >
         <motion.div className="flex-1 p-5">
           {visibleMessages.map((msg, index) => (
