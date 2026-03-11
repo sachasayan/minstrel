@@ -26,6 +26,12 @@ vi.mock('@/lib/store/store', () => ({
   }
 }))
 
+vi.mock('@/lib/bridge', () => ({
+  bridge: {
+    exportAgentTrace: vi.fn().mockResolvedValue({ accepted: false, destination: 'noop', spanCount: 0 })
+  }
+}))
+
 vi.mock('./toolHandlers', () => ({
   handleWriteFile: vi.fn(),
   handleCritique: vi.fn(),
@@ -48,6 +54,7 @@ import { handleMessage, handleWriteFile } from './toolHandlers'
 import { resolvePendingChat } from '@/lib/store/chatSlice'
 import { setPendingFiles } from '@/lib/store/projectsSlice'
 import { agentTraceService } from './agentTraceService'
+import { bridge } from '@/lib/bridge'
 
 describe('chatService', () => {
   const mockDispatch = vi.fn()
@@ -120,6 +127,12 @@ describe('chatService', () => {
       expect(trace.steps).toHaveLength(1)
       expect(trace.steps[0]?.toolCalls[0]?.toolName).toBe('writeFile')
       expect(trace.steps[0]?.prompt.metadata.agent).toBe('writerAgent')
+      expect(bridge.exportAgentTrace).toHaveBeenCalledTimes(1)
+      expect(vi.mocked(bridge.exportAgentTrace).mock.calls[0]?.[0]).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'agent.run.writerAgent' })
+        ])
+      )
     })
 
     it('should iterate when routeTo is called', async () => {

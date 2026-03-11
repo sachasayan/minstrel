@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, SaveDialogOptions } from 'electron'
+import type { OtelSpan } from '../shared/observability'
 
 type SelectDirectoryOperation = 'import' | 'export' | 'save'
 
@@ -22,6 +23,7 @@ const api = {
   loadSqliteProject: (filePath: string) => ipcRenderer.invoke('load-sqlite-project', filePath),
   getAppSettings: () => ipcRenderer.invoke('get-app-settings'),
   saveAppSettings: (config: unknown) => ipcRenderer.invoke('save-app-settings', config),
+  exportAgentTrace: (spans: OtelSpan[]) => ipcRenderer.invoke('export-agent-trace', spans),
   triggerSafeStoragePrompt: () => ipcRenderer.invoke('trigger-safe-storage-prompt'),
   getProcessVersions: () => ({
     electron: process.versions.electron,

@@ -6,6 +6,8 @@ import icon from '../../resources/icon.icns?asset'
 import { registerFileOpsHandlers } from './fileOps'
 import { registerSettingsHandlers } from './settingsManager'
 import { registerSqliteOpsHandlers } from './sqliteOps'
+import { registerTraceExportHandlers } from './traceExport'
+import { loadMainEnv } from './env'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -53,6 +55,8 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  loadMainEnv()
+
   if (is.dev) {
     // Monkey-patch session for electron-devtools-installer compatibility with Electron 40
     // This silences deprecation warnings until the library is officially updated.
@@ -90,6 +94,7 @@ app.whenReady().then(() => {
   registerFileOpsHandlers()
   registerSettingsHandlers()
   registerSqliteOpsHandlers()
+  registerTraceExportHandlers()
 
   createWindow()
 

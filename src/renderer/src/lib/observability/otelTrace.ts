@@ -5,30 +5,7 @@ import type {
   AgentTraceToolCall
 } from '@/lib/services/agentTraceService'
 import { hashString } from './hash'
-
-export interface OtelSpanEvent {
-  name: string
-  timeUnixNano: string
-  attributes?: Record<string, string | number | boolean>
-}
-
-export interface OtelStatus {
-  code: 'OK' | 'ERROR'
-  message?: string
-}
-
-export interface OtelSpan {
-  traceId: string
-  spanId: string
-  parentSpanId?: string
-  name: string
-  kind: 'INTERNAL' | 'CLIENT'
-  startTimeUnixNano: string
-  endTimeUnixNano: string
-  attributes: Record<string, string | number | boolean>
-  events: OtelSpanEvent[]
-  status: OtelStatus
-}
+import type { OtelSpan, OtelSpanEvent, OtelStatus } from '@shared/observability'
 
 const toUnixNano = (isoTimestamp: string) => `${BigInt(new Date(isoTimestamp).getTime()) * 1000000n}`
 

@@ -2,7 +2,7 @@ import { ModelMessage } from 'ai'
 import { BuildPromptMetadata } from '@/lib/prompts/types'
 import { hashString } from '@/lib/observability/hash'
 import { convertAgentTraceToOtelSpans } from '@/lib/observability/otelTrace'
-import type { OtelSpan } from '@/lib/observability/otelTrace'
+import type { OtelSpan } from '@shared/observability'
 
 const STORAGE_KEY = 'minstrel.agentTraces.v1'
 const MAX_TRACES = 50
@@ -95,6 +95,7 @@ const makeId = (prefix: string) =>
 
 class AgentTraceService {
   private traces: AgentTrace[] = []
+  private listeners = new Set<() => void>()
 
   constructor() {
     this.traces = this.load()
@@ -125,11 +126,16 @@ class AgentTraceService {
     }
   }
 
+  private notify() {
+    this.listeners.forEach((listener) => listener())
+  }
+
   private updateTrace(traceId: string, updater: (trace: AgentTrace) => void) {
     const trace = this.traces.find((item) => item.traceId === traceId)
     if (!trace) return
     updater(trace)
     this.persist()
+    this.notify()
   }
 
   startTrace(input: {
@@ -154,6 +160,7 @@ class AgentTraceService {
 
     this.traces = [trace, ...this.traces].slice(0, MAX_TRACES)
     this.persist()
+    this.notify()
     return trace.traceId
   }
 
@@ -296,12 +303,20 @@ class AgentTraceService {
   clear() {
     this.traces = []
     this.persist()
+    this.notify()
   }
 
   summarizeMessages(messages: ModelMessage[]) {
     return {
       count: messages.length,
       hash: hashString(JSON.stringify(messages))
+    }
+  }
+
+  subscribe(listener: () => void) {
+    this.listeners.add(listener)
+    return () => {
+      this.listeners.delete(listener)
     }
   }
 }

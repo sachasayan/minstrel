@@ -61,6 +61,16 @@ Minstrel uses user-supplied API keys configured inside the app's Settings screen
 - Paste your API key
 - Choose preferred models for higher- and lower-cost tasks
 
+## Langfuse Tracing
+
+Agent traces can be exported to Langfuse Cloud from the Electron main process.
+
+1. Copy `.env.example` to `.env`
+2. Fill in `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY`
+3. Start the app normally with `npm run dev`
+
+The Langfuse secret key is loaded only in the Electron main process and is not exposed to the renderer.
+
 ## Licensing
 
 The application is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license. This means that you are free to share and adapt the application for non-commercial purposes, as long as you give appropriate credit and indicate if changes were made. Commercial use is not permitted under this license.

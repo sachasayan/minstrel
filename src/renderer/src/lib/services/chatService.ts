@@ -14,6 +14,7 @@ import {
 import { createTools } from './toolRegistry'
 import { streamingService } from './streamingService'
 import { agentTraceService } from './agentTraceService'
+import { bridge } from '@/lib/bridge'
 
 const DEBOUNCE_TIME = 5000 // 5 seconds
 const MAX_STEPS = 6
@@ -386,6 +387,12 @@ export const sendMessage = async (
       status: traceStatus,
       errorMessage: traceErrorMessage
     })
+    try {
+      const spans = agentTraceService.getOtelSpans(traceId)
+      await bridge.exportAgentTrace(spans)
+    } catch (error) {
+      console.warn('[chatService] Failed to hand trace export to main process.', error)
+    }
     console.log('sendMessage() execution finished')
   }
 }

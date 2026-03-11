@@ -236,4 +236,5 @@ describe('SettingsPage personalization', () => {
     expect(mockStoredSettings.writingSample).toBe('')
     expect(mockStoredSettings.writingStyleDescription).toBe('')
   })
+
 })

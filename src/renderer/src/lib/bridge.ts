@@ -1,4 +1,5 @@
 import type { SaveDialogOptions } from 'electron'
+import type { OtelSpan } from '@shared/observability'
 
 type Invoke = (channel: string, ...args: unknown[]) => Promise<any>
 
@@ -78,6 +79,10 @@ export const bridge = {
     typeof window.api?.saveAppSettings === 'function'
       ? window.api.saveAppSettings(config)
       : call('save-app-settings', config),
+  exportAgentTrace: (spans: OtelSpan[]) =>
+    typeof window.api?.exportAgentTrace === 'function'
+      ? window.api.exportAgentTrace(spans)
+      : call('export-agent-trace', spans),
   triggerSafeStoragePrompt: () =>
     typeof window.api?.triggerSafeStoragePrompt === 'function'
       ? window.api.triggerSafeStoragePrompt()

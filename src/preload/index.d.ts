@@ -1,4 +1,5 @@
 import type { SaveDialogOptions } from 'electron'
+import type { OtelSpan, TraceExportResult } from '../shared/observability'
 
 declare global {
   interface LegacyElectronApi {
@@ -30,6 +31,7 @@ declare global {
     loadSqliteProject: (filePath: string) => Promise<any>
     getAppSettings: () => Promise<any>
     saveAppSettings: (config: unknown) => Promise<void>
+    exportAgentTrace: (spans: OtelSpan[]) => Promise<TraceExportResult>
     triggerSafeStoragePrompt: () => Promise<boolean>
     getProcessVersions: () => { electron?: string; chrome?: string; node?: string }
   }
