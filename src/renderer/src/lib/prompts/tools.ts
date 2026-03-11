@@ -41,9 +41,9 @@ ${
   (tools.includes('routeTo'))
     ? `
 ## routeTo
-* Routes the user to a specialist agent.
+* Routes the workflow to another agent when multi-agent mode is enabled.
 * REQUIRED PARAMETERS:
-  - "agent" (string): The name of the specialist agent (e.g. "writerAgent").
+  - "agent" (string): The exact name of the target agent.
 `
     : ''
 }

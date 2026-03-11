@@ -49,30 +49,38 @@ describe('promptBuilder', () => {
     expect(provided).toEqual(['Outline'])
   })
 
+  it('resolves bare chapter IDs to the display-form chapter entry', () => {
+    const resolved = pb.resolveRequestedFiles(mockData, ['id1', 'Outline'])
+    expect(resolved.resolvedFiles).toEqual(['<!-- id: id1 --> Chapter 1: The Beginning', 'Outline'])
+    expect(resolved.unresolvedFiles).toEqual([])
+  })
+
   it('getFileContents returns concatenated contents (handles ID suffix)', () => {
     const contents = pb.getFileContents(mockData, ['Outline', '<!-- id: id1 --> Chapter 1: The Beginning'])
     expect(contents).toContain('Test outline content')
     expect(contents).toContain('Once upon a time...')
   })
 
-  it('buildPrompt returns correct structure for writerAgent', () => {
+  it('buildPrompt returns correct structure for storyAgent', () => {
     const context: RequestContext = {
-      agent: 'writerAgent',
+      agent: 'storyAgent',
       currentStep: 0
     }
     const result = pb.buildPrompt(context, mockData, mockSettings)
     expect(result.messages).toHaveLength(3) // 3 messages in mockChat + ensuring last is user (already user in mock)
-    expect(result.allowedTools).toHaveLength(1)
+    expect(result.allowedTools).toHaveLength(3)
     expect(result.allowedTools).toContain('writeFile')
+    expect(result.allowedTools).toContain('readFile')
+    expect(result.allowedTools).toContain('actionSuggestion')
     expect(result.allowedTools).not.toContain('routeTo')
-    expect(result.metadata.agent).toBe('writerAgent')
+    expect(result.metadata.agent).toBe('storyAgent')
     expect(result.metadata.sectionMetadata.some((section) => section.key === 'toolsPrompt')).toBe(true)
     expect(result.metadata.systemHash).toMatch(/^fnv1a:/)
   })
 
-  it('buildPrompt includes writing style personalization for writerAgent when available', () => {
+  it('buildPrompt includes writing style personalization for storyAgent when available', () => {
     const context: RequestContext = {
-      agent: 'writerAgent',
+      agent: 'storyAgent',
       currentStep: 0
     }
     const result = pb.buildPrompt(context, mockData, {
@@ -86,7 +94,7 @@ describe('promptBuilder', () => {
 
   it('buildPrompt omits writing style personalization when description is blank', () => {
     const context: RequestContext = {
-      agent: 'writerAgent',
+      agent: 'storyAgent',
       currentStep: 0
     }
     const result = pb.buildPrompt(context, mockData, {
@@ -97,14 +105,12 @@ describe('promptBuilder', () => {
     expect(result.system).not.toContain('PERSONALIZATION: TARGET WRITING STYLE')
   })
 
-  it('buildPrompt returns correct structure for routingAgent', () => {
+  it('buildPrompt auto-includes the outline for storyAgent', () => {
     const context: RequestContext = {
-      agent: 'routingAgent',
+      agent: 'storyAgent',
       currentStep: 0
     }
     const result = pb.buildPrompt(context, mockData, mockSettings)
-    expect(result.allowedTools).toContain('routeTo')
-    expect(result.allowedTools).toContain('readFile')
     expect(result.metadata.providedFiles).toContain('Outline')
   })
 

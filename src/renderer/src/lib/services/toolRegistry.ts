@@ -29,6 +29,8 @@ export interface ToolCallbacks {
  */
 export const createTools = (callbacks: ToolCallbacks) => {
   const { dispatch, activeProject } = callbacks
+  let hasReadThisTurn = false
+  let writeCountThisTurn = 0
   const getDurationMs = (startedAt: string, endedAt: string) =>
     Math.max(0, new Date(endedAt).getTime() - new Date(startedAt).getTime())
   const emitToolCall = (
@@ -49,8 +51,12 @@ export const createTools = (callbacks: ToolCallbacks) => {
       execute: async (args) => {
         const startedAt = new Date().toISOString()
         try {
+          if (hasReadThisTurn) {
+            throw new Error('writeFile cannot be used in the same turn after readFile. Load files first, then write on the next turn.')
+          }
           console.log(`[TOOL EXECUTION] writeFile called with raw args:`, JSON.stringify(args))
           handleWriteFile(args.file_name, args.content, dispatch, activeProject)
+          writeCountThisTurn += 1
           const result = { status: 'success', file: args.file_name }
           const endedAt = new Date().toISOString()
           emitToolCall({
@@ -83,8 +89,12 @@ export const createTools = (callbacks: ToolCallbacks) => {
       execute: async (args) => {
         const startedAt = new Date().toISOString()
         try {
+          if (writeCountThisTurn > 0) {
+            throw new Error('readFile cannot be used in the same turn after writeFile. Finish writing from the current context or read first.')
+          }
           console.log(`[TOOL EXECUTION] readFile called with raw args:`, JSON.stringify(args))
           const fileNames = args.file_names.split(',').map(f => f.trim()).filter(Boolean)
+          hasReadThisTurn = true
           if (callbacks.onReadFile) {
             callbacks.onReadFile(fileNames)
           }

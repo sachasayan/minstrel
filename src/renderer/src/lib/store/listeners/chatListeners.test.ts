@@ -31,7 +31,7 @@ describe('chatListeners', () => {
     })
   }
 
-  it('starts the routing agent when a user message is added', async () => {
+  it('starts the story agent when a user message is added', async () => {
     const store = makeStore()
 
     store.dispatch(setActiveProject({
@@ -59,7 +59,7 @@ describe('chatListeners', () => {
     expect(sendMessage).toHaveBeenCalledWith(
       {
         currentStep: 0,
-        agent: 'routingAgent',
+        agent: 'storyAgent',
         projectPath: '/tmp/story.mns'
       },
       expect.objectContaining({

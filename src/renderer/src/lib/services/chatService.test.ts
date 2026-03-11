@@ -92,7 +92,7 @@ describe('chatService', () => {
     }
 
     it('should iterate and call tool-triggered side-effects', async () => {
-      const context = { agent: 'writerAgent', currentStep: 0 } as any
+      const context = { agent: 'storyAgent', currentStep: 0 } as any
       
       vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _sy, _p, tools: any) => {
         return mockStreamingResult('AI reasoning', [
@@ -126,33 +126,65 @@ describe('chatService', () => {
       expect(trace.status).toBe('completed')
       expect(trace.steps).toHaveLength(1)
       expect(trace.steps[0]?.toolCalls[0]?.toolName).toBe('writeFile')
-      expect(trace.steps[0]?.prompt.metadata.agent).toBe('writerAgent')
+      expect(trace.steps[0]?.prompt.metadata.agent).toBe('storyAgent')
       expect(bridge.exportAgentTrace).toHaveBeenCalledTimes(1)
       expect(vi.mocked(bridge.exportAgentTrace).mock.calls[0]?.[0]).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ name: 'agent.run.writerAgent' })
+          expect.objectContaining({ name: 'agent.run.storyAgent' })
         ])
       )
     })
 
-    it('should iterate when routeTo is called', async () => {
-      const context = { agent: 'routingAgent', currentStep: 0 } as any
+    it('should add a continuation message when a write-only turn returns no text', async () => {
+      const context = { agent: 'storyAgent', currentStep: 0 } as any
+
+      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _sy, _p, tools: any) => {
+        return mockStreamingResult('', [
+          { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
+        ], tools) as any
+      })
+
+      const promptData = {
+        activeProject: mockState.projects.activeProject,
+        chatHistory: mockState.chat.chatHistory
+      }
+      await sendMessage(context, promptData, mockState.settings, mockDispatch)
+
+      expect(handleMessage).toHaveBeenCalledWith(
+        expect.stringContaining("What should we tackle next?"),
+        expect.any(Function)
+      )
+    })
+
+    it('should iterate when readFile is called', async () => {
+      const loadedState = {
+        ...mockState,
+        projects: {
+          activeProject: {
+            ...mockState.projects.activeProject,
+            files: [{ title: 'Outline', content: 'Outline body' }],
+            storyContent: '# <!-- id: ch1 --> Chapter 1\nChapter body'
+          }
+        }
+      } as any
+
+      vi.mocked(store.getState).mockReturnValue(loadedState)
+
+      const context = { agent: 'storyAgent', currentStep: 0 } as any
       
       let callCount = 0
       vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_settings, _system, _userPrompt, tools: any) => {
         callCount++
         if (callCount === 1) {
-          // Trigger the routeTo tool callback, which sets nextAgent inside chatService
-          if (tools.routeTo?.execute) {
-            await tools.routeTo.execute({ agent: 'writerAgent' })
+          if (tools.readFile?.execute) {
+            await tools.readFile.execute({ file_names: 'Outline, <!-- id: ch1 --> Chapter 1' })
           }
           return {
-            text: '',
-            toolCalls: Promise.resolve([{ toolName: 'routeTo', args: { agent: 'writerAgent' } }]),
+            text: 'Checking the outline and existing chapter first.',
+            toolCalls: Promise.resolve([{ toolName: 'readFile', args: { file_names: 'Outline, <!-- id: ch1 --> Chapter 1' } }]),
             textStream: (async function* () {})(),
           } as any
         }
-        // Second call: writerAgent produces a final response, no further routing
         return {
           text: 'Done',
           toolCalls: Promise.resolve([]),
@@ -161,28 +193,66 @@ describe('chatService', () => {
       })
         
       const promptData = {
-        activeProject: mockState.projects.activeProject,
-        chatHistory: mockState.chat.chatHistory
+        activeProject: loadedState.projects.activeProject,
+        chatHistory: loadedState.chat.chatHistory
       }
       await sendMessage(context, promptData, mockState.settings, mockDispatch)
       
-      // Should have called the LLM twice: once for routing, once for the writerAgent
+      // Should have called the LLM twice: once to request files, once to continue with them
       expect(geminiService.streamTextWithTools).toHaveBeenCalledTimes(2)
-      expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[0]?.[4]).toBe('low')
       expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[1]?.[4]).toBe('high')
 
       const trace = agentTraceService.getRecentTraces()[0]
       expect(trace.steps).toHaveLength(2)
-      expect(trace.steps[0]?.nextAgent).toBe('writerAgent')
-      expect(trace.steps[1]?.agent).toBe('writerAgent')
+      expect(trace.steps[0]?.nextRequestedFiles).toEqual(['Outline', '<!-- id: ch1 --> Chapter 1'])
+      expect(trace.steps[1]?.agent).toBe('storyAgent')
+    })
+
+    it('should stop with an error when requested files cannot be provided', async () => {
+      const missingState = {
+        ...mockState,
+        projects: {
+          activeProject: {
+            ...mockState.projects.activeProject,
+            files: [{ title: 'Outline', content: 'Outline body' }],
+            storyContent: '# <!-- id: actual-ch1 --> Chapter 1\nChapter body'
+          }
+        }
+      } as any
+
+      vi.mocked(store.getState).mockReturnValue(missingState)
+
+      const context = {
+        agent: 'storyAgent',
+        currentStep: 1,
+        requestedFiles: ['missing-id', 'Outline']
+      } as any
+
+      const promptData = {
+        activeProject: missingState.projects.activeProject,
+        chatHistory: missingState.chat.chatHistory
+      }
+
+      await sendMessage(context, promptData, missingState.settings, mockDispatch)
+
+      expect(geminiService.streamTextWithTools).not.toHaveBeenCalled()
+      expect(handleMessage).toHaveBeenCalledWith(
+        expect.stringContaining("I couldn't continue safely because I didn't receive all of the files I asked for: missing-id."),
+        expect.any(Function)
+      )
+
+      const trace = agentTraceService.getRecentTraces()[0]
+      expect(trace.status).toBe('error')
+      expect(trace.errorMessage).toContain('missing-id')
+      expect(trace.events.some((event) => event.type === 'requested_files_missing')).toBe(true)
     })
 
     it('should respect AbortSignal', async () => {
       let firstCall = true
-      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_s, _p, tools: any) => {
+      vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_s, _p, _m, tools: any) => {
         if (firstCall) {
           firstCall = false
-          const secondContext = { agent: 'routingAgent', currentStep: 0 } as any
+          const secondContext = { agent: 'storyAgent', currentStep: 0 } as any
           const promptData = {
             activeProject: mockState.projects.activeProject,
             chatHistory: mockState.chat.chatHistory
@@ -197,7 +267,7 @@ describe('chatService', () => {
         return mockStreamingResult('second', [], tools) as any
       })
 
-      const firstContext = { agent: 'routingAgent', currentStep: 0 } as any
+      const firstContext = { agent: 'storyAgent', currentStep: 0 } as any
       const promptData = {
         activeProject: mockState.projects.activeProject,
         chatHistory: mockState.chat.chatHistory
@@ -232,7 +302,7 @@ describe('chatService', () => {
         })()
       }) as any)
 
-      const context = { agent: 'routingAgent', currentStep: 0, projectPath: '/projects/test.mns' } as any
+      const context = { agent: 'storyAgent', currentStep: 0, projectPath: '/projects/test.mns' } as any
       const promptData = {
         activeProject: mockState.projects.activeProject,
         chatHistory: mockState.chat.chatHistory

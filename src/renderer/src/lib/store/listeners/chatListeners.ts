@@ -13,7 +13,7 @@ chatListeners.startListening({
       const state = listenerApi.getState() as RootState
       const blankContext: RequestContext = {
         currentStep: 0,
-        agent: 'routingAgent',
+        agent: 'storyAgent',
         projectPath: state.projects.activeProject?.projectPath ?? null
       }
       const promptData = {

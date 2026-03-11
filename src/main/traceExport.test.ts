@@ -28,7 +28,7 @@ describe('traceExport', () => {
       {
         traceId: 'trace',
         spanId: 'span',
-        name: 'agent.run.writerAgent',
+        name: 'agent.run.storyAgent',
         kind: 'INTERNAL',
         startTimeUnixNano: '1',
         endTimeUnixNano: '2',
@@ -63,7 +63,7 @@ describe('traceExport', () => {
         traceId: '0123456789abcdef0123456789abcdef',
         spanId: '0123456789abcdef',
         parentSpanId: 'fedcba9876543210',
-        name: 'agent.run.writerAgent',
+        name: 'agent.run.storyAgent',
         kind: 'INTERNAL',
         startTimeUnixNano: '1000',
         endTimeUnixNano: '2000',
@@ -137,7 +137,7 @@ describe('traceExport', () => {
       {
         traceId: '0123456789abcdef0123456789abcdef',
         spanId: '0123456789abcdef',
-        name: 'agent.run.writerAgent',
+        name: 'agent.run.storyAgent',
         kind: 'INTERNAL',
         startTimeUnixNano: '1000',
         endTimeUnixNano: '2000',

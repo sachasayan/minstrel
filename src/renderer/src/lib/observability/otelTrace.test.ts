@@ -11,7 +11,7 @@ describe('otelTrace', () => {
       startedAt: '2026-03-10T10:00:00.000Z',
       endedAt: '2026-03-10T10:00:05.000Z',
       status: 'completed',
-      initialAgent: 'routingAgent',
+      initialAgent: 'storyAgent',
       currentStep: 0,
       userMessage: 'Draft chapter one',
       errorMessage: undefined,
@@ -19,28 +19,30 @@ describe('otelTrace', () => {
         {
           timestamp: '2026-03-10T10:00:01.000Z',
           type: 'step_started',
-          data: { stepIndex: 0, agent: 'routingAgent' }
+          data: { stepIndex: 0, agent: 'storyAgent' }
         }
       ],
       steps: [
         {
           stepId: 'step_one',
           index: 0,
-          agent: 'routingAgent',
+          agent: 'storyAgent',
           startedAt: '2026-03-10T10:00:00.500Z',
           endedAt: '2026-03-10T10:00:02.000Z',
           status: 'completed',
           requestedFiles: ['Outline'],
-          allowedTools: ['readFile', 'routeTo'],
-          modelPreference: 'low',
+          allowedTools: ['readFile', 'writeFile'],
+          modelPreference: 'high',
           provider: 'google',
           modelId: 'gemini-test',
           prompt: {
             system: 'system prompt',
             messages: [{ role: 'user', content: 'Draft chapter one' }],
             metadata: {
-              agent: 'routingAgent',
+              agent: 'storyAgent',
               availableFiles: ['Outline', 'Chapter 1'],
+              resolvedRequestedFiles: ['Outline'],
+              unresolvedRequestedFiles: [],
               providedFiles: ['Outline'],
               sectionMetadata: [
                 {
@@ -61,7 +63,6 @@ describe('otelTrace', () => {
           finalText: 'Routing complete',
           displayedText: 'Routing complete',
           outputSuppressed: false,
-          nextAgent: 'writerAgent',
           nextRequestedFiles: ['Outline', 'Chapter 1'],
           llmCalls: [
             {
@@ -75,9 +76,9 @@ describe('otelTrace', () => {
           ],
           toolCalls: [
             {
-              toolName: 'routeTo',
-              args: { agent: 'writerAgent' },
-              result: { status: 'success', target: 'writerAgent' },
+              toolName: 'readFile',
+              args: { file_names: 'Outline, Chapter 1' },
+              result: { status: 'success', requested: ['Outline', 'Chapter 1'] },
               startedAt: '2026-03-10T10:00:01.000Z',
               endedAt: '2026-03-10T10:00:01.050Z',
               durationMs: 50,
@@ -91,24 +92,24 @@ describe('otelTrace', () => {
     const spans = convertAgentTraceToOtelSpans(trace)
 
     expect(spans).toHaveLength(4)
-    expect(spans[0]?.name).toBe('agent.run.routingAgent')
+    expect(spans[0]?.name).toBe('agent.run.storyAgent')
     expect(spans[0]?.events[0]?.name).toBe('step_started')
     expect(spans[0]?.attributes['langfuse.trace.input']).toBe('Draft chapter one')
     expect(spans[0]?.attributes['langfuse.trace.output']).toBe('Routing complete')
 
-    const stepSpan = spans.find((span) => span.name === 'agent.step.routingAgent')
+    const stepSpan = spans.find((span) => span.name === 'agent.step.storyAgent')
     expect(stepSpan?.attributes['minstrel.prompt.system_hash']).toBe('fnv1a:22222222')
     expect(stepSpan?.attributes['langfuse.observation.input']).toContain('system prompt')
     expect(stepSpan?.attributes['langfuse.observation.output']).toContain('Routing complete')
-    expect(stepSpan?.events.some((event) => event.name === 'agent.route')).toBe(true)
+    expect(stepSpan?.events.some((event) => event.name === 'agent.request_files')).toBe(true)
 
     const llmSpan = spans.find((span) => span.name === 'llm.call')
     expect(llmSpan?.attributes['llm.model.name']).toBe('gemini-test')
     expect(llmSpan?.attributes['langfuse.observation.type']).toBe('generation')
 
-    const toolSpan = spans.find((span) => span.name === 'tool.routeTo')
-    expect(toolSpan?.attributes['tool.name']).toBe('routeTo')
-    expect(toolSpan?.attributes['langfuse.observation.input']).toContain('writerAgent')
+    const toolSpan = spans.find((span) => span.name === 'tool.readFile')
+    expect(toolSpan?.attributes['tool.name']).toBe('readFile')
+    expect(toolSpan?.attributes['langfuse.observation.input']).toContain('Chapter 1')
     expect(toolSpan?.status.code).toBe('OK')
   })
 
@@ -120,7 +121,7 @@ describe('otelTrace', () => {
       startedAt: '2026-03-10T11:00:00.000Z',
       endedAt: '2026-03-10T11:00:03.000Z',
       status: 'error',
-      initialAgent: 'writerAgent',
+      initialAgent: 'storyAgent',
       currentStep: 0,
       userMessage: 'Rewrite the chapter',
       errorMessage: 'provider failure',
@@ -129,7 +130,7 @@ describe('otelTrace', () => {
         {
           stepId: 'step_error',
           index: 0,
-          agent: 'writerAgent',
+          agent: 'storyAgent',
           startedAt: '2026-03-10T11:00:00.100Z',
           endedAt: '2026-03-10T11:00:02.000Z',
           status: 'error',
@@ -142,8 +143,10 @@ describe('otelTrace', () => {
             system: 'system',
             messages: [{ role: 'user', content: 'Rewrite the chapter' }],
             metadata: {
-              agent: 'writerAgent',
+              agent: 'storyAgent',
               availableFiles: [],
+              resolvedRequestedFiles: [],
+              unresolvedRequestedFiles: [],
               providedFiles: [],
               sectionMetadata: [],
               systemLength: 6,
@@ -176,7 +179,7 @@ describe('otelTrace', () => {
     const spans = convertAgentTraceToOtelSpans(trace)
 
     expect(spans[0]?.status.code).toBe('ERROR')
-    expect(spans.find((span) => span.name === 'agent.step.writerAgent')?.status.code).toBe('ERROR')
+    expect(spans.find((span) => span.name === 'agent.step.storyAgent')?.status.code).toBe('ERROR')
     expect(spans.find((span) => span.name === 'llm.call')?.status.code).toBe('ERROR')
   })
 })

@@ -36,7 +36,7 @@ export interface AgentTracePromptSnapshot {
 export interface AgentTraceStep {
   stepId: string
   index: number
-  agent: 'routingAgent' | 'writerAgent'
+  agent: 'storyAgent'
   startedAt: string
   endedAt?: string
   status: AgentTraceStepStatus
@@ -71,7 +71,7 @@ export interface AgentTrace {
   startedAt: string
   endedAt?: string
   status: AgentTraceStatus
-  initialAgent: 'routingAgent' | 'writerAgent'
+  initialAgent: 'storyAgent'
   currentStep: number
   userMessage?: string
   events: AgentTraceEvent[]
@@ -141,7 +141,7 @@ class AgentTraceService {
   startTrace(input: {
     requestToken: number
     projectPath: string | null
-    initialAgent: 'routingAgent' | 'writerAgent'
+    initialAgent: 'storyAgent'
     currentStep: number
     userMessage?: string
   }) {
@@ -174,7 +174,7 @@ class AgentTraceService {
     traceId: string,
     input: {
       index: number
-      agent: 'routingAgent' | 'writerAgent'
+      agent: 'storyAgent'
       requestedFiles?: string[]
       allowedTools: string[]
       modelPreference: 'high' | 'low'

@@ -15,8 +15,10 @@ export interface PromptSectionMetadata {
 }
 
 export interface BuildPromptMetadata {
-  agent: 'routingAgent' | 'writerAgent'
+  agent: 'storyAgent'
   availableFiles: string[]
+  resolvedRequestedFiles: string[]
+  unresolvedRequestedFiles: string[]
   providedFiles: string[]
   sectionMetadata: PromptSectionMetadata[]
   systemLength: number

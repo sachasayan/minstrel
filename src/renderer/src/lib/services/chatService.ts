@@ -19,6 +19,10 @@ import { bridge } from '@/lib/bridge'
 const DEBOUNCE_TIME = 5000 // 5 seconds
 const MAX_STEPS = 6
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const DEFAULT_CONTINUATION_MESSAGE =
+  "I've updated the draft. Next I’d focus on tightening the outline, expanding the current chapter, or planning the next scene. What should we tackle next?"
+const buildMissingFilesMessage = (missingFiles: string[]) =>
+  `I couldn't continue safely because I didn't receive all of the files I asked for: ${missingFiles.join(', ')}. I'm stopping here instead of guessing. Please try again after those files are available.`
 
 /**
  * Tracks the current active agent loop to allow for interruption.
@@ -57,7 +61,7 @@ export const initializeGeminiService = () => {
 
 /**
  * Main entry point for sending a chat message.
- * Orchestrates multiple agents in an iterative loop.
+ * Orchestrates the story agent in an iterative loop.
  */
 export const sendMessage = async (
   initialContext: RequestContext,
@@ -140,12 +144,24 @@ export const sendMessage = async (
 
       const { system, messages, allowedTools, metadata } = buildPrompt(context, livePromptData, liveSettings)
 
+      if (metadata.unresolvedRequestedFiles.length > 0) {
+        const errorMsg = buildMissingFilesMessage(metadata.unresolvedRequestedFiles)
+        agentTraceService.addEvent(traceId, 'requested_files_missing', {
+          stepIndex: context.currentStep,
+          missingFiles: metadata.unresolvedRequestedFiles,
+          requestedFiles: context.requestedFiles ?? [],
+          resolvedFiles: metadata.resolvedRequestedFiles
+        })
+        handleMessage(errorMsg, dispatchIfProjectActive as AppDispatch)
+        traceStatus = 'error'
+        traceErrorMessage = errorMsg
+        break
+      }
+
       // Inform Redux about pending files AI might be reading
       dispatchIfCurrent(setPendingFiles(context.requestedFiles || null))
 
-      // Determine model preference based on agent type
-      const modelPreference: 'high' | 'low' = 
-        context.agent === 'writerAgent' ? 'high' : 'low'
+      const modelPreference: 'high' | 'low' = 'high'
       const provider = liveSettings.provider || 'google'
       const selectedModelId = getSelectedModelId(liveSettings, provider, modelPreference)
       const stepId = agentTraceService.startStep(traceId, {
@@ -172,7 +188,6 @@ export const sendMessage = async (
       })
 
       // Define local variables to capture state changes from tools
-      let nextAgent: string | null = null
       let nextRequestedFiles: string[] | undefined = undefined
 
       // Tools definition using the registry
@@ -182,10 +197,6 @@ export const sendMessage = async (
         onReadFile: (fileNames) => {
           if (!requestStillActive()) return
           nextRequestedFiles = fileNames
-        },
-        onRouteTo: (agent) => {
-          if (!requestStillActive()) return
-          nextAgent = agent
         },
         onToolCall: (event) => {
           agentTraceService.addToolCall(traceId, stepId, event)
@@ -237,7 +248,7 @@ export const sendMessage = async (
           // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
           const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
           const isWritingLargeContent = (finalText.length > 500 && hasHeading);
-          const isLikelyInternalTask = context.agent === 'writerAgent';
+          const isLikelyInternalTask = true;
           
           if (isWritingLargeContent && isLikelyInternalTask) {
              streamingService.updateText("Writing changes to story...")
@@ -313,6 +324,9 @@ export const sendMessage = async (
            displayedText = finalText.trim()
            handleMessage(displayedText, dispatchIfProjectActive as AppDispatch);
         }
+      } else if (finalCalls.some((call) => call.toolName === 'writeFile')) {
+        displayedText = DEFAULT_CONTINUATION_MESSAGE
+        handleMessage(displayedText, dispatchIfProjectActive as AppDispatch)
       }
 
       // Clear streaming state after each step
@@ -321,18 +335,9 @@ export const sendMessage = async (
       // Prepare context for next iteration
       const nextContext: RequestContext = {
         currentStep: context.currentStep + 1,
-        agent: (nextAgent as any) || context.agent,
-        requestedFiles: nextRequestedFiles || context.requestedFiles,
+        agent: context.agent,
+        requestedFiles: nextRequestedFiles,
         sequenceInfo: context.sequenceInfo
-      }
-
-      // Defensive: warn if readFile was called without a routeTo in the same turn
-      if (nextRequestedFiles && !nextAgent) {
-        console.warn('[chatService] readFile called without routeTo — loop will stall. Files requested:', nextRequestedFiles)
-        agentTraceService.addEvent(traceId, 'read_without_route', {
-          stepIndex: context.currentStep,
-          requestedFiles: nextRequestedFiles
-        })
       }
 
       agentTraceService.finishStep(traceId, stepId, {
@@ -340,12 +345,11 @@ export const sendMessage = async (
         finalText,
         displayedText,
         outputSuppressed,
-        nextAgent,
         nextRequestedFiles
       })
 
-      // Terminal condition: if no routing tool was used, the task chain is finished
-      if (!nextAgent) {
+      // Terminal condition: continue only when the agent requested more files.
+      if (!nextRequestedFiles?.length) {
         break
       }
 

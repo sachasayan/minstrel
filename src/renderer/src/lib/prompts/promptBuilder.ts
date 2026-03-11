@@ -8,8 +8,7 @@ import {
   appendWithSeparator,
   addFormattedSection
 } from './promptsUtils'
-import { getRoutingAgentPrompt } from './routingAgent'
-import { getWriterAgentPrompt } from './writerAgent'
+import { getStoryAgentPrompt } from './storyAgent'
 import { getToolsPrompt } from './tools'
 
 import { getChaptersFromStoryContent, extractChapterContent } from '@/lib/storyContent'
@@ -29,15 +28,50 @@ export const getAvailableFiles = (data: PromptData): string[] => {
   return [...artifactFiles, ...virtualChapters]
 }
 
-export const getProvidedFiles = (data: PromptData, dependencies: string[] | undefined): string[] => {
+export const resolveRequestedFiles = (data: PromptData, dependencies: string[] | undefined): {
+  resolvedFiles: string[]
+  unresolvedFiles: string[]
+} => {
   const availableFiles = getAvailableFiles(data)
   const depsArray = Array.isArray(dependencies) ? dependencies : []
-  return availableFiles.filter((f) => depsArray.includes(f))
+  const resolvedFiles: string[] = []
+  const unresolvedFiles: string[] = []
+
+  depsArray.forEach((dependency) => {
+    if (availableFiles.includes(dependency)) {
+      resolvedFiles.push(dependency)
+      return
+    }
+
+    const chapterMatch = availableFiles.find((file) => {
+      const idMatch = file.match(/^<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
+      return idMatch?.[1] === dependency
+    })
+
+    if (chapterMatch) {
+      resolvedFiles.push(chapterMatch)
+      return
+    }
+
+    unresolvedFiles.push(dependency)
+  })
+
+  return {
+    resolvedFiles: Array.from(new Set(resolvedFiles)),
+    unresolvedFiles
+  }
+}
+
+export const getProvidedFiles = (data: PromptData, dependencies: string[] | undefined): string[] => {
+  const { resolvedFiles } = resolveRequestedFiles(data, dependencies)
+  const availableFiles = getAvailableFiles(data)
+  return availableFiles.filter((f) => resolvedFiles.includes(f))
 }
 
 // Gets contents of all the given files (including virtual chapters) as a string
 export const getFileContents = (data: PromptData, dependencies: string[] | undefined): string => {
-  if (!dependencies || !Array.isArray(dependencies) || dependencies.length === 0) {
+  const { resolvedFiles } = resolveRequestedFiles(data, dependencies)
+  if (resolvedFiles.length === 0) {
     return ''
   }
 
@@ -46,7 +80,7 @@ export const getFileContents = (data: PromptData, dependencies: string[] | undef
 
   const filesContent: string[] = []
 
-  dependencies.forEach((title) => {
+  resolvedFiles.forEach((title) => {
     // 1. Check artifact files
     const artifactFile = activeProject.files.find((f) => f.title === title)
     if (artifactFile) {
@@ -142,42 +176,15 @@ export const buildPrompt = (
   }
 
   switch (context.agent) {
-    case 'routingAgent': {
-      allowedTools = ['readFile', 'actionSuggestion', 'routeTo', 'writeFile']
-      const routingPrompt = getRoutingAgentPrompt()
-      const toolsPrompt = getToolsPrompt(allowedTools)
-      system = appendWithSeparator(system, routingPrompt)
-      system = appendWithSeparator(system, toolsPrompt)
-      recordSection('agentPrompt', 'ROUTING AGENT PROMPT', routingPrompt)
-      recordSection('toolsPrompt', 'TOOLS PROMPT', toolsPrompt, allowedTools.length)
-
-      // Always auto-include the Outline if it exists, plus any explicitly requested files
-      const outlineExists = availableFiles.includes('Outline')
-      const routingFiles = Array.from(new Set([
-        ...(outlineExists ? ['Outline'] : []),
-        ...(context.requestedFiles || [])
-      ]))
-      const routingProvidedFiles = getProvidedFiles(data, routingFiles)
-      const routingFileContents = getFileContents(data, routingFiles)
-      providedFiles = routingProvidedFiles
-
-      system = addAvailableFiles(system, availableFiles)
-      system = addProvidedFiles(system, routingProvidedFiles)
-      system = addFileContents(system, routingFileContents)
-      recordSection('availableFiles', 'DIRECTORY LISTING: FILES IN PROJECT', availableFiles.join('\n'), availableFiles.length)
-      recordSection('providedFiles', 'ACTIVE FILES', routingProvidedFiles.join('\n'), routingProvidedFiles.length)
-      recordSection('fileContents', 'ACTIVE FILE CONTENTS', routingFileContents, routingProvidedFiles.length)
-      break
-    }
-    case 'writerAgent': {
-      allowedTools = ['writeFile']
-      const writerPrompt = getWriterAgentPrompt()
+    case 'storyAgent': {
+      allowedTools = ['readFile', 'actionSuggestion', 'writeFile']
+      const storyPrompt = getStoryAgentPrompt()
       const toolsPrompt = getToolsPrompt(allowedTools)
       const writingStyleDescription = settings.writingStyleDescription?.trim() ?? ''
-      system = appendWithSeparator(system, writerPrompt)
+      system = appendWithSeparator(system, storyPrompt)
       system = appendWithSeparator(system, toolsPrompt)
       system = addWritingStyleGuidance(system, settings)
-      recordSection('agentPrompt', 'WRITER AGENT PROMPT', writerPrompt)
+      recordSection('agentPrompt', 'STORY AGENT PROMPT', storyPrompt)
       recordSection('toolsPrompt', 'TOOLS PROMPT', toolsPrompt, allowedTools.length)
       if (writingStyleDescription) {
         recordSection(
@@ -187,15 +194,22 @@ export const buildPrompt = (
         )
       }
 
-      const writerProvidedFiles = getProvidedFiles(data, context.requestedFiles)
-      const writerFileContents = getFileContents(data, context.requestedFiles)
-      providedFiles = writerProvidedFiles
+      const outlineExists = availableFiles.includes('Outline')
+      const requestedFiles = Array.from(new Set([
+        ...(outlineExists ? ['Outline'] : []),
+        ...(context.requestedFiles || [])
+      ]))
+      const { resolvedFiles, unresolvedFiles } = resolveRequestedFiles(data, requestedFiles)
+      const activeProvidedFiles = getProvidedFiles(data, resolvedFiles)
+      const activeFileContents = getFileContents(data, resolvedFiles)
+      providedFiles = activeProvidedFiles
+
       system = addAvailableFiles(system, availableFiles)
-      system = addProvidedFiles(system, writerProvidedFiles)
-      system = addFileContents(system, writerFileContents)
+      system = addProvidedFiles(system, activeProvidedFiles)
+      system = addFileContents(system, activeFileContents)
       recordSection('availableFiles', 'DIRECTORY LISTING: FILES IN PROJECT', availableFiles.join('\n'), availableFiles.length)
-      recordSection('providedFiles', 'ACTIVE FILES', writerProvidedFiles.join('\n'), writerProvidedFiles.length)
-      recordSection('fileContents', 'ACTIVE FILE CONTENTS', writerFileContents, writerProvidedFiles.length)
+      recordSection('providedFiles', 'ACTIVE FILES', activeProvidedFiles.join('\n'), activeProvidedFiles.length)
+      recordSection('fileContents', 'ACTIVE FILE CONTENTS', activeFileContents, activeProvidedFiles.length)
       break
     }
     default: {
@@ -211,6 +225,20 @@ export const buildPrompt = (
     metadata: {
       agent: context.agent,
       availableFiles,
+      resolvedRequestedFiles:
+        context.agent === 'storyAgent'
+          ? resolveRequestedFiles(data, Array.from(new Set([
+              ...(availableFiles.includes('Outline') ? ['Outline'] : []),
+              ...(context.requestedFiles || [])
+            ]))).resolvedFiles
+          : [],
+      unresolvedRequestedFiles:
+        context.agent === 'storyAgent'
+          ? resolveRequestedFiles(data, Array.from(new Set([
+              ...(availableFiles.includes('Outline') ? ['Outline'] : []),
+              ...(context.requestedFiles || [])
+            ]))).unresolvedFiles
+          : [],
       providedFiles,
       sectionMetadata,
       systemLength: system.length,
