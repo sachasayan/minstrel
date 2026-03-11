@@ -93,16 +93,22 @@ describe('otelTrace', () => {
     expect(spans).toHaveLength(4)
     expect(spans[0]?.name).toBe('agent.run.routingAgent')
     expect(spans[0]?.events[0]?.name).toBe('step_started')
+    expect(spans[0]?.attributes['langfuse.trace.input']).toBe('Draft chapter one')
+    expect(spans[0]?.attributes['langfuse.trace.output']).toBe('Routing complete')
 
     const stepSpan = spans.find((span) => span.name === 'agent.step.routingAgent')
     expect(stepSpan?.attributes['minstrel.prompt.system_hash']).toBe('fnv1a:22222222')
+    expect(stepSpan?.attributes['langfuse.observation.input']).toContain('system prompt')
+    expect(stepSpan?.attributes['langfuse.observation.output']).toContain('Routing complete')
     expect(stepSpan?.events.some((event) => event.name === 'agent.route')).toBe(true)
 
     const llmSpan = spans.find((span) => span.name === 'llm.call')
     expect(llmSpan?.attributes['llm.model.name']).toBe('gemini-test')
+    expect(llmSpan?.attributes['langfuse.observation.type']).toBe('generation')
 
     const toolSpan = spans.find((span) => span.name === 'tool.routeTo')
     expect(toolSpan?.attributes['tool.name']).toBe('routeTo')
+    expect(toolSpan?.attributes['langfuse.observation.input']).toContain('writerAgent')
     expect(toolSpan?.status.code).toBe('OK')
   })
 

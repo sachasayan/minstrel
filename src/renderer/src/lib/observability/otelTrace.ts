@@ -20,6 +20,16 @@ const toSpanId = (value: string) => toHex(value, 16)
 const safeEndTime = (endedAt: string | undefined, startedAt: string) => endedAt ?? startedAt
 
 const summarizeObject = (value: unknown) => JSON.stringify(value ?? null)
+const stringifyForLangfuse = (value: unknown) =>
+  typeof value === 'string' ? value : JSON.stringify(value ?? null)
+
+const getTraceOutput = (trace: AgentTrace) => {
+  const lastCompletedStep = [...trace.steps]
+    .reverse()
+    .find((step) => step.displayedText || step.finalText)
+
+  return lastCompletedStep?.displayedText ?? lastCompletedStep?.finalText ?? ''
+}
 
 const statusFromTrace = (trace: AgentTrace): OtelStatus =>
   trace.status === 'error' || trace.status === 'max_steps'
@@ -68,6 +78,8 @@ const buildRootSpan = (trace: AgentTrace, traceId: string): OtelSpan => {
       'minstrel.request_token': trace.requestToken,
       'minstrel.project_path': trace.projectPath ?? '',
       'minstrel.initial_agent': trace.initialAgent,
+      'langfuse.trace.input': trace.userMessage ?? '',
+      'langfuse.trace.output': getTraceOutput(trace),
       'minstrel.user_message_hash': hashString(trace.userMessage ?? ''),
       'minstrel.user_message_present': Boolean(trace.userMessage),
       'minstrel.step_count': trace.steps.length,
@@ -96,6 +108,16 @@ const buildStepSpan = (trace: AgentTrace, step: AgentTraceStep, traceId: string)
       'minstrel.step.index': step.index,
       'minstrel.agent': step.agent,
       'minstrel.status': step.status,
+      'langfuse.observation.input': stringifyForLangfuse({
+        system: prompt.system,
+        messages: prompt.messages
+      }),
+      'langfuse.observation.output': stringifyForLangfuse({
+        finalText: step.finalText ?? '',
+        displayedText: step.displayedText ?? '',
+        nextAgent: step.nextAgent ?? null,
+        nextRequestedFiles: step.nextRequestedFiles ?? []
+      }),
       'minstrel.requested_files': JSON.stringify(requestedFiles),
       'minstrel.requested_file_count': requestedFiles.length,
       'minstrel.allowed_tools': JSON.stringify(step.allowedTools),
@@ -165,6 +187,13 @@ const buildLlmSpans = (trace: AgentTrace, step: AgentTraceStep, traceId: string)
     startTimeUnixNano: toUnixNano(call.startedAt),
     endTimeUnixNano: toUnixNano(safeEndTime(call.endedAt, call.startedAt)),
     attributes: {
+      'langfuse.observation.type': 'generation',
+      'langfuse.observation.input': stringifyForLangfuse({
+        system: step.prompt.system,
+        messages: step.prompt.messages
+      }),
+      'langfuse.observation.output': step.finalText ?? step.displayedText ?? '',
+      'langfuse.observation.model.name': call.modelId ?? step.modelId ?? '',
       'llm.model.provider': call.provider ?? step.provider ?? '',
       'llm.model.name': call.modelId ?? step.modelId ?? '',
       'minstrel.step.id': step.stepId,
@@ -186,6 +215,8 @@ const buildToolSpan = (step: AgentTraceStep, call: AgentTraceToolCall, index: nu
   endTimeUnixNano: toUnixNano(call.endedAt),
   attributes: {
     'tool.name': call.toolName,
+    'langfuse.observation.input': stringifyForLangfuse(call.args),
+    'langfuse.observation.output': stringifyForLangfuse(call.result),
     'tool.args_hash': hashString(summarizeObject(call.args)),
     'tool.result_hash': hashString(summarizeObject(call.result)),
     'tool.duration_ms': call.durationMs,
