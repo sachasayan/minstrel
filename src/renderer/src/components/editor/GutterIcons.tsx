@@ -115,7 +115,10 @@ function GutterItem({ icon, label, isActive, isModified, onClick }: GutterItemPr
                     )}
                 </button>
             </TooltipTrigger>
-            <TooltipContent side="right" className="bg-popover/95 backdrop-blur-md border-border/50 text-foreground font-medium shadow-xl">
+            <TooltipContent
+                side="right"
+                className="backdrop-blur-md border-border/50  font-medium shadow-xl"
+            >
                 <p className="text-xs">{label}</p>
             </TooltipContent>
         </Tooltip>
