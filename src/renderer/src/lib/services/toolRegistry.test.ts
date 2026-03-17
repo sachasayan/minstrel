@@ -21,8 +21,8 @@ describe('toolRegistry', () => {
       activeProject: null
     })
 
-    await tools.writeFile.execute({ file_name: 'Outline', content: 'outline' })
-    await tools.writeFile.execute({ file_name: 'abc123', content: '# <!-- id: abc123 --> Chapter 1' })
+    await tools.writeFile.execute!({ file_name: 'Outline', content: 'outline' }, {} as any)
+    await tools.writeFile.execute!({ file_name: 'abc123', content: '# <!-- id: abc123 --> Chapter 1' }, {} as any)
 
     expect(handleWriteFile).toHaveBeenCalledTimes(2)
   })
@@ -33,10 +33,10 @@ describe('toolRegistry', () => {
       activeProject: null
     })
 
-    await tools.readFile.execute({ file_names: 'Outline, Chapter 1' })
+    await tools.readFile.execute!({ file_names: 'Outline, Chapter 1' }, {} as any)
 
     await expect(
-      tools.writeFile.execute({ file_name: 'Outline', content: 'updated outline' })
+      tools.writeFile.execute!({ file_name: 'Outline', content: 'updated outline' }, {} as any)
     ).rejects.toThrow('writeFile cannot be used in the same turn after readFile')
   })
 
@@ -46,10 +46,10 @@ describe('toolRegistry', () => {
       activeProject: null
     })
 
-    await tools.writeFile.execute({ file_name: 'Outline', content: 'updated outline' })
+    await tools.writeFile.execute!({ file_name: 'Outline', content: 'updated outline' }, {} as any)
 
     await expect(
-      tools.readFile.execute({ file_names: 'Outline, Chapter 1' })
+      tools.readFile.execute!({ file_names: 'Outline, Chapter 1' }, {} as any)
     ).rejects.toThrow('readFile cannot be used in the same turn after writeFile')
   })
 })

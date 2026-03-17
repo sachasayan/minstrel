@@ -349,7 +349,7 @@ export const sendMessage = async (
       })
 
       // Terminal condition: continue only when the agent requested more files.
-      if (!nextRequestedFiles?.length) {
+      if (!(nextRequestedFiles as string[] | undefined)?.length) {
         break
       }
 
@@ -422,7 +422,7 @@ Return the suggestions as action suggestions.
   const suggestionTool = tool({
     description: 'Provide title suggestions for the user.',
     inputSchema: z.object({ suggestions: z.string().describe('Comma-separated list of title suggestions') }),
-    execute: async ({ suggestions }) => {
+    execute: async ({ suggestions }, _options) => {
       console.log('Title suggestions tool executed with:', suggestions)
       return { status: 'success' }
     }

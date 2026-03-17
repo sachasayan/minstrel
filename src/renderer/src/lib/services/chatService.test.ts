@@ -76,7 +76,7 @@ describe('chatService', () => {
       // Simulate tool execution
       for (const call of toolCalls) {
         if (tools[call.toolName] && tools[call.toolName].execute) {
-          await tools[call.toolName].execute(call.args)
+          await tools[call.toolName].execute!(call.args, {} as any)
         }
       }
 
@@ -177,7 +177,7 @@ describe('chatService', () => {
         callCount++
         if (callCount === 1) {
           if (tools.readFile?.execute) {
-            await tools.readFile.execute({ file_names: 'Outline, <!-- id: ch1 --> Chapter 1' })
+            await tools.readFile.execute!({ file_names: 'Outline, <!-- id: ch1 --> Chapter 1' }, {} as any)
           }
           return {
             text: 'Checking the outline and existing chapter first.',

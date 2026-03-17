@@ -48,7 +48,7 @@ export const createTools = (callbacks: ToolCallbacks) => {
     writeFile: tool({
       description: 'Write content to a file. Only Markdown files supported.',
       inputSchema: schemas.writeFileSchema,
-      execute: async (args) => {
+      execute: async (args, _options) => {
         const startedAt = new Date().toISOString()
         try {
           if (hasReadThisTurn) {
@@ -86,7 +86,7 @@ export const createTools = (callbacks: ToolCallbacks) => {
     readFile: tool({
       description: 'Read the contents of specified files.',
       inputSchema: schemas.readFileSchema,
-      execute: async (args) => {
+      execute: async (args, _options) => {
         const startedAt = new Date().toISOString()
         try {
           if (writeCountThisTurn > 0) {
@@ -127,7 +127,7 @@ export const createTools = (callbacks: ToolCallbacks) => {
     routeTo: tool({
       description: 'Route to a specialist agent.',
       inputSchema: schemas.routeToSchema,
-      execute: async (args) => {
+      execute: async (args, _options) => {
         const startedAt = new Date().toISOString()
         try {
           console.log(`[TOOL EXECUTION] routeTo called with raw args:`, JSON.stringify(args))
@@ -163,7 +163,7 @@ export const createTools = (callbacks: ToolCallbacks) => {
     actionSuggestion: tool({
       description: 'Provide suggestions for the user.',
       inputSchema: schemas.actionSuggestionSchema,
-      execute: async (args) => {
+      execute: async (args, _options) => {
         const startedAt = new Date().toISOString()
         try {
           console.log(`[TOOL EXECUTION] actionSuggestion called with raw args:`, JSON.stringify(args))

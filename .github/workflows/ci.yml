@@ -34,3 +34,12 @@ jobs:
 
       - name: Run tests
         run: npm run test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build app for E2E
+        run: npx electron-vite build
+
+      - name: Run E2E tests
+        run: xvfb-run npm run test:e2e
