@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { installExtension, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 import icon from '../../resources/icon.icns?asset'
 import { registerFileOpsHandlers } from './fileOps'
 import { registerSettingsHandlers } from './settingsManager'
@@ -58,27 +57,25 @@ app.whenReady().then(() => {
   loadMainEnv()
 
   if (is.dev) {
-    // Monkey-patch session for electron-devtools-installer compatibility with Electron 40
-    // This silences deprecation warnings until the library is officially updated.
-    // @ts-ignore
-    if (session.defaultSession && !session.defaultSession.getAllExtensions) {
-      // @ts-ignore
-      session.defaultSession.getAllExtensions = (): any[] => {
-        return session.defaultSession.extensions.getAllExtensions()
-      }
-    }
-    // @ts-ignore
-    if (session.defaultSession && !session.defaultSession.loadExtension) {
-      // @ts-ignore
-      session.defaultSession.loadExtension = (path: string, options: any): Promise<any> => {
-        return session.defaultSession.extensions.loadExtension(path, options)
-      }
-    }
+    // Native Electron extension loading to replace electron-devtools-installer
+    // This avoids deprecation warnings and uses the modern session.extensions API.
+    const reduxDevToolsPath = join(
+      app.getPath('userData'),
+      'extensions/lmhkpmbekcpmknklioeibfkpmmfibljd'
+    )
 
-    // Conditionally install Redux DevTools in development
-    installExtension(REDUX_DEVTOOLS)
+    session.defaultSession.extensions
+      .loadExtension(reduxDevToolsPath, { allowFileAccess: true })
       .then((ext) => console.log(`Added Extension:  ${ext.name}`))
-      .catch((err) => console.log('An error occurred: ', err))
+      .catch((err) => {
+        if (err.message.includes('Extension cannot be loaded from')) {
+          console.warn(
+            'Redux DevTools not found locally. Please install it once via the library or manually to populate the directory.'
+          )
+        } else {
+          console.error('An error occurred while loading Redux DevTools: ', err)
+        }
+      })
   }
 
   // Set app user model id for windows
