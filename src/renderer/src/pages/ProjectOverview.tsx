@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils'
 import StatusBar from '@/components/StatusBar'
 import ProjectBar from '@/components/ProjectBar'
 import { isChapterSection, isOverviewSection } from '@/lib/activeSection'
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/AppSidebar'
 
 const ProjectOverview = (): React.ReactNode => {
   const appState = useSelector(selectAppState)
@@ -49,42 +51,45 @@ const ProjectOverview = (): React.ReactNode => {
   ])
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
-      {!isFreshNewProject ? (
-        <>
-          <motion.div
-            animate={{ opacity: isProjectEmpty ? 0 : 1 }}
-            transition={{ duration: 0.5 }}
-            className={cn(
-              "fixed top-4 right-4 z-50 flex items-center gap-2",
-              isProjectEmpty && "pointer-events-none"
-            )}
-          >
-            <ProjectBar />
-            <StatusBar floating={false} />
-          </motion.div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset className="flex flex-col flex-1 min-w-0 relative overflow-hidden h-svh max-h-svh">
+        {!isFreshNewProject ? (
+            <>
+              <motion.div
+                animate={{ opacity: isProjectEmpty ? 0 : 1 }}
+                transition={{ duration: 0.5 }}
+                className={cn(
+                  'fixed top-4 right-4 z-50 flex items-center gap-2',
+                  isProjectEmpty && 'pointer-events-none'
+                )}
+              >
+                <ProjectBar />
+                <StatusBar floating={false} />
+              </motion.div>
 
-          <motion.main
-            animate={{ opacity: isProjectEmpty ? 0 : 1 }}
-            transition={{ duration: 0.5 }}
-            className={cn(
-              "relative flex-1 min-w-0 h-full overflow-hidden",
-              isProjectEmpty && "pointer-events-none"
-            )}
-          >
-            {appState.activeView == 'project/editor' && editorContent ? (
-              <StoryViewer
-                key={activeProject?.projectPath}
-                activeSection={appState.activeSection}
-                content={editorContent.content}
-              />
-            ) : null}
-          </motion.main>
-        </>
-      ) : null}
-      <ChatInterface />
-      <CommandPalette />
-    </div>
+              <motion.main
+                animate={{ opacity: isProjectEmpty ? 0 : 1 }}
+                transition={{ duration: 0.5 }}
+                className={cn(
+                  'relative flex-1 min-w-0 h-full overflow-hidden min-h-0',
+                  isProjectEmpty && 'pointer-events-none'
+                )}
+              >
+                {appState.activeView === 'project/editor' && editorContent ? (
+                  <StoryViewer
+                    key={activeProject?.projectPath}
+                    activeSection={appState.activeSection}
+                    content={editorContent.content}
+                  />
+                ) : null}
+              </motion.main>
+            </>
+          ) : null}
+          <ChatInterface />
+          <CommandPalette />
+        </SidebarInset>
+    </SidebarProvider>
   )
 }
 

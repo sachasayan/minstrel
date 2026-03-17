@@ -2,13 +2,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Fragment, useRef, JSX, useCallback, useState, useMemo, ReactNode } from 'react'
 import { remark } from 'remark'
 
-import { setProjectHasLiveEdits, selectProjects, updateFile, updateParameters, addChapter } from '@/lib/store/projectsSlice'
+import { setProjectHasLiveEdits, selectProjects, updateFile, updateParameters } from '@/lib/store/projectsSlice'
 import { setActiveSection } from '@/lib/store/appStateSlice'
 import { selectChat } from '@/lib/store/chatSlice'
 import { getChaptersFromStoryContent } from '@/lib/storyContent'
 import { DashboardRibbon } from './DashboardRibbon'
 import { LexicalEditor } from './LexicalEditor'
-import { GutterIcons } from './GutterIcons'
 import { TitleModal } from './TitleModal'
 import { ListOrdered } from 'lucide-react'
 import { ActiveSection } from '@/types'
@@ -145,16 +144,7 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
         )}
 
         <div className={`flex flex-row gap-6 transition-opacity duration-500 ${isPending ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-          <div className="flex-grow flex justify-end items-start pt-12">
-            <GutterIcons
-              activeSection={activeSection}
-              chapters={chapters}
-              modifiedChapters={modifiedChapters}
-              artifacts={artifacts}
-              onSelect={(section) => dispatch(setActiveSection(section))}
-              onAddChapter={() => dispatch(addChapter())}
-            />
-          </div>
+          <div className="flex-grow" />
           <div className="max-w-3xl w-full">
             <ReadOnlyOutline content={outlineContent} />
             <LexicalEditor
