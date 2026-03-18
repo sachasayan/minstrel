@@ -85,7 +85,7 @@ describe('chatService', () => {
         toolCalls: Promise.resolve(toolCalls),
         textStream: (async function* () {
           yield text
-        })(),
+        })()
       }
 
       return result as any
@@ -93,34 +93,21 @@ describe('chatService', () => {
 
     it('should iterate and call tool-triggered side-effects', async () => {
       const context = { agent: 'storyAgent', currentStep: 0 } as any
-      
+
       vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _sy, _p, tools: any) => {
-        return mockStreamingResult('AI reasoning', [
-          { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
-        ], tools) as any
+        return mockStreamingResult('AI reasoning', [{ toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }], tools) as any
       })
-      
+
       const promptData = {
         activeProject: mockState.projects.activeProject,
         chatHistory: mockState.chat.chatHistory
       }
       await sendMessage(context, promptData, mockState.settings, mockDispatch)
-      
+
       expect(geminiService.streamTextWithTools).toHaveBeenCalledOnce()
-      expect(geminiService.streamTextWithTools).toHaveBeenCalledWith(
-        mockState.settings,
-        expect.any(String),
-        expect.any(Array),
-        expect.any(Object),
-        'high'
-      )
+      expect(geminiService.streamTextWithTools).toHaveBeenCalledWith(mockState.settings, expect.any(String), expect.any(Array), expect.any(Object), 'high')
       expect(handleWriteFile).toHaveBeenCalledTimes(1)
-      expect(handleWriteFile).toHaveBeenCalledWith(
-        'test.md',
-        'content',
-        expect.any(Function),
-        mockState.projects.activeProject
-      )
+      expect(handleWriteFile).toHaveBeenCalledWith('test.md', 'content', expect.any(Function), mockState.projects.activeProject)
 
       const trace = agentTraceService.getRecentTraces()[0]
       expect(trace.status).toBe('completed')
@@ -128,20 +115,14 @@ describe('chatService', () => {
       expect(trace.steps[0]?.toolCalls[0]?.toolName).toBe('writeFile')
       expect(trace.steps[0]?.prompt.metadata.agent).toBe('storyAgent')
       expect(bridge.exportAgentTrace).toHaveBeenCalledTimes(1)
-      expect(vi.mocked(bridge.exportAgentTrace).mock.calls[0]?.[0]).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ name: 'agent.run.storyAgent' })
-        ])
-      )
+      expect(vi.mocked(bridge.exportAgentTrace).mock.calls[0]?.[0]).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'agent.run.storyAgent' })]))
     })
 
     it('should add a continuation message when a write-only turn returns no text', async () => {
       const context = { agent: 'storyAgent', currentStep: 0 } as any
 
       vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async (_s, _sy, _p, tools: any) => {
-        return mockStreamingResult('', [
-          { toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }
-        ], tools) as any
+        return mockStreamingResult('', [{ toolName: 'writeFile', args: { file_name: 'test.md', content: 'content' } }], tools) as any
       })
 
       const promptData = {
@@ -150,10 +131,7 @@ describe('chatService', () => {
       }
       await sendMessage(context, promptData, mockState.settings, mockDispatch)
 
-      expect(handleMessage).toHaveBeenCalledWith(
-        expect.stringContaining("What should we tackle next?"),
-        expect.any(Function)
-      )
+      expect(handleMessage).toHaveBeenCalledWith(expect.stringContaining('What should we tackle next?'), expect.any(Function))
     })
 
     it('should iterate when readFile is called', async () => {
@@ -171,7 +149,7 @@ describe('chatService', () => {
       vi.mocked(store.getState).mockReturnValue(loadedState)
 
       const context = { agent: 'storyAgent', currentStep: 0 } as any
-      
+
       let callCount = 0
       vi.mocked(geminiService.streamTextWithTools).mockImplementation(async (_settings, _system, _userPrompt, tools: any) => {
         callCount++
@@ -182,22 +160,24 @@ describe('chatService', () => {
           return {
             text: 'Checking the outline and existing chapter first.',
             toolCalls: Promise.resolve([{ toolName: 'readFile', args: { file_names: 'Outline, <!-- id: ch1 --> Chapter 1' } }]),
-            textStream: (async function* () {})(),
+            textStream: (async function* () {})()
           } as any
         }
         return {
           text: 'Done',
           toolCalls: Promise.resolve([]),
-          textStream: (async function* () { yield 'Done' })(),
+          textStream: (async function* () {
+            yield 'Done'
+          })()
         } as any
       })
-        
+
       const promptData = {
         activeProject: loadedState.projects.activeProject,
         chatHistory: loadedState.chat.chatHistory
       }
       await sendMessage(context, promptData, mockState.settings, mockDispatch)
-      
+
       // Should have called the LLM twice: once to request files, once to continue with them
       expect(geminiService.streamTextWithTools).toHaveBeenCalledTimes(2)
       expect(vi.mocked(geminiService.streamTextWithTools).mock.calls[1]?.[4]).toBe('high')
@@ -236,10 +216,7 @@ describe('chatService', () => {
       await sendMessage(context, promptData, missingState.settings, mockDispatch)
 
       expect(geminiService.streamTextWithTools).not.toHaveBeenCalled()
-      expect(handleMessage).toHaveBeenCalledWith(
-        expect.stringContaining("I couldn't continue safely because I didn't receive all of the files I asked for: missing-id."),
-        expect.any(Function)
-      )
+      expect(handleMessage).toHaveBeenCalledWith(expect.stringContaining("I couldn't continue safely because I didn't receive all of the files I asked for: missing-id."), expect.any(Function))
 
       const trace = agentTraceService.getRecentTraces()[0]
       expect(trace.status).toBe('error')
@@ -283,24 +260,27 @@ describe('chatService', () => {
       let currentState = mockState
 
       vi.mocked(store.getState).mockImplementation(() => currentState as any)
-      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(async () => ({
-        text: Promise.resolve('Late response'),
-        toolCalls: Promise.resolve([]),
-        textStream: (async function* () {
-          currentState = {
-            ...mockState,
-            projects: {
-              activeProject: {
-                title: 'Other',
-                projectPath: '/projects/other.mns',
-                files: [],
-                storyContent: ''
-              }
-            }
-          } as any
-          yield 'Late response'
-        })()
-      }) as any)
+      vi.mocked(geminiService.streamTextWithTools).mockImplementationOnce(
+        async () =>
+          ({
+            text: Promise.resolve('Late response'),
+            toolCalls: Promise.resolve([]),
+            textStream: (async function* () {
+              currentState = {
+                ...mockState,
+                projects: {
+                  activeProject: {
+                    title: 'Other',
+                    projectPath: '/projects/other.mns',
+                    files: [],
+                    storyContent: ''
+                  }
+                }
+              } as any
+              yield 'Late response'
+            })()
+          }) as any
+      )
 
       const context = { agent: 'storyAgent', currentStep: 0, projectPath: '/projects/test.mns' } as any
       const promptData = {
@@ -325,7 +305,7 @@ describe('chatService', () => {
         text: '',
         toolCalls: [{ toolName: 'actionSuggestion', args: { suggestions: 'T1, T2' } }]
       } as any)
-      
+
       const titles = await generateTitleSuggestions('plot', 'fantasy', 'space')
       expect(titles).toEqual(['T1', 'T2'])
     })

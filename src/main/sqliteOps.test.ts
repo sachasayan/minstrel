@@ -1,10 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-  handleInitSqliteProject,
-  handleSaveSqliteProject,
-  handleLoadSqliteProject,
-  handleGetSqliteProjectMeta
-} from './sqliteOps'
+import { handleInitSqliteProject, handleSaveSqliteProject, handleLoadSqliteProject, handleGetSqliteProjectMeta } from './sqliteOps'
 import Database from 'better-sqlite3'
 import * as fs from 'fs/promises'
 
@@ -40,7 +35,7 @@ describe('sqliteOps', () => {
     const ActualDatabase = require('better-sqlite3')
     mockDb = new ActualDatabase(':memory:')
     mockDb.close = vi.fn()
-    vi.mocked(Database).mockImplementation(() => {
+    vi.mocked(Database).mockImplementation(function () {
       return mockDb
     })
   })
@@ -97,9 +92,7 @@ describe('sqliteOps', () => {
           { title: 'Chapter 1', content: 'Content 1', type: 'chapter', sort_order: 1 },
           { title: 'Outline', content: 'Outline content', type: 'outline', sort_order: 0 }
         ],
-        chatHistory: [
-          { sender: 'user', text: 'Hello', timestamp: '2023-01-01T00:00:00Z' }
-        ]
+        chatHistory: [{ sender: 'user', text: 'Hello', timestamp: '2023-01-01T00:00:00Z' }]
       }
 
       const result = await handleSaveSqliteProject({}, 'test.db', project)
@@ -125,7 +118,7 @@ describe('sqliteOps', () => {
     it('should rollback on error', async () => {
       // Mock exec to throw when trying to BEGIN or DELETE
       const originalExec = mockDb.exec.bind(mockDb)
-      mockDb.exec = vi.fn().mockImplementation((sql) => {
+      mockDb.exec = vi.fn().mockImplementation(function (sql) {
         if (sql.includes('DELETE FROM metadata')) throw new Error('Transaction Error')
         return originalExec(sql)
       })
@@ -167,7 +160,7 @@ describe('sqliteOps', () => {
         CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT);
         CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, title TEXT, content TEXT, type TEXT, sort_order INTEGER);
         CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY, sender TEXT, text TEXT, timestamp TEXT, metadata TEXT);
-        
+
         INSERT INTO metadata (key, value) VALUES ('title', '"Loaded Project"'), ('genre', '"Mystery"'), ('wordCountTarget', '50000'), ('lastViewedSection', '{"kind":"artifact","title":"Outline"}');
         INSERT INTO files (title, content, type, sort_order) VALUES ('Notes', 'Some notes', 'note', 1);
         INSERT INTO chat_history (sender, text, timestamp) VALUES ('ai', 'Hello there', '2023-01-01T00:00:00Z');
