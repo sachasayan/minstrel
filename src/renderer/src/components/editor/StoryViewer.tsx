@@ -25,24 +25,9 @@ export function StoryViewer({ activeSection, content }: StoryViewerProps): JSX.E
   const containerRef = useRef<HTMLDivElement>(null)
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false)
 
-  const chapters = useMemo(() => {
-    return projectState.activeProject ? getChaptersFromStoryContent(projectState.activeProject.storyContent) : []
-  }, [projectState.activeProject?.storyContent])
-
-  const modifiedChapters = projectState.modifiedChapters || []
   const outlineContent = useMemo(() => {
     return projectState.activeProject?.files?.find((file) => file.title === 'Outline')?.content || ''
   }, [projectState.activeProject?.files])
-
-  const artifacts = useMemo(
-    () => [
-      {
-        title: 'Outline',
-        icon: <ListOrdered className="h-4 w-4" />
-      }
-    ],
-    []
-  )
 
   const isPending = chatState.pendingChat
 

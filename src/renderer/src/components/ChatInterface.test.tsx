@@ -22,8 +22,8 @@ vi.mock('@/lib/services/streamingService', () => ({
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => <>{children}</>,
   motion: {
-    div: ({ children, initial: _initial, animate: _animate, exit: _exit, transition: _transition, layout: _layout, ...props }: any) => <div {...props}>{children}</div>,
-    span: ({ children, initial: _initial, animate: _animate, exit: _exit, transition: _transition, layout: _layout, ...props }: any) => <span {...props}>{children}</span>
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    span: ({ children, ...props }: any) => <span {...props}>{children}</span>
   }
 }))
 

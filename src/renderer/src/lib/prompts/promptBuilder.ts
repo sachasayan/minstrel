@@ -182,7 +182,7 @@ export const buildPrompt = (context: RequestContext, data: PromptData, settings:
 
       const outlineExists = availableFiles.includes('Outline')
       const requestedFiles = Array.from(new Set([...(outlineExists ? ['Outline'] : []), ...(context.requestedFiles || [])]))
-      const { resolvedFiles, unresolvedFiles } = resolveRequestedFiles(data, requestedFiles)
+      const { resolvedFiles } = resolveRequestedFiles(data, requestedFiles)
       const activeProvidedFiles = getProvidedFiles(data, resolvedFiles)
       const activeFileContents = getFileContents(data, resolvedFiles)
       providedFiles = activeProvidedFiles

@@ -396,7 +396,7 @@ Return the suggestions as action suggestions.
   const suggestionTool = tool({
     description: 'Provide title suggestions for the user.',
     inputSchema: z.object({ suggestions: z.string().describe('Comma-separated list of title suggestions') }),
-    execute: async ({ suggestions }, _options) => {
+    execute: async ({ suggestions }) => {
       console.log('Title suggestions tool executed with:', suggestions)
       return { status: 'success' }
     }

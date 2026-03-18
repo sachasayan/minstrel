@@ -367,8 +367,8 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <div ref={panelRef} className="flex h-full min-h-0 flex-col">
             <motion.div className="min-h-0 flex-1 overflow-y-auto p-5">
-              {visibleMessages.map((msg, index) => (
-                <ChatMessageItem key={index} msg={msg} />
+              {visibleMessages.map((msg) => (
+                <ChatMessageItem key={`${msg.sender}-${msg.text}`} msg={msg} />
               ))}
 
               {streamingText && <ChatMessageItem msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }} />}
@@ -378,7 +378,7 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
                   <motion.div key="suggestions" layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={HEIGHT_TRANSITION}>
                     <SmoothHeight>
                       <div className="flex flex-wrap items-center">
-                        {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                        {actionSuggestions.slice(0, 3).map((suggestion) => (
                           <motion.div
                             key={suggestion}
                             layout="position"
@@ -465,8 +465,8 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
           {showTopFade ? <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background via-background/95 to-transparent" /> : null}
           <div ref={panelRef} className="relative flex min-h-[220px] shrink-0 flex-col">
             <motion.div className="flex-1 p-5">
-              {visibleMessages.map((msg, index) => (
-                <ChatMessageItem key={index} msg={msg} />
+              {visibleMessages.map((msg) => (
+                <ChatMessageItem key={`${msg.sender}-${msg.text}`} msg={msg} />
               ))}
 
               {streamingText && <ChatMessageItem msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }} />}
@@ -476,7 +476,7 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
                   <motion.div key="suggestions" layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={HEIGHT_TRANSITION}>
                     <SmoothHeight>
                       <div className="flex flex-wrap items-center">
-                        {actionSuggestions.slice(0, 3).map((suggestion, index) => (
+                        {actionSuggestions.slice(0, 3).map((suggestion) => (
                           <motion.div
                             key={suggestion}
                             layout="position"
