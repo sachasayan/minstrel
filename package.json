@@ -6,7 +6,8 @@
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "scripts": {
-    "format": "prettier --write .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "lint": "oxlint . --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
@@ -117,7 +118,6 @@
     "jsdom": "^27.0.1",
     "oxfmt": "^0.41.0",
     "oxlint": "^1.56.0",
-    "prettier": "^3.8.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwindcss": "^4.2.1",

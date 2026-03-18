@@ -1,21 +1,13 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript"
-  ],
+  "plugins": ["typescript"],
   "categories": {
     "correctness": "off"
   },
   "env": {
     "builtin": true
   },
-  "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    "out/",
-    "mock-projects/",
-    ".eslintrc.cjs"
-  ],
+  "ignorePatterns": ["node_modules/", "dist/", "out/", "mock-projects/", ".eslintrc.cjs"],
   "rules": {
     "constructor-super": "error",
     "for-direction": "error",
@@ -95,12 +87,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.cts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "rules": {
         "constructor-super": "off",
         "no-class-assign": "off",
@@ -123,9 +110,7 @@
       }
     },
     {
-      "files": [
-        "**/*.{js,mjs,cjs,jsx,ts,tsx}"
-      ],
+      "files": ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
       "rules": {
         "react/display-name": "error",
         "react/jsx-key": "error",
@@ -154,9 +139,7 @@
         "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/ban-ts-comment": "off"
       },
-      "plugins": [
-        "react"
-      ],
+      "plugins": ["react"],
       "env": {
         "browser": true,
         "node": true
