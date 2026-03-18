@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { $getRoot } from 'lexical'
 import { HeadingNode } from '@lexical/rich-text'
 import { ActiveSection } from '@/types'
@@ -24,7 +24,7 @@ export function ScrollSyncPlugin({ activeSection, onSectionChange, containerRef,
   const lastDispatchAt = useRef(0)
   const hasHandledInitialScroll = useRef(false)
 
-  const getScrollBehavior = () => (!hasHandledInitialScroll.current && instantInitialScroll ? 'auto' : 'smooth')
+  const getScrollBehavior = useCallback(() => (!hasHandledInitialScroll.current && instantInitialScroll ? 'auto' : 'smooth'), [instantInitialScroll])
 
   const markInitialScrollHandled = () => {
     if (!hasHandledInitialScroll.current) {
@@ -93,7 +93,7 @@ export function ScrollSyncPlugin({ activeSection, onSectionChange, containerRef,
         }
       }
     })
-  }, [activeSection, editor, containerRef])
+  }, [activeSection, editor, containerRef, getScrollBehavior])
 
   // 2. Handle Scroll Observation (Editor -> Story)
   useEffect(() => {

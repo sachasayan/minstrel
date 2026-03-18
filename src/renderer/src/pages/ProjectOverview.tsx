@@ -11,7 +11,6 @@ import CommandPalette from '@/components/CommandPalette'
 import { cn } from '@/lib/utils'
 import StatusBar from '@/components/StatusBar'
 import ProjectBar from '@/components/ProjectBar'
-import { isChapterSection, isOverviewSection } from '@/lib/activeSection'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/AppSidebar'
 
@@ -34,17 +33,13 @@ const ProjectOverview = (): React.ReactNode => {
     return !hasUserStartedFirstTurn || pendingChat
   }, [activeProject, isProjectEmpty, chatHistory, pendingChat])
 
-  const isStorySection = useMemo(() => {
-    return isOverviewSection(appState.activeSection) || isChapterSection(appState.activeSection)
-  }, [appState.activeSection])
-
   const editorContent = useMemo(() => {
     if (appState.activeView !== 'project/editor') return null
 
     return {
       content: activeProject?.storyContent || ''
     }
-  }, [appState.activeView, isStorySection, activeProject?.storyContent])
+  }, [appState.activeView, activeProject?.storyContent])
 
   return (
     <SidebarProvider>

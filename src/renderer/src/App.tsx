@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode, useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectActiveView } from '@/lib/store/appStateSlice'
 import { selectActiveProject } from '@/lib/store/projectsSlice'
@@ -33,7 +33,7 @@ export default function App(): ReactNode {
 
   const [hasLoaded, setHasLoaded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     console.log('Loading settings')
     setLoadError(null)
     try {
@@ -45,7 +45,7 @@ export default function App(): ReactNode {
     } finally {
       setHasLoaded(true)
     }
-  }
+  }, [dispatch])
 
   const router = (activeView) => {
     switch (activeView) {
@@ -69,7 +69,7 @@ export default function App(): ReactNode {
     if (!hasLoaded) {
       loadSettings() // Call the async function
     }
-  }, [hasLoaded])
+  }, [hasLoaded, loadSettings])
 
   // Conditionally render OnboardingPage or the main app router
   return (

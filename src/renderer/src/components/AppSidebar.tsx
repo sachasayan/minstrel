@@ -25,10 +25,11 @@ export function AppSidebar() {
   const projectState = useSelector(selectProjects)
   const appState = useSelector(selectAppState)
   const activeSection = appState.activeSection
+  const activeProject = projectState.activeProject
 
   const chapters = React.useMemo(() => {
-    return projectState.activeProject ? getChaptersFromStoryContent(projectState.activeProject.storyContent) : []
-  }, [projectState.activeProject?.storyContent])
+    return activeProject ? getChaptersFromStoryContent(activeProject.storyContent) : []
+  }, [activeProject])
 
   const modifiedChapters = projectState.modifiedChapters || []
 

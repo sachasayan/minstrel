@@ -24,7 +24,7 @@ export function DashboardRibbon() {
       chapter: i + 1,
       chapterWordCount: c.wordCount
     }))
-  }, [activeProject?.storyContent])
+  }, [activeProject])
 
   const dialogueCountData = useMemo<DialogueCountRow[]>(() => {
     const dialogCounts = activeProject?.dialogueAnalysis?.dialogCounts
