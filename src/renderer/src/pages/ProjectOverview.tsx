@@ -72,21 +72,26 @@ const ProjectOverview = (): React.ReactNode => {
                 animate={{ opacity: isProjectEmpty ? 0 : 1 }}
                 transition={{ duration: 0.5 }}
                 className={cn(
-                  'relative flex-1 min-w-0 h-full overflow-hidden min-h-0',
+                  'relative flex flex-1 min-w-0 h-full overflow-hidden min-h-0',
                   isProjectEmpty && 'pointer-events-none'
                 )}
               >
-                {appState.activeView === 'project/editor' && editorContent ? (
-                  <StoryViewer
-                    key={activeProject?.projectPath}
-                    activeSection={appState.activeSection}
-                    content={editorContent.content}
-                  />
-                ) : null}
+                <div className="min-w-0 flex-1">
+                  {appState.activeView === 'project/editor' && editorContent ? (
+                    <StoryViewer
+                      key={activeProject?.projectPath}
+                      activeSection={appState.activeSection}
+                      content={editorContent.content}
+                    />
+                  ) : null}
+                </div>
+                <aside className="h-full w-[390px] shrink-0">
+                  <ChatInterface placement="column" />
+                </aside>
               </motion.main>
             </>
           ) : null}
-          <ChatInterface />
+          {isFreshNewProject ? <ChatInterface /> : null}
           <CommandPalette />
         </SidebarInset>
     </SidebarProvider>
