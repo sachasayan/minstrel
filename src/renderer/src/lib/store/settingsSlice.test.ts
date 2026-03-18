@@ -13,11 +13,7 @@ import reducer, {
 } from './settingsSlice'
 import { RecentProject } from '@/types'
 import { AppSettings } from '@/types'
-import {
-  DEFAULT_HIGH_PREFERENCE_MODEL_ID,
-  DEFAULT_LOW_PREFERENCE_MODEL_ID,
-  DEFAULT_PROVIDER
-} from '@shared/constants'
+import { DEFAULT_HIGH_PREFERENCE_MODEL_ID, DEFAULT_LOW_PREFERENCE_MODEL_ID, DEFAULT_PROVIDER } from '@shared/constants'
 
 describe('settingsSlice', () => {
   const initialState: AppSettings = {
@@ -42,9 +38,9 @@ describe('settingsSlice', () => {
     const loadedSettings = {
       workingRootDirectory: '/new/root'
     } as any
-    
+
     const actual = reducer(initialState, setSettingsState(loadedSettings))
-    
+
     expect(actual.workingRootDirectory).toBe('/new/root')
     // Defaults should be preserved
     expect(actual.highPreferenceModelId).toBe(DEFAULT_HIGH_PREFERENCE_MODEL_ID)
@@ -58,7 +54,7 @@ describe('settingsSlice', () => {
   it('should handle setWorkingRootDirectory', () => {
     const actual = reducer(initialState, setWorkingRootDirectory('/test/dir'))
     expect(actual.workingRootDirectory).toBe('/test/dir')
-    
+
     const cleared = reducer(actual, setWorkingRootDirectory(null))
     expect(cleared.workingRootDirectory).toBeNull()
   })
@@ -95,9 +91,7 @@ describe('settingsSlice', () => {
 
   describe('setRecentProjects', () => {
     it('should replace the recentProjects list wholesale', () => {
-      const projects: RecentProject[] = [
-        { projectPath: '/a.mns', title: 'A', genre: 'fantasy', lastOpenedAt: '2026-01-01T00:00:00Z' }
-      ]
+      const projects: RecentProject[] = [{ projectPath: '/a.mns', title: 'A', genre: 'fantasy', lastOpenedAt: '2026-01-01T00:00:00Z' }]
       const actual = reducer(initialState, setRecentProjects(projects))
       expect(actual.recentProjects).toEqual(projects)
     })
@@ -136,7 +130,7 @@ describe('settingsSlice', () => {
       // Most recently opened should be first
       expect(state.recentProjects![0].title).toBe('Project 4')
       // Oldest (Project 1) should have been evicted
-      expect(state.recentProjects!.map(p => p.title)).not.toContain('Project 1')
+      expect(state.recentProjects!.map((p) => p.title)).not.toContain('Project 1')
     })
 
     it('should handle adding to an undefined recentProjects list gracefully', () => {

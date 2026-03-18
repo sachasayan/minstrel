@@ -34,8 +34,7 @@ describe('projectListeners', () => {
         projects: projectsReducer,
         chat: chatReducer
       },
-      middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().prepend(projectListeners.middleware)
+      middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(projectListeners.middleware)
     })
   }
 

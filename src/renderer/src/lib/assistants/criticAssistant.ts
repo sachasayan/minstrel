@@ -37,21 +37,20 @@ const SYSTEM_PROMPT = `
  * Uses the LLM to critique a story based on its outline and full content.
  * Returns the parsed critique object or null if it fails.
  */
-export async function runCritique(
-  settings: AppSettings,
-  outlineContent: string,
-  storyContent: string
-): Promise<any | null> {
+export async function runCritique(settings: AppSettings, outlineContent: string, storyContent: string): Promise<any | null> {
   console.log('[criticAssistant] Starting story critique...')
   const prompt = `${SYSTEM_PROMPT}\n\n---\nOUTLINE:\n${outlineContent}\n\nSTORY CONTENT:\n${storyContent}`
 
   try {
     const raw = await llmService.generateContent(settings, prompt, 'high')
     console.log('[criticAssistant] Raw LLM response received.')
-    
+
     // Strip any accidental markdown fences before parsing
-    const cleaned = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim()
-    
+    const cleaned = raw
+      .replace(/^```[a-z]*\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .trim()
+
     const parsed = JSON.parse(cleaned)
     if (parsed.critique && parsed.analysis) {
       console.log('[criticAssistant] Critique successfully generated and parsed.')

@@ -59,19 +59,14 @@ app.whenReady().then(() => {
   if (is.dev) {
     // Native Electron extension loading to replace electron-devtools-installer
     // This avoids deprecation warnings and uses the modern session.extensions API.
-    const reduxDevToolsPath = join(
-      app.getPath('userData'),
-      'extensions/lmhkpmbekcpmknklioeibfkpmmfibljd'
-    )
+    const reduxDevToolsPath = join(app.getPath('userData'), 'extensions/lmhkpmbekcpmknklioeibfkpmmfibljd')
 
     session.defaultSession.extensions
       .loadExtension(reduxDevToolsPath, { allowFileAccess: true })
       .then((ext) => console.log(`Added Extension:  ${ext.name}`))
       .catch((err) => {
         if (err.message.includes('Extension cannot be loaded from')) {
-          console.warn(
-            'Redux DevTools not found locally. Please install it once via the library or manually to populate the directory.'
-          )
+          console.warn('Redux DevTools not found locally. Please install it once via the library or manually to populate the directory.')
         } else {
           console.error('An error occurred while loading Redux DevTools: ', err)
         }

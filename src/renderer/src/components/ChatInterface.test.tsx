@@ -36,14 +36,15 @@ describe('ChatInterface floating new-project controls', () => {
     await Promise.resolve()
   }
 
-  const createStore = () => configureStore({
-    reducer: {
-      appState: appStateReducer,
-      projects: projectsReducer,
-      chat: chatReducer,
-      settings: settingsReducer
-    }
-  })
+  const createStore = () =>
+    configureStore({
+      reducer: {
+        appState: appStateReducer,
+        projects: projectsReducer,
+        chat: chatReducer,
+        settings: settingsReducer
+      }
+    })
 
   beforeEach(() => {
     ;(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true

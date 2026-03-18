@@ -1,18 +1,9 @@
 import { Project, ProjectFragment, RecentProject } from '@/types'
 
-type RecentProjectSource = Pick<
-  ProjectFragment,
-  'projectPath' | 'title' | 'genre' | 'cover' | 'coverImageMimeType' | 'wordCountCurrent'
-> & Partial<Pick<Project, 'coverImageBase64'>>
+type RecentProjectSource = Pick<ProjectFragment, 'projectPath' | 'title' | 'genre' | 'cover' | 'coverImageMimeType' | 'wordCountCurrent'> & Partial<Pick<Project, 'coverImageBase64'>>
 
-export const buildRecentProjectEntry = (
-  source: RecentProjectSource,
-  lastOpenedAt = new Date().toISOString()
-): RecentProject => {
-  const cover =
-    source.coverImageBase64 && source.coverImageMimeType
-      ? `data:${source.coverImageMimeType};base64,${source.coverImageBase64}`
-      : source.cover
+export const buildRecentProjectEntry = (source: RecentProjectSource, lastOpenedAt = new Date().toISOString()): RecentProject => {
+  const cover = source.coverImageBase64 && source.coverImageMimeType ? `data:${source.coverImageMimeType};base64,${source.coverImageBase64}` : source.cover
 
   return {
     projectPath: source.projectPath,

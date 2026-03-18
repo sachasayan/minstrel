@@ -29,5 +29,4 @@ describe('promptsUtils', () => {
     expect(u.addCurrentSequence('P', 'S')).toContain('S')
     expect(u.addCurrentSequence('P', '')).toBe('P')
   })
-
 })

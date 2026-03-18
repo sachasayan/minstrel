@@ -6,30 +6,30 @@ const globals = require('globals')
 
 module.exports = tseslint.config(
   {
-    ignores: ['node_modules/', 'dist/', 'out/', 'mock-projects/', '.eslintrc.cjs'],
+    ignores: ['node_modules/', 'dist/', 'out/', 'mock-projects/', '.eslintrc.cjs']
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
     files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],
     plugins: {
-      react: reactPlugin,
+      react: reactPlugin
     },
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.node,
+        ...globals.node
       },
       parserOptions: {
         ecmaFeatures: {
-          jsx: true,
-        },
-      },
+          jsx: true
+        }
+      }
     },
     settings: {
       react: {
-        version: 'detect',
-      },
+        version: 'detect'
+      }
     },
     rules: {
       ...reactPlugin.configs.recommended.rules,
@@ -45,7 +45,7 @@ module.exports = tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       'react/react-in-jsx-scope': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-    },
+      '@typescript-eslint/ban-ts-comment': 'off'
+    }
   }
 )

@@ -12,7 +12,7 @@ Tools are called natively via the model's tool-calling capabilities. Do not use 
 You can use multiple tools in a single response.
 
 ${
-  (tools.includes('writeFile'))
+  tools.includes('writeFile')
     ? `
 ## writeFile
 * Writes content to the specified file.
@@ -26,7 +26,7 @@ ${
 }
 
 ${
-  (tools.includes('readFile'))
+  tools.includes('readFile')
     ? `
 ## readFile
 * Requests the full contents of the specified files.
@@ -38,7 +38,7 @@ ${
 }
 
 ${
-  (tools.includes('routeTo'))
+  tools.includes('routeTo')
     ? `
 ## routeTo
 * Routes the workflow to another agent when multi-agent mode is enabled.
@@ -49,7 +49,7 @@ ${
 }
 
 ${
-  (tools.includes('actionSuggestion'))
+  tools.includes('actionSuggestion')
     ? `
 ## actionSuggestion
 * Suggests up to 3 possible next steps for the user.

@@ -11,25 +11,27 @@ export interface HighlightRange {
  */
 export function stripMarkdown(md: string): string {
   if (!md) return ''
-  return md
-    .replace(/<!--\s*id:.*-->/g, '') // Remove chapter IDs
-    .replace(/^#+\s+/gm, '') // Headings
-    .replace(/\*\*(.*?)\*\*/g, '$1') // Bold **
-    .replace(/\*(.*?)\*/g, '$1') // Italic *
-    .replace(/__(.*?)__/g, '$1') // Bold __
-    .replace(/_(.*?)_/g, '$1') // Italic _
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Links [text](url)
-    .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // Code blocks and inline code
-    .replace(/^[ \t]*[*+-][ \t]+/gm, '') // List markers
-    .replace(/^[ \t]*>[ \t]+/gm, '') // Blockquotes
-    // Horizontal normalization
-    .replace(/[ \t]+/g, ' ')
-    .trim()
-    // Vertical normalization: exactly one blank line between non-empty lines
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .join('\n\n')
+  return (
+    md
+      .replace(/<!--\s*id:.*-->/g, '') // Remove chapter IDs
+      .replace(/^#+\s+/gm, '') // Headings
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Bold **
+      .replace(/\*(.*?)\*/g, '$1') // Italic *
+      .replace(/__(.*?)__/g, '$1') // Bold __
+      .replace(/_(.*?)_/g, '$1') // Italic _
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Links [text](url)
+      .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // Code blocks and inline code
+      .replace(/^[ \t]*[*+-][ \t]+/gm, '') // List markers
+      .replace(/^[ \t]*>[ \t]+/gm, '') // Blockquotes
+      // Horizontal normalization
+      .replace(/[ \t]+/g, ' ')
+      .trim()
+      // Vertical normalization: exactly one blank line between non-empty lines
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .join('\n\n')
+  )
 }
 
 /**
@@ -63,23 +65,25 @@ export function getAddedRanges(oldText: string, newText: string): HighlightRange
   let nextChar = 0x2400 // Start in a safe Unicode range
 
   function tokenize(segments: string[]): string {
-    return segments.map(seg => {
-      // Normalize segment for comparison (alphanumeric only)
-      const normalized = seg.toLowerCase().replace(/[^a-z0-9]/g, '')
-      if (!segmentToChar.has(normalized)) {
-        const char = String.fromCharCode(nextChar++)
-        segmentToChar.set(normalized, char)
-        charToSegment.set(char, seg)
-      }
-      return segmentToChar.get(normalized)
-    }).join('')
+    return segments
+      .map((seg) => {
+        // Normalize segment for comparison (alphanumeric only)
+        const normalized = seg.toLowerCase().replace(/[^a-z0-9]/g, '')
+        if (!segmentToChar.has(normalized)) {
+          const char = String.fromCharCode(nextChar++)
+          segmentToChar.set(normalized, char)
+          charToSegment.set(char, seg)
+        }
+        return segmentToChar.get(normalized)
+      })
+      .join('')
   }
 
   const oldTokenized = tokenize(oldSegments)
   const newTokenized = tokenize(newSegments)
 
   // 3. Perform diff
-  // We skip diffCleanupSemantic here because we want to preserve 
+  // We skip diffCleanupSemantic here because we want to preserve
   // our specific sentence boundaries exactly as tokenized.
   const diffs = diffMain(oldTokenized, newTokenized)
 

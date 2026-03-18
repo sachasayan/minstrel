@@ -24,34 +24,34 @@ projectListeners.startListening({
   matcher: isAnyOf(setActiveProjectFromFragment),
   // Explicitly type the action parameter
   effect: async (action: PayloadAction<ProjectFragment>, listenerApi) => {
-    const projectFragment = action.payload; // Now correctly typed as ProjectFragment
+    const projectFragment = action.payload // Now correctly typed as ProjectFragment
     if (!projectFragment?.projectPath) {
-        console.warn('setActiveProjectFromFragment listener triggered without a valid project fragment.')
-        return;
+      console.warn('setActiveProjectFromFragment listener triggered without a valid project fragment.')
+      return
     }
 
     try {
-        console.log(`Listener: Fetching full details for ${projectFragment.title}`)
-        // Fetch the full project details, which now includes chatHistory
-        const fullProject: Project | null = await fetchProjectDetails(projectFragment)
+      console.log(`Listener: Fetching full details for ${projectFragment.title}`)
+      // Fetch the full project details, which now includes chatHistory
+      const fullProject: Project | null = await fetchProjectDetails(projectFragment)
 
-        if (fullProject) {
-            console.log(`Listener: Dispatching setActiveProject for ${fullProject.title}`)
-            // Dispatch action to set the fully loaded project
-            listenerApi.dispatch(setActiveProject(fullProject))
+      if (fullProject) {
+        console.log(`Listener: Dispatching setActiveProject for ${fullProject.title}`)
+        // Dispatch action to set the fully loaded project
+        listenerApi.dispatch(setActiveProject(fullProject))
 
-            console.log(`Listener: Dispatching setChatHistory for ${fullProject.title}`)
-            // Dispatch action to set the chat history
-            listenerApi.dispatch(setChatHistory(fullProject.chatHistory ?? []))
-            listenerApi.dispatch(setActiveSection(resolveProjectSection(fullProject, fullProject.lastViewedSection)))
-            listenerApi.dispatch(setActiveView('project/editor'))
-        } else {
-             console.error(`Listener: Failed to fetch full project details for ${projectFragment.title}`)
-             // Optionally dispatch an error state or notification
-        }
-    } catch (error) {
-        console.error(`Listener: Error fetching project details or dispatching actions for ${projectFragment.title}:`, error)
+        console.log(`Listener: Dispatching setChatHistory for ${fullProject.title}`)
+        // Dispatch action to set the chat history
+        listenerApi.dispatch(setChatHistory(fullProject.chatHistory ?? []))
+        listenerApi.dispatch(setActiveSection(resolveProjectSection(fullProject, fullProject.lastViewedSection)))
+        listenerApi.dispatch(setActiveView('project/editor'))
+      } else {
+        console.error(`Listener: Failed to fetch full project details for ${projectFragment.title}`)
         // Optionally dispatch an error state or notification
+      }
+    } catch (error) {
+      console.error(`Listener: Error fetching project details or dispatching actions for ${projectFragment.title}:`, error)
+      // Optionally dispatch an error state or notification
     }
   }
 })

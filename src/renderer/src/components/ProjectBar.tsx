@@ -2,14 +2,7 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import { FileDown, Loader2, Save, X } from 'lucide-react'
-import {
-  selectActiveProject,
-  selectProjects,
-  setActiveProject,
-  setAllFilesAsSaved,
-  setProjectHasLiveEdits,
-  setProjectPath
-} from '@/lib/store/projectsSlice'
+import { selectActiveProject, selectProjects, setActiveProject, setAllFilesAsSaved, setProjectHasLiveEdits, setProjectPath } from '@/lib/store/projectsSlice'
 import { addRecentProject, selectSettingsState } from '@/lib/store/settingsSlice'
 import pdfService from '@/lib/services/pdfService'
 import PdfExportConfigModal, { PdfExportConfig } from '@/components/PdfExportConfigModal'
@@ -19,20 +12,10 @@ import { selectChatHistory } from '@/lib/store/chatSlice'
 import { saveProject, createSqliteProject } from '@/lib/services/fileService'
 import { selectAppState, setActiveView } from '@/lib/store/appStateSlice'
 import { bridge } from '@/lib/bridge'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { saveAppSettings } from '@/lib/services/settingsService'
 import { buildRecentProjectEntry } from '@/lib/recentProjects'
 import { Project } from '@/types'
-
 
 const ProjectBar = () => {
   const dispatch = useDispatch()
@@ -46,10 +29,7 @@ const ProjectBar = () => {
 
   const refreshRecentProjects = async (project: Project) => {
     const recentEntry = buildRecentProjectEntry(project)
-    const updatedRecents = [
-      recentEntry,
-      ...(settings.recentProjects ?? []).filter((recentProject) => recentProject.projectPath !== project.projectPath)
-    ].slice(0, 3)
+    const updatedRecents = [recentEntry, ...(settings.recentProjects ?? []).filter((recentProject) => recentProject.projectPath !== project.projectPath)].slice(0, 3)
 
     dispatch(addRecentProject(recentEntry))
     try {
@@ -127,7 +107,10 @@ const ProjectBar = () => {
 
       // 3. Derive the title from the chosen filename (no extension)
       const chosenFilename = chosenPath.split('/').pop() ?? 'untitled'
-      const titleFromFilename = chosenFilename.replace(/\.mns$/i, '').replace(/_/g, ' ').trim()
+      const titleFromFilename = chosenFilename
+        .replace(/\.mns$/i, '')
+        .replace(/_/g, ' ')
+        .trim()
 
       // 4. Build the project with the derived title + path, then persist
       const projectWithTitleAndPath = {
@@ -207,13 +190,7 @@ const ProjectBar = () => {
       <div className="flex items-center gap-1 rounded-full border bg-background/80 p-1 shadow-sm backdrop-blur-sm">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Save Project"
-              onClick={handleSave}
-              className="h-8 w-8 rounded-full"
-            >
+            <Button variant="ghost" size="icon" aria-label="Save Project" onClick={handleSave} className="h-8 w-8 rounded-full">
               <Save className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
@@ -222,30 +199,15 @@ const ProjectBar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Close Project"
-              onClick={handleCloseSafe}
-              className="h-8 w-8 rounded-full"
-            >
+            <Button variant="ghost" size="icon" aria-label="Close Project" onClick={handleCloseSafe} className="h-8 w-8 rounded-full">
               <X className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Close Project</TooltipContent>
         </Tooltip>
 
-        <PdfExportConfigModal
-          onExport={handleExportConfigured}
-          triggerTooltip="Export Project to PDF"
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Export Project to PDF"
-            disabled={isExporting}
-            className="h-8 w-8 rounded-full"
-          >
+        <PdfExportConfigModal onExport={handleExportConfigured} triggerTooltip="Export Project to PDF">
+          <Button variant="ghost" size="icon" aria-label="Export Project to PDF" disabled={isExporting} className="h-8 w-8 rounded-full">
             {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
           </Button>
         </PdfExportConfigModal>

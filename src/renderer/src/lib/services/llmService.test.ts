@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const {
-  generateTextMock,
-  streamTextMock,
-  googleFactoryMock,
-  openAiFactoryMock
-} = vi.hoisted(() => ({
+const { generateTextMock, streamTextMock, googleFactoryMock, openAiFactoryMock } = vi.hoisted(() => ({
   generateTextMock: vi.fn(),
   streamTextMock: vi.fn(),
   googleFactoryMock: vi.fn(),
@@ -49,13 +44,7 @@ describe('llmService', () => {
     }
     const tools = { writeFile: { description: 'Write', inputSchema: {}, execute: vi.fn() } }
 
-    const result = await service.generateTextWithTools(
-      settings as any,
-      'system prompt',
-      'user prompt',
-      tools,
-      'high'
-    )
+    const result = await service.generateTextWithTools(settings as any, 'system prompt', 'user prompt', tools, 'high')
 
     expect(openAiFactoryMock).toHaveBeenCalledWith({ apiKey: 'openai-key' })
     expect(provider).toHaveBeenCalledWith('gpt-4o')
@@ -73,14 +62,17 @@ describe('llmService', () => {
     const provider = vi.fn().mockReturnValue(model)
     googleFactoryMock.mockReturnValue(provider)
 
-    const { model: selectedModel, provider: selectedProvider, selectedModelId } =
-      service.getProviderAndModel(
-        {
-          provider: 'google',
-          googleApiKey: 'google-key'
-        } as any,
-        'low'
-      )
+    const {
+      model: selectedModel,
+      provider: selectedProvider,
+      selectedModelId
+    } = service.getProviderAndModel(
+      {
+        provider: 'google',
+        googleApiKey: 'google-key'
+      } as any,
+      'low'
+    )
 
     expect(googleFactoryMock).toHaveBeenCalledWith({ apiKey: 'google-key' })
     expect(provider).toHaveBeenCalledWith('gemini-3-flash-preview')
@@ -121,12 +113,7 @@ describe('llmService', () => {
     const messages = [{ role: 'user', content: 'Continue' }]
     const tools = { routeTo: { description: 'Route', inputSchema: {}, execute: vi.fn() } }
 
-    const result = await service.streamTextWithTools(
-      settings as any,
-      'system',
-      messages as any,
-      tools
-    )
+    const result = await service.streamTextWithTools(settings as any, 'system', messages as any, tools)
 
     expect(provider).toHaveBeenCalledWith('gpt-4o-mini')
     expect(streamTextMock).toHaveBeenCalledWith({

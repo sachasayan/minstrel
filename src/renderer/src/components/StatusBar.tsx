@@ -29,12 +29,7 @@ const StatusBar = ({ floating = true }: StatusBarProps) => {
 
   return (
     <>
-      <div
-        className={cn(
-          'bg-background/80 flex items-center gap-1 rounded-full border p-1 backdrop-blur-sm',
-          floating && 'fixed top-4 right-4 z-50 shadow-sm'
-        )}
-      >
+      <div className={cn('bg-background/80 flex items-center gap-1 rounded-full border p-1 backdrop-blur-sm', floating && 'fixed top-4 right-4 z-50 shadow-sm')}>
         <div
           className={cn('mx-2 h-2.5 w-2.5 rounded-full', isOnline ? 'bg-green-500' : 'bg-red-500')}
           role="status"
@@ -44,13 +39,7 @@ const StatusBar = ({ floating = true }: StatusBarProps) => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label={themeLabel}
-              className="h-8 w-8 rounded-full"
-            >
+            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={themeLabel} className="h-8 w-8 rounded-full">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
@@ -59,13 +48,7 @@ const StatusBar = ({ floating = true }: StatusBarProps) => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSettingsOpen(true)}
-              aria-label="Settings"
-              className="h-8 w-8 rounded-full"
-            >
+            <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} aria-label="Settings" className="h-8 w-8 rounded-full">
               <Settings className="h-4 w-4" />
             </Button>
           </TooltipTrigger>

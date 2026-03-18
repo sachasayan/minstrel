@@ -40,8 +40,8 @@ export default function App(): ReactNode {
       const appSettings = await bridge.getAppSettings()
       dispatch(setSettingsState(appSettings || {})) // Dispatch loaded settings or empty object
     } catch (error) {
-      console.error("Failed to load settings in App:", error);
-      setLoadError("Failed to load application settings. Please check your configuration and try again.")
+      console.error('Failed to load settings in App:', error)
+      setLoadError('Failed to load application settings. Please check your configuration and try again.')
     } finally {
       setHasLoaded(true)
     }
@@ -55,16 +55,14 @@ export default function App(): ReactNode {
       case 'project/parameters':
       case 'project/editor':
         // Ensure activeProject exists before rendering ProjectOverview
-        return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro />; // Fallback to Intro if no project
+        return activeProject ? <ProjectOverview key={activeProject.projectPath} /> : <Intro /> // Fallback to Intro if no project
 
       default:
         return <Intro />
     }
   }
 
-  const routeKey = activeView.startsWith('project/')
-    ? `${activeView}:${activeProject?.projectPath || 'new-project'}`
-    : activeView
+  const routeKey = activeView.startsWith('project/') ? `${activeView}:${activeProject?.projectPath || 'new-project'}` : activeView
 
   // Load settings on first boot
   useEffect(() => {

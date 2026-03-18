@@ -1,10 +1,7 @@
 import { ProjectFragment, Project, ProjectFile } from '@/types'
 import { loadSqliteProject, saveSqliteProject, initSqliteProject } from './sqliteService'
 import { bridge } from '@/lib/bridge'
-import {
-  buildPersistableProject,
-  normalizeProjectStoryContent
-} from '@/lib/storyContent'
+import { buildPersistableProject, normalizeProjectStoryContent } from '@/lib/storyContent'
 
 export function decodeHtmlEntities(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html')
@@ -156,11 +153,7 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
     // console.log(projectFiles)
     const parsedFiles = projectFiles.map((item) => {
       const normalizedName = item.name.trim()
-      const fileType = normalizedName.toLowerCase().includes('outline')
-        ? 'outline'
-        : normalizedName.toLowerCase().includes('chapter')
-          ? 'chapter'
-          : 'unknown'
+      const fileType = normalizedName.toLowerCase().includes('outline') ? 'outline' : normalizedName.toLowerCase().includes('chapter') ? 'chapter' : 'unknown'
       return {
         title: normalizedName,
         content: item.content,
@@ -169,10 +162,12 @@ export const fetchProjectDetails = async (projectFragment: ProjectFragment): Pro
       } as ProjectFile
     })
 
-    const storyContent = metadata.storyContent || parsedFiles
-      .filter(f => f.type === 'chapter' || f.title.toLowerCase().startsWith('chapter'))
-      .map(f => `# ${f.title}\n\n${f.content}`)
-      .join('\n\n')
+    const storyContent =
+      metadata.storyContent ||
+      parsedFiles
+        .filter((f) => f.type === 'chapter' || f.title.toLowerCase().startsWith('chapter'))
+        .map((f) => `# ${f.title}\n\n${f.content}`)
+        .join('\n\n')
 
     // Construct the Project object for MD files (no cover/chat support here)
     const project = {

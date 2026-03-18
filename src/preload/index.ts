@@ -9,15 +9,12 @@ const api = {
   readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
   writeFile: (filePath: string, content: string) => ipcRenderer.invoke('write-file', filePath, content),
   makeDirectory: (dirPath: string) => ipcRenderer.invoke('make-directory', dirPath),
-  selectDirectory: (operation: SelectDirectoryOperation) =>
-    ipcRenderer.invoke('select-directory', operation),
+  selectDirectory: (operation: SelectDirectoryOperation) => ipcRenderer.invoke('select-directory', operation),
   deleteFile: (filePath: string) => ipcRenderer.invoke('delete-file', filePath),
   showSaveDialog: (options: SaveDialogOptions) => ipcRenderer.invoke('show-save-dialog', options),
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
-  initSqliteProject: (filePath: string, metadata: unknown) =>
-    ipcRenderer.invoke('init-sqlite-project', filePath, metadata),
-  saveSqliteProject: (filePath: string, project: unknown) =>
-    ipcRenderer.invoke('save-sqlite-project', filePath, project),
+  initSqliteProject: (filePath: string, metadata: unknown) => ipcRenderer.invoke('init-sqlite-project', filePath, metadata),
+  saveSqliteProject: (filePath: string, project: unknown) => ipcRenderer.invoke('save-sqlite-project', filePath, project),
   getSqliteProjectMeta: (filePath: string) => ipcRenderer.invoke('get-sqlite-project-meta', filePath),
   getSqliteProjectsMeta: (filePaths: string[]) => ipcRenderer.invoke('get-sqlite-projects-meta', filePaths),
   loadSqliteProject: (filePath: string) => ipcRenderer.invoke('load-sqlite-project', filePath),

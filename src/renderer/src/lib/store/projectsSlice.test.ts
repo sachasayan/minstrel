@@ -80,8 +80,8 @@ describe('projectsSlice', () => {
     const content = actual.activeProject?.storyContent ?? ''
     // Split by H1 headings to isolate each chapter's section
     const splitResult = content.split(/^#\s+/m).filter(Boolean)
-    const ch1Section = splitResult.find(s => s.toLowerCase().includes('chapter 1')) ?? ''
-    const ch2Section = splitResult.find(s => s.toLowerCase().includes('chapter 2')) ?? ''
+    const ch1Section = splitResult.find((s) => s.toLowerCase().includes('chapter 1')) ?? ''
+    const ch2Section = splitResult.find((s) => s.toLowerCase().includes('chapter 2')) ?? ''
     // Chapter 1 should have been updated
     expect(ch1Section).toContain('New Body')
     expect(ch1Section).not.toContain('Old')
@@ -108,20 +108,14 @@ describe('projectsSlice', () => {
         ...initialState,
         activeProject: { title: 'Old Title', projectPath: '', files: [], storyContent: '' } as any
       }
-      const actual = reducer(
-        stateWithProject,
-        setProjectPath({ title: 'My Novel', projectPath: '/projects/my-novel.mns' })
-      )
+      const actual = reducer(stateWithProject, setProjectPath({ title: 'My Novel', projectPath: '/projects/my-novel.mns' }))
       expect(actual.activeProject?.title).toBe('My Novel')
       expect(actual.activeProject?.projectPath).toBe('/projects/my-novel.mns')
       expect(actual.projectHasLiveEdits).toBe(true)
     })
 
     it('should be a no-op when activeProject is null', () => {
-      const actual = reducer(
-        initialState,
-        setProjectPath({ title: 'X', projectPath: '/x.mns' })
-      )
+      const actual = reducer(initialState, setProjectPath({ title: 'X', projectPath: '/x.mns' }))
       expect(actual.activeProject).toBeNull()
     })
   })

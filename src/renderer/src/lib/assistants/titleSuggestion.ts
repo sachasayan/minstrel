@@ -11,10 +11,7 @@ Example format: ["🌙 Title One", "⚔️ Title Two", ...]`
  * Uses the LLM to suggest 12 title options for a story based on its outline.
  * Returns an empty array if the LLM call fails or the outline is missing.
  */
-export async function suggestTitles(
-  settings: AppSettings,
-  outlineContent: string
-): Promise<string[]> {
+export async function suggestTitles(settings: AppSettings, outlineContent: string): Promise<string[]> {
   if (!outlineContent?.trim()) return []
 
   const prompt = `${SYSTEM_PROMPT}\n\n---\nOUTLINE:\n${outlineContent}`
@@ -23,7 +20,10 @@ export async function suggestTitles(
     const raw = await llmService.generateContent(settings, prompt, 'low')
     console.log('[titleSuggestion] Raw LLM response:', raw)
     // Strip any accidental markdown fences before parsing
-    const cleaned = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim()
+    const cleaned = raw
+      .replace(/^```[a-z]*\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .trim()
     console.log('[titleSuggestion] Cleaned for parse:', cleaned)
     const parsed = JSON.parse(cleaned)
     if (Array.isArray(parsed) && parsed.every((t) => typeof t === 'string')) {

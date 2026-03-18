@@ -12,11 +12,7 @@ interface TraceExporter {
   export(spans: OtelSpan[]): Promise<TraceExportResult>
 }
 
-type OtlpAttributeValue =
-  | { stringValue: string }
-  | { boolValue: boolean }
-  | { intValue: string }
-  | { doubleValue: number }
+type OtlpAttributeValue = { stringValue: string } | { boolValue: boolean } | { intValue: string } | { doubleValue: number }
 
 interface ExportTraceServiceResponse {
   partialSuccess?: {
@@ -196,8 +192,7 @@ export const exportTraceSpans = async (spans: OtelSpan[]) => {
   return exporter.export(Array.isArray(spans) ? spans : [])
 }
 
-const handleExportAgentTrace = async (_event: Electron.IpcMainInvokeEvent, spans: OtelSpan[]) =>
-  exportTraceSpans(spans)
+const handleExportAgentTrace = async (_event: Electron.IpcMainInvokeEvent, spans: OtelSpan[]) => exportTraceSpans(spans)
 
 export const registerTraceExportHandlers = () => {
   ipcMain.handle('export-agent-trace', handleExportAgentTrace)

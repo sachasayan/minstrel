@@ -8,9 +8,7 @@ import { PromptData } from '@/lib/prompts/types'
 import { toast } from 'sonner'
 import { RequestContext, AppSettings } from '@/types'
 import { AppDispatch, store } from '@/lib/store/store'
-import {
-  handleMessage,
-} from './toolHandlers'
+import { handleMessage } from './toolHandlers'
 import { createTools } from './toolRegistry'
 import { streamingService } from './streamingService'
 import { agentTraceService } from './agentTraceService'
@@ -19,8 +17,7 @@ import { bridge } from '@/lib/bridge'
 const DEBOUNCE_TIME = 5000 // 5 seconds
 const MAX_STEPS = 6
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-const DEFAULT_CONTINUATION_MESSAGE =
-  "I've updated the draft. Next I’d focus on tightening the outline, expanding the current chapter, or planning the next scene. What should we tackle next?"
+const DEFAULT_CONTINUATION_MESSAGE = "I've updated the draft. Next I’d focus on tightening the outline, expanding the current chapter, or planning the next scene. What should we tackle next?"
 const buildMissingFilesMessage = (missingFiles: string[]) =>
   `I couldn't continue safely because I didn't receive all of the files I asked for: ${missingFiles.join(', ')}. I'm stopping here instead of guessing. Please try again after those files are available.`
 
@@ -32,21 +29,13 @@ let currentRequestToken = 0
 
 const getActiveProjectPath = (): string | null => store.getState().projects.activeProject?.projectPath ?? null
 const isCurrentRequestToken = (requestToken: number): boolean => currentRequestToken === requestToken
-const isRequestProjectActive = (requestToken: number, projectPath: string | null): boolean =>
-  isCurrentRequestToken(requestToken) && getActiveProjectPath() === projectPath
+const isRequestProjectActive = (requestToken: number, projectPath: string | null): boolean => isCurrentRequestToken(requestToken) && getActiveProjectPath() === projectPath
 const getUserMessageFromHistory = (promptData: PromptData, initialContext: RequestContext) =>
   [...promptData.chatHistory].reverse().find((message) => message.sender === 'User')?.text ?? initialContext.message
-const getSelectedModelId = (
-  settings: AppSettings,
-  provider: string,
-  modelPreference: 'high' | 'low'
-) => {
-  const explicitModelId =
-    modelPreference === 'high' ? settings.highPreferenceModelId : settings.lowPreferenceModelId
+const getSelectedModelId = (settings: AppSettings, provider: string, modelPreference: 'high' | 'low') => {
+  const explicitModelId = modelPreference === 'high' ? settings.highPreferenceModelId : settings.lowPreferenceModelId
   if (explicitModelId) return explicitModelId
-  return typeof geminiService.getDefaultModelId === 'function'
-    ? geminiService.getDefaultModelId(provider, modelPreference)
-    : undefined
+  return typeof geminiService.getDefaultModelId === 'function' ? geminiService.getDefaultModelId(provider, modelPreference) : undefined
 }
 
 export const cancelActiveChatRequest = (reason = 'request canceled') => {
@@ -63,18 +52,13 @@ export const initializeGeminiService = () => {
  * Main entry point for sending a chat message.
  * Orchestrates the story agent in an iterative loop.
  */
-export const sendMessage = async (
-  initialContext: RequestContext,
-  promptData: PromptData,
-  settings: AppSettings,
-  dispatch: AppDispatch
-) => {
+export const sendMessage = async (initialContext: RequestContext, promptData: PromptData, settings: AppSettings, dispatch: AppDispatch) => {
   // Cancel any existing loop if a new message arrives
   if (currentAbortController) {
     console.log('Aborting previous agent loop...')
     currentAbortController.abort()
   }
-  
+
   currentAbortController = new AbortController()
   const signal = currentAbortController.signal
   const requestToken = ++currentRequestToken
@@ -204,22 +188,14 @@ export const sendMessage = async (
       })
 
       // Filter tools to only include those allowed for the current agent
-      const activeTools = Object.fromEntries(
-        Object.entries(toolkit).filter(([name]) => allowedTools.includes(name))
-      )
+      const activeTools = Object.fromEntries(Object.entries(toolkit).filter(([name]) => allowedTools.includes(name)))
 
       let finalText = ''
       let finalCalls: any[] = []
       try {
         agentTraceService.startLlmCall(traceId, stepId, provider, selectedModelId)
-        const stream = await geminiService.streamTextWithTools(
-          liveSettings,
-          system,
-          messages,
-          activeTools,
-          modelPreference
-        )
-        
+        const stream = await geminiService.streamTextWithTools(liveSettings, system, messages, activeTools, modelPreference)
+
         if (!requestStillActive()) break
         streamingService.updateStatus('Minstrel is thinking...')
 
@@ -244,16 +220,16 @@ export const sendMessage = async (
           }
           finalText += textPart
           agentTraceService.appendStreamText(traceId, stepId, textPart)
-          
+
           // Heuristic: if we already see large content that looks like a file write, stop streaming text to UI
-          const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis');
-          const isWritingLargeContent = (finalText.length > 500 && hasHeading);
-          const isLikelyInternalTask = true;
-          
+          const hasHeading = /^#\s+.+/m.test(finalText) || finalText.includes('## Synopsis')
+          const isWritingLargeContent = finalText.length > 500 && hasHeading
+          const isLikelyInternalTask = true
+
           if (isWritingLargeContent && isLikelyInternalTask) {
-             streamingService.updateText("Writing changes to story...")
+            streamingService.updateText('Writing changes to story...')
           } else {
-             streamingService.updateText(finalText)
+            streamingService.updateText(finalText)
           }
         }
 
@@ -271,7 +247,6 @@ export const sendMessage = async (
           finalCalls = []
         }
         agentTraceService.finishLlmCall(traceId, stepId, { status: 'success' })
-        
       } catch (error: any) {
         agentTraceService.finishLlmCall(traceId, stepId, {
           status: 'error',
@@ -312,17 +287,17 @@ export const sendMessage = async (
       let outputSuppressed = false
       if (finalText && finalText.trim().length > 0) {
         // Prevent leaking giant edits into chat if a tool call already handled it
-        const wasWriteAction = finalCalls.some(c => c.toolName === 'writeFile' || c.toolName === 'updateChapter');
-        const isVeryLarge = finalText.length > 1000;
-        
+        const wasWriteAction = finalCalls.some((c) => c.toolName === 'writeFile' || c.toolName === 'updateChapter')
+        const isVeryLarge = finalText.length > 1000
+
         if (wasWriteAction && isVeryLarge) {
-           console.log('Skipping chat message addition as it looks like a redundant large file write.');
-           displayedText = "I've updated the content as requested."
-           outputSuppressed = true
-           handleMessage(displayedText, dispatchIfProjectActive as AppDispatch);
+          console.log('Skipping chat message addition as it looks like a redundant large file write.')
+          displayedText = "I've updated the content as requested."
+          outputSuppressed = true
+          handleMessage(displayedText, dispatchIfProjectActive as AppDispatch)
         } else {
-           displayedText = finalText.trim()
-           handleMessage(displayedText, dispatchIfProjectActive as AppDispatch);
+          displayedText = finalText.trim()
+          handleMessage(displayedText, dispatchIfProjectActive as AppDispatch)
         }
       } else if (finalCalls.some((call) => call.toolName === 'writeFile')) {
         displayedText = DEFAULT_CONTINUATION_MESSAGE
@@ -363,7 +338,6 @@ export const sendMessage = async (
       traceStatus = 'max_steps'
       traceErrorMessage = errorMsg
     }
-
   } catch (error) {
     if (signal.aborted) {
       traceStatus = inactiveReason
@@ -380,7 +354,7 @@ export const sendMessage = async (
       dispatch(setPendingFiles(null))
       dispatch(resolvePendingChat())
     }
-    
+
     if (isCurrentRequestToken(requestToken) && currentAbortController?.signal === signal) {
       currentAbortController = null
     }
@@ -430,18 +404,17 @@ Return the suggestions as action suggestions.
 
   try {
     const state = store.getState()
-    const result = await geminiService.generateTextWithTools(
-      state.settings,
-      prompt,
-      '',
-      { actionSuggestion: suggestionTool },
-      'low'
-    )
-    const suggestionCall = (result.toolCalls as any[]).find(tc => tc.toolName === 'actionSuggestion')
+    const result = await geminiService.generateTextWithTools(state.settings, prompt, '', { actionSuggestion: suggestionTool }, 'low')
+    const suggestionCall = (result.toolCalls as any[]).find((tc) => tc.toolName === 'actionSuggestion')
     const raw = (suggestionCall?.args as any)?.suggestions ?? ''
     return typeof raw === 'string'
-      ? raw.split(',').map(s => s.trim()).filter(Boolean)
-      : Array.isArray(raw) ? raw : []
+      ? raw
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : Array.isArray(raw)
+        ? raw
+        : []
   } catch (error) {
     console.error('Failed to generate title suggestions:', error)
     toast.error('Failed to generate title suggestions. Please try entering one manually.')

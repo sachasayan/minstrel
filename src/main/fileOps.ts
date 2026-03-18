@@ -1,11 +1,6 @@
 import { dialog, ipcMain, IpcMainInvokeEvent, OpenDialogOptions, SaveDialogOptions } from 'electron'
 import * as fs from 'fs/promises'
-import {
-  approveDirectoryPath,
-  approveFilePath,
-  assertPathAuthorized,
-  normalizeUserPath
-} from './pathAccess'
+import { approveDirectoryPath, approveFilePath, assertPathAuthorized, normalizeUserPath } from './pathAccess'
 
 export const handleReadDirectory = async (_event: IpcMainInvokeEvent, dirPath: string) => {
   try {
@@ -32,11 +27,7 @@ export const handleReadFile = async (_event: IpcMainInvokeEvent, filePath: strin
   }
 }
 
-export const handleWriteFile = async (
-  _event: IpcMainInvokeEvent,
-  filePath: string,
-  content: string
-) => {
+export const handleWriteFile = async (_event: IpcMainInvokeEvent, filePath: string, content: string) => {
   try {
     const resolvedPath = assertPathAuthorized(filePath, 'write-file')
     console.log('Writing file to:', resolvedPath)
@@ -52,14 +43,9 @@ export const handleSelectDirectory = async (_event: IpcMainInvokeEvent, operatio
   const isExport = operation === 'export'
   const isSave = operation === 'save'
 
-  const properties: OpenDialogOptions['properties'] =
-    isExport || isSave ? ['openDirectory', 'createDirectory'] : ['openDirectory']
+  const properties: OpenDialogOptions['properties'] = isExport || isSave ? ['openDirectory', 'createDirectory'] : ['openDirectory']
 
-  const title = isExport
-    ? 'Choose export folder'
-    : isSave
-      ? 'Choose where to save your project'
-      : 'Select folder'
+  const title = isExport ? 'Choose export folder' : isSave ? 'Choose where to save your project' : 'Select folder'
 
   const result = await dialog.showOpenDialog({
     title,
@@ -105,10 +91,7 @@ export const handleDeleteFile = async (_event: IpcMainInvokeEvent, filePath: str
   }
 }
 
-export const handleShowSaveDialog = async (
-  _event: IpcMainInvokeEvent,
-  options: SaveDialogOptions
-) => {
+export const handleShowSaveDialog = async (_event: IpcMainInvokeEvent, options: SaveDialogOptions) => {
   const result = await dialog.showSaveDialog(options)
   if (result.canceled || !result.filePath) {
     return null

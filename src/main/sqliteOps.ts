@@ -17,9 +17,7 @@ const isStoryFileRecord = (file: { title?: string | null; type?: string | null }
   return file.type === 'story' || file.title === 'Story'
 }
 
-const serializeLegacyChapters = (
-  chapterFiles: Array<{ title?: string | null; content?: string | null }>
-): string => {
+const serializeLegacyChapters = (chapterFiles: Array<{ title?: string | null; content?: string | null }>): string => {
   if (!Array.isArray(chapterFiles) || chapterFiles.length === 0) {
     return '# Chapter 1\n\n'
   }
@@ -376,13 +374,13 @@ export const handleLoadSqliteProject = async (_event, filePath: string) => {
     const legacyChapterFiles = projectFiles.filter((file) => isChapterFileRecord(file))
     const storyFile = projectFiles.find((file) => isStoryFileRecord(file))
     const nonChapterFiles = projectFiles.filter((file) => !isChapterFileRecord(file) && !isStoryFileRecord(file))
-    
-    const storyContent = 
-       (projectMetadata.storyContent && projectMetadata.storyContent.trim().length > 0)
-       ? projectMetadata.storyContent
-       : (storyFile?.content && storyFile.content.trim().length > 0)
-         ? storyFile.content
-         : serializeLegacyChapters(legacyChapterFiles)
+
+    const storyContent =
+      projectMetadata.storyContent && projectMetadata.storyContent.trim().length > 0
+        ? projectMetadata.storyContent
+        : storyFile?.content && storyFile.content.trim().length > 0
+          ? storyFile.content
+          : serializeLegacyChapters(legacyChapterFiles)
 
     const loadedProject = {
       // Spread required ProjectFragment fields first

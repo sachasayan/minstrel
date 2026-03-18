@@ -1,11 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AppSettings, RecentProject } from '@/types'
 import { RootState } from '@/lib/store/store'
-import {
-  DEFAULT_HIGH_PREFERENCE_MODEL_ID,
-  DEFAULT_LOW_PREFERENCE_MODEL_ID,
-  DEFAULT_PROVIDER
-} from '@shared/constants'
+import { DEFAULT_HIGH_PREFERENCE_MODEL_ID, DEFAULT_LOW_PREFERENCE_MODEL_ID, DEFAULT_PROVIDER } from '@shared/constants'
 
 const initialState: AppSettings = {
   workingRootDirectory: null, // Match default type in settingsManager
@@ -82,9 +78,7 @@ export const settingsSlice = createSlice({
       const MAX_RECENT = 3
       const incoming = action.payload
       // Remove any existing entry for the same path, then prepend, then trim
-      const filtered = (state.recentProjects ?? []).filter(
-        (p) => p.projectPath !== incoming.projectPath
-      )
+      const filtered = (state.recentProjects ?? []).filter((p) => p.projectPath !== incoming.projectPath)
       state.recentProjects = [incoming, ...filtered].slice(0, MAX_RECENT)
     }
   }

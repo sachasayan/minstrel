@@ -15,17 +15,11 @@ export const makeChapterSection = (title: string, index: number, chapterId?: str
   chapterId
 })
 
-export const isOverviewSection = (section: ActiveSection): section is { kind: 'overview' } =>
-  section?.kind === 'overview'
+export const isOverviewSection = (section: ActiveSection): section is { kind: 'overview' } => section?.kind === 'overview'
 
-export const isChapterSection = (
-  section: ActiveSection
-): section is { kind: 'chapter'; title: string; index: number; chapterId?: string } =>
-  section?.kind === 'chapter'
+export const isChapterSection = (section: ActiveSection): section is { kind: 'chapter'; title: string; index: number; chapterId?: string } => section?.kind === 'chapter'
 
-export const isArtifactSection = (
-  section: ActiveSection
-): section is { kind: 'artifact'; title: string } => section?.kind === 'artifact'
+export const isArtifactSection = (section: ActiveSection): section is { kind: 'artifact'; title: string } => section?.kind === 'artifact'
 
 export const activeSectionKey = (section: ActiveSection): string => {
   if (!section) return 'none'
@@ -43,10 +37,7 @@ export const findDefaultProjectSection = (project: Project | undefined | null): 
   return makeChapterSection(chapters[0].title, 0, chapters[0].id)
 }
 
-export const resolveProjectSection = (
-  project: Project | undefined | null,
-  savedSection: ActiveSection | undefined | null
-): ActiveSection => {
+export const resolveProjectSection = (project: Project | undefined | null, savedSection: ActiveSection | undefined | null): ActiveSection => {
   const fallback = findDefaultProjectSection(project)
 
   if (!savedSection) return fallback
@@ -65,16 +56,9 @@ export const resolveProjectSection = (
   const chapters = getChaptersFromStoryContent(project?.storyContent ?? '')
   if (chapters.length === 0) return fallback
 
-  const matchedChapter =
-    (savedSection.chapterId
-      ? chapters.find((chapter) => chapter.id === savedSection.chapterId)
-      : undefined) ?? chapters[savedSection.index]
+  const matchedChapter = (savedSection.chapterId ? chapters.find((chapter) => chapter.id === savedSection.chapterId) : undefined) ?? chapters[savedSection.index]
 
   if (!matchedChapter) return fallback
 
-  return makeChapterSection(
-    matchedChapter.title,
-    matchedChapter.index,
-    matchedChapter.id
-  )
+  return makeChapterSection(matchedChapter.title, matchedChapter.index, matchedChapter.id)
 }

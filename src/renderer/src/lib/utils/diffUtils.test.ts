@@ -43,7 +43,7 @@ describe('diffUtils', () => {
       const oldText = 'The quick brown fox. It jumped over the lazy dog.'
       const newText = 'The quick brown fox. It was very agile. It jumped over the lazy dog.'
       const ranges = getAddedRanges(oldText, newText)
-      
+
       expect(ranges).toHaveLength(1)
       const addedText = newText.substring(ranges[0].start, ranges[0].end)
       // Our segmenter includes trailing whitespace in the segment
@@ -54,7 +54,7 @@ describe('diffUtils', () => {
       const oldText = 'The end.'
       const newText = 'The beginning. The end.'
       const ranges = getAddedRanges(oldText, newText)
-      
+
       expect(ranges).toHaveLength(1)
       expect(newText.substring(ranges[0].start, ranges[0].end).trim()).toBe('The beginning.')
     })
@@ -77,7 +77,7 @@ describe('diffUtils', () => {
       const oldText = 'Sentence A. Sentence B.'
       const newText = 'Sentence B. Sentence A.'
       const ranges = getAddedRanges(oldText, newText)
-      
+
       expect(ranges.length).toBeGreaterThan(0)
       const highlight = newText.substring(ranges[0].start, ranges[0].end).trim()
       expect(['Sentence A.', 'Sentence B.']).toContain(highlight)
@@ -87,7 +87,7 @@ describe('diffUtils', () => {
       const oldText = 'Start. End.'
       const newText = 'Start. Middle 1. Middle 2. End. Postscript.'
       const ranges = getAddedRanges(oldText, newText)
-      
+
       // Should find " Middle 1. Middle 2. " and " Postscript."
       expect(ranges).toHaveLength(2)
       expect(newText.substring(ranges[0].start, ranges[0].end).trim()).toBe('Middle 1. Middle 2.')
@@ -98,7 +98,7 @@ describe('diffUtils', () => {
       const oldText = 'Ancient history.'
       const newText = 'A brand new story starts here.'
       const ranges = getAddedRanges(oldText, newText)
-      
+
       expect(ranges).toHaveLength(1)
       expect(newText.substring(ranges[0].start, ranges[0].end).trim()).toBe('A brand new story starts here.')
     })

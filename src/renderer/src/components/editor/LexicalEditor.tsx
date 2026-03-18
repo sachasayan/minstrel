@@ -17,7 +17,7 @@ import { ChapterHeadingNode, $createChapterHeadingNode, $isChapterHeadingNode } 
 
 // @lexical/code depends on Prism being available globally
 if (typeof window !== 'undefined') {
-    (window as any).Prism = Prism
+  ;(window as any).Prism = Prism
 }
 
 import { theme } from './EditorTheme'
@@ -30,142 +30,106 @@ import { ElementTransformer } from '@lexical/markdown'
 import { ActiveSection } from '@/types'
 
 const CHAPTER_HEADING_TRANSFORMER: ElementTransformer = {
-    dependencies: [ChapterHeadingNode],
-    export: (node) => {
-        if (!$isChapterHeadingNode(node)) {
-            return null
+  dependencies: [ChapterHeadingNode],
+  export: (node) => {
+    if (!$isChapterHeadingNode(node)) {
+      return null
+    }
+    const tag = node.getTag()
+    const id = node.getChapterId()
+    const text = node.getTextContent()
+
+    const level = parseInt(tag.replace('h', ''))
+    const prefix = '#'.repeat(level)
+
+    // Only H1 headers are treated as chapters with IDs
+    if (tag === 'h1') {
+      return `${prefix} ${text}${id ? ` <!-- id: ${id} -->` : ''}`
+    }
+
+    return `${prefix} ${text}`
+  },
+  regExp: /^(#{1,6})\s/,
+  replace: (parentNode, children, match) => {
+    const level = match[1].length
+    const tag = ('h' + level) as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+
+    let id: string | undefined = undefined
+
+    // Try to find and extract ID from children
+    if (tag === 'h1' && children.length > 0) {
+      const lastChild = children[children.length - 1]
+      if (lastChild instanceof TextNode) {
+        const text = lastChild.getTextContent()
+        const idMatch = text.match(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
+        if (idMatch) {
+          id = idMatch[1]
+          const cleanedText = text.replace(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/, '').trim()
+          if (cleanedText) {
+            lastChild.setTextContent(cleanedText)
+          } else {
+            children.pop()
+          }
         }
-        const tag = node.getTag()
-        const id = node.getChapterId()
-        const text = node.getTextContent()
+      }
+    }
 
-        const level = parseInt(tag.replace('h', ''))
-        const prefix = '#'.repeat(level)
-
-        // Only H1 headers are treated as chapters with IDs
-        if (tag === 'h1') {
-            return `${prefix} ${text}${id ? ` <!-- id: ${id} -->` : ''}`
-        }
-
-        return `${prefix} ${text}`
-    },
-    regExp: /^(#{1,6})\s/,
-    replace: (parentNode, children, match) => {
-        const level = match[1].length
-        const tag = ('h' + level) as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-
-        let id: string | undefined = undefined
-
-        // Try to find and extract ID from children
-        if (tag === 'h1' && children.length > 0) {
-            const lastChild = children[children.length - 1]
-            if (lastChild instanceof TextNode) {
-                const text = lastChild.getTextContent()
-                const idMatch = text.match(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/)
-                if (idMatch) {
-                    id = idMatch[1]
-                    const cleanedText = text.replace(/<!--\s*id:\s*([a-zA-Z0-9-]+)\s*-->/, '').trim()
-                    if (cleanedText) {
-                        lastChild.setTextContent(cleanedText)
-                    } else {
-                        children.pop()
-                    }
-                }
-            }
-        }
-
-        const node = $createChapterHeadingNode(tag, id)
-        node.append(...children)
-        parentNode.replace(node)
-    },
-    type: 'element',
+    const node = $createChapterHeadingNode(tag, id)
+    node.append(...children)
+    parentNode.replace(node)
+  },
+  type: 'element'
 }
 
 // Filter out standard heading transformer so it doesn't collide
-const FILTERED_TRANSFORMERS = TRANSFORMERS.filter(t =>
-    t.type !== 'element' ||
-    !/^(#{1,6})\s/.test((t as ElementTransformer).regExp.source)
-)
+const FILTERED_TRANSFORMERS = TRANSFORMERS.filter((t) => t.type !== 'element' || !/^(#{1,6})\s/.test((t as ElementTransformer).regExp.source))
 
 const CUSTOM_TRANSFORMERS = [CHAPTER_HEADING_TRANSFORMER, ...FILTERED_TRANSFORMERS]
 
 const editorConfig = {
-    namespace: 'MinstrelEditor',
-    theme,
-    onError(error: Error) {
-        console.error('Lexical Error:', error)
-    },
-    nodes: [
-        ChapterHeadingNode,
-        HeadingNode,
-        ListNode,
-        ListItemNode,
-        QuoteNode,
-        CodeNode,
-        CodeHighlightNode,
-        TableNode,
-        TableCellNode,
-        TableRowNode,
-        AutoLinkNode,
-        LinkNode,
-        MarkNode
-    ]
+  namespace: 'MinstrelEditor',
+  theme,
+  onError(error: Error) {
+    console.error('Lexical Error:', error)
+  },
+  nodes: [ChapterHeadingNode, HeadingNode, ListNode, ListItemNode, QuoteNode, CodeNode, CodeHighlightNode, TableNode, TableCellNode, TableRowNode, AutoLinkNode, LinkNode, MarkNode]
 }
 
 interface LexicalEditorProps {
-    initialContent: string
-    onChange: (markdown: string) => void
-    activeSection: ActiveSection
-    onSectionChange: (section: ActiveSection) => void
-    containerRef: React.RefObject<HTMLDivElement | null>
-    editable?: boolean
-    instantInitialScroll?: boolean
+  initialContent: string
+  onChange: (markdown: string) => void
+  activeSection: ActiveSection
+  onSectionChange: (section: ActiveSection) => void
+  containerRef: React.RefObject<HTMLDivElement | null>
+  editable?: boolean
+  instantInitialScroll?: boolean
 }
 
-export function LexicalEditor({
-    initialContent,
-    onChange,
-    activeSection,
-    onSectionChange,
-    containerRef,
-    editable = true,
-    instantInitialScroll = false
-}: LexicalEditorProps): JSX.Element {
-    const config = {
-        ...editorConfig,
-        editable
-    }
+export function LexicalEditor({ initialContent, onChange, activeSection, onSectionChange, containerRef, editable = true, instantInitialScroll = false }: LexicalEditorProps): JSX.Element {
+  const config = {
+    ...editorConfig,
+    editable
+  }
 
-    return (
-        <LexicalComposer initialConfig={config}>
-            <div className="editor-container relative">
-                <EditablePlugin editable={editable} />
-                <RichTextPlugin
-                    contentEditable={
-                        <ContentEditable className="outline-none py-4 min-h-[500px]" />
-                    }
-                    placeholder={
-                        <div className="absolute top-4 left-0 pointer-events-none opacity-40 italic">
-                            Start writing your story...
-                        </div>
-                    }
-                    ErrorBoundary={LexicalErrorBoundary}
-                />
-                <HistoryPlugin />
-                <MarkdownShortcutPlugin transformers={CUSTOM_TRANSFORMERS} />
-                <MarkdownSyncPlugin initialMarkdown={initialContent} onChange={onChange} transformers={CUSTOM_TRANSFORMERS} />
-                <ScrollSyncPlugin
-                    activeSection={activeSection}
-                    onSectionChange={onSectionChange}
-                    containerRef={containerRef}
-                    instantInitialScroll={instantInitialScroll}
-                />
-                <HighlightPlugin activeSection={activeSection} />
-                <ClearHighlightsOnEditPlugin />
-                <FloatingToolbarPlugin />
-            </div>
-        </LexicalComposer>
-    )
+  return (
+    <LexicalComposer initialConfig={config}>
+      <div className="editor-container relative">
+        <EditablePlugin editable={editable} />
+        <RichTextPlugin
+          contentEditable={<ContentEditable className="outline-none py-4 min-h-[500px]" />}
+          placeholder={<div className="absolute top-4 left-0 pointer-events-none opacity-40 italic">Start writing your story...</div>}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <HistoryPlugin />
+        <MarkdownShortcutPlugin transformers={CUSTOM_TRANSFORMERS} />
+        <MarkdownSyncPlugin initialMarkdown={initialContent} onChange={onChange} transformers={CUSTOM_TRANSFORMERS} />
+        <ScrollSyncPlugin activeSection={activeSection} onSectionChange={onSectionChange} containerRef={containerRef} instantInitialScroll={instantInitialScroll} />
+        <HighlightPlugin activeSection={activeSection} />
+        <ClearHighlightsOnEditPlugin />
+        <FloatingToolbarPlugin />
+      </div>
+    </LexicalComposer>
+  )
 }
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -174,50 +138,53 @@ import { $getRoot } from 'lexical'
 import { $isMarkNode, $unwrapMarkNode } from '@lexical/mark'
 
 function EditablePlugin({ editable }: { editable: boolean }) {
-    const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext()
 
-    useEffect(() => {
-        editor.setEditable(editable)
-    }, [editor, editable])
+  useEffect(() => {
+    editor.setEditable(editable)
+  }, [editor, editable])
 
-    return null
+  return null
 }
 
 function ClearHighlightsOnEditPlugin() {
-    const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext()
 
-    useEffect(() => {
-        return editor.registerUpdateListener(({ dirtyElements, dirtyLeaves, tags }) => {
-            if (tags.has('import-markdown') || tags.has('apply-highlights') || tags.has('clear-highlights')) {
-                return
+  useEffect(() => {
+    return editor.registerUpdateListener(({ dirtyElements, dirtyLeaves, tags }) => {
+      if (tags.has('import-markdown') || tags.has('apply-highlights') || tags.has('clear-highlights')) {
+        return
+      }
+
+      if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {
+        return
+      }
+
+      editor.update(
+        () => {
+          const markNodes = new Set<MarkNode>()
+
+          for (const textNode of $getRoot().getAllTextNodes()) {
+            let parent = textNode.getParent()
+
+            while (parent !== null) {
+              if ($isMarkNode(parent) && parent.getIDs().includes('agent-edit')) {
+                markNodes.add(parent)
+              }
+              parent = parent.getParent()
             }
+          }
 
-            if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {
-                return
+          for (const markNode of markNodes) {
+            if (markNode.isAttached()) {
+              $unwrapMarkNode(markNode)
             }
+          }
+        },
+        { tag: 'clear-highlights' }
+      )
+    })
+  }, [editor])
 
-            editor.update(() => {
-                const markNodes = new Set<MarkNode>()
-
-                for (const textNode of $getRoot().getAllTextNodes()) {
-                    let parent = textNode.getParent()
-
-                    while (parent !== null) {
-                        if ($isMarkNode(parent) && parent.getIDs().includes('agent-edit')) {
-                            markNodes.add(parent)
-                        }
-                        parent = parent.getParent()
-                    }
-                }
-
-                for (const markNode of markNodes) {
-                    if (markNode.isAttached()) {
-                        $unwrapMarkNode(markNode)
-                    }
-                }
-            }, { tag: 'clear-highlights' })
-        })
-    }, [editor])
-
-    return null
+  return null
 }

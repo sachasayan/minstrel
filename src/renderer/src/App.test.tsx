@@ -101,20 +101,22 @@ describe('App route transitions', () => {
     const store = await renderApp()
 
     await act(async () => {
-      store.dispatch(setActiveProject({
-        projectPath: '/tmp/existing-project.mns',
-        title: 'Existing',
-        genre: 'fantasy',
-        wordCountTarget: 80000,
-        wordCountCurrent: 0,
-        storyContent: '',
-        files: [],
-        summary: '',
-        year: 2026,
-        expertSuggestions: [],
-        knowledgeGraph: null,
-        chatHistory: []
-      } as any))
+      store.dispatch(
+        setActiveProject({
+          projectPath: '/tmp/existing-project.mns',
+          title: 'Existing',
+          genre: 'fantasy',
+          wordCountTarget: 80000,
+          wordCountCurrent: 0,
+          storyContent: '',
+          files: [],
+          summary: '',
+          year: 2026,
+          expertSuggestions: [],
+          knowledgeGraph: null,
+          chatHistory: []
+        } as any)
+      )
       store.dispatch(setActiveView('project/editor'))
       await flushPromises()
     })

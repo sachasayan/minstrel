@@ -32,10 +32,7 @@ const Intro = (): ReactNode => {
 
       // Update redux + persist to disk
       dispatch(addRecentProject(recentEntry))
-      const updatedRecents = [
-        recentEntry,
-        ...(settingsState.recentProjects ?? []).filter(p => p.projectPath !== projectPath)
-      ].slice(0, 3)
+      const updatedRecents = [recentEntry, ...(settingsState.recentProjects ?? []).filter((p) => p.projectPath !== projectPath)].slice(0, 3)
       await saveAppSettings({ ...settingsState, recentProjects: updatedRecents })
 
       // Fetch full project, set state, navigate
@@ -67,15 +64,10 @@ const Intro = (): ReactNode => {
   return (
     <>
       <StatusBar />
-      <div className={cn("flex flex-col items-center justify-center p-8 h-full gap-8")}>
+      <div className={cn('flex flex-col items-center justify-center p-8 h-full gap-8')}>
         <h1 className="text-2xl font-bold text-highlight-700 dark:text-highlight-300">Welcome to Minstrel</h1>
 
-        <ProjectLibrary
-          recentProjects={recentProjects}
-          onProjectSelect={handleProjectSelect}
-          onNew={handleNew}
-          onOpen={handleOpen}
-        />
+        <ProjectLibrary recentProjects={recentProjects} onProjectSelect={handleProjectSelect} onNew={handleNew} onOpen={handleOpen} />
 
         <p className="rounded-2xl border border-border bg-card/70 py-2 px-4 text-sm text-highlight-800 shadow-sm dark:text-highlight-200">
           Minstrel is totally free for personal use. Like it?{' '}

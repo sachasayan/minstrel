@@ -168,18 +168,13 @@ function ReadOnlyOutline({ content }: { content: string }): JSX.Element {
   const tree = useMemo(() => remark().parse(content || ''), [content])
 
   return (
-    <section
-      data-outline-target="true"
-      className="mb-10 rounded-2xl border border-border/50 bg-muted/10 px-6 py-6"
-    >
+    <section data-outline-target="true" className="mb-10 rounded-2xl border border-border/50 bg-muted/10 px-6 py-6">
       <div className="mb-4 flex items-center gap-2 text-highlight-700 dark:text-highlight-300">
         <ListOrdered className="h-4 w-4" />
         <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Outline</h2>
       </div>
       {tree.children.length > 0 ? (
-        <div className="space-y-4 text-sm leading-7 text-foreground/90">
-          {renderMarkdownNodes(tree.children)}
-        </div>
+        <div className="space-y-4 text-sm leading-7 text-foreground/90">{renderMarkdownNodes(tree.children)}</div>
       ) : (
         <p className="text-sm italic text-muted-foreground">No outline yet.</p>
       )}
@@ -188,9 +183,7 @@ function ReadOnlyOutline({ content }: { content: string }): JSX.Element {
 }
 
 function renderMarkdownNodes(nodes: any[], keyPrefix = 'md'): JSX.Element[] {
-  return nodes
-    .map((node, index) => renderMarkdownNode(node, `${keyPrefix}-${index}`))
-    .filter((node): node is JSX.Element => node !== null)
+  return nodes.map((node, index) => renderMarkdownNode(node, `${keyPrefix}-${index}`)).filter((node): node is JSX.Element => node !== null)
 }
 
 function renderMarkdownNode(node: any, key: string): JSX.Element | null {
@@ -229,10 +222,7 @@ function renderMarkdownNode(node: any, key: string): JSX.Element | null {
     case 'list': {
       const ListTag = node.ordered ? 'ol' : 'ul'
       return (
-        <ListTag
-          key={key}
-          className={node.ordered ? 'space-y-2 pl-5 list-decimal' : 'space-y-2 pl-5 list-disc'}
-        >
+        <ListTag key={key} className={node.ordered ? 'space-y-2 pl-5 list-decimal' : 'space-y-2 pl-5 list-disc'}>
           {node.children?.map((child: any, index: number) => renderListItem(child, `${key}-${index}`))}
         </ListTag>
       )
@@ -257,18 +247,10 @@ function renderMarkdownNode(node: any, key: string): JSX.Element | null {
 }
 
 function renderListItem(node: any, key: string): JSX.Element {
-  const isTightParagraph =
-    node.children?.length === 1 &&
-    node.children[0]?.type === 'paragraph'
+  const isTightParagraph = node.children?.length === 1 && node.children[0]?.type === 'paragraph'
 
   return (
-    <li key={key}>
-      {isTightParagraph ? (
-        <span>{renderInlineNodes(node.children[0].children ?? [], key)}</span>
-      ) : (
-        <div className="space-y-2">{renderMarkdownNodes(node.children ?? [], key)}</div>
-      )}
-    </li>
+    <li key={key}>{isTightParagraph ? <span>{renderInlineNodes(node.children[0].children ?? [], key)}</span> : <div className="space-y-2">{renderMarkdownNodes(node.children ?? [], key)}</div>}</li>
   )
 }
 
@@ -281,13 +263,29 @@ function renderInlineNode(node: any, key: string): ReactNode {
     case 'text':
       return node.value ?? ''
     case 'strong':
-      return <strong key={key} className="font-semibold text-foreground">{renderInlineNodes(node.children ?? [], key)}</strong>
+      return (
+        <strong key={key} className="font-semibold text-foreground">
+          {renderInlineNodes(node.children ?? [], key)}
+        </strong>
+      )
     case 'emphasis':
-      return <em key={key} className="italic">{renderInlineNodes(node.children ?? [], key)}</em>
+      return (
+        <em key={key} className="italic">
+          {renderInlineNodes(node.children ?? [], key)}
+        </em>
+      )
     case 'delete':
-      return <del key={key} className="line-through opacity-70">{renderInlineNodes(node.children ?? [], key)}</del>
+      return (
+        <del key={key} className="line-through opacity-70">
+          {renderInlineNodes(node.children ?? [], key)}
+        </del>
+      )
     case 'inlineCode':
-      return <code key={key} className="rounded bg-background/80 px-1.5 py-0.5 text-[0.9em]">{node.value ?? ''}</code>
+      return (
+        <code key={key} className="rounded bg-background/80 px-1.5 py-0.5 text-[0.9em]">
+          {node.value ?? ''}
+        </code>
+      )
     case 'link':
       return (
         <a

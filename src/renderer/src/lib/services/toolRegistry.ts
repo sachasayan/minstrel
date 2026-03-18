@@ -1,9 +1,6 @@
 import { tool } from 'ai'
 import * as schemas from './toolSchemas'
-import {
-  handleWriteFile,
-  handleActionSuggestions
-} from './toolHandlers'
+import { handleWriteFile, handleActionSuggestions } from './toolHandlers'
 import { AppDispatch } from '@/lib/store/store'
 import { Project } from '@/types'
 
@@ -12,16 +9,7 @@ export interface ToolCallbacks {
   activeProject: Project | null
   onReadFile?: (fileNames: string[]) => void
   onRouteTo?: (agent: string) => void
-  onToolCall?: (event: {
-    toolName: string
-    args: unknown
-    result?: unknown
-    startedAt: string
-    endedAt: string
-    durationMs: number
-    status: 'success' | 'error'
-    errorMessage?: string
-  }) => void
+  onToolCall?: (event: { toolName: string; args: unknown; result?: unknown; startedAt: string; endedAt: string; durationMs: number; status: 'success' | 'error'; errorMessage?: string }) => void
 }
 
 /**
@@ -31,8 +19,7 @@ export const createTools = (callbacks: ToolCallbacks) => {
   const { dispatch, activeProject } = callbacks
   let hasReadThisTurn = false
   let writeCountThisTurn = 0
-  const getDurationMs = (startedAt: string, endedAt: string) =>
-    Math.max(0, new Date(endedAt).getTime() - new Date(startedAt).getTime())
+  const getDurationMs = (startedAt: string, endedAt: string) => Math.max(0, new Date(endedAt).getTime() - new Date(startedAt).getTime())
   const emitToolCall = (
     event: Omit<NonNullable<ToolCallbacks['onToolCall']> extends (input: infer T) => void ? T : never, 'durationMs'> & {
       durationMs?: number
@@ -93,7 +80,10 @@ export const createTools = (callbacks: ToolCallbacks) => {
             throw new Error('readFile cannot be used in the same turn after writeFile. Finish writing from the current context or read first.')
           }
           console.log(`[TOOL EXECUTION] readFile called with raw args:`, JSON.stringify(args))
-          const fileNames = args.file_names.split(',').map(f => f.trim()).filter(Boolean)
+          const fileNames = args.file_names
+            .split(',')
+            .map((f) => f.trim())
+            .filter(Boolean)
           hasReadThisTurn = true
           if (callbacks.onReadFile) {
             callbacks.onReadFile(fileNames)
@@ -167,7 +157,10 @@ export const createTools = (callbacks: ToolCallbacks) => {
         const startedAt = new Date().toISOString()
         try {
           console.log(`[TOOL EXECUTION] actionSuggestion called with raw args:`, JSON.stringify(args))
-          const suggestions = args.suggestions.split(',').map(s => s.trim()).filter(Boolean)
+          const suggestions = args.suggestions
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
           handleActionSuggestions(suggestions, dispatch)
           const result = { status: 'success' }
           const endedAt = new Date().toISOString()

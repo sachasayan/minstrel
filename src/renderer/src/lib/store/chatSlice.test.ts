@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import reducer, {
-  setChatHistory,
-  clearChatHistory,
-  addChatMessage,
-  resolvePendingChat,
-  setActionSuggestions
-} from './chatSlice'
+import reducer, { setChatHistory, clearChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions } from './chatSlice'
 import { ChatMessage } from '@/types'
 
 describe('chatSlice', () => {

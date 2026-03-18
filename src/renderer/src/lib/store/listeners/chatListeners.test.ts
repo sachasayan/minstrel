@@ -26,32 +26,35 @@ describe('chatListeners', () => {
         projects: projectsReducer,
         chat: chatReducer
       },
-      middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().prepend(chatListeners.middleware)
+      middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(chatListeners.middleware)
     })
   }
 
   it('starts the story agent when a user message is added', async () => {
     const store = makeStore()
 
-    store.dispatch(setActiveProject({
-      projectPath: '/tmp/story.mns',
-      title: 'Story',
-      genre: 'fantasy',
-      wordCountTarget: 80000,
-      wordCountCurrent: 0,
-      storyContent: '',
-      files: [],
-      summary: '',
-      year: 2026,
-      expertSuggestions: [],
-      knowledgeGraph: null
-    } as any))
+    store.dispatch(
+      setActiveProject({
+        projectPath: '/tmp/story.mns',
+        title: 'Story',
+        genre: 'fantasy',
+        wordCountTarget: 80000,
+        wordCountCurrent: 0,
+        storyContent: '',
+        files: [],
+        summary: '',
+        year: 2026,
+        expertSuggestions: [],
+        knowledgeGraph: null
+      } as any)
+    )
 
-    store.dispatch(addChatMessage({
-      sender: 'User',
-      text: 'Write chapter one'
-    }))
+    store.dispatch(
+      addChatMessage({
+        sender: 'User',
+        text: 'Write chapter one'
+      })
+    )
 
     await Promise.resolve()
 
@@ -81,10 +84,12 @@ describe('chatListeners', () => {
   it('ignores non-user messages', async () => {
     const store = makeStore()
 
-    store.dispatch(addChatMessage({
-      sender: 'Gemini',
-      text: 'Here is a draft.'
-    }))
+    store.dispatch(
+      addChatMessage({
+        sender: 'Gemini',
+        text: 'Here is a draft.'
+      })
+    )
 
     await Promise.resolve()
 

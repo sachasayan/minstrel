@@ -1,9 +1,4 @@
-import type {
-  AgentTrace,
-  AgentTraceEvent,
-  AgentTraceStep,
-  AgentTraceToolCall
-} from '@/lib/services/agentTraceService'
+import type { AgentTrace, AgentTraceEvent, AgentTraceStep, AgentTraceToolCall } from '@/lib/services/agentTraceService'
 import { hashString } from './hash'
 import type { OtelSpan, OtelSpanEvent, OtelStatus } from '@shared/observability'
 
@@ -20,31 +15,19 @@ const toSpanId = (value: string) => toHex(value, 16)
 const safeEndTime = (endedAt: string | undefined, startedAt: string) => endedAt ?? startedAt
 
 const summarizeObject = (value: unknown) => JSON.stringify(value ?? null)
-const stringifyForLangfuse = (value: unknown) =>
-  typeof value === 'string' ? value : JSON.stringify(value ?? null)
+const stringifyForLangfuse = (value: unknown) => (typeof value === 'string' ? value : JSON.stringify(value ?? null))
 
 const getTraceOutput = (trace: AgentTrace) => {
-  const lastCompletedStep = [...trace.steps]
-    .reverse()
-    .find((step) => step.displayedText || step.finalText)
+  const lastCompletedStep = [...trace.steps].reverse().find((step) => step.displayedText || step.finalText)
 
   return lastCompletedStep?.displayedText ?? lastCompletedStep?.finalText ?? ''
 }
 
-const statusFromTrace = (trace: AgentTrace): OtelStatus =>
-  trace.status === 'error' || trace.status === 'max_steps'
-    ? { code: 'ERROR', message: trace.errorMessage ?? trace.status }
-    : { code: 'OK' }
+const statusFromTrace = (trace: AgentTrace): OtelStatus => (trace.status === 'error' || trace.status === 'max_steps' ? { code: 'ERROR', message: trace.errorMessage ?? trace.status } : { code: 'OK' })
 
-const statusFromStep = (step: AgentTraceStep): OtelStatus =>
-  step.status === 'error'
-    ? { code: 'ERROR', message: step.finalText?.slice(0, 200) }
-    : { code: 'OK' }
+const statusFromStep = (step: AgentTraceStep): OtelStatus => (step.status === 'error' ? { code: 'ERROR', message: step.finalText?.slice(0, 200) } : { code: 'OK' })
 
-const statusFromTool = (call: AgentTraceToolCall): OtelStatus =>
-  call.status === 'error'
-    ? { code: 'ERROR', message: call.errorMessage }
-    : { code: 'OK' }
+const statusFromTool = (call: AgentTraceToolCall): OtelStatus => (call.status === 'error' ? { code: 'ERROR', message: call.errorMessage } : { code: 'OK' })
 
 const eventAttributes = (data?: Record<string, unknown>) => {
   if (!data) return undefined
@@ -232,9 +215,7 @@ export const convertAgentTraceToOtelSpans = (trace: AgentTrace): OtelSpan[] => {
   const rootSpan = buildRootSpan(trace, traceId)
   const stepSpans = trace.steps.map((step) => buildStepSpan(trace, step, traceId))
   const llmSpans = trace.steps.flatMap((step) => buildLlmSpans(trace, step, traceId))
-  const toolSpans = trace.steps.flatMap((step) =>
-    step.toolCalls.map((call, index) => buildToolSpan(step, call, index, traceId))
-  )
+  const toolSpans = trace.steps.flatMap((step) => step.toolCalls.map((call, index) => buildToolSpan(step, call, index, traceId)))
 
   return [rootSpan, ...stepSpans, ...llmSpans, ...toolSpans]
 }

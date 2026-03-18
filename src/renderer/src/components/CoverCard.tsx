@@ -45,33 +45,27 @@ export function CoverCard({ className }: { className?: string }) {
       <div
         className={cn(
           `group relative mx-auto flex h-full flex-col overflow-hidden rounded-xl border-2 p-4 transition-colors duration-200 ease-in-out`,
-          "border-border/70 hover:border-border",
+          'border-border/70 hover:border-border',
           `bg-cover bg-center`,
           className
         )}
         style={{ backgroundImage: `url(${coverPreviewUrl})` }}
       >
         {/* Overlay for actions - always visible if no cover, or on hover if cover exists */}
-        <div className={cn(
-          "flex flex-col items-center justify-center h-full transition-opacity duration-200 bg-black/40 backdrop-blur-[2px]",
-          coverPreviewUrl ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-        )}>
-          <Button type="button" variant={coverPreviewUrl ? "secondary" : "default"} onClick={handleOpenModal} className="mb-2 shadow-lg">
+        <div
+          className={cn(
+            'flex flex-col items-center justify-center h-full transition-opacity duration-200 bg-black/40 backdrop-blur-[2px]',
+            coverPreviewUrl ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+          )}
+        >
+          <Button type="button" variant={coverPreviewUrl ? 'secondary' : 'default'} onClick={handleOpenModal} className="mb-2 shadow-lg">
             <Upload className="mr-2 h-4 w-4" /> {coverPreviewUrl ? 'Change Cover' : 'Add Cover'}
           </Button>
-          {!coverPreviewUrl && (
-            <p className="text-center text-xs text-white shadow-sm">
-              Choose from gallery or upload
-            </p>
-          )}
+          {!coverPreviewUrl && <p className="text-center text-xs text-white shadow-sm">Choose from gallery or upload</p>}
         </div>
       </div>
 
-      <CoverSelectionModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSelectCover={handleCoverSelection}
-      />
+      <CoverSelectionModal open={isModalOpen} onOpenChange={setIsModalOpen} onSelectCover={handleCoverSelection} />
     </>
   )
 }

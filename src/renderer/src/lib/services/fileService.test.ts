@@ -1,11 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import {
-  getProjectFragmentMeta,
-  fetchProjects,
-  fetchProjectDetails,
-  saveProject,
-  isSqliteFormat
-} from './fileService'
+import { getProjectFragmentMeta, fetchProjects, fetchProjectDetails, saveProject, isSqliteFormat } from './fileService'
 
 // Mock dependencies
 vi.mock('./sqliteService', () => ({
@@ -57,7 +51,7 @@ describe('fileService', () => {
         coverImageBase64: 'abc',
         coverImageMimeType: 'image/png'
       })
-      
+
       const meta = await getProjectFragmentMeta('test.mns')
       expect(meta?.title).toBe('SQLite Project')
       expect(meta?.cover).toContain('data:image/png;base64,abc')
@@ -67,7 +61,7 @@ describe('fileService', () => {
     it('should handle Markdown files by parsing content', async () => {
       const mockMd = '----Metadata.json\n{"title": "MD Project", "wordCountCurrent": 50}\n----'
       mockInvoke.mockResolvedValueOnce(mockMd)
-      
+
       const meta = await getProjectFragmentMeta('test.md')
       expect(meta?.title).toBe('MD Project')
       expect(meta?.wordCountCurrent).toBe(50)
@@ -91,7 +85,7 @@ describe('fileService', () => {
       mockInvoke.mockResolvedValueOnce({ title: 'P1' })
       // Mock MD content
       mockInvoke.mockResolvedValueOnce('----Metadata.json\n{"title": "P2"}\n----')
-      
+
       const projects = await fetchProjects('/root')
       expect(projects).toHaveLength(2)
       expect(projects[0].title).toBe('P1')
@@ -104,7 +98,7 @@ describe('fileService', () => {
       const fragment = { projectPath: 'test.mns', title: 'P1' } as any
       const mockProject = { title: 'P1', files: [] }
       vi.mocked(loadSqliteProject).mockResolvedValueOnce(mockProject as any)
-      
+
       const project = await fetchProjectDetails(fragment)
       expect(project.title).toBe('P1')
       expect(loadSqliteProject).toHaveBeenCalledWith(fragment)
@@ -121,12 +115,12 @@ describe('fileService', () => {
 Once upon a time...
       `
       mockInvoke.mockResolvedValueOnce(mockMd)
-      
+
       const project = await fetchProjectDetails(fragment)
       expect(project.title).toBe('P1')
       // Chapters are moved to storyContent and removed from files array during normalization
       expect(project.storyContent).toContain('Once upon a time')
-      expect(project.files).toHaveLength(0) 
+      expect(project.files).toHaveLength(0)
     })
   })
 
@@ -134,7 +128,7 @@ Once upon a time...
     it('should save existing SQLite project directly', async () => {
       const project = { projectPath: 'test.mns', title: 'P1', files: [] } as any
       vi.mocked(saveSqliteProject).mockResolvedValueOnce(true)
-      
+
       const result = await saveProject(project)
       expect(result.success).toBe(true)
       expect(saveSqliteProject).toHaveBeenCalled()
@@ -144,7 +138,7 @@ Once upon a time...
       const project = { projectPath: 'test.md', title: 'P1', files: [] } as any
       vi.mocked(saveSqliteProject).mockResolvedValueOnce(true)
       mockInvoke.mockResolvedValueOnce({ success: true }) // delete-file
-      
+
       const result = await saveProject(project)
       expect(result.success).toBe(true)
       expect(result.finalPath).toBe('test.mns')

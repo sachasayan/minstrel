@@ -1,13 +1,6 @@
 import { RequestContext, AppSettings } from '@/types'
 import { ModelMessage } from 'ai'
-import {
-  basePrompt,
-  addAvailableFiles,
-  addProvidedFiles,
-  addFileContents,
-  appendWithSeparator,
-  addFormattedSection
-} from './promptsUtils'
+import { basePrompt, addAvailableFiles, addProvidedFiles, addFileContents, appendWithSeparator, addFormattedSection } from './promptsUtils'
 import { getStoryAgentPrompt } from './storyAgent'
 import { getToolsPrompt } from './tools'
 
@@ -21,14 +14,15 @@ export const getAvailableFiles = (data: PromptData): string[] => {
   if (!activeProject) return []
 
   const artifactFiles = activeProject.files.map((f) => f.title)
-  const virtualChapters = getChaptersFromStoryContent(activeProject.storyContent).map((c) => 
-    c.id ? `<!-- id: ${c.id} --> ${c.title}` : c.title
-  )
+  const virtualChapters = getChaptersFromStoryContent(activeProject.storyContent).map((c) => (c.id ? `<!-- id: ${c.id} --> ${c.title}` : c.title))
 
   return [...artifactFiles, ...virtualChapters]
 }
 
-export const resolveRequestedFiles = (data: PromptData, dependencies: string[] | undefined): {
+export const resolveRequestedFiles = (
+  data: PromptData,
+  dependencies: string[] | undefined
+): {
   resolvedFiles: string[]
   unresolvedFiles: string[]
 } => {
@@ -143,11 +137,7 @@ const addWritingStyleGuidance = (prompt: string, settings: AppSettings): string 
   )
 }
 
-export const buildPrompt = (
-  context: RequestContext,
-  data: PromptData,
-  settings: AppSettings = {}
-): BuildPromptResult => {
+export const buildPrompt = (context: RequestContext, data: PromptData, settings: AppSettings = {}): BuildPromptResult => {
   let system = basePrompt
 
   const availableFiles = getAvailableFiles(data)
@@ -187,18 +177,11 @@ export const buildPrompt = (
       recordSection('agentPrompt', 'STORY AGENT PROMPT', storyPrompt)
       recordSection('toolsPrompt', 'TOOLS PROMPT', toolsPrompt, allowedTools.length)
       if (writingStyleDescription) {
-        recordSection(
-          'writingStyle',
-          'PERSONALIZATION: TARGET WRITING STYLE',
-          writingStyleDescription
-        )
+        recordSection('writingStyle', 'PERSONALIZATION: TARGET WRITING STYLE', writingStyleDescription)
       }
 
       const outlineExists = availableFiles.includes('Outline')
-      const requestedFiles = Array.from(new Set([
-        ...(outlineExists ? ['Outline'] : []),
-        ...(context.requestedFiles || [])
-      ]))
+      const requestedFiles = Array.from(new Set([...(outlineExists ? ['Outline'] : []), ...(context.requestedFiles || [])]))
       const { resolvedFiles, unresolvedFiles } = resolveRequestedFiles(data, requestedFiles)
       const activeProvidedFiles = getProvidedFiles(data, resolvedFiles)
       const activeFileContents = getFileContents(data, resolvedFiles)
@@ -227,17 +210,11 @@ export const buildPrompt = (
       availableFiles,
       resolvedRequestedFiles:
         context.agent === 'storyAgent'
-          ? resolveRequestedFiles(data, Array.from(new Set([
-              ...(availableFiles.includes('Outline') ? ['Outline'] : []),
-              ...(context.requestedFiles || [])
-            ]))).resolvedFiles
+          ? resolveRequestedFiles(data, Array.from(new Set([...(availableFiles.includes('Outline') ? ['Outline'] : []), ...(context.requestedFiles || [])]))).resolvedFiles
           : [],
       unresolvedRequestedFiles:
         context.agent === 'storyAgent'
-          ? resolveRequestedFiles(data, Array.from(new Set([
-              ...(availableFiles.includes('Outline') ? ['Outline'] : []),
-              ...(context.requestedFiles || [])
-            ]))).unresolvedFiles
+          ? resolveRequestedFiles(data, Array.from(new Set([...(availableFiles.includes('Outline') ? ['Outline'] : []), ...(context.requestedFiles || [])]))).unresolvedFiles
           : [],
       providedFiles,
       sectionMetadata,

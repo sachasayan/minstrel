@@ -90,8 +90,7 @@ const safeLocalStorage = () => {
   }
 }
 
-const makeId = (prefix: string) =>
-  `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+const makeId = (prefix: string) => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
 
 class AgentTraceService {
   private traces: AgentTrace[] = []
@@ -138,13 +137,7 @@ class AgentTraceService {
     this.notify()
   }
 
-  startTrace(input: {
-    requestToken: number
-    projectPath: string | null
-    initialAgent: 'storyAgent'
-    currentStep: number
-    userMessage?: string
-  }) {
+  startTrace(input: { requestToken: number; projectPath: string | null; initialAgent: 'storyAgent'; currentStep: number; userMessage?: string }) {
     const trace: AgentTrace = {
       traceId: makeId('trace'),
       requestToken: input.requestToken,

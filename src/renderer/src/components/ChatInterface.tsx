@@ -20,12 +20,12 @@ const STATE_CHANGE_TRANSITION = {
   type: 'spring' as const,
   stiffness: 260,
   damping: 25,
-  mass: 1,
+  mass: 1
 }
 const DOCKED_TRANSITION = {
   type: 'tween' as const,
   duration: 0.08,
-  ease: 'linear' as const,
+  ease: 'linear' as const
 }
 
 type ChatInterfacePlacement = 'auto' | 'column'
@@ -42,7 +42,8 @@ const ChatLoadingIndicator = ({ status }: { status: string }) => {
 
   return (
     <div className="flex items-center p-2 text-xs italic text-muted-foreground">
-      {status || 'Minstrel is thinking'}{dots}
+      {status || 'Minstrel is thinking'}
+      {dots}
     </div>
   )
 }
@@ -53,19 +54,19 @@ interface ChatMessageItemProps {
 
 const STREAM_WORD_TRANSITION = {
   duration: 0.14,
-  ease: 'easeOut' as const,
+  ease: 'easeOut' as const
 }
 
 const BUBBLE_LAYOUT_TRANSITION = {
   layout: {
     duration: 0.2,
-    ease: 'easeOut' as const,
-  },
+    ease: 'easeOut' as const
+  }
 }
 
 const HEIGHT_TRANSITION = {
   duration: 0.2,
-  ease: 'easeOut' as const,
+  ease: 'easeOut' as const
 }
 
 const INLINE_MARKDOWN_PATTERN = /(\*\*[^*\n]+?\*\*|__[^_\n]+?__|\*[^*\n]+?\*|_[^_\n]+?_)/g
@@ -82,21 +83,10 @@ const renderInlineMarkdown = (text: string, keyPrefix: string): React.ReactNode[
       nodes.push(text.slice(lastIndex, index))
     }
 
-    if (
-      (token.startsWith('**') && token.endsWith('**')) ||
-      (token.startsWith('__') && token.endsWith('__'))
-    ) {
-      nodes.push(
-        <strong key={`${keyPrefix}-strong-${index}`}>
-          {renderInlineMarkdown(token.slice(2, -2), `${keyPrefix}-strong-${index}`)}
-        </strong>
-      )
+    if ((token.startsWith('**') && token.endsWith('**')) || (token.startsWith('__') && token.endsWith('__'))) {
+      nodes.push(<strong key={`${keyPrefix}-strong-${index}`}>{renderInlineMarkdown(token.slice(2, -2), `${keyPrefix}-strong-${index}`)}</strong>)
     } else {
-      nodes.push(
-        <em key={`${keyPrefix}-em-${index}`}>
-          {renderInlineMarkdown(token.slice(1, -1), `${keyPrefix}-em-${index}`)}
-        </em>
-      )
+      nodes.push(<em key={`${keyPrefix}-em-${index}`}>{renderInlineMarkdown(token.slice(1, -1), `${keyPrefix}-em-${index}`)}</em>)
     }
 
     lastIndex = index + token.length
@@ -129,12 +119,7 @@ const StreamedMessageText = memo(({ text }: { text: string }) => {
         /\s+/.test(token) ? (
           <span key={`space-${index}`}>{token}</span>
         ) : (
-          <motion.span
-            key={`${index}-${token}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={STREAM_WORD_TRANSITION}
-          >
+          <motion.span key={`${index}-${token}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={STREAM_WORD_TRANSITION}>
             {token}
           </motion.span>
         )
@@ -145,13 +130,7 @@ const StreamedMessageText = memo(({ text }: { text: string }) => {
 
 StreamedMessageText.displayName = 'StreamedMessageText'
 
-const SmoothHeight = memo(({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) => {
+const SmoothHeight = memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
   const contentRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState(0)
 
@@ -175,15 +154,8 @@ const SmoothHeight = memo(({
   }, [children])
 
   return (
-    <motion.div
-      initial={false}
-      animate={{ height }}
-      transition={HEIGHT_TRANSITION}
-      className={cn('overflow-hidden', className)}
-    >
-      <div ref={contentRef}>
-        {children}
-      </div>
+    <motion.div initial={false} animate={{ height }} transition={HEIGHT_TRANSITION} className={cn('overflow-hidden', className)}>
+      <div ref={contentRef}>{children}</div>
     </motion.div>
   )
 })
@@ -200,23 +172,13 @@ StreamingBubbleBody.displayName = 'StreamingBubbleBody'
 
 const ChatMessageItem = memo(({ msg }: ChatMessageItemProps) => {
   return msg.sender === 'User' ? (
-    <motion.div
-      layout="position"
-      transition={BUBBLE_LAYOUT_TRANSITION}
-      className="flex items-start justify-end"
-    >
-      <motion.div
-        className="chat-message mb-2 ml-16 max-w-[85%] rounded-[28px] border border-border/50 bg-card px-5 py-3 text-left text-sm font-medium text-card-foreground shadow-none"
-      >
+    <motion.div layout="position" transition={BUBBLE_LAYOUT_TRANSITION} className="flex items-start justify-end">
+      <motion.div className="chat-message mb-2 ml-16 max-w-[85%] rounded-[28px] border border-border/50 bg-card px-5 py-3 text-left text-sm font-medium text-card-foreground shadow-none">
         {msg.text}
       </motion.div>
     </motion.div>
   ) : (
-    <motion.div
-      layout="position"
-      transition={BUBBLE_LAYOUT_TRANSITION}
-      className="flex items-start gap-2"
-    >
+    <motion.div layout="position" transition={BUBBLE_LAYOUT_TRANSITION} className="flex items-start gap-2">
       <img src={minstrelIcon} className="mt-1 size-10 shrink-0" alt="" />
       <motion.div
         className={`chat-message mb-2 mr-6 max-w-[85%] rounded-[28px] border border-highlight-200/70 bg-highlight-100 px-5 py-3 text-left text-sm text-highlight-900 shadow-none ${(msg as any).isStreaming ? 'opacity-90' : ''}`}
@@ -244,7 +206,7 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
 
   const isProjectEmpty = useMemo(() => {
     const hasStoryContent = !!activeProject?.storyContent && activeProject.storyContent.trim() !== ''
-    const hasAncillaryFiles = !!activeProject?.files && activeProject.files.some(f => f.content && f.content.trim() !== '')
+    const hasAncillaryFiles = !!activeProject?.files && activeProject.files.some((f) => f.content && f.content.trim() !== '')
     return !hasStoryContent && !hasAncillaryFiles
   }, [activeProject?.storyContent, activeProject?.files])
 
@@ -278,8 +240,7 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
     const paddingBottom = Number.parseFloat(computedStyle.paddingBottom) || 0
     const borderTop = Number.parseFloat(computedStyle.borderTopWidth) || 0
     const borderBottom = Number.parseFloat(computedStyle.borderBottomWidth) || 0
-    const maxHeight =
-      lineHeight * MAX_INPUT_LINES + paddingTop + paddingBottom + borderTop + borderBottom
+    const maxHeight = lineHeight * MAX_INPUT_LINES + paddingTop + paddingBottom + borderTop + borderBottom
 
     textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
     textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
@@ -395,15 +356,9 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
   const viewportHeight = typeof window === 'undefined' ? 220 + VIEWPORT_PADDING * 2 : window.innerHeight
   const dockHeight = dockRect?.height ?? Math.min(Math.max(viewportHeight * 0.75, 400), viewportHeight - VIEWPORT_PADDING * 2)
   const visiblePanelHeight = isProjectEmpty ? panelHeight : Math.min(panelHeight, dockHeight)
-  const dockLeft = dockRect
-    ? Math.min(dockRect.left, viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING)
-    : viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING
-  const dockBottom = dockRect
-    ? Math.min(dockRect.bottom, viewportHeight - VIEWPORT_PADDING)
-    : viewportHeight - VIEWPORT_PADDING
-  const dockTop = isProjectEmpty
-    ? '50%'
-    : Math.max(dockBottom - visiblePanelHeight, VIEWPORT_PADDING)
+  const dockLeft = dockRect ? Math.min(dockRect.left, viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING) : viewportWidth - DOCK_WIDTH - VIEWPORT_PADDING
+  const dockBottom = dockRect ? Math.min(dockRect.bottom, viewportHeight - VIEWPORT_PADDING) : viewportHeight - VIEWPORT_PADDING
+  const dockTop = isProjectEmpty ? '50%' : Math.max(dockBottom - visiblePanelHeight, VIEWPORT_PADDING)
   const showTopFade = !isProjectEmpty && panelHeight > dockHeight
 
   if (isColumnPlacement) {
@@ -413,28 +368,14 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
           <div ref={panelRef} className="flex h-full min-h-0 flex-col">
             <motion.div className="min-h-0 flex-1 overflow-y-auto p-5">
               {visibleMessages.map((msg, index) => (
-                <ChatMessageItem
-                  key={index}
-                  msg={msg}
-                />
+                <ChatMessageItem key={index} msg={msg} />
               ))}
 
-              {streamingText && (
-                <ChatMessageItem
-                  msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
-                />
-              )}
+              {streamingText && <ChatMessageItem msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }} />}
 
               <AnimatePresence initial={false}>
                 {actionSuggestions.length > 0 && (
-                  <motion.div
-                    key="suggestions"
-                    layout="position"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={HEIGHT_TRANSITION}
-                  >
+                  <motion.div key="suggestions" layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={HEIGHT_TRANSITION}>
                     <SmoothHeight>
                       <div className="flex flex-wrap items-center">
                         {actionSuggestions.slice(0, 3).map((suggestion, index) => (
@@ -463,14 +404,7 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
 
               <AnimatePresence initial={false}>
                 {pendingChat && (
-                  <motion.div
-                    key="loading"
-                    layout="position"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={HEIGHT_TRANSITION}
-                  >
+                  <motion.div key="loading" layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={HEIGHT_TRANSITION}>
                     <SmoothHeight>
                       <ChatLoadingIndicator status={streamingStatus} />
                     </SmoothHeight>
@@ -519,43 +453,27 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
           left: isProjectEmpty ? '50%' : dockLeft,
           top: dockTop,
           x: isProjectEmpty ? '-50%' : 0,
-          y: isProjectEmpty ? '-50%' : 0,
+          y: isProjectEmpty ? '-50%' : 0
         }}
         transition={isProjectEmpty ? STATE_CHANGE_TRANSITION : DOCKED_TRANSITION}
         style={{
-          maxHeight: isProjectEmpty ? undefined : dockHeight,
+          maxHeight: isProjectEmpty ? undefined : dockHeight
         }}
         className="fixed relative flex min-h-[220px] flex-col items-center justify-end"
       >
         <div className="pointer-events-auto relative w-full overflow-hidden">
-          {showTopFade ? (
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background via-background/95 to-transparent" />
-          ) : null}
+          {showTopFade ? <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background via-background/95 to-transparent" /> : null}
           <div ref={panelRef} className="relative flex min-h-[220px] shrink-0 flex-col">
             <motion.div className="flex-1 p-5">
               {visibleMessages.map((msg, index) => (
-                <ChatMessageItem
-                  key={index}
-                  msg={msg}
-                />
+                <ChatMessageItem key={index} msg={msg} />
               ))}
 
-              {streamingText && (
-                <ChatMessageItem
-                  msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }}
-                />
-              )}
+              {streamingText && <ChatMessageItem msg={{ sender: 'Gemini', text: streamingText, isStreaming: true }} />}
 
               <AnimatePresence initial={false}>
                 {actionSuggestions.length > 0 && (
-                  <motion.div
-                    key="suggestions"
-                    layout="position"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={HEIGHT_TRANSITION}
-                  >
+                  <motion.div key="suggestions" layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={HEIGHT_TRANSITION}>
                     <SmoothHeight>
                       <div className="flex flex-wrap items-center">
                         {actionSuggestions.slice(0, 3).map((suggestion, index) => (
@@ -584,14 +502,7 @@ const ChatInterface = ({ placement = 'auto' }: { placement?: ChatInterfacePlacem
 
               <AnimatePresence initial={false}>
                 {pendingChat && (
-                  <motion.div
-                    key="loading"
-                    layout="position"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={HEIGHT_TRANSITION}
-                  >
+                  <motion.div key="loading" layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={HEIGHT_TRANSITION}>
                     <SmoothHeight>
                       <ChatLoadingIndicator status={streamingStatus} />
                     </SmoothHeight>

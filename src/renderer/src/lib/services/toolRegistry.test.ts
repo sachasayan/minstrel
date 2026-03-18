@@ -35,9 +35,7 @@ describe('toolRegistry', () => {
 
     await tools.readFile.execute!({ file_names: 'Outline, Chapter 1' }, {} as any)
 
-    await expect(
-      tools.writeFile.execute!({ file_name: 'Outline', content: 'updated outline' }, {} as any)
-    ).rejects.toThrow('writeFile cannot be used in the same turn after readFile')
+    await expect(tools.writeFile.execute!({ file_name: 'Outline', content: 'updated outline' }, {} as any)).rejects.toThrow('writeFile cannot be used in the same turn after readFile')
   })
 
   it('rejects readFile after writeFile in the same turn', async () => {
@@ -48,8 +46,6 @@ describe('toolRegistry', () => {
 
     await tools.writeFile.execute!({ file_name: 'Outline', content: 'updated outline' }, {} as any)
 
-    await expect(
-      tools.readFile.execute!({ file_names: 'Outline, Chapter 1' }, {} as any)
-    ).rejects.toThrow('readFile cannot be used in the same turn after writeFile')
+    await expect(tools.readFile.execute!({ file_names: 'Outline, Chapter 1' }, {} as any)).rejects.toThrow('readFile cannot be used in the same turn after writeFile')
   })
 })

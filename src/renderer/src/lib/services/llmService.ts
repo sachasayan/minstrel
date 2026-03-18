@@ -87,9 +87,7 @@ const service: any = {
   // Get default model ID for a provider
   getDefaultModelId(provider: string, preference: 'high' | 'low'): string {
     const providerKey = provider as ProviderName
-    return (
-      PROVIDER_MODELS[providerKey]?.[preference] || PROVIDER_MODELS.google[preference]
-    )
+    return PROVIDER_MODELS[providerKey]?.[preference] || PROVIDER_MODELS.google[preference]
   },
 
   // Get model instance
@@ -113,9 +111,7 @@ const service: any = {
     const apiKey = this.getApiKey(settings, provider)
 
     if (!apiKey) {
-      throw new Error(
-        `LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`
-      )
+      throw new Error(`LLM API key for provider ${provider} is not initialized. Please set the API key in settings.`)
     }
 
     const highModelId = settings.highPreferenceModelId || this.getDefaultModelId(provider, 'high')
@@ -137,9 +133,7 @@ const service: any = {
   async generateContent(settings: AppSettings, prompt: string, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
-    console.log(
-      `Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
-    )
+    console.log(`Using provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`)
 
     try {
       const { text } = await generateText({
@@ -148,13 +142,8 @@ const service: any = {
       })
       return text
     } catch (error) {
-      console.error(
-        `Error generating content with provider ${provider} (Model: ${selectedModelId}):`,
-        error
-      )
-      throw new Error(
-        `Failed to generate content: ${error instanceof Error ? error.message : String(error)}`
-      )
+      console.error(`Error generating content with provider ${provider} (Model: ${selectedModelId}):`, error)
+      throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : String(error)}`)
     }
   },
 
@@ -162,9 +151,7 @@ const service: any = {
   async generateTextWithTools(settings: AppSettings, system: string, prompt: string, tools: any, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
-    console.log(
-      `Using provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`
-    )
+    console.log(`Using provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`)
 
     try {
       const result = await generateText({
@@ -177,13 +164,8 @@ const service: any = {
       })
       return result
     } catch (error) {
-      console.error(
-        `Error generating content with tools and provider ${provider} (Model: ${selectedModelId}):`,
-        error
-      )
-      throw new Error(
-        `Failed to generate content with tools: ${error instanceof Error ? error.message : String(error)}`
-      )
+      console.error(`Error generating content with tools and provider ${provider} (Model: ${selectedModelId}):`, error)
+      throw new Error(`Failed to generate content with tools: ${error instanceof Error ? error.message : String(error)}`)
     }
   },
 
@@ -191,9 +173,7 @@ const service: any = {
   async streamTextWithTools(settings: AppSettings, system: string, messages: ModelMessage[], tools: any, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
-    console.log(
-      `Streaming with provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`
-    )
+    console.log(`Streaming with provider: ${provider}, model: ${selectedModelId} with tools for agent preference: ${modelPreference}`)
 
     try {
       return streamText({
@@ -203,13 +183,8 @@ const service: any = {
         tools: tools
       })
     } catch (error) {
-      console.error(
-        `Error streaming content with tools and provider ${provider} (Model: ${selectedModelId}):`,
-        error
-      )
-      throw new Error(
-        `Failed to stream content with tools: ${error instanceof Error ? error.message : String(error)}`
-      )
+      console.error(`Error streaming content with tools and provider ${provider} (Model: ${selectedModelId}):`, error)
+      throw new Error(`Failed to stream content with tools: ${error instanceof Error ? error.message : String(error)}`)
     }
   },
 
@@ -217,9 +192,7 @@ const service: any = {
   async *streamGenerateContent(settings: AppSettings, prompt: string, modelPreference: 'high' | 'low' = 'low') {
     const { model, provider, selectedModelId } = this.getProviderAndModel(settings, modelPreference)
 
-    console.log(
-      `Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`
-    )
+    console.log(`Streaming with provider: ${provider}, model: ${selectedModelId} for agent preference: ${modelPreference}`)
 
     try {
       const { textStream } = await streamText({
@@ -232,13 +205,8 @@ const service: any = {
         yield delta
       }
     } catch (error) {
-      console.error(
-        `Error streaming content with provider ${provider} (Model: ${selectedModelId}):`,
-        error
-      )
-      throw new Error(
-        `Failed to stream content: ${error instanceof Error ? error.message : String(error)}`
-      )
+      console.error(`Error streaming content with provider ${provider} (Model: ${selectedModelId}):`, error)
+      throw new Error(`Failed to stream content: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 }

@@ -77,8 +77,8 @@ describe('ProjectOverview new project chrome gating', () => {
         removeListener: vi.fn(),
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
+        dispatchEvent: vi.fn()
+      }))
     })
     container = document.createElement('div')
     document.body.appendChild(container)

@@ -133,9 +133,7 @@ export const fetchSqliteProjects = async (rootDir: string | null): Promise<Proje
         return []
       }
 
-      const filesList = directoryItems
-        .filter((item) => item && item.type === 'file' && item.name.endsWith('.mns'))
-        .map((item) => `${rootDir}/${item.name}`)
+      const filesList = directoryItems.filter((item) => item && item.type === 'file' && item.name.endsWith('.mns')).map((item) => `${rootDir}/${item.name}`)
 
       // Call bulk fetch handler in the main process
       const results: (ProjectFragment | null)[] = await bridge.getSqliteProjectsMeta(filesList)

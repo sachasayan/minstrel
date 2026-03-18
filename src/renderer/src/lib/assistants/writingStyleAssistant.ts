@@ -8,17 +8,18 @@ Do not praise the sample. Do not give advice. Do not mention the reader or the a
 Do not quote the sample. Do not use markdown, lists, or JSON.
 Keep the response under 140 words.`
 
-export async function describeWritingStyle(
-  settings: AppSettings,
-  writingSample: string
-): Promise<string | null> {
+export async function describeWritingStyle(settings: AppSettings, writingSample: string): Promise<string | null> {
   if (!writingSample.trim()) return null
 
   const prompt = `${SYSTEM_PROMPT}\n\n---\nWRITING SAMPLE:\n${writingSample.trim()}`
 
   try {
     const raw = await llmService.generateContent(settings, prompt, 'low')
-    const cleaned = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').replace(/\s+/g, ' ').trim()
+    const cleaned = raw
+      .replace(/^```[a-z]*\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .replace(/\s+/g, ' ')
+      .trim()
     return cleaned || null
   } catch (error) {
     console.error('[writingStyleAssistant] Failed to analyze writing style:', error)

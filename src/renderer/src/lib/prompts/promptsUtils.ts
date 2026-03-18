@@ -42,11 +42,10 @@ export function appendWithSeparator(prompt: string, sectionToAdd: string | null 
   }
   // Ensure the base prompt doesn't accidentally start with the separator if it was empty
   if (prompt.trim() === '') {
-    return sectionToAdd;
+    return sectionToAdd
   }
   return `${prompt}${separator}${sectionToAdd}`
 }
-
 
 /**
  * Adds a formatted subsection (like Available Files, User Prompt) with a title.
@@ -59,7 +58,6 @@ export function addFormattedSection(prompt: string, sectionTitle: string, conten
   // Note: The separator is used *before* the # Title line for these subsections
   return `${prompt}${separator}# ${sectionTitle}:\n\n${content}\n\n`
 }
-
 
 export function addAvailableFiles(prompt: string, files: string[]): string {
   const content = files.join('\n') || '(The user did not provide a listing of files in this project.)'

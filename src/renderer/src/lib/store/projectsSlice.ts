@@ -3,11 +3,7 @@ import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit'
 import { ProjectState, ProjectFragment, Project, Genre, ProjectFile } from '@/types'
 import { RootState } from './store'
 import { projectFromFragment } from '@/lib/typeUtils'
-import {
-  normalizeProjectStoryContent,
-  replaceChapterContent,
-  ensureAllChaptersHaveIds
-} from '@/lib/storyContent'
+import { normalizeProjectStoryContent, replaceChapterContent, ensureAllChaptersHaveIds } from '@/lib/storyContent'
 
 const initialState: ProjectState = {
   projectHasLiveEdits: false,
@@ -86,7 +82,7 @@ export const projectsSlice = createSlice({
         // Special case: "Story" title always updates the monolith
         if (payload.title === 'Story') {
           state.activeProject.storyContent = payload.content
-          
+
           // Track modified chapter if index is provided
           if (payload.chapterIndex !== undefined && !state.modifiedChapters.includes(payload.chapterIndex)) {
             state.modifiedChapters.push(payload.chapterIndex)
@@ -165,7 +161,7 @@ export const projectsSlice = createSlice({
         const rawContent = `${currentContent}${delimiter}# ${newChapterTitle}\n\n`
         state.activeProject.storyContent = ensureAllChaptersHaveIds(rawContent)
         state.projectHasLiveEdits = true
-        
+
         // Track the new chapter as modified
         if (!state.modifiedChapters.includes(newChapterNumber - 1)) {
           state.modifiedChapters.push(newChapterNumber - 1)
@@ -193,7 +189,7 @@ export const projectsSlice = createSlice({
         activeProject.storyContent = replaceChapterContent(storyContent, '', content, chapterId)
         // Run global ID insurance but ONLY if needed to keep performance high
         if (activeProject.storyContent.includes('# ') && !activeProject.storyContent.includes('<!-- id:')) {
-           activeProject.storyContent = ensureAllChaptersHaveIds(activeProject.storyContent)
+          activeProject.storyContent = ensureAllChaptersHaveIds(activeProject.storyContent)
         }
         state.projectHasLiveEdits = true
       }
@@ -225,19 +221,16 @@ export const selectActiveProject = (state: RootState) => state.projects.activePr
 
 // Add selector for cover data URL (implementation for Step 5)
 // This selector computes the data URL on demand and is memoized
-export const selectActiveProjectWithCoverDataUrl = createSelector(
-  [selectActiveProject],
-  (activeProject): Project | null => {
-    if (activeProject && activeProject.coverImageBase64 && activeProject.coverImageMimeType) {
-      // Return a *copy* of the project with the cover data URL populated
-      return {
-        ...activeProject,
-        cover: `data:${activeProject.coverImageMimeType};base64,${activeProject.coverImageBase64}`
-      }
+export const selectActiveProjectWithCoverDataUrl = createSelector([selectActiveProject], (activeProject): Project | null => {
+  if (activeProject && activeProject.coverImageBase64 && activeProject.coverImageMimeType) {
+    // Return a *copy* of the project with the cover data URL populated
+    return {
+      ...activeProject,
+      cover: `data:${activeProject.coverImageMimeType};base64,${activeProject.coverImageBase64}`
     }
-    // Return the original project if cover data is missing or project is null
-    return activeProject
   }
-)
+  // Return the original project if cover data is missing or project is null
+  return activeProject
+})
 
 export default projectsSlice.reducer

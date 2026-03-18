@@ -48,9 +48,7 @@ describe('getChaptersFromStoryContent', () => {
 
   it('should handle special characters in titles', () => {
     const content = '# Chapter 1: The Beginning (Part !@#$)\nContent'
-    expect(getChaptersFromStoryContent(content)).toEqual([
-      { title: 'Chapter 1: The Beginning (Part !@#$)', index: 0 }
-    ])
+    expect(getChaptersFromStoryContent(content)).toEqual([{ title: 'Chapter 1: The Beginning (Part !@#$)', index: 0 }])
   })
 
   it('should ignore lines that look like chapters but are not (e.g., no space after #)', () => {
@@ -188,7 +186,7 @@ describe('replaceChapterContent', () => {
     expect(result).toBe(content)
   })
 
-  it('should append chapter if it doesn\'t exist and no ID provided', () => {
+  it("should append chapter if it doesn't exist and no ID provided", () => {
     const result = replaceChapterContent(content, 'C3', 'New 3')
     expect(result).toContain('# C3')
     expect(result).toContain('New 3')

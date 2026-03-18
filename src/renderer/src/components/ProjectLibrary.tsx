@@ -31,17 +31,15 @@ interface RecentCardProps {
 }
 
 const RecentCard = ({ project, onClick }: RecentCardProps): ReactNode => {
-  const backgroundImageUrl = project.cover
-    ? `url("${project.cover}")`
-    : `url("/covers/${project.genre}.png")`
+  const backgroundImageUrl = project.cover ? `url("${project.cover}")` : `url("/covers/${project.genre}.png")`
 
   return (
-    <div className="relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 bg-card shadow-md transition-transform duration-300 hover:scale-105 hover:border-border" onClick={onClick}>
+    <div
+      className="relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 bg-card shadow-md transition-transform duration-300 hover:scale-105 hover:border-border"
+      onClick={onClick}
+    >
       <div className="relative" style={{ paddingTop: '175%' }}>
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: backgroundImageUrl }}
-        >
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: backgroundImageUrl }}>
           <div className="absolute inset-x-0 bg-card bottom-0 p-4">
             <h3 className="truncate text-lg font-semibold text-card-foreground">{project.title}</h3>
             <p className="text-sm text-muted-foreground">
@@ -71,16 +69,8 @@ const ActionCard = ({ icon, label, onClick, variant = 'primary' }: ActionCardPro
       className={`grow relative w-50 cursor-pointer select-none overflow-hidden rounded-lg border border-border/60 shadow-md transition-transform duration-300 hover:scale-105 hover:border-border p-4 ${isPrimary ? 'bg-primary' : 'bg-secondary'} flex flex-col items-center justify-center`}
       onClick={onClick}
     >
-
-
-          <div className={isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}>
-            {icon}
-          </div>
-          <h3 className={`text-lg font-semibold ${isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}`}>
-            {label}
-          </h3>
-
-
+      <div className={isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}>{icon}</div>
+      <h3 className={`text-lg font-semibold ${isPrimary ? 'text-primary-foreground' : 'text-secondary-foreground'}`}>{label}</h3>
     </div>
   )
 }
@@ -90,27 +80,11 @@ const ProjectLibrary = ({ recentProjects, onProjectSelect, onNew, onOpen }: Proj
     <div className="container mx-auto">
       <div className="flex flex-wrap flex-row justify-center gap-6">
         {recentProjects.map((project) => (
-          <RecentCard
-            key={project.projectPath}
-            project={project}
-            onClick={() => onProjectSelect(project.projectPath)}
-          />
+          <RecentCard key={project.projectPath} project={project} onClick={() => onProjectSelect(project.projectPath)} />
         ))}
         <div className="flex flex-col gap-6">
-          <ActionCard
-            icon={<FolderOpenIcon className="w-10 h-10" />}
-            label="Open"
-            onClick={onOpen}
-            variant="secondary"
-            compact
-          />
-          <ActionCard
-            icon={<BookPlusIcon className="w-10 h-10" />}
-            label="New"
-            onClick={onNew}
-            variant="primary"
-            compact
-          />
+          <ActionCard icon={<FolderOpenIcon className="w-10 h-10" />} label="Open" onClick={onOpen} variant="secondary" compact />
+          <ActionCard icon={<BookPlusIcon className="w-10 h-10" />} label="New" onClick={onNew} variant="primary" compact />
         </div>
       </div>
     </div>
