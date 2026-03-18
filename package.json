@@ -6,9 +6,9 @@
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "scripts": {
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
-    "lint": "oxlint . --fix",
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint . --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
@@ -21,10 +21,10 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "prepare": "husky",
+    "prepare": "vp config",
     "rebuild:node": "npm rebuild better-sqlite3",
     "rebuild:electron": "npx @electron/rebuild -v 40.8.0 --force",
-    "test": "npm run rebuild:node && vitest run",
+    "test": "npm run rebuild:node && vp test run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
@@ -114,16 +114,19 @@
     "electron-builder": "^26.8.1",
     "electron-vite": "^5.0.0",
     "globals": "^17.4.0",
-    "husky": "^9.1.7",
     "jsdom": "^27.0.1",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwindcss": "^4.2.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^4.1.0"
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
+    "vite-plus": "latest"
+  },
+  "packageManager": "npm@11.11.1",
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
   }
 }

@@ -12,7 +12,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "esModuleInterop": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/renderer/src/*"

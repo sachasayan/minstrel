@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import React, { act } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { createRoot, Root } from 'react-dom/client'

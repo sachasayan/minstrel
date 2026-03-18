@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test'
 import { handleInitSqliteProject, handleSaveSqliteProject, handleLoadSqliteProject, handleGetSqliteProjectMeta } from './sqliteOps'
 import Database from 'better-sqlite3'
 import * as fs from 'fs/promises'

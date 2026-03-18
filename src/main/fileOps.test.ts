@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { handleReadDirectory, handleReadFile, handleWriteFile, handleSelectDirectory, handleMakeDirectory, handleDeleteFile, handleShowSaveDialog } from './fileOps'
 import { dialog } from 'electron'
 import * as fs from 'fs/promises'

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { initSqliteProject, saveSqliteProject, loadSqliteProject, fetchSqliteProjects } from './sqliteService'
 import { Project, ProjectFragment } from '@/types'
 

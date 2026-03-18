@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import * as pb from './promptBuilder'
 import { PromptData } from './types'
 import { RequestContext, Project, ChatMessage, AppSettings } from '@/types'

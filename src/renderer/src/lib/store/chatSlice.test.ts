@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vite-plus/test'
 import reducer, { setChatHistory, clearChatHistory, addChatMessage, resolvePendingChat, setActionSuggestions } from './chatSlice'
 import { ChatMessage } from '@/types'
 

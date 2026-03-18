@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test'
 import { safeStorage } from 'electron'
 import settings from 'electron-settings'
 import { encryptValue, decryptValue, loadAppSettings, saveAppSettings } from './settingsManager'

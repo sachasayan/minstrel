@@ -12,10 +12,9 @@
     "noUnusedParameters": false,
     "composite": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "@shared/*": [
-        "src/shared/*"
+        "./src/shared/*"
       ],
       "@/*": [
         "./src/renderer/src/*"
